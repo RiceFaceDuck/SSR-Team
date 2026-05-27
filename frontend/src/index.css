@@ -1,0 +1,1 @@
+/* อิมพอร์ตระบบดีไซน์ Tailwind CSS */@tailwind base;@tailwind components;@tailwind utilities;/* ซ่อนแถบ Scrollbar แต่ยังใช้นิ้วเลื่อนได้ (เพื่อความสวยงามบนมือถือ) */.scrollbar-hide::-webkit-scrollbar {display: none;}.scrollbar-hide {-ms-overflow-style: none;scrollbar-width: none;}

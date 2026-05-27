@@ -1,0 +1,1 @@
+{"projects": {"default": "ssr-team"},"targets": {"ssr-team": {"hosting": {"frontend": ["ssr-team"],"admin": ["ssr-team-admin"]}}}}

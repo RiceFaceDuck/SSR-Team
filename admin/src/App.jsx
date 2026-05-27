@@ -1,0 +1,52 @@
+import React, { useState } from 'react';
+import AdminLayout from './components/layout/AdminLayout';
+import TimeController from './features/gameweek/TimeController';
+import NoAdsToggle from './features/gameweek/NoAdsToggle';
+import PlayerManager from './features/players/PlayerManager';
+import RedeemLogs from './features/verify/RedeemLogs';
+
+export default function App() {
+  const [currentPath, setCurrentPath] = useState('gameweek');
+
+  return (
+    <AdminLayout currentPath={currentPath} setPath={setCurrentPath}>
+      
+      {/* 1. เมนูควบคุม Gameweek */}
+      {currentPath === 'gameweek' && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <div>
+            <h2 className="text-2xl font-black text-slate-800 mb-1">ระบบ Gameweek (เวลา)</h2>
+            <p className="text-sm text-slate-500">ควบคุมช่วงเวลาเปิด-ปิดตลาด และโหมดปิดโฆษณา</p>
+          </div>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <TimeController />
+            <NoAdsToggle />
+          </div>
+        </div>
+      )}
+      
+      {/* 2. เมนูจัดการนักเตะ */}
+      {currentPath === 'players' && (
+        <div className="animate-in fade-in duration-300">
+          <PlayerManager />
+        </div>
+      )}
+      
+      {/* 3. เมนูจัดการสปอนเซอร์ */}
+      {currentPath === 'sponsor' && (
+        <div className="animate-in fade-in duration-300">
+          <h2 className="text-2xl font-black text-slate-800 mb-1">จัดการสปอนเซอร์ & โฆษณา</h2>
+          <p className="text-sm text-slate-500">ตั้งค่าป้ายแบนเนอร์และลิงก์ Affiliate ในหน้าเควส (กำลังพัฒนาโครงสร้าง)</p>
+        </div>
+      )}
+      
+      {/* 4. เมนูตรวจสอบประวัติ */}
+      {currentPath === 'database' && (
+        <div className="animate-in fade-in duration-300">
+          <RedeemLogs />
+        </div>
+      )}
+      
+    </AdminLayout>
+  );
+}
