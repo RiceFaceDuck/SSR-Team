@@ -1,30 +1,62 @@
 import { create } from 'zustand';
-import { db } from '../config/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../config/firebase';
 
-export const useGameStore = create((set) => ({
-  isNoAdsMode: false,
-  marketDeadline: null,
-  allPlayersCache: [],
-  
-  // รูปภาพค่าเริ่มต้น (กรณีฐานข้อมูลว่างเปล่า)
+// ฟังก์ชันแปลงลิงก์ Google Drive ให้เป็น Direct Image Link ที่ใช้โชว์รูปได้ 100%
+const convertToDirectLink = (url) => {
+  if (!url) return '';
+  if (url.includes('drive.google.com') || url.includes('script.google.com')) {
+    // หาคำว่า id=... เพื่อดึงรหัสไฟล์ออกมา
+    const idMatch = url.match(/id=([^&]+)/);
+    if (idMatch && idMatch[1]) {
+      return `https://lh3.googleusercontent.com/d/${idMatch[1]}`;
+    }
+  }
+  return url; // ถ้าไม่ใช่ลิงก์ Drive ก็ปล่อยผ่านตามปกติ
+};
+
+export const useGameStore = create((set, get) => ({
+  // ภาพตั้งต้น (เปลี่ยนเป็นภาพสนามฟุตบอลเท่ๆ เพื่อเทส Clean UI)
   themeConfig: {
-    loginBackgroundUrl: 'https://images.unsplash.com/photo-1518605368461-1e1e38ce7043?q=80&w=1000&auto=format&fit=crop', 
+    loginBackgroundUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2000', 
     floatingObjectUrl: '',
   },
+  isNoAdsMode: false,
+  isListenerActive: false, 
 
-  // ฟังก์ชันดักฟังการเปลี่ยนธีมแบบ Real-time จาก Firebase
+  // ฟังก์ชันดักฟังการเปลี่ยนแปลงจากระบบแอดมิน
   initThemeListener: () => {
+    if (get().isListenerActive) return () => {};
+    
+    console.log("🎧 เริ่มดักฟังการเปลี่ยนธีม...");
     const docRef = doc(db, 'public_data', 'system_config');
     
-    // onSnapshot จะทำงานอัตโนมัติทันทีที่แอดมินกดเซฟรูปใหม่
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists() && docSnap.data().themeConfig) {
-        set({ themeConfig: docSnap.data().themeConfig });
-        console.log("🎨 อัปเดตธีมจากระบบหลังบ้านสำเร็จ!");
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        
+        // ดึงข้อมูลมา แล้วเข้าเครื่องแปลงลิงก์ทันที
+        const rawBgUrl = data.themeConfig?.loginBackgroundUrl || data.loginBackgroundUrl;
+        const rawObjUrl = data.themeConfig?.floatingObjectUrl || data.floatingObjectUrl;
+
+        set({
+          themeConfig: {
+            loginBackgroundUrl: convertToDirectLink(rawBgUrl) || get().themeConfig.loginBackgroundUrl,
+            floatingObjectUrl: convertToDirectLink(rawObjUrl) || '',
+          },
+          isNoAdsMode: data.isNoAdsMode || false,
+        });
+        
       }
+    }, (error) => {
+      console.error("❌ เกิดข้อผิดพลาดในการดักฟังธีม:", error);
     });
+
+    set({ isListenerActive: true });
     
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+      set({ isListenerActive: false });
+    };
   }
 }));
