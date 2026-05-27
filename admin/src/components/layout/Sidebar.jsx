@@ -1,9 +1,11 @@
 import React from 'react';
-import { LayoutDashboard, Users, Star, Database } from 'lucide-react';
+import { LayoutDashboard, Users, Star, Database, Palette } from 'lucide-react';
 
 export default function Sidebar({ currentPath, setPath }) {
+  // เพิ่มเมนู Palette (จัดการธีม) เข้ามาในระบบ
   const menu = [
     { id: 'gameweek', icon: LayoutDashboard, label: 'Gameweek Control' },
+    { id: 'theme', icon: Palette, label: 'Theme & Design (ธีม)' },
     { id: 'players', icon: Users, label: 'Player Management' },
     { id: 'sponsor', icon: Star, label: 'Ads & Sponsors' },
     { id: 'database', icon: Database, label: 'Audit Logs' },
@@ -18,7 +20,7 @@ export default function Sidebar({ currentPath, setPath }) {
             key={item.id}
             onClick={() => setPath(item.id)}
             className={`w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all ${
-              currentPath === item.id ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800'
+              currentPath === item.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-400 hover:bg-slate-800'
             }`}
           >
             <item.icon size={20} />

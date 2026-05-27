@@ -4,6 +4,7 @@ import TimeController from './features/gameweek/TimeController';
 import NoAdsToggle from './features/gameweek/NoAdsToggle';
 import PlayerManager from './features/players/PlayerManager';
 import RedeemLogs from './features/verify/RedeemLogs';
+import ThemeController from './features/theme/ThemeController';
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState('gameweek');
@@ -24,23 +25,30 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* 2. เมนูจัดการธีม (อัปโหลดรูปลง Google Drive) */}
+      {currentPath === 'theme' && (
+        <div className="animate-in fade-in duration-300">
+          <ThemeController />
+        </div>
+      )}
       
-      {/* 2. เมนูจัดการนักเตะ */}
+      {/* 3. เมนูจัดการนักเตะ */}
       {currentPath === 'players' && (
         <div className="animate-in fade-in duration-300">
           <PlayerManager />
         </div>
       )}
       
-      {/* 3. เมนูจัดการสปอนเซอร์ */}
+      {/* 4. เมนูจัดการสปอนเซอร์ */}
       {currentPath === 'sponsor' && (
         <div className="animate-in fade-in duration-300">
           <h2 className="text-2xl font-black text-slate-800 mb-1">จัดการสปอนเซอร์ & โฆษณา</h2>
-          <p className="text-sm text-slate-500">ตั้งค่าป้ายแบนเนอร์และลิงก์ Affiliate ในหน้าเควส (กำลังพัฒนาโครงสร้าง)</p>
+          <p className="text-sm text-slate-500">ตั้งค่าป้ายแบนเนอร์และลิงก์ Affiliate ในหน้าเควส</p>
         </div>
       )}
       
-      {/* 4. เมนูตรวจสอบประวัติ */}
+      {/* 5. เมนูตรวจสอบประวัติ */}
       {currentPath === 'database' && (
         <div className="animate-in fade-in duration-300">
           <RedeemLogs />
