@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import AdminLayout from './components/layout/AdminLayout';
 import TimeController from './features/gameweek/TimeController';
 import NoAdsToggle from './features/gameweek/NoAdsToggle';
-import PlayerManager from './features/players/PlayerManager';
+
+// เปลี่ยนจาก PlayerManager เดิม เป็น PlayerFeature (ระบบใหม่ที่เราเพิ่งสร้างเสร็จ)
+import PlayerFeature from './features/players/PlayerFeature'; 
+
 import RedeemLogs from './features/verify/RedeemLogs';
 import ThemeController from './features/theme/ThemeController';
 
@@ -33,10 +36,10 @@ export default function App() {
         </div>
       )}
       
-      {/* 3. เมนูจัดการนักเตะ */}
+      {/* 3. เมนูจัดการนักเตะ (ติดตั้งระบบใหม่ที่นี่) */}
       {currentPath === 'players' && (
         <div className="animate-in fade-in duration-300">
-          <PlayerManager />
+          <PlayerFeature />
         </div>
       )}
       

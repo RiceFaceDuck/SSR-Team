@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 // import { getAnalytics } from "firebase/analytics"; 
@@ -15,7 +15,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase for Admin
-const app = initializeApp(firebaseConfig);
+// เช็คว่ามีการ Initialize Firebase ไปแล้วหรือยัง (ป้องกัน Error duplicate-app จาก Vite HMR รันซ้ำ)
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
