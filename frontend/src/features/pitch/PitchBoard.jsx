@@ -1,17 +1,17 @@
 /**
  * @file PitchBoard.jsx
- * @description UI Component สำหรับแสดงกระดานสนามฟุตบอล
- * อัปเกรด (Phase 3 - Tap & Place): ลบ Drag & Drop เปลี่ยนเป็นระบบแตะเพื่อวาง (Tap & Place)
- * พร้อมแสดงเอฟเฟกต์แสงไฟไฮไลท์ช่องที่สามารถวางนักเตะได้แบบ Premium
+ * @description UI Component สำหรับแสดงกระดานสนามฟุตบอลแบบสมจริง
+ * อัปเกรด (Phase 3 - Multi-Layer Formations): รองรับ 11 แผนการเล่น (รวมแผน 4 เลเยอร์อย่าง 4-2-3-1, 4-1-4-1)
+ * มาพร้อมกับระบบแตะเพื่อวาง (Tap & Place) และ Smart Allocation เพื่อจัดสรรตัวจริงลงสล็อตที่ถูกต้อง
  */
 
 import React from 'react';
-import PlayerSlot from './PlayerSlot';
-
+import PlayerSlot from '../../components/player/PlayerSlot';
 import { useUserStore } from '../../store/useUserStore';
 import { useMarketStore } from '../../store/useMarketStore';
-import { toast } from '../../utils/toast';
+import { getFormationData } from '../../utils/formationUtils';
 import { normalizePosition } from '../../utils/squadValidator';
+import { toast } from '../../utils/toast';
 
 export default function PitchBoard({ onSlotClick }) {
   const { 
@@ -23,88 +23,102 @@ export default function PitchBoard({ onSlotClick }) {
 
   const getPlayerBySku = useMarketStore((state) => state.getPlayerBySku);
 
-  // ฟังก์ชันจัดการเมื่อผู้ใช้กดที่ช่องต่างๆ บนสนาม
-  const handleSlotClick = (slotId, positionCode, existingPlayer) => {
-    // 1. ถ้ากำลังถือการ์ดนักเตะอยู่ (โหมดจัดวาง)
-    if (pendingPlacement) {
-      const targetPos = normalizePosition(positionCode);
-      const pendingPos = normalizePosition(pendingPlacement.position);
+  // ดึงโครงสร้างแผนการเล่นปัจจุบันจาก Formation Engine
+  const currentFormation = getFormationData(formation);
 
-      // ตรวจสอบว่าตำแหน่งตรงกันหรือไม่
+  /**
+   * ฟังก์ชันจัดการเมื่อแตะที่ช่องบนสนาม (Slot)
+   * @param {string} slotId - รหัสประจำช่อง เช่น 'FW-0', 'DM-1'
+   * @param {string} categoryCode - ตำแหน่งหลัก เช่น 'FW', 'MF', 'DF'
+   * @param {Object} existingPlayer - ข้อมูลนักเตะที่อยู่ในช่องนั้นอยู่แล้ว (ถ้ามี)
+   */
+  const handleSlotClick = (slotId, categoryCode, existingPlayer) => {
+    // 1. ตรวจสอบว่ากำลังถือนักเตะเตรียมวางลงตำแหน่งอยู่หรือไม่ (โหมดจัดวาง)
+    if (pendingPlacement) {
+      const targetPos = categoryCode; // ตำแหน่งเป้าหมาย เช่น 'MF'
+      const pendingPos = normalizePosition(pendingPlacement.position); // ตำแหน่งธรรมชาติของนักเตะที่ถืออยู่
+
+      // ล็อกดาวน์ตำแหน่ง: หากตำแหน่งที่จับมาไม่ตรงกับช่องสนาม จะไม่อนุญาตให้วางลงช่องนั้น
       if (targetPos !== pendingPos) {
-         // 📳 สั่นเตือนเมื่อผิดตำแหน่ง
-         if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-            window.navigator.vibrate([50, 100, 50]);
-         }
-         toast.error(`วางไม่ได้! ${pendingPlacement.name} เล่นตำแหน่ง ${pendingPos} เท่านั้น`);
-         return;
+        // 📳 สั่นสะเทือนแบบปฏิเสธ (Negative Haptic)
+        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+          window.navigator.vibrate([50, 100, 50]);
+        }
+        toast.error(`วางไม่ได้! ${pendingPlacement.name} เล่นในตำแหน่ง ${pendingPos} เท่านั้น`);
+        return;
       }
 
-      // ทำการยืนยันการวางนักเตะลงช่อง slotId นี้
+      // ยืนยันการวางนักเตะลงในกระดาน
       const result = confirmPlacement(slotId);
-      if (result.success) {
-         toast.success(result.message);
-      } else {
-         toast.error(result.message);
+      if (result && result.success) {
+        toast.success(result.message);
+      } else if (result) {
+        toast.error(result.message);
       }
 
     } else {
       // 2. โหมดปกติ (ไม่ได้ถือการ์ด)
-      // ถ้ากดที่ช่องที่มีนักเตะอยู่แล้ว ให้ส่ง Event ออกไป (เช่น ไปเปิดสถิติ หรือเปิดเมนูเปลี่ยนตัว)
+      // แตะเพื่อเรียกเปิด Modal สถิติ หรือสลับตัวนักเตะที่อยู่บนกระดาน
       if (onSlotClick && existingPlayer) {
-         // 📳 สั่นเบาๆ ตอบสนอง
-         if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-            window.navigator.vibrate(15);
-         }
-         onSlotClick(positionCode, existingPlayer);
+        // 📳 สั่นสะเทือนเบาๆ ตกกระทบ (Tap Haptic)
+        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+          window.navigator.vibrate(15);
+        }
+        onSlotClick(categoryCode, existingPlayer);
       }
     }
   };
 
-  // แยกแผนการเล่น (เช่น '4-4-2' -> DF: 4, MF: 4, FW: 2)
-  const parts = formation.split('-');
-  const defCount = parseInt(parts[0], 10) || 4;
-  const midCount = parseInt(parts[1], 10) || 4;
-  const fwdCount = parseInt(parts[2], 10) || 2;
+  // สร้าง Set ขึ้นมาเก็บไอดีของนักเตะตัวจริงที่ถูกจัดวางใน Slot ชั่วคราวนี้แล้ว
+  // ป้องกันปัญหานักเตะแสดงผลซ้ำกันในหลายๆ ช่อง เมื่อกดจัดทีมอัตโนมัติ (Auto-Fill)
+  const usedPlayerIds = new Set();
 
   /**
-   * ฟังก์ชันผู้ช่วยสำหรับสร้างแถวของนักเตะตามตำแหน่งและจำนวนที่กำหนด
-   * @param {string} positionCode - รหัสตำแหน่ง เช่น 'FW', 'MF', 'DF', 'GK'
-   * @param {number} count - จำนวนช่องนักเตะที่ต้องการในแถวนี้
+   * เรนเดอร์แถวนักเตะตามเลเยอร์ในแนวตั้ง (เช่น แถวหน้าเป้า, แถวกลางรุก, แถวกองหลัง)
+   * @param {Object} rowConfig - คอนฟิกของแถวสนาม { role: 'AM', category: 'MF', count: 3 }
    */
-  const renderRow = (positionCode, count) => {
-    // กรองเอานักเตะ *เฉพาะตัวจริง* ในตำแหน่งนี้
-    const playersInPos = mySquad.filter(p => normalizePosition(p.position) === positionCode && p.isStarting);
+  const renderRow = (rowConfig) => {
+    const { role, category, count } = rowConfig;
     const slots = [];
     
-    // ตรวจสอบว่ากำลังถือการ์ดในตำแหน่งนี้อยู่หรือไม่
-    const isDroppableRow = pendingPlacement && normalizePosition(pendingPlacement.position) === positionCode;
+    // ตรวจสอบสถานะว่า แถวนี้รองรับตำแหน่งที่กำลังถืออยู่หรือไม่ (เพื่อทำเอฟเฟกต์ Glow เชิญชวน)
+    const isDroppableRow = pendingPlacement && normalizePosition(pendingPlacement.position) === category;
     
-    // วนลูปสร้างช่องตามโควต้าของแผนการเล่น
     for (let i = 0; i < count; i++) {
-      const slotId = `${positionCode}-${i}`;
+      // สร้าง ID เฉพาะให้กับสล็อตนี้ เช่น 'AM-0', 'DM-1', 'DF-3'
+      const slotId = `${role}-${i}`;
       
-      // ค้นหานักเตะที่ประจำอยู่ในช่องนี้ 
-      // (รองรับระบบเก่าด้วยการเช็ค index ป้องกันนักเตะหายหากไม่มี slotIndex)
-      let assignedMember = playersInPos.find(p => p.slotIndex === slotId);
-      if (!assignedMember && i < playersInPos.length && !playersInPos[i].slotIndex) {
-         assignedMember = playersInPos[i];
+      // 1. ลองดึงนักเตะที่มี slotIndex ระบุไว้ตรงสล็อตนี้เป๊ะๆ (มาจากการวางแบบเจาะจงตำแหน่งแมนนวล)
+      let assignedMember = mySquad.find(p => p.isStarting && p.slotIndex === slotId);
+
+      // 2. ถ้าสล็อตนี้ยังไม่มีคนวางแบบกำหนดเอง ให้ควานหาตัวจริงในตำแหน่งหลักนี้ที่ยัง "ไม่มีพิกัดลงสนาม" (มาจากการจัดทีมแบบออโต้)
+      if (!assignedMember) {
+        assignedMember = mySquad.find(p => 
+          p.isStarting && 
+          normalizePosition(p.position) === category &&
+          !p.slotIndex &&
+          !usedPlayerIds.has(p.playerId)
+        );
       }
 
-      // ถ้ารหัส SKU มีตัวตน ให้ไปดึงข้อมูลเต็มๆ จาก Market Cache
+      // 3. ลงทะเบียนไอดีของนักเตะที่ได้ตำแหน่งเรียบร้อย เพื่อให้ระบบข้ามตัวนี้ไปในช่องถัดๆ ไป
+      if (assignedMember) {
+        usedPlayerIds.add(assignedMember.playerId);
+      }
+
+      // ควานหารายละเอียดนักเตะที่แคชไว้ใน Market Store มาประกอบ UI
       const playerFullData = assignedMember ? getPlayerBySku(assignedMember.playerId) : null;
       
-      // การคำนวณคลาสตกแต่ง (UI/UX)
-      // ถ้าช่องนี้สามารถวางนักเตะได้ จะทำให้มีแสงเรืองแสง (Glow) ซูมเข้า (Scale) และกระพริบ (Pulse)
+      // การตกแต่งกรอบช่องนักเตะตามสถานะจัดวาง (Glow & Pulse effects)
       const isDroppableSlot = isDroppableRow;
-      const slotWrapperClasses = `relative transition-all duration-300 ease-out rounded-2xl flex-shrink-0
+      const slotWrapperClasses = `relative transition-all duration-500 ease-out flex-shrink-0 rounded-full
         ${pendingPlacement ? 'cursor-pointer' : 'cursor-default'}
         ${isDroppableSlot 
-            ? 'ring-4 ring-yellow-400/80 shadow-[0_0_25px_rgba(250,204,21,0.6)] scale-105 z-20 animate-[pulse_2s_ease-in-out_infinite]' 
+            ? 'ring-4 ring-yellow-400/80 shadow-[0_0_30px_rgba(250,204,21,0.6)] scale-110 z-20 animate-[pulse_1.5s_ease-in-out_infinite] bg-yellow-400/10' 
             : 'ring-0'
         }
         ${pendingPlacement && !isDroppableSlot 
-            ? 'opacity-40 grayscale-[0.8] scale-95 pointer-events-none' 
+            ? 'opacity-30 grayscale-[0.9] scale-90 pointer-events-none' 
             : 'opacity-100 grayscale-0'
         }
       `;
@@ -112,22 +126,20 @@ export default function PitchBoard({ onSlotClick }) {
       slots.push(
         <div 
           key={slotId}
-          onClick={() => handleSlotClick(slotId, positionCode, playerFullData)}
+          onClick={() => handleSlotClick(slotId, category, playerFullData)}
           className={slotWrapperClasses}
         >
+          {/* เรียกใช้งาน PlayerSlot ตัวใหม่ ที่รองรับสถานะ expectedPosition */}
           <PlayerSlot 
-            slotId={slotId}
-            position={positionCode} 
             player={playerFullData}
-            // ไม่ต้องส่ง onClick ลงไปที่ PlayerSlot แล้ว เพราะเราครอบ Event ไว้ที่ div นี้แทน
+            expectedPosition={category}
+            isGhost={!playerFullData}
           />
-
-          {/* เอฟเฟกต์ตกแต่งเพิ่มเติมสำหรับช่องที่ว่างและวางได้ (แสดงเป้าหมาย) */}
-          {isDroppableSlot && !playerFullData && (
-             <div className="absolute inset-0 flex items-center justify-center bg-black/10 rounded-2xl pointer-events-none">
-                <div className="w-8 h-8 rounded-full bg-yellow-400/30 flex items-center justify-center animate-ping">
-                </div>
-                <span className="absolute text-yellow-500 font-black text-2xl drop-shadow-md">+</span>
+          
+          {/* ป้ายสติกเกอร์บอกสไตล์ย่อยของเลเยอร์ลอยเด่นขึ้นมาในช่องว่าง (เช่น AM, DM เพื่อชี้แนะแผนการยืน) */}
+          {!playerFullData && role !== category && (
+             <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/80 text-cyan-300 text-[9px] font-bold px-1.5 py-0.5 rounded border border-cyan-700/50 pointer-events-none whitespace-nowrap">
+               {role}
              </div>
           )}
         </div>
@@ -135,35 +147,42 @@ export default function PitchBoard({ onSlotClick }) {
     }
 
     return (
-      <div className="flex justify-around w-full z-10 px-2 my-1">
+      <div key={`row-${role}`} className="flex justify-evenly items-center w-full z-10 px-2 min-h-[80px]">
         {slots}
       </div>
     );
   };
 
   return (
-    <div className="w-full h-[420px] bg-gradient-to-b from-[#2EAC6D] to-[#208B55] rounded-[2.5rem] shadow-[inset_0_20px_40px_rgba(0,0,0,0.2),0_15px_30px_rgba(46,172,109,0.3)] border-[6px] border-white/20 relative overflow-hidden flex flex-col justify-between py-6 px-4">
+    <div className="w-full aspect-[3/4] sm:h-[480px] bg-gradient-to-b from-emerald-600 via-green-600 to-emerald-800 
+                    rounded-[2.5rem] shadow-[inset_0_20px_40px_rgba(0,0,0,0.3),0_15px_30px_rgba(16,185,129,0.2)] 
+                    border-[6px] border-emerald-900/40 relative overflow-hidden flex flex-col justify-between py-6 px-4">
        
-       {/* พื้นหลังตกแต่ง: เส้นสนามฟุตบอล */}
-       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-2 border-white/30 rounded-full pointer-events-none"></div>
-       <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-white/30 pointer-events-none"></div>
-       {/* กรอบเขตโทษ บน-ล่าง */}
-       <div className="absolute left-1/2 top-0 -translate-x-1/2 w-40 h-16 border-2 border-t-0 border-white/30 rounded-b-lg pointer-events-none"></div>
-       <div className="absolute left-1/2 bottom-0 -translate-x-1/2 w-40 h-16 border-2 border-b-0 border-white/30 rounded-t-lg pointer-events-none"></div>
+       {/* ลวดลายหญ้าแบบตารางแนวตั้ง (Chessboard Premium Grid Overlay) */}
+       <div className="absolute inset-0 opacity-10 pointer-events-none" 
+            style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.1) 40px, rgba(255,255,255,0.1) 80px)' }}>
+       </div>
 
-       {/* การจัดวางโซน (เรียงจากบนลงล่าง: กองหน้า -> กองกลาง -> กองหลัง -> ผู้รักษาประตู) */}
+       {/* พื้นหลังจำลอง: ตกแต่งเส้นสนามฟุตบอลในกระดาน (Pitch Lines) */}
+       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-[3px] border-white/30 rounded-full pointer-events-none z-0"></div>
+       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/40 rounded-full pointer-events-none z-0"></div>
+       <div className="absolute left-0 right-0 top-1/2 h-[3px] bg-white/30 pointer-events-none z-0"></div>
        
-       {/* โซนกองหน้า */}
-       {renderRow('FW', fwdCount)}
+       {/* กรอบกรีดเขตโทษ (Penalty Boxes) บน-ล่าง */}
+       <div className="absolute left-1/2 top-0 -translate-x-1/2 w-48 h-20 border-[3px] border-t-0 border-white/30 rounded-b-xl pointer-events-none z-0 flex justify-center">
+          <div className="w-20 h-10 border-[3px] border-t-0 border-white/30 rounded-b-md"></div>
+       </div>
+       <div className="absolute left-1/2 bottom-0 -translate-x-1/2 w-48 h-20 border-[3px] border-b-0 border-white/30 rounded-t-xl pointer-events-none z-0 flex items-end justify-center">
+          <div className="w-20 h-10 border-[3px] border-b-0 border-white/30 rounded-t-md"></div>
+       </div>
 
-       {/* โซนกองกลาง */}
-       {renderRow('MF', midCount)}
-
-       {/* โซนกองหลัง */}
-       {renderRow('DF', defCount)}
-       
-       {/* โซนผู้รักษาประตู (บังคับ 1 คนเสมอ) */}
-       {renderRow('GK', 1)}
+       {/* โซนการจัดตำแหน่งนักเตะหลัก (เรนเดอร์แถวแนวนอนอย่างไดนามิกจากระบบแท็คติก) */}
+       <div className="relative z-10 flex flex-col justify-between h-full py-2">
+         {currentFormation.rows.map(row => renderRow(row))}
+         
+         {/* เลเยอร์โซนผู้รักษาประตู (GK - ตรึงไว้ด้านล่างสุดของกระดานเสมอ) */}
+         {renderRow({ role: 'GK', category: 'GK', count: 1 })}
+       </div>
        
     </div>
   );
