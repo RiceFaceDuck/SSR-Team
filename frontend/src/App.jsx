@@ -18,6 +18,9 @@ import LeaderboardScreen from './features/leaderboard/LeaderboardScreen';
 import SocialScreen from './features/social/SocialScreen';
 import LiveScoreScreen from './features/live/LiveScoreScreen';
 
+// นำเข้า Toast Component ที่เราเพิ่งสร้าง
+import Toast from './components/common/Toast';
+
 export default function App() {
   // ดึง State และ Action จาก Zustand (เชื่อมโยงระบบหลังบ้านกับหน้าบ้าน)
   const { 
@@ -105,29 +108,36 @@ export default function App() {
   }
 
   // ถ้ายังไม่ได้ล็อกอิน (และโหลดเสร็จแล้ว) ให้เด้งไปหน้า LoginScreen 
-  // (ถอด prop onLogin ออก เพราะ LoginScreen จะเรียกใช้ authService เองแล้ว)
   if (!isAuthenticated) {
-    return <LoginScreen />;
+    return (
+      <>
+        <Toast /> {/* ฝัง Toast ไว้ที่หน้า Login ด้วยเผื่อแจ้งเตือนต่างๆ */}
+        <LoginScreen />
+      </>
+    );
   }
 
   // ถ้าล็อกอินสำเร็จแล้ว (isAuthenticated === true) จะเข้ามาโซนนี้ทันที
   return (
-    <MobileLayout 
-      currentPath={currentPath} 
-      onNavigate={setCurrentPath}
-      onLogout={handleLogout}
-    >
-      {/* ระบบ Router สลับหน้า */}
-      {currentPath === 'pitch' && <PitchScreen />}
-      {currentPath === 'market' && <MarketScreen />}
-      {currentPath === 'quest' && <QuestScreen />}
-      {currentPath === 'redeem' && <RedeemScreen />}
-      
-      {/* Router หน้าใหม่ */}
-      {currentPath === 'profile' && <ProfileScreen />}
-      {currentPath === 'leaderboard' && <LeaderboardScreen />}
-      {currentPath === 'social' && <SocialScreen />}
-      {currentPath === 'live' && <LiveScoreScreen />}
-    </MobileLayout>
+    <>
+      <Toast /> {/* ฝัง Toast ไว้ชั้นนอกสุดของระบบที่เข้าสู่ระบบแล้ว */}
+      <MobileLayout 
+        currentPath={currentPath} 
+        onNavigate={setCurrentPath}
+        onLogout={handleLogout}
+      >
+        {/* ระบบ Router สลับหน้า */}
+        {currentPath === 'pitch' && <PitchScreen />}
+        {currentPath === 'market' && <MarketScreen />}
+        {currentPath === 'quest' && <QuestScreen />}
+        {currentPath === 'redeem' && <RedeemScreen />}
+        
+        {/* Router หน้าใหม่ */}
+        {currentPath === 'profile' && <ProfileScreen />}
+        {currentPath === 'leaderboard' && <LeaderboardScreen />}
+        {currentPath === 'social' && <SocialScreen />}
+        {currentPath === 'live' && <LiveScoreScreen />}
+      </MobileLayout>
+    </>
   );
 }
