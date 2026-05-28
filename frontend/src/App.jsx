@@ -19,11 +19,21 @@ import SocialScreen from './features/social/SocialScreen';
 import LiveScoreScreen from './features/live/LiveScoreScreen';
 
 import Toast from './components/common/Toast';
-import FloatingDragAvatar from './components/player/FloatingDragAvatar';
 
 export default function App() {
   const { isAuthenticated, isAuthLoading, setUserAuth, clearAuth, setAuthReady } = useUserStore();
   const [currentPath, setCurrentPath] = useState('pitch');
+
+  // 🌟 เพิ่มระบบ Seamless Navigation รับ Event สลับหน้าจออัตโนมัติจากทุกที่ในแอป
+  useEffect(() => {
+    const handleSwitchTab = (e) => {
+      if (e.detail) {
+        setCurrentPath(e.detail);
+      }
+    };
+    window.addEventListener('switchTab', handleSwitchTab);
+    return () => window.removeEventListener('switchTab', handleSwitchTab);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -89,7 +99,7 @@ export default function App() {
     return <><Toast /><LoginScreen /></>;
   }
 
-  // เทคนิค Keep-alive DOM: แทนที่จะลบทิ้ง เราใช้ fixed เอาไปซ่อนไว้นอกจอ (กัน event นิ้วสะดุด)
+  // เทคนิค Keep-alive DOM
   const getRouteClass = (path) => currentPath === path 
     ? "block h-full w-full animate-in fade-in duration-300" 
     : "fixed -left-[9999px] opacity-0 pointer-events-none";
@@ -97,7 +107,7 @@ export default function App() {
   return (
     <>
       <Toast /> 
-      <FloatingDragAvatar />
+      {/* 🌟 ลบ FloatingDragAvatar ออกไปแล้ว */}
       
       <MobileLayout currentPath={currentPath} onNavigate={setCurrentPath} onLogout={handleLogout}>
         <div className={getRouteClass('pitch')}><PitchScreen /></div>

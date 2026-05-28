@@ -1,7 +1,7 @@
 /**
  * @file MarketScreen.jsx
  * @description หน้าจอหลักของตลาดนักเตะ (Market)
- * อัปเกรด: เชื่อมต่อ Firebase, มีระบบ Caching, ค้นหา/กรองข้อมูลลื่นไหล, ตรวจสอบกฎการซื้อขาย และ UI โทนสว่างพรีเมียม
+ * อัปเกรด (Phase 3 - Tap & Place): รองรับ Bottom Sheet, ยกเลิกระบบ Drag & Drop, และยิง Event สลับไปหน้า Pitch อัตโนมัติเมื่อกด "นำเข้าทีม"
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -11,25 +11,32 @@ import GoogleAdWrapper from '../../components/ads/GoogleAdWrapper';
 import BudgetBar from '../../components/common/BudgetBar';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 import PlayerActionModal from '../../components/player/PlayerActionModal';
+import PlayerBottomSheet from '../../components/player/PlayerBottomSheet'; // 🌟 นำเข้า Bottom Sheet ตัวใหม่
 
-// แก้ไข Path ให้ถูกต้อง (ถอยกลับ 2 ขั้นเพื่อไปหา src/store)
+// แก้ไข Path ให้ถูกต้อง
 import { useMarketStore } from '../../store/useMarketStore';
 import { useUserStore } from '../../store/useUserStore';
-import { validateBuyPlayer, validateSellPlayer } from '../../utils/squadValidator';
+import { validateSellPlayer } from '../../utils/squadValidator';
 import { toast } from '../../utils/toast';
 
 export default function MarketScreen() {
-  // 1. ดึง State และ Action จาก Stores (อัปเกรด: เพิ่ม autoPlacePlayer)
+  // 1. ดึง State และ Action จาก Stores
   const { players, isLoading, fetchMarketPlayers } = useMarketStore();
-  const { mySquad, budgetLeft, buyPlayer, sellPlayer, autoPlacePlayer } = useUserStore();
+  // 🌟 ดึง startPlacement มาใช้แทนระบบ autoPlacePlayer เดิม
+  const { mySquad, budgetLeft, sellPlayer, startPlacement } = useUserStore();
 
   // 2. Local State สำหรับจัดการ UI ภายในหน้านี้
   const [activeTab, setActiveTab] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('price-desc'); // price-desc, price-asc, points-desc
+  
+  // State สำหรับ Modal เดิม (ใช้สำหรับการขาย)
   const [modalConfig, setModalConfig] = useState({ isOpen: false, player: null, actionType: 'buy' });
+  
+  // 🌟 State สำหรับ Bottom Sheet ตัวใหม่ (ใช้สำหรับการซื้อ/นำเข้าทีม)
+  const [bottomSheetConfig, setBottomSheetConfig] = useState({ isOpen: false, player: null });
 
-  // 3. ดึงข้อมูลตลาดนักเตะเมื่อเปิดหน้านี้ (Store จะจัดการเรื่อง Cache ให้เอง)
+  // 3. ดึงข้อมูลตลาดนักเตะเมื่อเปิดหน้านี้
   useEffect(() => {
     fetchMarketPlayers();
   }, [fetchMarketPlayers]);
@@ -43,16 +50,14 @@ export default function MarketScreen() {
     { label: 'ผู้รักษาประตู', value: 'GK' }
   ];
 
-  // 5. กรองและเรียงลำดับข้อมูลนักเตะ (ทำฝั่ง Client เพื่อความลื่นไหล ประหยัดโควต้า Firebase)
+  // 5. กรองและเรียงลำดับข้อมูลนักเตะ
   const displayPlayers = useMemo(() => {
     let filtered = [...players];
 
-    // 5.1 กรองตามตำแหน่ง (Tab)
     if (activeTab !== 'ALL') {
       filtered = filtered.filter(p => p.position?.toUpperCase() === activeTab);
     }
 
-    // 5.2 กรองตามการค้นหา (Search)
     if (searchQuery.trim() !== '') {
       const q = searchQuery.toLowerCase();
       filtered = filtered.filter(p => 
@@ -62,7 +67,6 @@ export default function MarketScreen() {
       );
     }
 
-    // 5.3 เรียงลำดับ (Sort)
     filtered.sort((a, b) => {
       const priceA = parseFloat(a.price) || 0;
       const priceB = parseFloat(b.price) || 0;
@@ -78,42 +82,46 @@ export default function MarketScreen() {
     return filtered;
   }, [players, activeTab, searchQuery, sortBy]);
 
-  // 6. ฟังก์ชันเมื่อกดปุ่ม ซื้อ/ขาย ที่การ์ดนักเตะ
-  const handleActionClick = (player, actionType) => {
-    setModalConfig({ isOpen: true, player, actionType });
+  // 6. ฟังก์ชันเมื่อกดที่แถวนักเตะ (Tap Row) -> เปิด Bottom Sheet
+  const handleRowClick = (player) => {
+    setBottomSheetConfig({ isOpen: true, player });
   };
 
-  // 7. ฟังก์ชันเมื่อกดยืนยันใน Modal
+  // 7. ฟังก์ชันเมื่อกดปุ่ม ซื้อ/ขาย 
+  const handleActionClick = (player, actionType) => {
+    if (actionType === 'buy') {
+      // ถ้ากดปุ่มซื้อ ให้เปิด Bottom Sheet (เหมือน Tap Row)
+      setBottomSheetConfig({ isOpen: true, player });
+    } else {
+      // ถ้ากดปุ่มขาย ให้เปิด Modal เก่าเพื่อยืนยันการขาย
+      setModalConfig({ isOpen: true, player, actionType });
+    }
+  };
+
+  // 8. 🌟 ฟังก์ชันเมื่อกด "นำเข้าทีม" จาก Bottom Sheet
+  const handlePlacePlayer = (player) => {
+    // โยนเข้าสู่ระบบเตรียมจัดวาง (ยังไม่หักเงินจริง)
+    const result = startPlacement(player);
+    
+    if (result.success) {
+      toast.success(result.message);
+      setBottomSheetConfig({ isOpen: false, player: null });
+      
+      // ยิง Event เพื่อสั่งให้ Layout หลักสลับแท็บไปยังหน้า Pitch (สนาม)
+      window.dispatchEvent(new CustomEvent('switchTab', { detail: 'pitch' }));
+    } else {
+      // กรณีเงินไม่พอ หรือมีนักเตะในทีมแล้ว
+      toast.error(result.message);
+    }
+  };
+
+  // 9. ฟังก์ชันเมื่อกดยืนยันใน Modal เดิม (ปัจจุบันใช้แค่สำหรับ "ขาย" เท่านั้น)
   const handleConfirmAction = (player) => {
-    // เตรียมข้อมูล Full Object ของนักเตะในทีมตอนนี้ (เพื่อนำไปเข้าเครื่องตรวจสอบ)
     const currentSquadObjects = mySquad.map(sq => 
       players.find(p => String(p.sku) === String(sq.playerId))
     ).filter(Boolean);
 
-    if (modalConfig.actionType === 'buy') {
-      // ตรวจสอบกฎการซื้อ
-      const validation = validateBuyPlayer(player, currentSquadObjects, budgetLeft);
-      if (validation.isValid) {
-        
-        // 1. ซื้อเข้าทีมและหักเงิน
-        buyPlayer(player);
-        
-        // 2. ระบบ Smart Placement: พยายามจับลงสนามอัตโนมัติ
-        // ใช้ setTimeout เล็กน้อยเพื่อให้ State ซื้ออัปเดตเรียบร้อยก่อน
-        setTimeout(() => {
-          const isPlaced = autoPlacePlayer(player.sku);
-          if (isPlaced) {
-            toast.success(`ซื้อ ${player.name} สำเร็จและส่งลงสนามทันที!`);
-          } else {
-            toast.info(`ซื้อ ${player.name} สำเร็จ! (โควต้าสนามเต็ม แตะค้างที่นักเตะเพื่อลากจัดตัว)`, 4000);
-          }
-        }, 50);
-
-      } else {
-        toast.error(validation.message);
-      }
-    } else {
-      // ตรวจสอบกฎการขาย
+    if (modalConfig.actionType === 'sell') {
       const validation = validateSellPlayer(player, currentSquadObjects);
       if (validation.isValid) {
         sellPlayer(player);
@@ -122,10 +130,12 @@ export default function MarketScreen() {
         toast.error(validation.message);
       }
     }
+    
+    setModalConfig({ ...modalConfig, isOpen: false });
   };
 
   return (
-    <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-screen">
+    <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-screen pb-24">
       
       {/* Header & Budget */}
       <div className="mb-6">
@@ -163,7 +173,7 @@ export default function MarketScreen() {
           </div>
         </div>
 
-        {/* Tabs (แทนที่ Component เดิมเพื่อฟังก์ชันที่ทำงานได้จริง) */}
+        {/* Tabs */}
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.value;
@@ -188,19 +198,17 @@ export default function MarketScreen() {
       {/* Players List Area */}
       <div className="space-y-3 pb-4">
         {isLoading ? (
-          // แสดง Skeleton ตอนโหลดข้อมูล
           <SkeletonLoader type="row" count={5} />
         ) : displayPlayers.length > 0 ? (
-          // แสดงข้อมูลจริง
           displayPlayers.map((player) => (
             <PlayerRow 
               key={player.sku} 
               player={player} 
+              onClick={handleRowClick}      // 🌟 ส่ง Event กดตรงแถว
               onActionClick={handleActionClick} 
             />
           ))
         ) : (
-          // ไม่พบข้อมูล
           <div className="text-center py-10 bg-white rounded-2xl border border-slate-100 shadow-sm">
             <span className="text-4xl mb-3 block">🔍</span>
             <p className="text-slate-500 font-bold text-sm">ไม่พบนักเตะที่คุณค้นหา</p>
@@ -210,7 +218,15 @@ export default function MarketScreen() {
 
       <GoogleAdWrapper />
 
-      {/* Action Modal (ซ่อนอยู่ จะเด้งเมื่อกดปุ่ม) */}
+      {/* 🌟 Premium Bottom Sheet (สำหรับการซื้อ/นำเข้าทีม) */}
+      <PlayerBottomSheet 
+        isOpen={bottomSheetConfig.isOpen}
+        player={bottomSheetConfig.player}
+        onClose={() => setBottomSheetConfig({ isOpen: false, player: null })}
+        onPlace={handlePlacePlayer}
+      />
+
+      {/* Modal เดิม (ยังคงไว้สำหรับฟังก์ชัน "ขาย" นักเตะ) */}
       <PlayerActionModal 
         isOpen={modalConfig.isOpen}
         player={modalConfig.player}

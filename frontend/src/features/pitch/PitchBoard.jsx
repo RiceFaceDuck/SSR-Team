@@ -1,80 +1,65 @@
 /**
  * @file PitchBoard.jsx
  * @description UI Component สำหรับแสดงกระดานสนามฟุตบอล
- * อัปเกรด (Phase 2.5): เพิ่มระบบกรองเฉพาะ "ตัวจริง (isStarting)" มาลงสนาม,
- * สร้าง slotId และฝังระบบจับ Event "ปล่อยนิ้ว (Drop)" เพื่อทำ Auto-Swap อย่างชาญฉลาด
+ * อัปเกรด (Phase 3 - Tap & Place): ลบ Drag & Drop เปลี่ยนเป็นระบบแตะเพื่อวาง (Tap & Place)
+ * พร้อมแสดงเอฟเฟกต์แสงไฟไฮไลท์ช่องที่สามารถวางนักเตะได้แบบ Premium
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import PlayerSlot from './PlayerSlot';
 
-// แก้ไข Path ให้ถูกต้อง (ถอยกลับ 2 ขั้นเพื่อไปหา src/store)
 import { useUserStore } from '../../store/useUserStore';
 import { useMarketStore } from '../../store/useMarketStore';
-import { useDragStore } from '../../store/useDragStore';
+import { toast } from '../../utils/toast';
+import { normalizePosition } from '../../utils/squadValidator';
 
 export default function PitchBoard({ onSlotClick }) {
-  // 1. ดึง State หลัก
-  const mySquad = useUserStore((state) => state.mySquad);
-  const formation = useUserStore((state) => state.formation);
-  
-  // ดึง Action เพื่อใช้จัดการทีมเมื่อปล่อยนักเตะลงสนาม
-  const swapPlayer = useUserStore((state) => state.swapPlayer);
-  const autoPlacePlayer = useUserStore((state) => state.autoPlacePlayer);
+  const { 
+    mySquad, 
+    formation, 
+    pendingPlacement, 
+    confirmPlacement 
+  } = useUserStore();
 
   const getPlayerBySku = useMarketStore((state) => state.getPlayerBySku);
 
-  // 2. ดึง State การลาก (Drag & Drop)
-  const isDragging = useDragStore((state) => state.isDragging);
-  const draggedPlayer = useDragStore((state) => state.draggedPlayer);
-  const hoveredSlot = useDragStore((state) => state.hoveredSlot);
-  const stopDrag = useDragStore((state) => state.stopDrag);
+  // ฟังก์ชันจัดการเมื่อผู้ใช้กดที่ช่องต่างๆ บนสนาม
+  const handleSlotClick = (slotId, positionCode, existingPlayer) => {
+    // 1. ถ้ากำลังถือการ์ดนักเตะอยู่ (โหมดจัดวาง)
+    if (pendingPlacement) {
+      const targetPos = normalizePosition(positionCode);
+      const pendingPos = normalizePosition(pendingPlacement.position);
 
-  // ==========================================
-  // Logic การปล่อยนักเตะลงสนาม (Drop Engine)
-  // ==========================================
-  useEffect(() => {
-    const handleDrop = () => {
-      // ถ้ากำลังลาก และมีการ์ดในมือ และลอยอยู่เหนือช่อง Drop Zone
-      if (isDragging && draggedPlayer && hoveredSlot) {
-        // แยกรหัสช่อง (เช่น 'FW-0' -> ตำแหน่ง 'FW', ลำดับ 0)
-        const [targetPosition, slotIndexStr] = hoveredSlot.split('-');
-        const slotIndex = parseInt(slotIndexStr, 10);
-
-        // เช็คว่านักเตะที่ลากมา ตำแหน่งตรงกับโควต้าช่องไหม?
-        if (draggedPlayer.position === targetPosition) {
-          // หากลุ่ม "ตัวจริง" ในตำแหน่งเป้าหมาย
-          const playersInPos = mySquad.filter(p => p.position === targetPosition && p.isStarting);
-          const targetPlayerInSlot = playersInPos[slotIndex];
-
-          const draggedId = draggedPlayer.sku || draggedPlayer.playerId;
-
-          if (targetPlayerInSlot) {
-            // กรณีที่ 1: มีนักเตะเก่าอยู่แล้ว -> สลับตัว (Swap)
-            swapPlayer(draggedId, targetPlayerInSlot.playerId);
-          } else {
-            // กรณีที่ 2: ช่องนั้นยังว่าง -> เลื่อนขั้นเป็นตัวจริง (Auto Place)
-            autoPlacePlayer(draggedId);
-          }
-        }
-        
-        // จบการทำงานลาก
-        stopDrag();
-      } else if (isDragging) {
-        // กรณีลากไปปล่อยทิ้งไว้นอกกรอบ (ยกเลิกการลาก)
-        stopDrag();
+      // ตรวจสอบว่าตำแหน่งตรงกันหรือไม่
+      if (targetPos !== pendingPos) {
+         // 📳 สั่นเตือนเมื่อผิดตำแหน่ง
+         if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate([50, 100, 50]);
+         }
+         toast.error(`วางไม่ได้! ${pendingPlacement.name} เล่นตำแหน่ง ${pendingPos} เท่านั้น`);
+         return;
       }
-    };
 
-    // สมัครรับฟัง Event เมื่อมีการ "ปล่อยนิ้ว" หรือ "ปล่อยเมาส์"
-    window.addEventListener('mouseup', handleDrop);
-    window.addEventListener('touchend', handleDrop);
+      // ทำการยืนยันการวางนักเตะลงช่อง slotId นี้
+      const result = confirmPlacement(slotId);
+      if (result.success) {
+         toast.success(result.message);
+      } else {
+         toast.error(result.message);
+      }
 
-    return () => {
-      window.removeEventListener('mouseup', handleDrop);
-      window.removeEventListener('touchend', handleDrop);
-    };
-  }, [isDragging, draggedPlayer, hoveredSlot, mySquad, swapPlayer, autoPlacePlayer, stopDrag]);
+    } else {
+      // 2. โหมดปกติ (ไม่ได้ถือการ์ด)
+      // ถ้ากดที่ช่องที่มีนักเตะอยู่แล้ว ให้ส่ง Event ออกไป (เช่น ไปเปิดสถิติ หรือเปิดเมนูเปลี่ยนตัว)
+      if (onSlotClick && existingPlayer) {
+         // 📳 สั่นเบาๆ ตอบสนอง
+         if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(15);
+         }
+         onSlotClick(positionCode, existingPlayer);
+      }
+    }
+  };
 
   // แยกแผนการเล่น (เช่น '4-4-2' -> DF: 4, MF: 4, FW: 2)
   const parts = formation.split('-');
@@ -89,27 +74,63 @@ export default function PitchBoard({ onSlotClick }) {
    */
   const renderRow = (positionCode, count) => {
     // กรองเอานักเตะ *เฉพาะตัวจริง* ในตำแหน่งนี้
-    const playersInPos = mySquad.filter(p => p.position === positionCode && p.isStarting);
+    const playersInPos = mySquad.filter(p => normalizePosition(p.position) === positionCode && p.isStarting);
     const slots = [];
+    
+    // ตรวจสอบว่ากำลังถือการ์ดในตำแหน่งนี้อยู่หรือไม่
+    const isDroppableRow = pendingPlacement && normalizePosition(pendingPlacement.position) === positionCode;
     
     // วนลูปสร้างช่องตามโควต้าของแผนการเล่น
     for (let i = 0; i < count; i++) {
-      const squadMember = playersInPos[i];
-      // ถ้ารหัส SKU มีตัวตน ให้ไปดึงข้อมูลเต็มๆ (ชื่อ, รูป) จาก Market Cache มา
-      const playerFullData = squadMember ? getPlayerBySku(squadMember.playerId) : null;
-      
-      // สร้างรหัสประจำช่องที่ไม่มีทางซ้ำกัน เช่น 'FW-0', 'MF-1'
       const slotId = `${positionCode}-${i}`;
+      
+      // ค้นหานักเตะที่ประจำอยู่ในช่องนี้ 
+      // (รองรับระบบเก่าด้วยการเช็ค index ป้องกันนักเตะหายหากไม่มี slotIndex)
+      let assignedMember = playersInPos.find(p => p.slotIndex === slotId);
+      if (!assignedMember && i < playersInPos.length && !playersInPos[i].slotIndex) {
+         assignedMember = playersInPos[i];
+      }
+
+      // ถ้ารหัส SKU มีตัวตน ให้ไปดึงข้อมูลเต็มๆ จาก Market Cache
+      const playerFullData = assignedMember ? getPlayerBySku(assignedMember.playerId) : null;
+      
+      // การคำนวณคลาสตกแต่ง (UI/UX)
+      // ถ้าช่องนี้สามารถวางนักเตะได้ จะทำให้มีแสงเรืองแสง (Glow) ซูมเข้า (Scale) และกระพริบ (Pulse)
+      const isDroppableSlot = isDroppableRow;
+      const slotWrapperClasses = `relative transition-all duration-300 ease-out rounded-2xl flex-shrink-0
+        ${pendingPlacement ? 'cursor-pointer' : 'cursor-default'}
+        ${isDroppableSlot 
+            ? 'ring-4 ring-yellow-400/80 shadow-[0_0_25px_rgba(250,204,21,0.6)] scale-105 z-20 animate-[pulse_2s_ease-in-out_infinite]' 
+            : 'ring-0'
+        }
+        ${pendingPlacement && !isDroppableSlot 
+            ? 'opacity-40 grayscale-[0.8] scale-95 pointer-events-none' 
+            : 'opacity-100 grayscale-0'
+        }
+      `;
 
       slots.push(
-        <PlayerSlot 
+        <div 
           key={slotId}
-          slotId={slotId}
-          position={positionCode} 
-          player={playerFullData}
-          // ส่งข้อมูลกลับไปให้ Component แม่จัดการเมื่อถูกคลิก (ถ้ามี)
-          onClick={() => onSlotClick && onSlotClick(positionCode, playerFullData)}
-        />
+          onClick={() => handleSlotClick(slotId, positionCode, playerFullData)}
+          className={slotWrapperClasses}
+        >
+          <PlayerSlot 
+            slotId={slotId}
+            position={positionCode} 
+            player={playerFullData}
+            // ไม่ต้องส่ง onClick ลงไปที่ PlayerSlot แล้ว เพราะเราครอบ Event ไว้ที่ div นี้แทน
+          />
+
+          {/* เอฟเฟกต์ตกแต่งเพิ่มเติมสำหรับช่องที่ว่างและวางได้ (แสดงเป้าหมาย) */}
+          {isDroppableSlot && !playerFullData && (
+             <div className="absolute inset-0 flex items-center justify-center bg-black/10 rounded-2xl pointer-events-none">
+                <div className="w-8 h-8 rounded-full bg-yellow-400/30 flex items-center justify-center animate-ping">
+                </div>
+                <span className="absolute text-yellow-500 font-black text-2xl drop-shadow-md">+</span>
+             </div>
+          )}
+        </div>
       );
     }
 
