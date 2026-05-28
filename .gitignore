@@ -1,14 +1,21 @@
-ไม่เอาไฟล์ระบบเครื่องยนต์ (หนักมากและโหลดใหม่ได้)
-node_modules/frontend/node_modules/admin/node_modules/
+# ไม่เอาไฟล์ระบบเครื่องยนต์ (หนักมากและโหลดใหม่ได้)
+node_modules/
+frontend/node_modules/
+admin/node_modules/
 
-ไม่เอาไฟล์ Build (เพราะตอน Deploy เราบิลด์ใหม่ตลอด)
-dist/frontend/dist/admin/dist/
+# ไม่เอาไฟล์ Build (เพราะตอน Deploy เราบิลด์ใหม่ตลอด)
+dist/
+frontend/dist/
+admin/dist/
 
-ไม่เอาไฟล์ Log แจ้งเตือนยิบย่อยlogs.log
-npm-debug.logfirebase-debug.log*
+# ไม่เอาไฟล์ Log แจ้งเตือนยิบย่อย
+logs.log
+npm-debug.log
+firebase-debug.log*
 
-ไม่เอาโฟลเดอร์แคชของ Firebase
+# ไม่เอาโฟลเดอร์แคชของ Firebase
 .firebase/
 
-ไม่เอาไฟล์รหัสผ่านส่วนตัว (ถ้ามีในอนาคต)
-.env.env.local
+# ไม่เอาไฟล์รหัสผ่านส่วนตัว (ถ้ามีในอนาคต)
+.env
+.env.local
