@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Users, X, Copy, CheckCircle, Info } from 'lucide-react';
+import { Users, X, Download, CheckCircle, Info, FileSpreadsheet } from 'lucide-react';
+import * as XLSX from 'xlsx'; // เพิ่ม Import XLSX สำหรับสร้างไฟล์ Template
 
 // นำเข้า Views และ Components ที่เราสร้างไว้ทั้งหมด
 import PlayerList from './views/PlayerList';
@@ -29,13 +30,13 @@ const PlayerFeature = () => {
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isCopied, setIsCopied] = useState(false); // สำหรับปุ่ม Copy Headers
+  const [isDownloaded, setIsDownloaded] = useState(false); // เปลี่ยนจาก isCopied เป็นสถานะการดาวน์โหลด
 
   // --- ฟังก์ชันจัดการเปิด/ปิด Modal ---
   const closeModal = () => {
     if (!isProcessing) {
       setModal({ isOpen: false, type: null, data: null });
-      setIsCopied(false);
+      setIsDownloaded(false);
     }
   };
 
@@ -51,30 +52,49 @@ const PlayerFeature = () => {
     setModal({ isOpen: true, type: 'details', data: player });
   };
 
-  // --- ฟังก์ชันจัดการคำแนะนำ Excel ---
-  const handleCopyHeaders = () => {
-    // ใช้ \t (Tab) คั่นเพื่อให้เวลา Paste ลง Excel แล้วข้อมูลแยกไปอยู่ทีละคอลัมน์ให้อัตโนมัติ
-    const headers = "SKU\tName\tPosition\tTeam\tPrice\tPoints\tStatus\tGoals\tAssists\tCleanSheets\tYellowCards\tRedCards";
-    
-    // คำสั่งคัดลอกลง Clipboard
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(headers);
-    } else {
-      // Fallback
-      const textArea = document.createElement("textarea");
-      textArea.value = headers;
-      document.body.appendChild(textArea);
-      textArea.select();
-      try {
-        document.execCommand('copy');
-      } catch (err) {
-        console.error('Copy failed', err);
-      }
-      document.body.removeChild(textArea);
-    }
+  // --- 🔥 ฟังก์ชันสร้างและดาวน์โหลดไฟล์ Template Excel ---
+  const handleDownloadTemplate = () => {
+    try {
+      // 1. กำหนดหัวตารางและใส่ข้อมูลตัวอย่าง 1 แถวให้แอดมินดูเป็นไกด์ไลน์
+      const templateData = [
+        ["SKU", "Name", "Position", "Team", "Price", "Points", "Status", "Goals", "Assists", "CleanSheets", "YellowCards", "RedCards"],
+        ["PLY-001", "Lionel Messi", "FWD", "Inter Miami", 12.5, 0, "active", 0, 0, 0, 0, 0]
+      ];
 
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
+      // 2. แปลง Array ให้เป็น Worksheet
+      const worksheet = XLSX.utils.aoa_to_sheet(templateData);
+
+      // 3. ปรับขนาดความกว้างของคอลัมน์ให้สวยงาม (UX)
+      const wscols = [
+        { wch: 15 }, // SKU
+        { wch: 25 }, // Name
+        { wch: 10 }, // Position
+        { wch: 20 }, // Team
+        { wch: 10 }, // Price
+        { wch: 10 }, // Points
+        { wch: 15 }, // Status
+        { wch: 10 }, // Goals
+        { wch: 10 }, // Assists
+        { wch: 12 }, // CleanSheets
+        { wch: 12 }, // YellowCards
+        { wch: 10 }  // RedCards
+      ];
+      worksheet['!cols'] = wscols;
+
+      // 4. สร้าง Workbook และนำ Worksheet ใส่เข้าไป
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Player Template");
+
+      // 5. สั่งดาวน์โหลดไฟล์
+      XLSX.writeFile(workbook, "Player_Import_Template.xlsx");
+
+      // 6. แสดง Feedback ว่าดาวน์โหลดแล้ว
+      setIsDownloaded(true);
+      setTimeout(() => setIsDownloaded(false), 3000);
+    } catch (error) {
+      console.error("Error creating template:", error);
+      alert("เกิดข้อผิดพลาดในการสร้างไฟล์ Template");
+    }
   };
 
   // --- ฟังก์ชันจัดการข้อมูล (Actions) ---
@@ -146,49 +166,68 @@ const PlayerFeature = () => {
       
       case 'import-drop':
         return (
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-auto p-6 relative">
-            <button onClick={closeModal} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-auto p-7 relative border border-gray-100">
+            <button onClick={closeModal} className="absolute top-5 right-5 text-gray-400 hover:text-gray-700 transition-colors bg-gray-50 hover:bg-gray-100 p-1.5 rounded-full">
               <X className="w-5 h-5" />
             </button>
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-800">นำเข้าข้อมูลจาก Excel</h2>
-              <p className="text-sm text-gray-500 mt-1">อัปโหลดไฟล์ Excel (.xlsx, .csv) เพื่อเพิ่มนักเตะจำนวนมาก</p>
+            <div className="mb-6 flex items-center gap-3">
+              <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                <FileSpreadsheet className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">นำเข้าข้อมูลจาก Excel</h2>
+                <p className="text-sm text-gray-500 mt-0.5">ลากไฟล์มาวาง หรืออัปโหลดไฟล์ (.xlsx, .csv) เพื่อเพิ่มนักเตะจำนวนมาก</p>
+              </div>
             </div>
             
+            {/* โซนอัปโหลดไฟล์ */}
             <Dropzone 
               onFileSelected={handleExcelDrop} 
               isLoading={isProcessing} 
             />
 
-            {/* ส่วนคำแนะนำการสร้าง Template Excel */}
-            <div className="mt-6 bg-blue-50 border border-blue-100 rounded-lg p-5">
-              <h3 className="text-sm font-semibold text-blue-800 mb-2 flex items-center">
-                <Info className="w-4 h-4 mr-2" />
-                คำแนะนำการเตรียมไฟล์ Excel
-              </h3>
-              <p className="text-xs text-blue-600 mb-3 leading-relaxed">
-                สร้างไฟล์ Excel ใหม่ (แผ่นงานแรก) และคัดลอกหัวข้อคอลัมน์ด้านล่างนี้ ไปวางที่ <b>แถวแรก (Row 1 / Cell A1)</b> ของไฟล์ ระบบจะกระจายคอลัมน์ให้โดยอัตโนมัติ
-              </p>
-              
-              <div className="flex flex-col sm:flex-row items-center justify-between bg-white border border-blue-200 rounded-md p-2 gap-3">
-                <div className="overflow-x-auto whitespace-nowrap text-xs font-mono text-gray-600 py-1 flex-1 w-full scrollbar-hide">
-                  SKU, Name, Position, Team, Price, Points, Status, Goals, Assists...
+            {/* 🔥 อัปเกรดส่วนคำแนะนำ: เปลี่ยนจากการ Copy text เป็นปุ่มดาวน์โหลดไฟล์จริง */}
+            <div className="mt-6 bg-gradient-to-br from-blue-50 to-indigo-50/50 border border-blue-100/50 rounded-xl p-5 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-sm font-bold text-blue-900 flex items-center gap-2">
+                    <Info className="w-4 h-4 text-blue-600" />
+                    ต้องการไฟล์ตั้งต้น (Template) หรือไม่?
+                  </h3>
+                  <p className="text-xs text-blue-700/80 mt-1.5 leading-relaxed pr-4">
+                    เพื่อป้องกันการพิมพ์หัวตารางผิดพลาด เราขอแนะนำให้ดาวน์โหลดไฟล์ Template ของระบบไปใช้งาน ซึ่งจะมีการจัด Format ที่ถูกต้องไว้ให้แล้ว
+                  </p>
                 </div>
+                
                 <button
-                  onClick={handleCopyHeaders}
-                  className={`w-full sm:w-auto flex items-center justify-center px-4 py-2 text-xs font-medium rounded-md transition-colors shrink-0 shadow-sm
-                    ${isCopied ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  onClick={handleDownloadTemplate}
+                  className={`w-full sm:w-auto flex items-center justify-center px-5 py-2.5 text-sm font-medium rounded-lg transition-all shrink-0 shadow-sm
+                    ${isDownloaded 
+                      ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' 
+                      : 'bg-white text-blue-700 border border-blue-200 hover:bg-blue-600 hover:text-white hover:border-blue-600'}`}
                 >
-                  {isCopied ? <CheckCircle className="w-4 h-4 mr-1.5" /> : <Copy className="w-4 h-4 mr-1.5" />}
-                  {isCopied ? 'คัดลอกแล้ว!' : 'คัดลอกหัวคอลัมน์'}
+                  {isDownloaded ? <CheckCircle className="w-4 h-4 mr-2" /> : <Download className="w-4 h-4 mr-2" />}
+                  {isDownloaded ? 'ดาวน์โหลดสำเร็จ!' : 'โหลด Template'}
                 </button>
               </div>
 
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 text-[11px] text-gray-500 gap-x-4 gap-y-2">
-                <p><b className="text-gray-700">SKU:</b> รหัสอ้างอิง (ห้ามซ้ำ) <span className="text-red-500">*จำเป็น</span></p>
-                <p><b className="text-gray-700">Name:</b> ชื่อนักเตะ <span className="text-red-500">*จำเป็น</span></p>
-                <p><b className="text-gray-700">Position:</b> FW, MF, DF, GK</p>
-                <p><b className="text-gray-700">Status:</b> active, injured, suspended</p>
+              <div className="mt-5 pt-4 border-t border-blue-200/50 grid grid-cols-1 sm:grid-cols-2 text-[11px] gap-x-4 gap-y-2">
+                <div className="flex items-start gap-1">
+                  <span className="text-red-500 font-bold">*</span>
+                  <p className="text-gray-600"><b className="text-gray-800">SKU:</b> รหัสอ้างอิงของนักเตะ (ห้ามซ้ำกัน)</p>
+                </div>
+                <div className="flex items-start gap-1">
+                  <span className="text-red-500 font-bold">*</span>
+                  <p className="text-gray-600"><b className="text-gray-800">Name:</b> ชื่อนักเตะ (ชื่อเต็ม หรือ ชื่อย่อ)</p>
+                </div>
+                <div className="flex items-start gap-1">
+                  <span className="text-gray-400 font-bold">•</span>
+                  <p className="text-gray-600"><b className="text-gray-800">Position:</b> FWD, MID, DEF, GK</p>
+                </div>
+                <div className="flex items-start gap-1">
+                  <span className="text-gray-400 font-bold">•</span>
+                  <p className="text-gray-600"><b className="text-gray-800">Status:</b> active, injured, suspended</p>
+                </div>
               </div>
             </div>
           </div>
@@ -216,12 +255,12 @@ const PlayerFeature = () => {
       {/* Header ของหน้าจัดการนักเตะ */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-blue-600 rounded-lg text-white">
+          <div className="p-2 bg-blue-600 rounded-lg text-white shadow-sm">
             <Users className="w-6 h-6" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">จัดการข้อมูลนักเตะ (Players)</h1>
         </div>
-        <p className="text-gray-500">จัดการรายชื่อ ข้อมูลสถิติ และราคาของนักเตะในระบบ Fantasy</p>
+        <p className="text-gray-500">เพิ่ม, แก้ไข, อัปเดตสถิติ และราคาของนักเตะในระบบ Fantasy</p>
       </div>
 
       {/* Main Content (ตารางรายชื่อนักเตะ) */}
@@ -237,7 +276,7 @@ const PlayerFeature = () => {
           {/* พื้นหลังสีดำโปร่งแสง */}
           <div 
             className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"
-            onClick={closeModal} // คลิกพื้นหลังเพื่อปิด (ถ้าไม่ได้โหลดอยู่)
+            onClick={closeModal} // คลิกพื้นหลังเพื่อปิด
           ></div>
           
           {/* เนื้อหา Modal (อยู่เหนือพื้นหลัง) */}

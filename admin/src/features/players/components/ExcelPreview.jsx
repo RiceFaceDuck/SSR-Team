@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Check, X, AlertTriangle, Users } from 'lucide-react';
+import { Check, X, AlertTriangle, Users, FileSpreadsheet, Info, CheckCircle2 } from 'lucide-react';
 import DataTable from '../../../components/ui/DataTable';
 import StatusBadge from '../../../components/ui/StatusBadge';
 
@@ -18,81 +18,124 @@ const ExcelPreview = ({ data = [], onConfirm, onCancel, isLoading = false }) => 
     {
       header: 'SKU',
       accessorKey: 'sku',
-      className: 'font-mono text-xs text-gray-500'
+      className: 'font-mono text-xs text-gray-500 bg-gray-50'
     },
     {
       header: 'ชื่อนักเตะ',
       // Custom render เพื่อแสดงทั้งชื่อย่อ(ตัวหนา) และชื่อเต็ม(ตัวเล็ก)
       cell: (row) => (
-        <div>
-          <div className="font-semibold text-gray-900">{row.name}</div>
-          <div className="text-xs text-gray-500">{row.fullName}</div>
+        <div className="flex flex-col">
+          <span className="font-bold text-gray-900">{row.name}</span>
+          <span className="text-xs text-gray-500 truncate max-w-[150px]" title={row.fullName}>
+            {row.fullName}
+          </span>
         </div>
       )
     },
     {
       header: 'ตำแหน่ง',
       accessorKey: 'position',
-      // จัดให้อยู่ตรงกลาง
-      className: 'text-center font-medium'
+      // จัดให้อยู่ตรงกลาง และให้ตัวหนา
+      className: 'text-center font-bold text-gray-700'
     },
     {
       header: 'สโมสร',
-      accessorKey: 'team'
+      accessorKey: 'team',
+      className: 'font-medium'
     },
     {
       header: 'ราคา',
       accessorKey: 'displayPrice',
-      className: 'text-green-600 font-medium'
+      // ไฮไลท์ราคาให้ดูชัดเจน
+      className: 'text-right text-emerald-600 font-bold'
     },
     {
       header: 'คะแนน',
-      accessorKey: 'totalPoints',
-      className: 'text-center'
+      // ใส่ลูกเล่นให้คะแนนดูเด่นขึ้น
+      cell: (row) => (
+        <div className="flex justify-center">
+          <span className="bg-blue-50 text-blue-700 font-semibold px-2.5 py-1 rounded-md text-sm border border-blue-100">
+            {row.totalPoints}
+          </span>
+        </div>
+      )
     },
     {
       header: 'สถานะ',
       // เรียกใช้ StatusBadge Component
-      cell: (row) => <StatusBadge status={row.status} />
+      cell: (row) => (
+        <div className="flex justify-center">
+          <StatusBadge status={row.status} />
+        </div>
+      )
     }
   ], []);
 
-  // กรณีที่ Parse ไฟล์มาแล้วแต่ไม่ได้ข้อมูล (ไฟล์ว่างหรือผิดรูปแบบ)
+  // 🔥 Smart Empty State: อัปเกรดการแจ้งเตือนกรณีไม่พบข้อมูลให้ดูโปรและมีประโยชน์มากขึ้น
   if (!data || data.length === 0) {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
-        <AlertTriangle className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
-        <h3 className="text-lg font-medium text-yellow-800 mb-1">ไม่พบข้อมูลในไฟล์ Excel</h3>
-        <p className="text-sm text-yellow-600 mb-4">
-          กรุณาตรวจสอบว่าคุณใช้ Template ที่ถูกต้อง และมีข้อมูลอยู่ในแผ่นงาน (Sheet) แรก
+      <div className="bg-white border-2 border-dashed border-yellow-300 rounded-xl p-8 text-center shadow-sm">
+        <div className="mx-auto w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+          <AlertTriangle className="w-8 h-8 text-yellow-600" />
+        </div>
+        <h3 className="text-xl font-bold text-gray-800 mb-2">ไม่พบข้อมูล หรือ รูปแบบตารางไม่ถูกต้อง</h3>
+        <p className="text-gray-600 mb-6 max-w-lg mx-auto leading-relaxed">
+          ระบบไม่สามารถดึงข้อมูลนักเตะจากไฟล์ Excel ของคุณได้ กรุณาตรวจสอบว่ามีข้อมูลใน Sheet แรก และมี <span className="font-semibold text-gray-800">หัวตาราง (Header)</span> ตรงตามที่ระบบต้องการอย่างน้อย 4 ช่องด้านล่างนี้:
         </p>
+
+        {/* Required Columns Checklist */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto mb-8 text-left">
+          {[
+            { label: 'ชื่อ (Name)', desc: 'ชื่อนักเตะ' },
+            { label: 'ตำแหน่ง (Pos)', desc: 'GK, DEF, MID, FWD' },
+            { label: 'ทีม (Team)', desc: 'สโมสรต้นสังกัด' },
+            { label: 'ราคา (Price)', desc: 'ราคา (ตัวเลข)' }
+          ].map((col, idx) => (
+            <div key={idx} className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col gap-1">
+              <div className="flex items-center gap-1.5 text-green-600 font-semibold text-sm">
+                <CheckCircle2 className="w-4 h-4" /> {col.label}
+              </div>
+              <span className="text-xs text-gray-500 pl-5">{col.desc}</span>
+            </div>
+          ))}
+        </div>
+
         <button
           onClick={onCancel}
-          className="px-4 py-2 bg-white border border-yellow-300 text-yellow-700 rounded-lg hover:bg-yellow-100 transition-colors text-sm font-medium"
+          className="px-6 py-2.5 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all text-sm font-medium inline-flex items-center gap-2"
         >
-          กลับไปเลือกไฟล์ใหม่
+          <X className="w-4 h-4" /> กลับไปเลือกไฟล์ใหม่
         </button>
       </div>
     );
   }
 
+  // ✅ Preview Data State: แสดงผลตารางเมื่อ Parse สำเร็จ
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+    <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col transform transition-all">
       {/* ส่วนหัว (Header & Summary) */}
-      <div className="p-5 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800">ตรวจสอบข้อมูลก่อนนำเข้า</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            ระบบตรวจสอบพบข้อมูลทั้งหมด <span className="font-bold text-blue-600">{data.length}</span> รายการ
-          </p>
-        </div>
-        <div className="hidden sm:flex items-center justify-center w-12 h-12 bg-blue-100 text-blue-600 rounded-full">
-          <Users className="w-6 h-6" />
+      <div className="p-5 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-12 h-12 bg-blue-100 text-blue-600 rounded-xl shadow-inner">
+            <FileSpreadsheet className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-800">ตรวจสอบข้อมูลก่อนนำเข้า</h2>
+            <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-1">
+              ระบบตรวจสอบพบข้อมูลพร้อมใช้งาน <span className="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded text-xs">{data.length} รายการ</span>
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* ส่วนตาราง (Preview Table) - กำหนด max-height เพื่อไม่ให้หน้ายาวเกินไปถ้าข้อมูลเยอะ */}
-      <div className="max-h-[500px] overflow-y-auto p-4 bg-gray-50/50">
+      {/* คำแนะนำสั้นๆ */}
+      <div className="bg-blue-50/50 px-5 py-3 border-b border-blue-100 flex items-center gap-2 text-sm text-blue-700">
+        <Info className="w-4 h-4 flex-shrink-0" />
+        <p>โปรดตรวจสอบความถูกต้อง โดยเฉพาะ <strong>"ราคา"</strong> และ <strong>"ตำแหน่ง"</strong> หากถูกต้องครบถ้วนแล้ว ให้กดยืนยันด้านล่าง</p>
+      </div>
+
+      {/* ส่วนตาราง (Preview Table) */}
+      <div className="max-h-[450px] overflow-y-auto p-0 bg-white">
         <DataTable 
           columns={columns} 
           data={data} 
@@ -101,12 +144,12 @@ const ExcelPreview = ({ data = [], onConfirm, onCancel, isLoading = false }) => 
       </div>
 
       {/* ส่วน Footer (Action Buttons) */}
-      <div className="p-5 border-t border-gray-200 flex justify-end gap-3 bg-white">
+      <div className="p-5 border-t border-gray-200 flex justify-end gap-3 bg-gray-50">
         <button
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors disabled:opacity-50 flex items-center"
+          className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors disabled:opacity-50 flex items-center shadow-sm"
         >
           <X className="w-4 h-4 mr-2" />
           ยกเลิก
@@ -115,14 +158,22 @@ const ExcelPreview = ({ data = [], onConfirm, onCancel, isLoading = false }) => 
           type="button"
           onClick={() => onConfirm(data)}
           disabled={isLoading}
-          className="px-5 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-sm flex items-center"
+          className="px-6 py-2.5 text-sm font-bold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex items-center"
         >
           {isLoading ? (
-            <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+            <>
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              กำลังบันทึกข้อมูล...
+            </>
           ) : (
-            <Check className="w-4 h-4 mr-2" />
+            <>
+              <Check className="w-5 h-5 mr-2" />
+              ยืนยันการนำเข้าข้อมูล
+            </>
           )}
-          {isLoading ? 'กำลังนำเข้าข้อมูล...' : 'ยืนยันการนำเข้าข้อมูล'}
         </button>
       </div>
     </div>
