@@ -19,9 +19,9 @@ import { validateBuyPlayer, validateSellPlayer } from '../../utils/squadValidato
 import { toast } from '../../utils/toast';
 
 export default function MarketScreen() {
-  // 1. ดึง State และ Action จาก Stores
+  // 1. ดึง State และ Action จาก Stores (อัปเกรด: เพิ่ม autoPlacePlayer)
   const { players, isLoading, fetchMarketPlayers } = useMarketStore();
-  const { mySquad, budgetLeft, buyPlayer, sellPlayer } = useUserStore();
+  const { mySquad, budgetLeft, buyPlayer, sellPlayer, autoPlacePlayer } = useUserStore();
 
   // 2. Local State สำหรับจัดการ UI ภายในหน้านี้
   const [activeTab, setActiveTab] = useState('ALL');
@@ -94,8 +94,21 @@ export default function MarketScreen() {
       // ตรวจสอบกฎการซื้อ
       const validation = validateBuyPlayer(player, currentSquadObjects, budgetLeft);
       if (validation.isValid) {
+        
+        // 1. ซื้อเข้าทีมและหักเงิน
         buyPlayer(player);
-        toast.success(`ซื้อ ${player.name} เข้าร่วมทีมเรียบร้อย!`);
+        
+        // 2. ระบบ Smart Placement: พยายามจับลงสนามอัตโนมัติ
+        // ใช้ setTimeout เล็กน้อยเพื่อให้ State ซื้ออัปเดตเรียบร้อยก่อน
+        setTimeout(() => {
+          const isPlaced = autoPlacePlayer(player.sku);
+          if (isPlaced) {
+            toast.success(`ซื้อ ${player.name} สำเร็จและส่งลงสนามทันที!`);
+          } else {
+            toast.info(`ซื้อ ${player.name} สำเร็จ! (โควต้าสนามเต็ม แตะค้างที่นักเตะเพื่อลากจัดตัว)`, 4000);
+          }
+        }, 50);
+
       } else {
         toast.error(validation.message);
       }

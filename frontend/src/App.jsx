@@ -18,8 +18,9 @@ import LeaderboardScreen from './features/leaderboard/LeaderboardScreen';
 import SocialScreen from './features/social/SocialScreen';
 import LiveScoreScreen from './features/live/LiveScoreScreen';
 
-// นำเข้า Toast Component ที่เราเพิ่งสร้าง
+// นำเข้า Components ที่ใช้ร่วมกันระดับสูงสุด
 import Toast from './components/common/Toast';
+import FloatingDragAvatar from './components/player/FloatingDragAvatar';
 
 export default function App() {
   // ดึง State และ Action จาก Zustand (เชื่อมโยงระบบหลังบ้านกับหน้าบ้าน)
@@ -53,16 +54,24 @@ export default function App() {
               photoURL: userData.photoURL || user.photoURL,
               role: userData.role || 'player',
               energyBottles: userData.energyBottles || 0,
-              userPoints: userData.userPoints || 0
+              userPoints: userData.userPoints || 0,
+              
+              // ดึงสถานะทีมล่าสุดจาก Database มาแสดง
+              budgetLeft: userData.budgetLeft !== undefined ? userData.budgetLeft : 100.0,
+              mySquad: userData.mySquad || [],
+              formation: userData.formation || '4-4-2'
             });
           } else {
-            // กรณี: เพิ่งกดล็อกอินครั้งแรกสุด (Auth ผ่านแล้ว แต่ข้อมูลในฐานข้อมูลกำลังทยอยเขียน)
+            // กรณี: เพิ่งกดล็อกอินครั้งแรกสุด
             setUserAuth({
               uid: user.uid,
               displayName: user.displayName,
               email: user.email,
               photoURL: user.photoURL,
-              energyBottles: 100 // ให้ค่าเริ่มต้นแสดงโชว์ไปก่อนเพื่อความลื่นไหล
+              energyBottles: 100, // ให้ค่าเริ่มต้นแสดงโชว์ไปก่อนเพื่อความลื่นไหล
+              budgetLeft: 100.0,
+              mySquad: [],
+              formation: '4-4-2'
             });
           }
         } catch (error) {
@@ -72,18 +81,16 @@ export default function App() {
       } else {
         // กรณี: ผู้ใช้ยังไม่ได้ล็อกอิน หรือเพิ่งกด Logout
         clearAuth();
-        setAuthReady(); // ปลดล็อกหน้าจอ Loading แจ้งให้แอปรู้ว่าเช็กเสร็จแล้ว (ได้คำตอบว่าไม่ได้ล็อกอิน)
+        setAuthReady(); // ปลดล็อกหน้าจอ Loading
       }
     });
 
-    // ล้างการติดตามเมื่อ Component ถูกทำลาย (ป้องกัน Memory Leak)
+    // ล้างการติดตามเมื่อ Component ถูกทำลาย
     return () => unsubscribe();
   }, [setUserAuth, clearAuth, setAuthReady]);
 
   const handleLogout = async () => {
     await logoutUser();
-    // เมื่อ logoutUser ทำงานสำเร็จ Firebase จะยิง onAuthStateChanged อัตโนมัติ 
-    // และไปเข้าเงื่อนไข else -> clearAuth() ให้เองครับ (Reactivity 100%)
   };
 
   // ถ้า Firebase ยังเช็กสถานะการล็อกอินไม่เสร็จ ให้โชว์หน้า Loading โก้ๆ ไว้ก่อน
@@ -111,16 +118,19 @@ export default function App() {
   if (!isAuthenticated) {
     return (
       <>
-        <Toast /> {/* ฝัง Toast ไว้ที่หน้า Login ด้วยเผื่อแจ้งเตือนต่างๆ */}
+        <Toast />
         <LoginScreen />
       </>
     );
   }
 
-  // ถ้าล็อกอินสำเร็จแล้ว (isAuthenticated === true) จะเข้ามาโซนนี้ทันที
+  // ถ้าล็อกอินสำเร็จแล้ว จะเข้ามาโซนนี้ทันที
   return (
     <>
-      <Toast /> {/* ฝัง Toast ไว้ชั้นนอกสุดของระบบที่เข้าสู่ระบบแล้ว */}
+      {/* ฝัง Components ที่ต้องลอยอยู่เหนือทุกหน้าต่างไว้ที่นี่ */}
+      <Toast /> 
+      <FloatingDragAvatar />
+      
       <MobileLayout 
         currentPath={currentPath} 
         onNavigate={setCurrentPath}
@@ -132,7 +142,7 @@ export default function App() {
         {currentPath === 'quest' && <QuestScreen />}
         {currentPath === 'redeem' && <RedeemScreen />}
         
-        {/* Router หน้าใหม่ */}
+        {/* Router หน้าอื่นๆ */}
         {currentPath === 'profile' && <ProfileScreen />}
         {currentPath === 'leaderboard' && <LeaderboardScreen />}
         {currentPath === 'social' && <SocialScreen />}

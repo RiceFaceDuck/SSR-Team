@@ -1,7 +1,7 @@
 /**
  * @file useUserStore.js
  * @description สร้างคลังข้อมูลส่วนกลาง (Global State) ด้วย Zustand สำหรับเก็บข้อมูลผู้เล่น
- * อัปเดต: เพิ่มระบบจัดการกระเป๋าเงินซื้อ-ขายนักเตะ และจัดการแผนการเล่น
+ * อัปเดต: เพิ่มระบบจัดการกระเป๋าเงินซื้อ-ขายนักเตะ, แผนการเล่น, และระบบลากวาง (Drag & Drop) ตัวจริง/สำรอง
  */
 
 import { create } from 'zustand';
@@ -25,7 +25,7 @@ export const useUserStore = create((set) => ({
   // 3. ข้อมูลทีมและการ์ด (Squad State)
   // ==========================================
   formation: '4-4-2',     // แผนการเล่นเริ่มต้น
-  mySquad: [],            // เก็บรายชื่อนักเตะในทีมแบบประหยัดพื้นที่ (Array ของ { playerId: 'sku', position: 'FW' })
+  mySquad: [],            // เก็บรายชื่อนักเตะในทีมแบบประหยัดพื้นที่ (Array ของ { playerId: 'sku', position: 'FW', isStarting: boolean })
   myCards: [],            // เก็บการ์ดเสริมพลังที่มีในครอบครอง
 
   // ==========================================
@@ -81,10 +81,11 @@ export const useUserStore = create((set) => ({
     // หักเงินงบประมาณ
     const newBudget = state.budgetLeft - (parseFloat(player.price) || 0);
     
-    // จัดเก็บแบบลดขนาด (Data Optimization) เก็บแค่ SKU และตำแหน่ง
+    // จัดเก็บแบบลดขนาด (Data Optimization) เพิ่มสถานะ isStarting (เริ่มต้นให้นั่งสำรองไปก่อน)
     const newMember = { 
       playerId: String(player.sku), 
-      position: player.position 
+      position: player.position,
+      isStarting: false 
     };
 
     return {
@@ -126,9 +127,87 @@ export const useUserStore = create((set) => ({
     budgetLeft: 100.0 
   }),
 
+  // ==========================================
+  // 6. ฟังก์ชันจัดการระบบจัดทีมอัจฉริยะ (Smart Placement & Drag Engine)
+  // ==========================================
+
+  /**
+   * พยายามจัดนักเตะลงสนามอัตโนมัติ (เช็คโควต้าตำแหน่งจาก Formation)
+   * @param {string} playerId - รหัสนักเตะ (SKU)
+   * @returns {boolean} - สำเร็จ (ได้ลงตัวจริง) หรือ ไม่สำเร็จ (ที่เต็ม ต้องนั่งสำรอง)
+   */
+  autoPlacePlayer: (playerId) => {
+    let isPlaced = false;
+    set((state) => {
+      const squad = [...state.mySquad];
+      const playerIndex = squad.findIndex(p => p.playerId === String(playerId));
+      
+      if (playerIndex === -1) return state; // ไม่พบนักเตะในทีม
+
+      const player = squad[playerIndex];
+      const parts = state.formation.split('-'); // เช่น '4-4-2' -> ['4', '4', '2']
+      
+      // ดึงโควต้าสูงสุดของแต่ละตำแหน่งตามแผนการเล่น
+      const limits = {
+        GK: 1,
+        DF: parseInt(parts[0], 10) || 4,
+        MF: parseInt(parts[1], 10) || 4,
+        FW: parseInt(parts[2], 10) || 2
+      };
+
+      // นับจำนวนตัวจริง (isStarting: true) ในตำแหน่งเดียวกันที่อยู่บนสนามแล้ว
+      const currentStarters = squad.filter(p => p.isStarting && p.position === player.position).length;
+
+      // ถ้าที่ยังว่าง จับลงสนามเลย
+      if (currentStarters < limits[player.position]) {
+        squad[playerIndex] = { ...player, isStarting: true };
+        isPlaced = true;
+        return { mySquad: squad };
+      }
+      
+      // ถ้าที่เต็มแล้ว ปล่อยให้นั่งสำรองไป
+      return state;
+    });
+    return isPlaced;
+  },
+
+  /**
+   * สลับตำแหน่งนักเตะ 2 คน (ใช้ตอน Drag & Drop ไปวางทับกัน)
+   * @param {string} player1Id - รหัสนักเตะคนที่ 1 (ตัวที่ถูกลาก)
+   * @param {string} player2Id - รหัสนักเตะคนที่ 2 (ตัวที่ถูกวางทับ)
+   */
+  swapPlayer: (player1Id, player2Id) => set((state) => {
+    const squad = [...state.mySquad];
+    const p1Index = squad.findIndex(p => p.playerId === String(player1Id));
+    const p2Index = squad.findIndex(p => p.playerId === String(player2Id));
+
+    if (p1Index !== -1 && p2Index !== -1) {
+      // สลับสถานะ isStarting กัน
+      const tempStarting = squad[p1Index].isStarting;
+      squad[p1Index] = { ...squad[p1Index], isStarting: squad[p2Index].isStarting };
+      squad[p2Index] = { ...squad[p2Index], isStarting: tempStarting };
+    }
+    
+    return { mySquad: squad };
+  }),
+
+  /**
+   * ถอดนักเตะออกจากสนามกลับไปนั่งสำรอง
+   * @param {string} playerId - รหัสนักเตะ
+   */
+  removePlayerFromPitch: (playerId) => set((state) => {
+    const squad = [...state.mySquad];
+    const pIndex = squad.findIndex(p => p.playerId === String(playerId));
+    
+    if (pIndex !== -1) {
+      squad[pIndex] = { ...squad[pIndex], isStarting: false };
+    }
+    
+    return { mySquad: squad };
+  }),
 
   // ==========================================
-  // 6. ฟังก์ชันอำนวยความสะดวกอื่นๆ (Helper Actions)
+  // 7. ฟังก์ชันอำนวยความสะดวกอื่นๆ (Helper Actions)
   // ==========================================
   
   // ฟังก์ชันใช้ขวด 🧪
