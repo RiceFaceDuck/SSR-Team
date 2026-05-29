@@ -1,26 +1,15 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
+import QuestManager from './features/quests/QuestManager'; // 🌟 NEW: นำเข้าไฟล์หน้าจัดการของจริงมาแล้ว!
 
-// 🌟 MOCK COMPONENTS: สร้างตัวแทนชั่วคราวเพื่อให้แอป รันได้โดยไม่บัค 
-// (เดี๋ยวเราจะแทนที่ด้วยการ Import ไฟล์ของจริงในขั้นตอนต่อไป)
+// MOCK COMPONENTS สำหรับหน้าอื่นๆ ที่ยังไม่ได้ทำ
 const DashboardScreen = () => (
   <div className="p-8 bg-white rounded-3xl shadow-sm border border-slate-100">
     <h2 className="text-2xl font-bold text-slate-800 mb-2">แดชบอร์ดสรุปผล</h2>
     <p className="text-slate-500">ยินดีต้อนรับสู่ระบบจัดการหลังบ้าน</p>
   </div>
 );
-
-const QuestManagerMock = () => (
-  <div className="p-12 bg-indigo-50/50 rounded-3xl border-2 border-indigo-200 border-dashed text-center flex flex-col items-center justify-center min-h-[400px]">
-    <div className="w-16 h-16 bg-indigo-100 text-indigo-500 rounded-full flex items-center justify-center mb-4 animate-bounce">
-      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
-    </div>
-    <h2 className="text-2xl font-bold text-indigo-900 mb-2">พื้นที่เตรียมสร้าง "หน้าจัดการสปอนเซอร์"</h2>
-    <p className="text-indigo-600">กำลังจะถูกสร้างและนำมาใส่ที่นี่ใน ขั้นตอนที่ 10 (QuestManager.jsx)...</p>
-  </div>
-);
-
 
 export default function App() {
   // สมมติฐานว่าแอดมินล็อกอินแล้ว
@@ -60,8 +49,8 @@ export default function App() {
                 {/* หน้าหลัก */}
                 <Route path="/" element={<DashboardScreen />} />
                 
-                {/* 🌟 NEW: Route เข้าสู่ระบบจัดการสปอนเซอร์ */}
-                <Route path="/quests" element={<QuestManagerMock />} />
+                {/* 🌟 UPDATED: เรียกใช้ QuestManager ของจริงแทนหน้า Mock */}
+                <Route path="/quests" element={<QuestManager />} />
                 
                 {/* Route จำลองอื่นๆ ป้องกัน Error */}
                 <Route path="/users" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: จัดการผู้ใช้งาน</div>} />
