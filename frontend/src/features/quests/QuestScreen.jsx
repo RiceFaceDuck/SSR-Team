@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Trophy, Info, Sparkles } from 'lucide-react';
+import { Trophy, Sparkles } from 'lucide-react';
 import { useQuestStore } from '../../store/useQuestStore';
 import { useUserStore } from '../../store/useUserStore';
 import SponsorAdCard from './SponsorAdCard';
@@ -65,16 +65,7 @@ export default function QuestScreen() {
           ภารกิจพิเศษ
         </h2>
         <p className="text-slate-500 mt-1 font-medium text-sm">
-          สนับสนุนสปอนเซอร์เพื่อรับ <span className="font-bold text-amber-500">Balls ⚽</span> ไปเสริมทัพ
-        </p>
-      </div>
-
-      {/* Info Banner (ป้ายอธิบายเงื่อนไข) */}
-      <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 flex gap-3 items-start mb-6 shadow-sm">
-        <Info className="text-indigo-500 shrink-0 mt-0.5" size={18} />
-        <p className="text-xs text-indigo-700 leading-relaxed font-medium">
-          ภารกิจแต่ละรายการมีโควต้าจำกัด และระยะเวลารอ (Cooldown) 
-          <br className="hidden md:block"/>โควต้าที่ใช้ไปจะถูก <span className="font-bold">รีเซ็ตใหม่ทุกวันหลังเที่ยงคืน</span> อัตโนมัติ
+          เยี่ยมชมสปอนเซอร์เพื่อรับ <span className="font-bold text-amber-500">Balls ⚽</span>
         </p>
       </div>
 

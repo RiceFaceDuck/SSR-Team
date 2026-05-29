@@ -55,6 +55,17 @@ export default function SponsorAdCard({ quest, record, onClaim, isClaiming }) {
   }, [record, quest.cooldownHours, quest.maxClaimsPerUser]);
 
   // --- Helpers ---
+  // 🎯 ฟังก์ชันฉลาด: แปลงลิงก์แชร์ Google Drive ให้เป็น Direct Image URL เพื่อให้ <img src> แสดงผลได้ 100%
+  const getDirectImageUrl = (url) => {
+    if (!url) return '';
+    const driveRegex = /(?:drive\.google\.com\/.*?(?:id=|\/d\/)|drive\.google\.com\/file\/d\/)([\w-]+)/;
+    const match = url.match(driveRegex);
+    if (match && match[1]) {
+      return `https://lh3.googleusercontent.com/d/${match[1]}`;
+    }
+    return url;
+  };
+
   const getPlatformStyle = (platform) => {
     switch (platform) {
       case 'Shopee': return 'bg-orange-500 text-white shadow-orange-500/40';
@@ -66,15 +77,26 @@ export default function SponsorAdCard({ quest, record, onClaim, isClaiming }) {
     }
   };
 
+  // 🎯 อัปเกรด: รับรางวัลพร้อมกับเด้งไปเว็บสปอนเซอร์ในคลิกเดียว!
   const handleClaimClick = () => {
     if (isCooldown || isMaxed || isClaiming) return;
     playSound('click');
+    
+    // เปิดแท็บใหม่ไปยังเว็บไซต์ของสปอนเซอร์ (Target URL) ถ้ามีการตั้งค่าไว้
+    if (quest.targetUrl) {
+      window.open(quest.targetUrl, '_blank', 'noopener,noreferrer');
+    }
+    
+    // ทำการรันฟังก์ชันแจกรางวัล
     onClaim(quest);
   };
 
+  // กดยกเว้นปุ่มเคลม (กดที่รูป/กดที่ชื่อ) เพื่อเปิดแค่เว็บ ไม่รับรางวัล
   const handleLinkClick = () => {
-    playSound('click');
-    window.open(quest.targetUrl, '_blank', 'noopener,noreferrer');
+    if (quest.targetUrl) {
+      playSound('click');
+      window.open(quest.targetUrl, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -86,7 +108,7 @@ export default function SponsorAdCard({ quest, record, onClaim, isClaiming }) {
         className="w-28 h-28 shrink-0 rounded-2xl overflow-hidden relative shadow-inner cursor-pointer"
       >
         <img 
-          src={quest.imageUrl} 
+          src={getDirectImageUrl(quest.imageUrl)} 
           alt={quest.title} 
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
           onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=SSR+Sponsor'; }}
@@ -97,9 +119,11 @@ export default function SponsorAdCard({ quest, record, onClaim, isClaiming }) {
         </div>
         
         {/* ป้ายกำกับแพลตฟอร์ม */}
-        <div className={`absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-black tracking-wide shadow-lg ${getPlatformStyle(quest.platform)}`}>
-          {quest.platform.toUpperCase()}
-        </div>
+        {quest.platform && (
+          <div className={`absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-black tracking-wide shadow-lg ${getPlatformStyle(quest.platform)}`}>
+            {quest.platform.toUpperCase()}
+          </div>
+        )}
       </div>
 
       {/* 2. ส่วนข้อมูลและปุ่มรับรางวัล */}
