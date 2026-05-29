@@ -4,8 +4,8 @@ import { STYLES, playSound } from '../../config/theme';
 import { useUserStore } from '../../store/useUserStore';
 
 export default function TopHeader({ onLogout, onNavigate }) {
-  // ดึงข้อมูลโปรไฟล์และขวดพลังงานจาก Store ส่วนกลาง
-  const { userData, energyBottles } = useUserStore();
+  // ดึงข้อมูลโปรไฟล์และทรัพยากร(Balls)จาก Store ส่วนกลาง (🌟 เปลี่ยนจาก energyBottles เป็น balls)
+  const { userData, balls } = useUserStore();
 
   // ฟังก์ชันช่วยย่อโค้ดเวลาเปลี่ยนหน้า
   const handleNav = (path) => {
@@ -27,13 +27,13 @@ export default function TopHeader({ onLogout, onNavigate }) {
       {/* โซนเมนูขวาบน: ข้อมูลผู้เล่นและปุ่มต่างๆ */}
       <div className="flex gap-2 items-center">
         
-        {/* 🧪 ขวดพลังงาน (Energy Bottle) - ออกแบบให้ดูพรีเมียม เลอค่า */}
+        {/* ⚽ ทรัพยากร Balls (สกุลเงินหลัก) - อัปเกรด UI ระดับ AAA โทนสีทองพรีเมียม */}
         <div 
-          className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white px-3 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 shadow-[0_4px_10px_rgba(16,185,129,0.3)] border border-emerald-300 mr-1"
-          title="ขวดพลังงาน (Energy Bottles)"
+          className="bg-gradient-to-r from-amber-400 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 shadow-[0_4px_10px_rgba(245,158,11,0.4)] border border-amber-300 mr-1 hover:scale-105 transition-transform cursor-default"
+          title="ทรัพยากรลูกฟุตบอล (Balls)"
         >
-          <span className="text-sm leading-none drop-shadow-sm">🧪</span> 
-          {energyBottles}
+          <span className="text-sm leading-none drop-shadow-sm animate-pulse">⚽</span> 
+          <span className="drop-shadow-sm">{balls}</span>
         </div>
         
         {/* ไอคอนเมนูด้านบน */}

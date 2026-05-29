@@ -4,8 +4,8 @@ import { Trophy, Settings, Mail, Plus, User } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 
 export default function ProfileScreen() {
-  // ดึงข้อมูลโปรไฟล์และขวดพลังงานจาก Store ส่วนกลาง
-  const { userData, energyBottles } = useUserStore();
+  // ดึงข้อมูลโปรไฟล์และทรัพยากร (🌟 เปลี่ยนจาก energyBottles เป็น balls)
+  const { userData, balls } = useUserStore();
 
   return (
     <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -50,30 +50,31 @@ export default function ProfileScreen() {
         </div>
       </div>
 
-      {/* 🧪 Energy Bottle Center (โชว์ขวดพลังงานสไตล์พรีเมียม) */}
-      <div className="bg-slate-900 rounded-3xl p-6 mb-8 shadow-xl relative overflow-hidden text-white border border-slate-800 group">
-        {/* แสงสปอตไลท์สีเขียวมรกต */}
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-emerald-500 rounded-full mix-blend-screen filter blur-[60px] opacity-30 group-hover:opacity-40 transition-opacity duration-500"></div>
+      {/* ⚽ Balls Center (โชว์ทรัพยากรสไตล์พรีเมียม AAA) */}
+      <div className="bg-slate-900 rounded-3xl p-6 mb-8 shadow-[0_10px_30px_rgba(0,0,0,0.2)] relative overflow-hidden text-white border border-slate-800 group hover:border-slate-700 transition-colors">
+        {/* แสงสปอตไลท์สีทอง-ส้ม 2 วง เพิ่มมิติ AAA */}
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-amber-500 rounded-full mix-blend-screen filter blur-[60px] opacity-30 group-hover:opacity-50 transition-opacity duration-700"></div>
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-orange-600 rounded-full mix-blend-screen filter blur-[50px] opacity-20"></div>
         
         <div className="flex justify-between items-center relative z-10">
           <div>
-            <h4 className="text-emerald-400 font-black text-xs tracking-widest mb-1 drop-shadow-md">ENERGY BOTTLES</h4>
+            <h4 className="text-amber-400 font-black text-xs tracking-widest mb-1 drop-shadow-md">TRAINING BALLS</h4>
             <div className="flex items-baseline gap-2">
-              <span className="text-4xl leading-none drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]">🧪</span>
-              <span className="text-4xl font-black tracking-tighter">{energyBottles}</span>
-              <span className="text-slate-400 text-sm font-bold">ขวด</span>
+              <span className="text-4xl leading-none drop-shadow-[0_0_15px_rgba(245,158,11,0.6)] animate-pulse">⚽</span>
+              <span className="text-4xl font-black tracking-tighter">{balls}</span>
+              <span className="text-slate-400 text-sm font-bold">ลูก</span>
             </div>
           </div>
           
-          {/* ปุ่ม + (เตรียมไว้กดไปหน้าร้านค้า/เติมขวด) */}
+          {/* ปุ่ม + (เตรียมไว้กดไปหน้าร้านค้า/เติมบอล) เปลี่ยนเป็นปุ่ม Gradient พรีเมียม */}
           <button 
             onClick={() => playSound('click')}
-            className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 w-12 h-12 rounded-2xl flex items-center justify-center font-black shadow-[0_5px_20px_rgba(16,185,129,0.4)] transition-all hover:scale-105 active:scale-95"
+            className="bg-gradient-to-br from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-white w-12 h-12 rounded-2xl flex items-center justify-center font-black shadow-[0_5px_20px_rgba(245,158,11,0.4)] transition-all hover:scale-105 active:scale-95 border border-amber-300/50"
           >
             <Plus size={24} />
           </button>
         </div>
-        <p className="text-xs text-slate-400 mt-4 relative z-10 font-medium">ใช้ขวดพลังงานเพื่อรีเฟรชภารกิจ หรือซื้อนักเตะพิเศษ</p>
+        <p className="text-xs text-slate-400 mt-4 relative z-10 font-medium">ใช้ลูกฟุตบอลเพื่อทำภารกิจ แลกรางวัล หรือดึงตัวนักเตะพิเศษ</p>
       </div>
 
       {/* 🏆 ตู้โชว์ถ้วยรางวัล (Trophy Cabinet) */}

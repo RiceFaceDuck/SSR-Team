@@ -9,7 +9,7 @@ export const useUserStore = create(
       isAuthenticated: false, 
       isAuthLoading: true,    
       userData: null,         
-      energyBottles: 0,       
+      balls: 0,              // 🌟 UPDATED: เปลี่ยนจาก energyBottles เป็น balls ⚽ 
       userPoints: 0,          
       budgetLeft: 100.0,      
       formation: '4-4-2',     
@@ -26,7 +26,8 @@ export const useUserStore = create(
           photoURL: userPayload.photoURL,
           role: userPayload.role || 'player'
         },
-        energyBottles: userPayload.energyBottles || 0,
+        // รองรับทั้ง payload ใหม่ (balls) และเก่า (energyBottles) เพื่อป้องกันบัค
+        balls: userPayload.balls !== undefined ? userPayload.balls : (userPayload.energyBottles || 0),
         userPoints: userPayload.userPoints || 0,
         budgetLeft: userPayload.budgetLeft !== undefined ? userPayload.budgetLeft : 100.0,
         mySquad: userPayload.mySquad || [],
@@ -35,7 +36,7 @@ export const useUserStore = create(
 
       clearAuth: () => set({
         isAuthenticated: false, isAuthLoading: false, userData: null,
-        energyBottles: 0, userPoints: 0, budgetLeft: 100.0, mySquad: [], myCards: [], formation: '4-4-2'
+        balls: 0, userPoints: 0, budgetLeft: 100.0, mySquad: [], myCards: [], formation: '4-4-2'
       }),
 
       setAuthReady: () => set({ isAuthLoading: false }),
@@ -288,13 +289,23 @@ export const useUserStore = create(
         return { mySquad: squad };
       }),
 
-      // --- พลังงาน ---
-      useEnergy: (amount) => set((state) => {
-        if (state.energyBottles >= amount) return { energyBottles: state.energyBottles - amount };
+      // --- ทรัพยากรหลัก (Balls ⚽) --- 🌟 UPDATED 
+      useBalls: (amount) => set((state) => {
+        if (state.balls >= amount) {
+          if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(20); // สั่นสั้นๆ เมื่อหัก Balls
+          }
+          return { balls: state.balls - amount };
+        }
         return state; 
       }),
 
-      addEnergy: (amount) => set((state) => ({ energyBottles: state.energyBottles + amount }))
+      addBalls: (amount) => set((state) => {
+        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+          window.navigator.vibrate([30, 50, 30]); // สั่น 2 จังหวะตื่นเต้นเมื่อได้ Balls ⚽
+        }
+        return { balls: state.balls + amount };
+      })
     }),
     {
       name: 'fantasy-team-draft', // ชื่อ Key ใน Local Storage

@@ -1,63 +1,81 @@
 import React, { useState } from 'react';
-import AdminLayout from './components/layout/AdminLayout';
-import TimeController from './features/gameweek/TimeController';
-import NoAdsToggle from './features/gameweek/NoAdsToggle';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Sidebar from './components/layout/Sidebar';
 
-// เปลี่ยนจาก PlayerManager เดิม เป็น PlayerFeature (ระบบใหม่ที่เราเพิ่งสร้างเสร็จ)
-import PlayerFeature from './features/players/PlayerFeature'; 
+// 🌟 MOCK COMPONENTS: สร้างตัวแทนชั่วคราวเพื่อให้แอป รันได้โดยไม่บัค 
+// (เดี๋ยวเราจะแทนที่ด้วยการ Import ไฟล์ของจริงในขั้นตอนต่อไป)
+const DashboardScreen = () => (
+  <div className="p-8 bg-white rounded-3xl shadow-sm border border-slate-100">
+    <h2 className="text-2xl font-bold text-slate-800 mb-2">แดชบอร์ดสรุปผล</h2>
+    <p className="text-slate-500">ยินดีต้อนรับสู่ระบบจัดการหลังบ้าน</p>
+  </div>
+);
 
-import RedeemLogs from './features/verify/RedeemLogs';
-import ThemeController from './features/theme/ThemeController';
+const QuestManagerMock = () => (
+  <div className="p-12 bg-indigo-50/50 rounded-3xl border-2 border-indigo-200 border-dashed text-center flex flex-col items-center justify-center min-h-[400px]">
+    <div className="w-16 h-16 bg-indigo-100 text-indigo-500 rounded-full flex items-center justify-center mb-4 animate-bounce">
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+    </div>
+    <h2 className="text-2xl font-bold text-indigo-900 mb-2">พื้นที่เตรียมสร้าง "หน้าจัดการสปอนเซอร์"</h2>
+    <p className="text-indigo-600">กำลังจะถูกสร้างและนำมาใส่ที่นี่ใน ขั้นตอนที่ 10 (QuestManager.jsx)...</p>
+  </div>
+);
+
 
 export default function App() {
-  const [currentPath, setCurrentPath] = useState('gameweek');
+  // สมมติฐานว่าแอดมินล็อกอินแล้ว
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">
+        หน้าจอ Login (จำลอง) - <button onClick={() => setIsAuthenticated(true)} className="ml-4 bg-blue-600 px-4 py-2 rounded">เข้าสู่ระบบ</button>
+      </div>
+    );
+  }
 
   return (
-    <AdminLayout currentPath={currentPath} setPath={setCurrentPath}>
-      
-      {/* 1. เมนูควบคุม Gameweek */}
-      {currentPath === 'gameweek' && (
-        <div className="space-y-6 animate-in fade-in duration-300">
-          <div>
-            <h2 className="text-2xl font-black text-slate-800 mb-1">ระบบ Gameweek (เวลา)</h2>
-            <p className="text-sm text-slate-500">ควบคุมช่วงเวลาเปิด-ปิดตลาด และโหมดปิดโฆษณา</p>
-          </div>
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <TimeController />
-            <NoAdsToggle />
-          </div>
-        </div>
-      )}
+    <BrowserRouter>
+      <div className="flex h-screen bg-slate-50 text-slate-800 overflow-hidden font-sans">
+        
+        {/* แถบเมนูด้านซ้าย */}
+        <Sidebar onLogout={() => setIsAuthenticated(false)} />
+        
+        {/* พื้นที่จัดการข้อมูลด้านขวา */}
+        <main className="flex-1 flex flex-col h-full overflow-hidden relative">
+          
+          {/* Topbar อย่างง่าย */}
+          <header className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 z-10 shrink-0">
+            <h2 className="text-xl font-black text-slate-700 tracking-tight">ระบบจัดการหลังบ้าน</h2>
+            <div className="flex items-center gap-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="text-sm font-medium text-slate-500">ระบบทำงานปกติ</span>
+            </div>
+          </header>
 
-      {/* 2. เมนูจัดการธีม (อัปโหลดรูปลง Google Drive) */}
-      {currentPath === 'theme' && (
-        <div className="animate-in fade-in duration-300">
-          <ThemeController />
-        </div>
-      )}
-      
-      {/* 3. เมนูจัดการนักเตะ (ติดตั้งระบบใหม่ที่นี่) */}
-      {currentPath === 'players' && (
-        <div className="animate-in fade-in duration-300">
-          <PlayerFeature />
-        </div>
-      )}
-      
-      {/* 4. เมนูจัดการสปอนเซอร์ */}
-      {currentPath === 'sponsor' && (
-        <div className="animate-in fade-in duration-300">
-          <h2 className="text-2xl font-black text-slate-800 mb-1">จัดการสปอนเซอร์ & โฆษณา</h2>
-          <p className="text-sm text-slate-500">ตั้งค่าป้ายแบนเนอร์และลิงก์ Affiliate ในหน้าเควส</p>
-        </div>
-      )}
-      
-      {/* 5. เมนูตรวจสอบประวัติ */}
-      {currentPath === 'database' && (
-        <div className="animate-in fade-in duration-300">
-          <RedeemLogs />
-        </div>
-      )}
-      
-    </AdminLayout>
+          {/* กระดานแสดงผล (เปลี่ยนไปตาม Route) */}
+          <div className="flex-1 overflow-x-hidden overflow-y-auto p-8">
+            <div className="max-w-7xl mx-auto">
+              <Routes>
+                {/* หน้าหลัก */}
+                <Route path="/" element={<DashboardScreen />} />
+                
+                {/* 🌟 NEW: Route เข้าสู่ระบบจัดการสปอนเซอร์ */}
+                <Route path="/quests" element={<QuestManagerMock />} />
+                
+                {/* Route จำลองอื่นๆ ป้องกัน Error */}
+                <Route path="/users" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: จัดการผู้ใช้งาน</div>} />
+                <Route path="/players" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: ฐานข้อมูลนักเตะ</div>} />
+                <Route path="/matches" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: จัดการแข่งขัน</div>} />
+                <Route path="/settings" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: ตั้งค่าระบบ</div>} />
+                
+                {/* ดักจับ Route มั่วๆ ให้กลับไปหน้าแรก */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </div>
+          </div>
+        </main>
+      </div>
+    </BrowserRouter>
   );
 }
