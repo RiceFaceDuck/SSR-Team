@@ -1,7 +1,18 @@
-import { collection, getDocs, query, where, doc, runTransaction, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, runTransaction, Timestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 
-const COLLECTION_NAME = 'quests';
+/**
+ * ==========================================
+ * 🔧 Firestore Path Configuration (Frontend)
+ * ==========================================
+ * ซิงค์ Path ให้ตรงกับฝั่ง Admin เพื่อดึงข้อมูลที่ถูกต้องตามกฎ Security Rules
+ */
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'ssr-team';
+
+// Helper ดึง Collection Reference ตามกฎความปลอดภัย (Strict Path สำหรับดึงโฆษณา)
+const getQuestsCollection = () => {
+  return collection(db, 'artifacts', appId, 'public', 'data', 'quests');
+};
 
 /**
  * Service สำหรับจัดการภารกิจและป้ายโฆษณา (ฝั่ง Frontend/ผู้เล่น)
@@ -11,28 +22,50 @@ export const questService = {
   // 1. ดึงข้อมูลเฉพาะโฆษณาที่กำลังเปิดใช้งานอยู่ (isActive = true)
   getActiveQuests: async () => {
     try {
-      const q = query(collection(db, COLLECTION_NAME), where('isActive', '==', true));
-      const snapshot = await getDocs(q);
+      const questsRef = getQuestsCollection();
       
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        // แปลง Timestamp ให้เป็น ISO String เพื่อง่ายต่อการใช้งานใน Zustand
-        createdAt: doc.data().createdAt?.toDate().toISOString() || null,
-        updatedAt: doc.data().updatedAt?.toDate().toISOString() || null,
-      }));
+      // ดึงข้อมูลทั้งหมดจาก Public Quests ก่อน
+      const snapshot = await getDocs(questsRef);
+      
+      const activeQuests = [];
+      
+      // 💡 PRO TIP: ใช้ In-Memory Filtering & Sorting
+      // หลีกเลี่ยงการใช้ where() เพื่อป้องกัน Error ขาวหน้าแอปจากปัญหา Firestore Index
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        // กรองเอาเฉพาะสปอนเซอร์ที่แอดมินเปิดสถานะ Active = true
+        if (data.isActive === true) {
+          activeQuests.push({
+            id: doc.id,
+            ...data,
+            // แปลง Timestamp ให้เป็น ISO String เพื่อง่ายต่อการใช้งานใน Zustand
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
+            updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt,
+          });
+        }
+      });
+
+      // จัดเรียงข้อมูลจากล่าสุดไปเก่าสุด เพื่อให้ผู้เล่นเห็นโปรโมชั่นใหม่ก่อนเสมอ
+      return activeQuests.sort((a, b) => {
+        const timeA = new Date(a.createdAt || 0).getTime();
+        const timeB = new Date(b.createdAt || 0).getTime();
+        return timeB - timeA;
+      });
+      
     } catch (error) {
       console.error("❌ Error fetching active quests:", error);
+      // โยน Error เป็นภาษาที่เข้าใจง่าย เพื่อให้ UI เอาไปทำ Toast แจ้งเตือนได้
       throw new Error("ไม่สามารถโหลดภารกิจได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
     }
   },
 
-  // 2. กดรับรางวัลจากโฆษณา (ใช้ Transaction เพื่อกันโกง/กดรัว)
+  // 2. กดรับรางวัลจากโฆษณา (ใช้ Transaction เพื่อกันโกง/กดรัว) - โค้ดเดิมที่ทำงานได้สมบูรณ์
   claimReward: async (userId, quest) => {
     if (!userId || !quest || !quest.id) {
       throw new Error("ข้อมูลไม่ครบถ้วน ไม่สามารถรับรางวัลได้");
     }
 
+    // Path บันทึกข้อมูลส่วนตัว (User Profile) ยังคงอิงตามโครงสร้างเก่า
     const userRef = doc(db, 'users', userId);
 
     try {
@@ -53,7 +86,11 @@ export const questService = {
 
         // --- ระบบ Daily Reset (รีเซ็ตโควต้าข้ามวัน) ---
         if (questRecord.lastClaimed) {
-          const lastClaimedDate = questRecord.lastClaimed.toDate();
+          // รองรับทั้ง Date Object และ Firebase Timestamp
+          const lastClaimedDate = questRecord.lastClaimed.toDate 
+            ? questRecord.lastClaimed.toDate() 
+            : new Date(questRecord.lastClaimed);
+            
           // ถ้าวันที่/เดือน/ปี ไม่ตรงกับวันนี้ แปลว่าข้ามวันแล้ว ให้รีเซ็ตจำนวนที่เคยใช้ (uses)
           if (
             lastClaimedDate.getDate() !== now.getDate() ||
@@ -71,7 +108,10 @@ export const questService = {
 
         // --- Validation: เช็คเวลา Cooldown ---
         if (questRecord.lastClaimed && questRecord.uses > 0) {
-          const lastClaimedDate = questRecord.lastClaimed.toDate();
+          const lastClaimedDate = questRecord.lastClaimed.toDate 
+            ? questRecord.lastClaimed.toDate() 
+            : new Date(questRecord.lastClaimed);
+
           const cooldownMs = quest.cooldownHours * 60 * 60 * 1000;
           const nextAvailableTime = lastClaimedDate.getTime() + cooldownMs;
           

@@ -1,27 +1,38 @@
-import { collection, doc, addDoc, updateDoc, deleteDoc, getDocs, query, orderBy, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../config/firebase'; // อ้างอิง db จาก config ของโปรเจกต์
+import { collection, doc, addDoc, updateDoc, deleteDoc, getDocs, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../config/firebase'; 
 
-const COLLECTION_NAME = 'quests'; // ตั้งชื่อ Collection หลักสำหรับภารกิจ/โฆษณา
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'ssr-team';
 
-/**
- * Service สำหรับจัดการ Database ข้อมูลป้ายโฆษณาและภารกิจ (ฝั่ง Admin)
- * ออกแบบตามหลัก Clean Architecture แยกลอจิกเชื่อมต่อ DB ออกจาก UI
- */
+// 🎯 Helper ชี้เป้า Path ให้ตรงกับ Security Rules ใหม่ของระบบ
+const getQuestsCollection = () => {
+  return collection(db, 'artifacts', appId, 'public', 'data', 'quests');
+};
+
+const getQuestDoc = (id) => {
+  return doc(db, 'artifacts', appId, 'public', 'data', 'quests', id);
+};
+
 export const questService = {
   
-  // 1. ดึงข้อมูลโฆษณาทั้งหมด (ดึงมารอบเดียวเพื่อประหยัด Reads แล้วนำไปเก็บใน Zustand)
+  // 1. ดึงข้อมูลโฆษณาทั้งหมด
   getAllQuests: async () => {
     try {
-      const q = query(collection(db, COLLECTION_NAME), orderBy('createdAt', 'desc'));
-      const snapshot = await getDocs(q);
+      const snapshot = await getDocs(getQuestsCollection());
       
-      return snapshot.docs.map(doc => ({
+      const quests = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        // แปลง Timestamp ของ Firebase เป็น ISO String เพื่อไม่ให้ Zustand แจ้งเตือน Error Non-serializable
         createdAt: doc.data().createdAt?.toDate().toISOString() || null,
         updatedAt: doc.data().updatedAt?.toDate().toISOString() || null,
       }));
+
+      // จัดเรียงข้อมูลใน Memory (หลีกเลี่ยงการใช้ orderBy ป้องกัน Error ขาด Index)
+      return quests.sort((a, b) => {
+        const timeA = new Date(a.createdAt || 0).getTime();
+        const timeB = new Date(b.createdAt || 0).getTime();
+        return timeB - timeA;
+      });
+
     } catch (error) {
       console.error("❌ Error fetching quests:", error);
       throw new Error("ไม่สามารถดึงข้อมูลโฆษณาได้ กรุณาลองใหม่อีกครั้ง");
@@ -35,36 +46,36 @@ export const questService = {
         title: questData.title || '',
         description: questData.description || '',
         imageUrl: questData.imageUrl || '',
-        platform: questData.platform || 'Other', // Shopee, Lazada, Official, Other
-        rewardBalls: Number(questData.rewardBalls) || 20, // ⚽ รางวัลที่ได้รับ
-        maxClaimsPerUser: Number(questData.maxClaimsPerUser) || 1, // โควต้ากี่ครั้ง/คน
-        cooldownHours: Number(questData.cooldownHours) || 24, // ระยะเวลารอกดรอบต่อไป
-        targetUrl: questData.targetUrl || '', // ลิงก์ปลายทาง
-        isVerified: questData.isVerified || false, // ตราประทับ Official
-        isActive: questData.isActive !== undefined ? questData.isActive : true, // สถานะการมองเห็น
+        platform: questData.platform || 'Other',
+        rewardBalls: Number(questData.rewardBalls) || 20,
+        maxClaimsPerUser: Number(questData.maxClaimsPerUser) || 1,
+        cooldownHours: Number(questData.cooldownHours) || 24,
+        targetUrl: questData.targetUrl || '',
+        isVerified: questData.isVerified || false,
+        isActive: questData.isActive !== undefined ? questData.isActive : true,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
 
-      const docRef = await addDoc(collection(db, COLLECTION_NAME), newQuest);
+      // 🎯 บันทึกลง Path ที่ถูกต้อง
+      const docRef = await addDoc(getQuestsCollection(), newQuest);
       
       return { 
         id: docRef.id, 
         ...newQuest,
-        // Mock ค่าเวลากลับไปให้ Store อัปเดต UI ทันทีโดยไม่ต้องโหลดใหม่
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
     } catch (error) {
       console.error("❌ Error creating quest:", error);
-      throw new Error("เกิดข้อผิดพลาดในการสร้างโฆษณา");
+      throw new Error("เกิดข้อผิดพลาดในการสร้างโฆษณา (Permission Denied)");
     }
   },
 
   // 3. แก้ไขข้อมูลป้ายโฆษณา (Update)
   updateQuest: async (id, updateData) => {
     try {
-      const docRef = doc(db, COLLECTION_NAME, id);
+      const docRef = getQuestDoc(id);
       const dataToUpdate = {
         ...updateData,
         updatedAt: serverTimestamp()
@@ -81,7 +92,7 @@ export const questService = {
   // 4. ลบป้ายโฆษณา (Delete)
   deleteQuest: async (id) => {
     try {
-      const docRef = doc(db, COLLECTION_NAME, id);
+      const docRef = getQuestDoc(id);
       await deleteDoc(docRef);
       return true;
     } catch (error) {
@@ -90,10 +101,10 @@ export const questService = {
     }
   },
 
-  // 5. สลับสถานะ เปิด/ปิด การแสดงผลแบบรวดเร็ว (Toggle Active)
+  // 5. สลับสถานะ เปิด/ปิด 
   toggleQuestStatus: async (id, currentStatus) => {
     try {
-      const docRef = doc(db, COLLECTION_NAME, id);
+      const docRef = getQuestDoc(id);
       await updateDoc(docRef, {
         isActive: !currentStatus,
         updatedAt: serverTimestamp()

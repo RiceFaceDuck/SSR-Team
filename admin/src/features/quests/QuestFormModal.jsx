@@ -1,304 +1,271 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, Link as LinkIcon, Image as ImageIcon, CheckCircle, Clock, Users, Trophy } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { uploadImageToDrive } from '../../utils/googleDriveUploader';
 
 export default function QuestFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
-  // --- State สำหรับเก็บข้อมูลฟอร์ม ---
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    reward: 0,
     imageUrl: '',
-    platform: 'Other',
-    rewardBalls: 20,
-    maxClaimsPerUser: 1,
-    cooldownHours: 24,
-    targetUrl: '',
-    isVerified: false,
-    isActive: true
+    actionUrl: '',
+    isActive: true,
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const fileInputRef = useRef(null);
 
-  // --- Reset/Populate Form เมื่อเปิด Modal ---
+  // เมื่อเปิด Modal หรือมีข้อมูล initialData (สำหรับการแก้ไข) ให้เซ็ตค่าเริ่มต้น
   useEffect(() => {
-    if (isOpen) {
-      if (initialData) {
-        // กรณีแก้ไข (Edit)
-        setFormData({
-          title: initialData.title || '',
-          description: initialData.description || '',
-          imageUrl: initialData.imageUrl || '',
-          platform: initialData.platform || 'Other',
-          rewardBalls: Number(initialData.rewardBalls) || 20,
-          maxClaimsPerUser: Number(initialData.maxClaimsPerUser) || 1,
-          cooldownHours: Number(initialData.cooldownHours) || 24,
-          targetUrl: initialData.targetUrl || '',
-          isVerified: initialData.isVerified || false,
-          isActive: initialData.isActive !== undefined ? initialData.isActive : true
-        });
-      } else {
-        // กรณีสร้างใหม่ (Create)
-        setFormData({
-          title: '',
-          description: '',
-          imageUrl: '',
-          platform: 'Other',
-          rewardBalls: 20,
-          maxClaimsPerUser: 1,
-          cooldownHours: 24,
-          targetUrl: '',
-          isVerified: false,
-          isActive: true
-        });
-      }
+    if (initialData) {
+      setFormData(initialData);
+    } else {
+      // ค่าเริ่มต้นสำหรับสร้างใหม่
+      setFormData({
+        title: '',
+        description: '',
+        reward: 0,
+        imageUrl: '',
+        actionUrl: '',
+        isActive: true,
+      });
     }
-  }, [isOpen, initialData]);
-
-  // --- Handlers ---
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // แปลงค่า Number ให้ชัวร์ก่อนส่ง
-    const submissionData = {
-      ...formData,
-      rewardBalls: Number(formData.rewardBalls),
-      maxClaimsPerUser: Number(formData.maxClaimsPerUser),
-      cooldownHours: Number(formData.cooldownHours)
-    };
-
-    await onSubmit(submissionData);
-    setIsSubmitting(false);
-  };
+    setUploadError('');
+    setIsUploading(false);
+  }, [initialData, isOpen]);
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-        onClick={!isSubmitting ? onClose : undefined}
-      />
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
 
-      {/* Modal Content */}
-      <div className="bg-white rounded-3xl w-full max-w-2xl relative z-10 flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh]">
+  // 🚀 ฟังก์ชันจัดการการอัปโหลดไฟล์
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadError('');
+
+    try {
+      // เรียกใช้ Utility Function จากขั้นตอนที่ 1
+      const uploadedUrl = await uploadImageToDrive(file);
+      
+      setFormData((prev) => ({
+        ...prev,
+        imageUrl: uploadedUrl // นำ URL ที่ได้จาก Google Drive มาใส่ในฟอร์ม
+      }));
+    } catch (error) {
+      setUploadError(error.message || 'เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ');
+    } finally {
+      setIsUploading(false);
+      // เคลียร์ค่า input file เพื่อให้เลือกไฟล์เดิมซ้ำได้ในกรณีที่ต้องการ
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setFormData((prev) => ({ ...prev, imageUrl: '' }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // แปลง reward ให้เป็นตัวเลขก่อนส่ง
+    onSubmit({
+      ...formData,
+      reward: Number(formData.reward)
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
         
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-100 shrink-0">
+        <div className="px-6 py-4 border-b border-gray-800 flex justify-between items-center bg-gray-800/50">
+          <h2 className="text-xl font-bold text-white">
+            {initialData ? '✏️ แก้ไขภารกิจ/สปอนเซอร์' : '✨ สร้างภารกิจ/สปอนเซอร์ใหม่'}
+          </h2>
+          <button 
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          
+          {/* ชื่อภารกิจ */}
           <div>
-            <h2 className="text-xl font-bold text-slate-800">
-              {initialData ? 'แก้ไขโฆษณา/ภารกิจ' : 'สร้างโฆษณา/ภารกิจใหม่'}
-            </h2>
-            <p className="text-sm text-slate-500 mt-1">กำหนดรายละเอียดและเงื่อนไขการแจกรางวัล</p>
+            <label className="block text-sm font-medium text-gray-300 mb-1">ชื่อภารกิจ (Title)</label>
+            <input
+              type="text"
+              name="title"
+              required
+              value={formData.title}
+              onChange={handleChange}
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="เช่น ดูวิดีโอสปอนเซอร์รับ 50 Coin"
+            />
           </div>
-          <button 
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
 
-        {/* Form Body (Scrollable) */}
-        <div className="p-6 overflow-y-auto">
-          <form id="quest-form" onSubmit={handleSubmit} className="space-y-6">
+          {/* รายละเอียด */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">รายละเอียด (Description)</label>
+            <textarea
+              name="description"
+              rows="3"
+              value={formData.description}
+              onChange={handleChange}
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              placeholder="รายละเอียดเงื่อนไขภารกิจ..."
+            />
+          </div>
+
+          {/* 📸 ส่วนอัปโหลดรูปภาพ (อัปเกรดใหม่) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">รูปภาพป้ายโฆษณา/สปอนเซอร์</label>
             
-            {/* 1. ข้อมูลพื้นฐาน */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5 md:col-span-2">
-                <label className="text-sm font-semibold text-slate-700">ชื่อแคมเปญโฆษณา <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
-                  name="title"
-                  required
-                  value={formData.title}
-                  onChange={handleChange}
-                  placeholder="เช่น สมัครสมาชิกเว็บผู้สนับสนุน..." 
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
-                />
-              </div>
-
-              <div className="space-y-1.5 md:col-span-2">
-                <label className="text-sm font-semibold text-slate-700">คำอธิบายเพิ่มเติม</label>
-                <textarea 
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows="2"
-                  placeholder="รายละเอียดภารกิจสั้นๆ (ถ้ามี)" 
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all resize-none"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
-                  <ImageIcon size={16} className="text-slate-400"/> URL รูปภาพ (สัดส่วน 1:1) <span className="text-red-500">*</span>
-                </label>
-                <input 
-                  type="url" 
-                  name="imageUrl"
-                  required
-                  value={formData.imageUrl}
-                  onChange={handleChange}
-                  placeholder="https://... (Google Drive/Imgur)" 
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-sm"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
-                  <LinkIcon size={16} className="text-slate-400"/> ลิงก์ปลายทาง (Target URL) <span className="text-red-500">*</span>
-                </label>
-                <input 
-                  type="url" 
-                  name="targetUrl"
-                  required
-                  value={formData.targetUrl}
-                  onChange={handleChange}
-                  placeholder="https://..." 
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-sm"
-                />
-              </div>
-            </div>
-
-            <hr className="border-slate-100" />
-
-            {/* 2. การตั้งค่าระบบรางวัล */}
-            <div>
-              <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-                <Trophy size={16} className="text-amber-500"/> ตั้งค่ารางวัล & โควต้า
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-1">
-                    แจก Balls ⚽
-                  </label>
-                  <input 
-                    type="number" 
-                    name="rewardBalls"
-                    required
-                    min="1"
-                    value={formData.rewardBalls}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-100 outline-none transition-all font-bold text-amber-600 bg-amber-50/50"
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-700 border-dashed rounded-xl bg-gray-800/50 hover:bg-gray-800 transition-colors relative">
+              
+              {/* กรณีอัปโหลดเสร็จแล้ว แสดงรูป */}
+              {formData.imageUrl && !isUploading ? (
+                <div className="relative w-full">
+                  <img 
+                    src={formData.imageUrl} 
+                    alt="Preview" 
+                    className="w-full h-32 object-contain rounded-lg bg-black/50"
                   />
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors"
+                    title="ลบรูปภาพ"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-1">
-                    <Users size={14} className="text-slate-400"/> โควต้ากด/คน
-                  </label>
-                  <input 
-                    type="number" 
-                    name="maxClaimsPerUser"
-                    required
-                    min="1"
-                    value={formData.maxClaimsPerUser}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-1">
-                    <Clock size={14} className="text-slate-400"/> เวลารอ (ชั่วโมง)
-                  </label>
-                  <input 
-                    type="number" 
-                    name="cooldownHours"
-                    required
-                    min="0"
-                    step="0.5"
-                    value={formData.cooldownHours}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
-                  />
-                </div>
-
-              </div>
-            </div>
-
-            <hr className="border-slate-100" />
-
-            {/* 3. การแสดงผล (Platform & Badge) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-slate-700">แพลตฟอร์ม (Platform)</label>
-                <select 
-                  name="platform"
-                  value={formData.platform}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all bg-white"
-                >
-                  <option value="Official">Official (ระบบ)</option>
-                  <option value="Shopee">Shopee</option>
-                  <option value="Lazada">Lazada</option>
-                  <option value="Facebook">Facebook</option>
-                  <option value="Line">Line</option>
-                  <option value="Other">Other (อื่นๆ)</option>
-                </select>
-              </div>
-
-              <div className="space-y-1.5 flex flex-col justify-end">
-                <label className="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
-                  <div className="relative flex items-center">
-                    <input 
-                      type="checkbox"
-                      name="isVerified"
-                      checked={formData.isVerified}
-                      onChange={handleChange}
-                      className="sr-only"
-                    />
-                    <div className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${formData.isVerified ? 'bg-blue-500 border-blue-500' : 'border-slate-300'}`}>
-                      {formData.isVerified && <CheckCircle size={14} className="text-white" />}
+              ) : (
+                <div className="space-y-2 text-center w-full">
+                  {/* สถานะกำลังอัปโหลด */}
+                  {isUploading ? (
+                    <div className="flex flex-col items-center justify-center py-4">
+                      <svg className="animate-spin h-8 w-8 text-blue-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <p className="text-sm text-blue-400 font-medium">กำลังอัปโหลดไปยัง Google Drive...</p>
                     </div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">แสดงตรา Verified ✔️</p>
-                    <p className="text-xs text-slate-500">เพิ่มความน่าเชื่อถือให้กับป้ายนี้</p>
-                  </div>
-                </label>
-              </div>
+                  ) : (
+                    <>
+                      {/* สถานะรอเลือกไฟล์ */}
+                      <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <div className="flex text-sm text-gray-400 justify-center">
+                        <label className="relative cursor-pointer bg-transparent rounded-md font-medium text-blue-500 hover:text-blue-400 focus-within:outline-none">
+                          <span>คลิกเพื่อเลือกไฟล์รูปภาพ</span>
+                          <input 
+                            ref={fileInputRef}
+                            type="file" 
+                            className="sr-only" 
+                            accept="image/jpeg, image/png, image/gif, image/webp"
+                            onChange={handleFileUpload}
+                            disabled={isUploading}
+                          />
+                        </label>
+                      </div>
+                      <p className="text-xs text-gray-500">PNG, JPG, GIF สูงสุด 5MB</p>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
+            {uploadError && <p className="mt-2 text-sm text-red-500 flex items-center"><span className="mr-1">⚠️</span>{uploadError}</p>}
+          </div>
 
-          </form>
-        </div>
+          <div className="grid grid-cols-2 gap-4">
+            {/* รางวัล */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">รางวัล (Coins)</label>
+              <input
+                type="number"
+                name="reward"
+                min="0"
+                required
+                value={formData.reward}
+                onChange={handleChange}
+                className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            {/* สถานะเปิดใช้งาน */}
+            <div className="flex flex-col justify-center items-start pt-6">
+              <label className="flex items-center cursor-pointer">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    name="isActive"
+                    className="sr-only"
+                    checked={formData.isActive}
+                    onChange={handleChange}
+                  />
+                  <div className={`block w-10 h-6 rounded-full transition-colors ${formData.isActive ? 'bg-green-500' : 'bg-gray-600'}`}></div>
+                  <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.isActive ? 'transform translate-x-4' : ''}`}></div>
+                </div>
+                <span className="ml-3 text-sm font-medium text-gray-300">
+                  {formData.isActive ? 'เปิดใช้งาน (Active)' : 'ปิดชั่วคราว (Inactive)'}
+                </span>
+              </label>
+            </div>
+          </div>
 
-        {/* Footer (Actions) */}
-        <div className="p-6 border-t border-slate-100 bg-slate-50 rounded-b-3xl flex justify-end gap-3 shrink-0">
-          <button 
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="px-6 py-2.5 rounded-xl font-semibold text-slate-600 hover:bg-slate-200 transition-colors disabled:opacity-50"
-          >
-            ยกเลิก
-          </button>
-          <button 
-            type="submit"
-            form="quest-form"
-            disabled={isSubmitting}
-            className="px-6 py-2.5 rounded-xl font-bold bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm transition-colors flex items-center gap-2 disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-            ) : (
-              <Save size={18} />
-            )}
-            {initialData ? 'บันทึกการแก้ไข' : 'สร้างภารกิจ'}
-          </button>
-        </div>
+          {/* ลิงก์ปลายทาง (Action URL) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">ลิงก์ปลายทาง (Action URL - ถ้ามี)</label>
+            <input
+              type="url"
+              name="actionUrl"
+              value={formData.actionUrl}
+              onChange={handleChange}
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://sponsor-website.com"
+            />
+          </div>
 
+          {/* Footer Actions */}
+          <div className="pt-4 flex justify-end gap-3 border-t border-gray-800">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-800 transition-colors"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="submit"
+              disabled={isUploading}
+              className={`px-5 py-2.5 rounded-lg text-sm font-medium text-white transition-colors flex items-center shadow-lg
+                ${isUploading 
+                  ? 'bg-blue-600/50 cursor-not-allowed' 
+                  : 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/20'}`}
+            >
+              {isUploading ? 'รอก่อน...' : 'บันทึกข้อมูล'}
+            </button>
+          </div>
+
+        </form>
       </div>
     </div>
   );
