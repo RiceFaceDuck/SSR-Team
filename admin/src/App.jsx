@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
-import QuestManager from './features/quests/QuestManager'; // 🌟 NEW: นำเข้าไฟล์หน้าจัดการของจริงมาแล้ว!
+import QuestManager from './features/quests/QuestManager';
+// 🌟 NEW: นำเข้าไฟล์ UserManager ของจริงที่เราเพิ่งสร้างเสร็จ เพื่อใช้งานระบบจัดการ Balls ⚽
+import UserManager from './features/users/UserManager'; 
 
 // MOCK COMPONENTS สำหรับหน้าอื่นๆ ที่ยังไม่ได้ทำ
 const DashboardScreen = () => (
@@ -49,11 +51,11 @@ export default function App() {
                 {/* หน้าหลัก */}
                 <Route path="/" element={<DashboardScreen />} />
                 
-                {/* 🌟 UPDATED: เรียกใช้ QuestManager ของจริงแทนหน้า Mock */}
+                {/* 🌟 UPDATED: เรียกใช้ Component ของจริง */}
                 <Route path="/quests" element={<QuestManager />} />
+                <Route path="/users" element={<UserManager />} />
                 
                 {/* Route จำลองอื่นๆ ป้องกัน Error */}
-                <Route path="/users" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: จัดการผู้ใช้งาน</div>} />
                 <Route path="/players" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: ฐานข้อมูลนักเตะ</div>} />
                 <Route path="/matches" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: จัดการแข่งขัน</div>} />
                 <Route path="/settings" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: ตั้งค่าระบบ</div>} />

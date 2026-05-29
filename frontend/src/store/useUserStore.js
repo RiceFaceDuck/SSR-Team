@@ -3,6 +3,9 @@ import { persist, createJSONStorage } from 'zustand/middleware'; // 🌟 NEW: �
 import { normalizePosition } from '../utils/squadValidator';
 import { getPositionLimits } from '../utils/formationUtils'; // 🌟 NEW: นำเข้าตัวเช็คโควต้าตำแหน่ง
 
+// 🌟 NEW: นำเข้า Service สำหรับดึงประวัติธุรกรรม Balls ⚽ (Anti-Cheat Log)
+import { fetchUserTransactionHistory } from '../services/firebase/transactionService';
+
 export const useUserStore = create(
   persist(
     (set, get) => ({
@@ -15,6 +18,12 @@ export const useUserStore = create(
       formation: '4-4-2',     
       mySquad: [],            
       myCards: [],            
+
+      // ==========================================
+      // 🌟 NEW: State สำหรับเก็บประวัติการเงิน (Transaction History)
+      // ==========================================
+      transactions: [],
+      isTransactionsLoading: false,
 
       setUserAuth: (userPayload) => set({
         isAuthenticated: true,
@@ -36,7 +45,8 @@ export const useUserStore = create(
 
       clearAuth: () => set({
         isAuthenticated: false, isAuthLoading: false, userData: null,
-        balls: 0, userPoints: 0, budgetLeft: 100.0, mySquad: [], myCards: [], formation: '4-4-2'
+        balls: 0, userPoints: 0, budgetLeft: 100.0, mySquad: [], myCards: [], formation: '4-4-2',
+        transactions: [] // เคลียร์ประวัติด้วยเมื่อ Log out
       }),
 
       setAuthReady: () => set({ isAuthLoading: false }),
@@ -289,7 +299,14 @@ export const useUserStore = create(
         return { mySquad: squad };
       }),
 
+      // ==========================================
       // --- ทรัพยากรหลัก (Balls ⚽) --- 🌟 UPDATED 
+      // ==========================================
+      
+      // อัปเดตยอด Balls แบบตรงๆ (ใช้กรณี OnSnapshot ดึงข้อมูลใหม่จาก Firebase มาเซ็ต)
+      setBalls: (amount) => set({ balls: amount }),
+
+      // ใช้งาน Balls (อัปเดต UI ชั่วคราว)
       useBalls: (amount) => set((state) => {
         if (state.balls >= amount) {
           if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
@@ -300,12 +317,27 @@ export const useUserStore = create(
         return state; 
       }),
 
+      // เพิ่ม Balls (อัปเดต UI ชั่วคราว)
       addBalls: (amount) => set((state) => {
         if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
           window.navigator.vibrate([30, 50, 30]); // สั่น 2 จังหวะตื่นเต้นเมื่อได้ Balls ⚽
         }
         return { balls: state.balls + amount };
-      })
+      }),
+
+      // 🌟 NEW: Action สำหรับโหลดประวัติธุรกรรม
+      loadTransactions: async (userId) => {
+        if (!userId) return;
+        set({ isTransactionsLoading: true });
+        try {
+          const txs = await fetchUserTransactionHistory(userId);
+          set({ transactions: txs, isTransactionsLoading: false });
+        } catch (error) {
+          console.error("❌ Error loading transactions in store:", error);
+          set({ isTransactionsLoading: false });
+        }
+      }
+
     }),
     {
       name: 'fantasy-team-draft', // ชื่อ Key ใน Local Storage

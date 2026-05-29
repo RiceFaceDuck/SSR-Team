@@ -1,5 +1,6 @@
 import { collection, getDocs, doc, runTransaction, Timestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import { processTransaction } from './transactionService'; // 🌟 NEW: นำเข้าระบบธุรกรรมที่เพิ่งสร้าง
 
 /**
  * ==========================================
@@ -59,18 +60,17 @@ export const questService = {
     }
   },
 
-  // 2. กดรับรางวัลจากโฆษณา (ใช้ Transaction เพื่อกันโกง/กดรัว) - โค้ดเดิมที่ทำงานได้สมบูรณ์
+  // 2. 🌟 UPDATED: กดรับรางวัลจากโฆษณา (ใช้ระบบแยกเช็คโควต้า + แจกบอลด้วย transactionService)
   claimReward: async (userId, quest) => {
     if (!userId || !quest || !quest.id) {
       throw new Error("ข้อมูลไม่ครบถ้วน ไม่สามารถรับรางวัลได้");
     }
 
-    // Path บันทึกข้อมูลส่วนตัว (User Profile) ยังคงอิงตามโครงสร้างเก่า
     const userRef = doc(db, 'users', userId);
 
     try {
-      // ใช้ Transaction เพื่อล็อกข้อมูลผู้เล่น ป้องกันการเบิ้ลจำนวน Balls หากกดรัวเกินไป
-      const result = await runTransaction(db, async (transaction) => {
+      // 1. Transaction สำหรับเช็คและตัดโควต้าเควส (ป้องกันการกดรัว/Race Condition)
+      const questRecordUpdate = await runTransaction(db, async (transaction) => {
         const userDoc = await transaction.get(userRef);
         
         if (!userDoc.exists()) {
@@ -86,12 +86,10 @@ export const questService = {
 
         // --- ระบบ Daily Reset (รีเซ็ตโควต้าข้ามวัน) ---
         if (questRecord.lastClaimed) {
-          // รองรับทั้ง Date Object และ Firebase Timestamp
           const lastClaimedDate = questRecord.lastClaimed.toDate 
             ? questRecord.lastClaimed.toDate() 
             : new Date(questRecord.lastClaimed);
             
-          // ถ้าวันที่/เดือน/ปี ไม่ตรงกับวันนี้ แปลว่าข้ามวันแล้ว ให้รีเซ็ตจำนวนที่เคยใช้ (uses)
           if (
             lastClaimedDate.getDate() !== now.getDate() ||
             lastClaimedDate.getMonth() !== now.getMonth() ||
@@ -125,32 +123,37 @@ export const questService = {
           }
         }
 
-        // --- ดำเนินการอัปเดตข้อมูลเมื่อผ่านเงื่อนไขทั้งหมด ---
-        // รองรับทั้งระบบใหม่ (balls) และเก่า (energyBottles) เพื่อให้เนียนกริบ
-        const currentBalls = userData.balls !== undefined ? userData.balls : (userData.energyBottles || 0);
-        const newBalls = currentBalls + quest.rewardBalls;
-
         // อัปเดตประวัติการกดโฆษณาชิ้นนี้
         questRecord.uses += 1;
         questRecord.lastClaimed = Timestamp.fromDate(now);
 
-        // อัปเดตลง Database (อัปเดตเฉพาะฟิลด์ที่เปลี่ยน ประหยัด Data Transfer)
+        // 🌟 อัปเดตเฉพาะประวัติการกดลง Database เท่านั้น! 
+        // (เรื่องการบวกเงิน ปล่อยให้ transactionService จัดการ เพื่อให้มีประวัติ Audit Log)
         transaction.update(userRef, {
-          balls: newBalls,
           [`dailyQuests.${quest.id}`]: questRecord
         });
 
-        // คืนค่ากลับไปให้ Store อัปเดต UI
-        return { 
-          newBalls, 
-          questRecord: {
-            uses: questRecord.uses,
-            lastClaimed: now.toISOString()
-          }
+        return {
+          uses: questRecord.uses,
+          lastClaimed: now.toISOString()
         };
       });
 
-      return result;
+      // 2. เรียกใช้ transactionService เพื่อแจก Balls ⚽ พร้อมบันทึกประวัติ 
+      // (ใช้ increment() ลดการ Read ข้อมูลยอดเงินเก่ามาบวกเลข ประหยัดโคต้า!)
+      await processTransaction(
+        userId,
+        quest.rewardBalls,
+        'earn',
+        'sponsor_ad',
+        `ภารกิจ: ${quest.title || 'ชมสปอนเซอร์'}`
+      );
+
+      // คืนค่ากลับไปให้ Store อัปเดต UI
+      return { 
+        newBalls: 'auto', // 🌟 ไม่ต้องคืนค่ายอดรวมแล้ว เพราะเราใช้ระบบบวกอัตโนมัติ (increment)
+        questRecord: questRecordUpdate
+      };
 
     } catch (error) {
       console.error("❌ Error claiming reward:", error);
