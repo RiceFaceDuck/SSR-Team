@@ -6,13 +6,13 @@ export default function QuestFormModal({ isOpen, onClose, onSubmit, initialData 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    rewardBalls: 20, // เปลี่ยนจาก reward เป็น rewardBalls ให้ตรงกับ DB
+    rewardBalls: 20,
     imageUrl: '',
-    targetUrl: '', // ลิงก์ปลายทาง (เปลี่ยนจาก actionUrl)
-    platform: 'Website', // แพลตฟอร์มเริ่มต้น
-    maxClaimsPerUser: 1, // โควต้ารับสูงสุดต่อคนต่อวัน
-    cooldownHours: 24, // เวลารอรับครั้งต่อไป (ชั่วโมง)
-    isVerified: false, // ป้ายสปอนเซอร์ปลอดภัย
+    targetUrl: '',
+    platform: 'Website',
+    maxClaimsPerUser: 1,
+    cooldownHours: 24,
+    isVerified: false,
     isActive: true,
   });
 
@@ -54,6 +54,19 @@ export default function QuestFormModal({ isOpen, onClose, onSubmit, initialData 
 
   if (!isOpen) return null;
 
+  // 🎯 ฟังก์ชันช่วยแปลงลิงก์ Google Drive ทั่วไป ให้เป็น Direct Image URL (เพื่อให้ <img src="..."> อ่านได้)
+  const getDirectLink = (url) => {
+    if (!url) return '';
+    // ดึง ID ออกมาจากลิงก์ Drive
+    const driveRegex = /(?:drive\.google\.com\/.*?(?:id=|\/d\/)|drive\.google\.com\/file\/d\/)([\w-]+)/;
+    const match = url.match(driveRegex);
+    if (match && match[1]) {
+      // คืนค่าเป็นลิงก์ที่ใช้แสดงภาพได้โดยตรง
+      return `https://lh3.googleusercontent.com/d/${match[1]}`;
+    }
+    return url;
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -70,8 +83,14 @@ export default function QuestFormModal({ isOpen, onClose, onSubmit, initialData 
     setUploadError('');
 
     try {
+      // 1. อัปโหลดไฟล์ไปที่ Google Drive (ผ่าน Apps Script)
       const uploadedUrl = await uploadImageToDrive(file);
-      setFormData((prev) => ({ ...prev, imageUrl: uploadedUrl }));
+      
+      // 2. นำลิงก์ที่ได้มาแปลงเป็น Direct Link ทันที (แก้ปัญหารูปไม่ขึ้น)
+      const directImageUrl = getDirectLink(uploadedUrl);
+
+      // 3. เก็บลง State (เพื่อเตรียมเซฟลง Database)
+      setFormData((prev) => ({ ...prev, imageUrl: directImageUrl }));
     } catch (error) {
       setUploadError(error.message || 'เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ');
     } finally {
@@ -143,14 +162,17 @@ export default function QuestFormModal({ isOpen, onClose, onSubmit, initialData 
 
             {/* 📸 ส่วนอัปโหลดรูปภาพ */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-1">รูปภาพแบนเนอร์โฆษณา</label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-700 border-dashed rounded-xl bg-gray-800/50 hover:bg-gray-800 transition-colors relative">
+              <label className="block text-sm font-medium text-gray-300 mb-1">รูปภาพแบนเนอร์โฆษณา (อัปโหลดไฟล์)</label>
+              
+              {/* ช่อง Input ธรรมดาถูกเอาออกไปแล้ว เหลือแต่ Upload Zone */}
+              <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-700 border-dashed rounded-xl bg-gray-800/50 hover:bg-gray-800 transition-colors relative">
                 {formData.imageUrl && !isUploading ? (
                   <div className="relative w-full">
                     <img 
                       src={formData.imageUrl} 
                       alt="Preview" 
                       className="w-full h-40 object-contain rounded-lg bg-black/50"
+                      onError={(e) => { e.target.src = 'https://via.placeholder.com/400x200?text=Invalid+Image'; }}
                     />
                     <button
                       type="button"
@@ -207,10 +229,13 @@ export default function QuestFormModal({ isOpen, onClose, onSubmit, initialData 
                 className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="Website">🌐 Website</option>
+                <option value="Shopee">🛍️ Shopee</option>
+                <option value="Lazada">🛒 Lazada</option>
                 <option value="Facebook">📘 Facebook</option>
                 <option value="YouTube">📺 YouTube</option>
                 <option value="TikTok">🎵 TikTok</option>
                 <option value="Line">💬 LINE</option>
+                <option value="Official">⭐ Official</option>
                 <option value="Other">🏷️ Other</option>
               </select>
             </div>
