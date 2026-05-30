@@ -5,6 +5,8 @@ import { getPositionLimits } from '../utils/formationUtils'; // 🌟 NEW: นำ
 
 // 🌟 NEW: นำเข้า Service สำหรับดึงประวัติธุรกรรม Balls ⚽ (Anti-Cheat Log)
 import { fetchUserTransactionHistory } from '../services/firebase/transactionService';
+// 🌟 NEW: นำเข้า Service สำหรับจัดการเซฟทีมลง Firebase (ประหยัด Writes/Reads)
+import { squadService } from '../services/firebase/squadService';
 
 export const useUserStore = create(
   persist(
@@ -31,6 +33,41 @@ export const useUserStore = create(
       markAsSaved: () => set({ hasUnsavedChanges: false, isSaveUnlocked: false }), // ใช้เมื่อเซฟลง Cloud สำเร็จ
 
       // ==========================================
+      // 🌟 NEW: ระบบบันทึก/โหลดทีมบนคลาวด์ (Cloud Sync)
+      // ==========================================
+      saveSquadToCloud: async (userId) => {
+        const { mySquad, budgetLeft, formation, markAsSaved } = get();
+        if (!userId) return { success: false, message: 'ไม่พบ ID ผู้ใช้งาน กรุณาล็อกอินใหม่' };
+
+        try {
+          // ยิงข้อมูลขึ้น Firebase แค่ 1 ครั้ง ถ้วน!
+          await squadService.saveSquad(userId, { mySquad, budgetLeft, formation });
+          markAsSaved(); // รีเซ็ตสถานะ Draft หลังจากบันทึกสำเร็จ
+          return { success: true, message: 'บันทึกทีมลงระบบคลาวด์สำเร็จ!' };
+        } catch (error) {
+          console.error("❌ Error saving squad to cloud:", error);
+          return { success: false, message: error.message || 'บันทึกทีมล้มเหลว โปรดลองอีกครั้ง' };
+        }
+      },
+
+      loadSquadFromCloud: async (userId) => {
+        if (!userId) return;
+        try {
+          const squadData = await squadService.loadSquad(userId);
+          if (squadData) {
+            set({
+              mySquad: squadData.mySquad || [],
+              budgetLeft: squadData.budgetLeft !== undefined ? parseFloat(squadData.budgetLeft) : 100.0,
+              formation: squadData.formation || '4-4-2',
+              hasUnsavedChanges: false // โหลดมาจาก Cloud แปลว่าซิงค์ตรงกันแล้ว
+            });
+          }
+        } catch (error) {
+          console.error("❌ Error loading squad from cloud:", error);
+        }
+      },
+
+      // ==========================================
       // 🌟 NEW: State สำหรับเก็บประวัติการเงิน (Transaction History)
       // ==========================================
       transactions: [],
@@ -49,10 +86,8 @@ export const useUserStore = create(
         // รองรับทั้ง payload ใหม่ (balls) และเก่า (energyBottles) เพื่อป้องกันบัค
         balls: userPayload.balls !== undefined ? userPayload.balls : (userPayload.energyBottles || 0),
         userPoints: userPayload.userPoints || 0,
-        budgetLeft: userPayload.budgetLeft !== undefined ? userPayload.budgetLeft : 100.0,
-        mySquad: userPayload.mySquad || [],
-        formation: userPayload.formation || '4-4-2',
-        hasUnsavedChanges: false, // รีเซ็ตสถานะเมื่อดึงข้อมูลล่าสุดจากเซิร์ฟเวอร์
+        // mySquad, budgetLeft, formation จะถูกดึงผ่าน loadSquadFromCloud ใน App.jsx แทนเพื่อความแม่นยำ
+        hasUnsavedChanges: false, 
         isSaveUnlocked: false
       }),
 
@@ -281,7 +316,6 @@ export const useUserStore = create(
       // --- ระบบจัดทีมแบบเก่า (เก็บไว้ซัพพอร์ตบางฟีเจอร์) ---
       // ==========================================
       autoPlacePlayer: (playerId) => {
-        // ... (โค้ดเดิม ไม่ได้ใช้แล้วใน V2 แต่เผื่อมีเรียกใช้ในหน้าอื่น)
         // เพื่อให้ไฟล์ไม่ยาวเกินไป และคุณสั่งห้ามลบ ผมจึงดัดแปลงให้ชี้ไปที่ Logic ใหม่
         return get().autoFillTeam().success;
       },

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from './config/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'; // 🌟 UPDATED: นำเข้า setDoc และ serverTimestamp เผื่อกรณีสร้าง User ใหม่
 import { useUserStore } from './store/useUserStore';
 import { logoutUser } from './features/auth/authService';
 
@@ -21,7 +21,15 @@ import LiveScoreScreen from './features/live/LiveScoreScreen';
 import Toast from './components/common/Toast';
 
 export default function App() {
-  const { isAuthenticated, isAuthLoading, setUserAuth, clearAuth, setAuthReady } = useUserStore();
+  const { 
+    isAuthenticated, 
+    isAuthLoading, 
+    setUserAuth, 
+    clearAuth, 
+    setAuthReady,
+    loadSquadFromCloud // 🌟 NEW: นำเข้าฟังก์ชันโหลดทีมจาก Cloud
+  } = useUserStore();
+  
   const [currentPath, setCurrentPath] = useState('pitch');
 
   // 🌟 เพิ่มระบบ Seamless Navigation รับ Event สลับหน้าจออัตโนมัติจากทุกที่ในแอป
@@ -44,26 +52,43 @@ export default function App() {
           
           if (userDocSnap.exists()) {
             const userData = userDocSnap.data();
+            
+            // 🌟 1. เซ็ตข้อมูลผู้ใช้งานพื้นฐานก่อน (อัปเดตแค่นี้พอ)
             setUserAuth({
               uid: user.uid,
               displayName: userData.displayName || user.displayName,
               email: user.email,
               photoURL: userData.photoURL || user.photoURL,
               role: userData.role || 'player',
-              energyBottles: userData.energyBottles || 0,
+              balls: userData.balls !== undefined ? userData.balls : (userData.energyBottles || 0), // 🌟 รองรับตัวแปร balls
               userPoints: userData.userPoints || 0,
-              budgetLeft: userData.budgetLeft !== undefined ? userData.budgetLeft : 100.0,
-              mySquad: userData.mySquad || [],
-              formation: userData.formation || '4-4-2'
             });
+
+            // 🌟 2. สั่งโหลดทีมจาก Cloud ผ่าน Service ที่ถูกต้อง (แก้บั๊กเซฟทีมหาย!)
+            await loadSquadFromCloud(user.uid);
+
           } else {
-            setUserAuth({
-              uid: user.uid, displayName: user.displayName, email: user.email, photoURL: user.photoURL,
-              energyBottles: 100, budgetLeft: 100.0, mySquad: [], formation: '4-4-2'
-            });
+            // กรณีผู้เล่นใหม่ (อาจจะหลุดมาจากการ Login)
+            const newUserData = {
+              uid: user.uid,
+              displayName: user.displayName || 'ผู้จัดการทีมหน้าใหม่',
+              email: user.email,
+              photoURL: user.photoURL || '',
+              role: 'player',
+              balls: 100, // ทุนเริ่มต้น 100 Balls
+              userPoints: 0,
+              createdAt: serverTimestamp(),
+              lastLoginAt: serverTimestamp()
+            };
+
+            await setDoc(userDocRef, newUserData);
+
+            setUserAuth(newUserData);
+            // 🌟 โหลดทีมเผื่อไว้ (ถึงจะเป็นไอดีใหม่ก็ต้องเรียก เพื่อให้เซ็ตค่าเริ่มต้นที่ถูกต้อง)
+            await loadSquadFromCloud(user.uid);
           }
         } catch (error) {
-          console.error("Auth Fetch Error:", error);
+          console.error("❌ Auth Fetch Error:", error);
           clearAuth();
         }
       } else {
@@ -72,7 +97,7 @@ export default function App() {
       }
     });
     return () => unsubscribe();
-  }, [setUserAuth, clearAuth, setAuthReady]);
+  }, [setUserAuth, clearAuth, setAuthReady, loadSquadFromCloud]); // 🌟 อัปเดต Dependency Array
 
   const handleLogout = async () => {
     await logoutUser();
@@ -107,7 +132,6 @@ export default function App() {
   return (
     <>
       <Toast /> 
-      {/* 🌟 ลบ FloatingDragAvatar ออกไปแล้ว */}
       
       <MobileLayout currentPath={currentPath} onNavigate={setCurrentPath} onLogout={handleLogout}>
         <div className={getRouteClass('pitch')}><PitchScreen /></div>
