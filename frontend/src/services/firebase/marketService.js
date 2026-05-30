@@ -1,63 +1,71 @@
-/**
- * @file marketService.js
- * @description Service Layer สำหรับจัดการข้อมูลตลาดนักเตะ (Market) จาก Firebase Firestore
- * ทำหน้าที่เชื่อมต่อ Database และมีระบบ Cache ภายในเพื่อป้องกันการยิง Request ซ้ำซ้อน (ประหยัดค่า Reads)
- */
-
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 
-// ==========================================
-// 🧠 Local Memory Cache (Safeguard)
-// ป้องกันการยิง DB รัวๆ กรณี Component เรียกใช้ Service โดยตรงข้ามหัว Zustand
-// ==========================================
-let playersCache = null;
-let lastFetchTime = null;
-const CACHE_TTL = 60 * 60 * 1000; // อายุ Cache: 1 ชั่วโมง (มิลลิวินาที)
-
-/**
- * ฟังก์ชันสร้าง Path ของ Collection ตลาดนักเตะ (Public Data)
- * โครงสร้างอ้างอิงตาม Artifacts Security Rules
- */
-const getPlayersCollectionRef = () => {
-  // ดึง App ID จาก Environment (ถ้ามี) หรือใช้ค่าเริ่มต้น
-  const appId = typeof __app_id !== 'undefined' ? __app_id : 'ssr-team';
-  return collection(db, 'artifacts', appId, 'public', 'data', 'players');
-};
+// ระบบ Cache ใน Memory เพื่อลดโควต้า Firebase Reads
+// จะเก็บข้อมูลไว้ในหน่วยความจำชั่วคราวเพื่อไม่ให้โหลดซ้ำทุกครั้งที่เปลี่ยนหน้า
+let cachedPlayers = null;
+let lastFetchTime = 0;
+const CACHE_TTL = 5 * 60 * 1000; // อายุ Cache: 5 นาที
 
 export const marketService = {
   /**
-   * ดึงข้อมูลนักเตะทั้งหมดจากตลาด
-   * @param {boolean} forceRefresh - บังคับดึงข้อมูลใหม่จาก Firestore ทันที (ข้าม Cache)
-   * @returns {Promise<Array>} - Array ของข้อมูลนักเตะทั้งหมด
+   * ดึงข้อมูลนักเตะทั้งหมด (เชื่อมต่อ Firebase ของจริง)
+   * @param {boolean} forceRefresh - บังคับโหลดข้อมูลใหม่จาก Firebase (ข้าม Cache)
    */
-  getAllPlayers: async (forceRefresh = false) => {
-    const now = Date.now();
-
-    // 1. ตรวจสอบ Cache ในระดับ Service
-    if (!forceRefresh && playersCache && lastFetchTime && (now - lastFetchTime < CACHE_TTL)) {
-      console.log('⚡ [MarketService] ใช้ข้อมูลนักเตะจาก Local Cache (Safeguard)');
-      return playersCache;
-    }
-
-    // 2. ดึงข้อมูลใหม่จาก Firestore
+  getPlayers: async (forceRefresh = false) => {
     try {
-      console.log('📡 [MarketService] กำลังดึงข้อมูลนักเตะจาก Firestore...');
+      const now = Date.now();
       
-      const querySnapshot = await getDocs(getPlayersCollectionRef());
-      const playersList = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      // 1. คืนค่าจาก Cache ถ้ายังมีอายุและไม่บังคับ Refresh
+      if (!forceRefresh && cachedPlayers && (now - lastFetchTime < CACHE_TTL)) {
+        console.log('📦 [Market] ดึงข้อมูลนักเตะจาก Cache');
+        return cachedPlayers;
+      }
 
-      // 3. อัปเดต Cache ภายใน Service
-      playersCache = playersList;
+      console.log('☁️ [Market] ดึงข้อมูลนักเตะจาก Firebase Firestore...');
+      
+      // 2. ดึงข้อมูลจาก Collection 'players' (ข้อมูลชุดเดียวกับที่ Admin อัปโหลด)
+      const playersRef = collection(db, 'players');
+      // เราดึงข้อมูลทั้งหมดมาก่อน 1 ครั้ง แล้วให้ Zustand Store หรือ Component จัดการ Filter/Sort เพื่อประหยัดโควต้า
+      const q = query(playersRef); 
+      const snapshot = await getDocs(q);
+      
+      const players = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        players.push({
+          id: doc.id,
+          ...data,
+          // แปลงค่าให้ชัวร์ว่าเป็นตัวเลข ป้องกันบั๊กจากการนำเข้าไฟล์ Excel ของ Admin
+          price: Number(data.price) || 0,
+          stats: {
+            pace: Number(data.stats?.pace) || 0,
+            shooting: Number(data.stats?.shooting) || 0,
+            passing: Number(data.stats?.passing) || 0,
+            dribbling: Number(data.stats?.dribbling) || 0,
+            defending: Number(data.stats?.defending) || 0,
+            physical: Number(data.stats?.physical) || 0,
+          }
+        });
+      });
+
+      // 3. อัปเดต Cache เพื่อไว้ใช้งานครั้งต่อไป
+      cachedPlayers = players;
       lastFetchTime = now;
 
-      return playersList;
+      return players;
     } catch (error) {
-      console.error("❌ [MarketService] เกิดข้อผิดพลาดในการดึงข้อมูลตลาด:", error);
-      throw new Error("ไม่สามารถโหลดข้อมูลตลาดนักเตะได้ โปรดตรวจสอบการเชื่อมต่อ");
+      console.error('❌ [Market] Error fetching players:', error);
+      throw error;
     }
+  },
+
+  /**
+   * ล้าง Cache ด้วยตัวเอง (ใช้ในกรณีที่มีการสั่งรีเซ็ตหรือเกิด Error ร้ายแรง)
+   */
+  clearCache: () => {
+    cachedPlayers = null;
+    lastFetchTime = 0;
+    console.log('🧹 [Market] ล้าง Cache ข้อมูลนักเตะเรียบร้อย');
   }
 };

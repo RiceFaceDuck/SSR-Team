@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware'; // 🌟 NEW: นำเข้า persist ป้องกันข้อมูลหายตอน Refresh
 import { normalizePosition } from '../utils/squadValidator';
-import { getPositionLimits } from '../utils/formationUtils'; // 🌟 NEW: นำเข้าตัวเช็คโควต้าตำแหน่ง
+import { getPositionLimits, getFormationData } from '../utils/formationUtils'; // 🌟 FIX: นำเข้า getFormationData เพื่อใช้อ้างอิง slot
 
 // 🌟 NEW: นำเข้า Service สำหรับดึงประวัติธุรกรรม Balls ⚽ (Anti-Cheat Log)
 import { fetchUserTransactionHistory } from '../services/firebase/transactionService';
@@ -272,31 +272,55 @@ export const useUserStore = create(
         set({ mySquad: newSquad, hasUnsavedChanges: true }); // 🌟 อัปเดตสถานะ Draft
       },
 
-      // จัดทีมอัตโนมัติ (สุ่มจับยัดลงช่องว่าง)
+      // 🌟 FIX: จัดทีมอัตโนมัติ (ฉลาดขึ้น: จับยัดลง slotIndex ที่ว่างอยู่เป๊ะๆ เพื่อให้ Save ได้จริง)
       autoFillTeam: () => {
         const { mySquad, formation } = get();
         let newSquad = [...mySquad];
         const limits = getPositionLimits(formation);
+        const formationData = getFormationData(formation);
         
-        // นับว่าแต่ละตำแหน่งมีตัวจริงบนสนามกี่คนแล้ว
+        // 1. หาว่าช่องไหนบนสนาม (slotIndex) ถูกจองไปแล้วบ้าง
+        const occupiedSlots = new Set();
         const currentStarters = { FW: 0, MF: 0, DF: 0, GK: 0 };
+        
         newSquad.forEach(p => {
           if (p.isStarting) {
             currentStarters[normalizePosition(p.position)]++;
+            if (p.slotIndex) occupiedSlots.add(p.slotIndex);
           }
         });
 
+        // 2. ลิสต์ช่องว่างที่เหลืออยู่ของแต่ละตำแหน่งตามแผนการเล่นปัจจุบัน
+        const availableSlots = { FW: [], MF: [], DF: [], GK: [] };
+        
+        formationData.rows.forEach(row => {
+          for (let i = 0; i < row.count; i++) {
+            const slotId = `${row.role}-${i}`;
+            if (!occupiedSlots.has(slotId)) {
+              availableSlots[row.category].push(slotId);
+            }
+          }
+        });
+        
+        // เพิ่มช่องผู้รักษาประตู
+        if (!occupiedSlots.has('GK-0')) {
+          availableSlots['GK'].push('GK-0');
+        }
+
         let isModified = false;
 
-        // วนลูปจับตัวสำรองยัดลงสนาม จนกว่าจะเต็มโควต้า
+        // 3. วนลูปสำรอง จับยัดลงช่องว่างที่ระบุ slotIndex ชัดเจน (เพื่อให้บันทึกลงฐานข้อมูลได้)
         newSquad = newSquad.map(player => {
           if (player.isStarting) return player; // เป็นตัวจริงอยู่แล้ว ข้ามไป
 
           const pos = normalizePosition(player.position);
-          if (currentStarters[pos] < limits[pos]) {
+          
+          // ถ้าโควต้าตำแหน่งนี้ยังไม่เต็ม และมีช่องว่างของตำแหน่งนี้บนสนาม
+          if (currentStarters[pos] < limits[pos] && availableSlots[pos] && availableSlots[pos].length > 0) {
+            const assignedSlot = availableSlots[pos].shift(); // ดึงช่องแรกที่ว่างมาใช้งาน
             currentStarters[pos]++;
             isModified = true;
-            return { ...player, isStarting: true, slotIndex: null }; // จัดลงไปก่อน ส่วน slotIndex ปล่อยให้ PitchBoard จัดการ render
+            return { ...player, isStarting: true, slotIndex: assignedSlot }; // เซ็ตค่าพิกัดการยืนเป๊ะๆ
           }
           return player;
         });
@@ -327,10 +351,12 @@ export const useUserStore = create(
         const p2Index = squad.findIndex(p => p.playerId === String(player2Id));
 
         if (p1Index !== -1 && p2Index !== -1) {
-          // สลับแค่สถานะการลงสนาม (isStarting)
+          // สลับแค่สถานะการลงสนาม (isStarting) และ slotIndex ด้วย
           const tempStarting = squad[p1Index].isStarting;
-          squad[p1Index] = { ...squad[p1Index], isStarting: squad[p2Index].isStarting };
-          squad[p2Index] = { ...squad[p2Index], isStarting: tempStarting };
+          const tempSlot = squad[p1Index].slotIndex;
+          
+          squad[p1Index] = { ...squad[p1Index], isStarting: squad[p2Index].isStarting, slotIndex: squad[p2Index].slotIndex };
+          squad[p2Index] = { ...squad[p2Index], isStarting: tempStarting, slotIndex: tempSlot };
           
           // ล้าง slotIndex ถ้าคนไหนถูกเตะกลับม้านั่ง
           if (!squad[p1Index].isStarting) squad[p1Index].slotIndex = null;

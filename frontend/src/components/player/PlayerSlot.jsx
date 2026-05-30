@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Plus, RefreshCw } from 'lucide-react';
+import { User } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { normalizePosition } from '../../utils/squadValidator';
 
@@ -28,12 +28,6 @@ const POS_COLORS = {
     text: 'text-amber-100', 
     border: 'border-amber-500', 
     glow: 'shadow-[0_0_15px_rgba(245,158,11,0.6)]' 
-  },
-  DEFAULT: { 
-    bg: 'bg-gradient-to-t from-slate-700 to-slate-400', 
-    text: 'text-slate-100', 
-    border: 'border-slate-500', 
-    glow: 'shadow-[0_0_15px_rgba(100,116,139,0.6)]' 
   }
 };
 
@@ -48,17 +42,17 @@ export default function PlayerSlot({
   const { pendingPlacement } = useUserStore();
 
   // ดึงธีมสีตามตำแหน่ง (ถ้ามีนักเตะใช้ตำแหน่งนักเตะ ถ้าเป็นช่องว่างใช้ตำแหน่งที่คาดหวัง)
-  const position = player ? normalizePosition(player.position) : expectedPosition;
-  const theme = POS_COLORS[position] || POS_COLORS.DEFAULT;
+  const posCode = normalizePosition(player ? player.position : expectedPosition);
+  const theme = POS_COLORS[posCode] || POS_COLORS.MF;
 
-  // ตรวจสอบว่าช่องว่างนี้ "ตรงกับ" ตำแหน่งนักเตะที่กำลังถืออยู่หรือไม่ (ถ้าตรงจะทำแสงกระพริบเชิญชวนให้วาง)
-  const isMatchPending = isGhost && pendingPlacement && normalizePosition(pendingPlacement.position) === expectedPosition;
-
-  // ฟังก์ชันช่วยตัดชื่อให้สั้นลง ป้องกัน UI พัง (จำกัด 10 ตัวอักษร)
-  const shortName = player?.name ? (player.name.length > 10 ? player.name.substring(0, 8) + '..' : player.name) : 'Unknown';
+  // ตรวจสอบว่ามีนักเตะที่กำลังรอวาง และตำแหน่งตรงกับช่องนี้หรือไม่
+  const isMatchPending = pendingPlacement && normalizePosition(pendingPlacement.position) === posCode;
 
   // รูปภาพของนักเตะ (รองรับการเปลี่ยนแปลงชื่อ field ในอนาคต)
   const playerImage = player?.photoURL || player?.image;
+  
+  // ชื่อย่อสำหรับแสดงผล (ป้องกันชื่อยาวเกินไปแล้ว UI พัง)
+  const shortName = player?.name ? (player.name.length > 8 ? player.name.substring(0, 7) + '...' : player.name) : '';
 
   if (isGhost) {
     return (
@@ -72,18 +66,15 @@ export default function PlayerSlot({
               : 'border-slate-500/40 bg-slate-800/20 hover:border-slate-400/80 hover:bg-slate-700/50 backdrop-blur-sm'
             }
             active:scale-95 group`}
-          title={`วางผู้เล่นตำแหน่ง ${expectedPosition}`}
+          title={`วางผู้เล่นตำแหน่ง ${posCode}`}
         >
           {isMatchPending ? (
-            // แอนิเมชันตอนที่ถือนักเตะตรงกับตำแหน่งช่อง
-            <div className="relative flex items-center justify-center w-full h-full">
-               <div className="absolute inset-0 bg-white/10 rounded-full animate-ping"></div>
-               <Plus size={28} className={`${theme.text} drop-shadow-md z-10`} />
-            </div>
+            <span className={`text-sm sm:text-base font-black ${theme.text} animate-bounce`}>
+              วาง!
+            </span>
           ) : (
-            // ช่องว่างปกติ
             <span className="text-slate-500/70 text-sm font-black tracking-wider group-hover:text-slate-300 transition-colors">
-              {expectedPosition}
+              {posCode}
             </span>
           )}
         </button>
@@ -100,16 +91,13 @@ export default function PlayerSlot({
           ${isSelected 
             ? 'scale-110 z-30' // ขยายเมื่อถูกเลือกเตรียมสลับ
             : 'hover:scale-105 hover:z-20'
-          }`}
-        title={isSelected ? 'แตะเป้าหมายเพื่อสลับตำแหน่ง' : `เลือก ${player?.name}`}
+          }
+          ${isSelected ? theme.glow : ''}
+          ${isMatchPending && !isSelected ? `ring-2 ring-offset-2 ring-offset-slate-900 ${theme.border} animate-pulse scale-105 z-20` : ''}`}
+        title={isSelected ? 'แตะเป้าหมายเพื่อสลับตำแหน่ง' : isMatchPending ? `แตะเพื่อแทนที่ ${player?.name}` : `เลือก ${player?.name}`}
       >
-        {/* กรอบวงกลมด้านนอก */}
-        <div className={`absolute inset-0 rounded-full border-[2.5px] transition-all duration-300 shadow-lg
-          ${isSelected 
-            ? 'border-yellow-400 shadow-[0_0_25px_rgba(250,204,21,0.7)] animate-pulse' 
-            : `${theme.border} ${theme.glow} bg-slate-800`
-          }`}
-        ></div>
+        {/* วงแหวนสีบอกตำแหน่ง (ขอบนอก) */}
+        <div className={`absolute inset-0 rounded-full border-2 ${theme.border} ${isSelected ? 'animate-pulse' : 'opacity-80 group-hover:opacity-100'} ${isMatchPending ? 'opacity-100 border-dashed' : ''}`}></div>
 
         {/* รูปนักเตะ (ครอบด้วย overflow-hidden ให้เป็นวงกลมด้านใน) */}
         <div className="absolute inset-[2.5px] rounded-full overflow-hidden bg-slate-900 flex items-center justify-center">
@@ -132,9 +120,16 @@ export default function PlayerSlot({
 
         {/* แถบสีตำแหน่งแบบโค้งด้านล่างวงกลม (ตกแต่งให้ดูพรีเมียม) */}
         <div className={`absolute -bottom-1 w-3/4 h-2 rounded-full blur-[2px] opacity-70 ${theme.bg}`}></div>
+        
+        {/* ป้าย Position เล็กๆ แปะที่ขอบ */}
+        <div className={`absolute -top-1 -right-1 w-5 h-5 rounded-full ${theme.bg} border border-slate-900 flex items-center justify-center shadow-md z-10`}>
+          <span className={`text-[8px] sm:text-[9px] font-black ${theme.text}`}>
+            {posCode}
+          </span>
+        </div>
       </button>
 
-      {/* ป้ายชื่อและตำแหน่ง (ลอยทับซ้อนขึ้นมาเล็กน้อย) */}
+      {/* ป้ายชื่อ (ลอยทับซ้อนขึ้นมาเล็กน้อย) */}
       <div className="flex flex-col items-center -mt-1.5 z-20 pointer-events-none">
         <div className={`
           px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold text-white whitespace-nowrap shadow-md
@@ -143,18 +138,7 @@ export default function PlayerSlot({
         `}>
           {shortName}
         </div>
-        <div className={`text-[10px] mt-0.5 font-black tracking-widest uppercase drop-shadow-sm ${isSelected ? 'text-yellow-400' : theme.text}`}>
-          {position}
-        </div>
       </div>
-      
-      {/* Indicator Icon (ไอคอนสลับตัวลอยอยู่มุมขวาบน) */}
-      {isSelected && (
-        <div className="absolute -top-1 -right-2 w-6 h-6 bg-yellow-400 rounded-full border-2 border-slate-900 
-                        flex items-center justify-center shadow-lg animate-bounce z-40">
-          <RefreshCw size={12} className="text-slate-900 font-bold" />
-        </div>
-      )}
     </div>
   );
 }

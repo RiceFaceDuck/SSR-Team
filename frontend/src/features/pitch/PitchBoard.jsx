@@ -1,8 +1,8 @@
 /**
  * @file PitchBoard.jsx
  * @description UI Component สำหรับแสดงกระดานสนามฟุตบอลแบบสมจริง
- * อัปเกรด (Phase 3 - Multi-Layer Formations): รองรับ 11 แผนการเล่น (รวมแผน 4 เลเยอร์อย่าง 4-2-3-1, 4-1-4-1)
- * มาพร้อมกับระบบแตะเพื่อวาง (Tap & Place) และ Smart Allocation เพื่อจัดสรรตัวจริงลงสล็อตที่ถูกต้อง
+ * อัปเกรด (Phase 4): รองรับระบบแผนการเล่นแบบ Layer, Tap & Place ยึดตาม slotIndex
+ * พร้อมกราฟิกสนามสไตล์ Tactical Board ระดับพรีเมียม
  */
 
 import React from 'react';
@@ -19,7 +19,7 @@ export default function PitchBoard({ onSlotClick }) {
     formation, 
     pendingPlacement, 
     confirmPlacement,
-    setMarketFilterPos // 🌟 NEW: ดึงฟังก์ชันจดจำตำแหน่งลง Store
+    setMarketFilterPos // 🌟 ฟังก์ชันจดจำตำแหน่งลง Store
   } = useUserStore();
 
   const getPlayerBySku = useMarketStore((state) => state.getPlayerBySku);
@@ -74,14 +74,13 @@ export default function PitchBoard({ onSlotClick }) {
           window.navigator.vibrate([20, 30, 20]); // สั่นเป็นจังหวะตื่นเต้นเชิญชวน
         }
         
-        // ก. จดจำตำแหน่งที่ผู้เล่นต้องการลง Store
+        // ก. จดจำตำแหน่งที่ผู้เล่นต้องการเพื่อนำไป Filter ในตลาด
         setMarketFilterPos(categoryCode);
         
-        // ข. สั่งเปลี่ยนหน้าต่าง (Tab) ไปยัง Market แบบไร้รอยต่อ
+        // ข. สั่งเปลี่ยนหน้าต่าง (Tab) ไปยัง Market แบบไร้รอยต่อ (อิงจาก Event Listener ใน App.jsx)
         window.dispatchEvent(new CustomEvent('switchTab', { detail: 'market' }));
         
-        // ค. แจ้งเตือนสั้นๆ เพื่อให้ UI ไม่กระตุกจนงง
-        // เลือกใช้ชื่อเต็มของตำแหน่งเพื่อความสวยงาม
+        // ค. แจ้งเตือนสั้นๆ
         const posNames = { FW: 'กองหน้า', MF: 'กองกลาง', DF: 'กองหลัง', GK: 'ผู้รักษาประตู' };
         toast.info(`กำลังพาไปยังตลาดเพื่อหา ${posNames[categoryCode] || categoryCode}...`);
       }
@@ -89,7 +88,7 @@ export default function PitchBoard({ onSlotClick }) {
   };
 
   // สร้าง Set ขึ้นมาเก็บไอดีของนักเตะตัวจริงที่ถูกจัดวางใน Slot ชั่วคราวนี้แล้ว
-  // ป้องกันปัญหานักเตะแสดงผลซ้ำกันในหลายๆ ช่อง เมื่อกดจัดทีมอัตโนมัติ (Auto-Fill)
+  // ป้องกันปัญหานักเตะแสดงผลซ้ำกันในหลายๆ ช่อง เมื่อเพิ่งกดจัดทีมอัตโนมัติ (Auto-Fill) มาหมาดๆ
   const usedPlayerIds = new Set();
 
   /**
@@ -100,17 +99,17 @@ export default function PitchBoard({ onSlotClick }) {
     const { role, category, count } = rowConfig;
     const slots = [];
     
-    // ตรวจสอบสถานะว่า แถวนี้รองรับตำแหน่งที่กำลังถืออยู่หรือไม่ (เพื่อทำเอฟเฟกต์ Glow เชิญชวน)
+    // ตรวจสอบสถานะว่า แถวนี้รองรับตำแหน่งที่กำลังถืออยู่หรือไม่ (เพื่อทำเอฟเฟกต์ Glow เชิญชวนทั้งแถว)
     const isDroppableRow = pendingPlacement && normalizePosition(pendingPlacement.position) === category;
     
     for (let i = 0; i < count; i++) {
       // สร้าง ID เฉพาะให้กับสล็อตนี้ เช่น 'AM-0', 'DM-1', 'DF-3'
       const slotId = `${role}-${i}`;
       
-      // 1. ลองดึงนักเตะที่มี slotIndex ระบุไว้ตรงสล็อตนี้เป๊ะๆ (มาจากการวางแบบเจาะจงตำแหน่งแมนนวล)
+      // 1. ลองดึงนักเตะที่มี slotIndex ระบุไว้ตรงสล็อตนี้เป๊ะๆ (มาจากการวางเจาะจง หรือ ออโต้ตัวใหม่)
       let assignedMember = mySquad.find(p => p.isStarting && p.slotIndex === slotId);
 
-      // 2. ถ้าสล็อตนี้ยังไม่มีคนวางแบบกำหนดเอง ให้ควานหาตัวจริงในตำแหน่งหลักนี้ที่ยัง "ไม่มีพิกัดลงสนาม" (มาจากการจัดทีมแบบออโต้)
+      // 2. Fallback: ถ้าสล็อตนี้ยังไม่มีคนวางแบบเจาะจง ให้ควานหาตัวจริงที่ยังไม่มี slotIndex มาใส่แก้ขัด
       if (!assignedMember) {
         assignedMember = mySquad.find(p => 
           p.isStarting && 
@@ -120,12 +119,12 @@ export default function PitchBoard({ onSlotClick }) {
         );
       }
 
-      // 3. ลงทะเบียนไอดีของนักเตะที่ได้ตำแหน่งเรียบร้อย เพื่อให้ระบบข้ามตัวนี้ไปในช่องถัดๆ ไป
+      // 3. ลงทะเบียนไอดีของนักเตะที่ได้ตำแหน่งเรียบร้อย ป้องกันดึงคนเดิมมาใส่ช่องถัดไป
       if (assignedMember) {
         usedPlayerIds.add(assignedMember.playerId);
       }
 
-      // ควานหารายละเอียดนักเตะที่แคชไว้ใน Market Store มาประกอบ UI
+      // ควานหารายละเอียดนักเตะจาก Market Store มาประกอบ UI (ดึงจาก Cache เร็วมาก)
       const playerFullData = assignedMember ? getPlayerBySku(assignedMember.playerId) : null;
       
       // การตกแต่งกรอบช่องนักเตะตามสถานะจัดวาง (Glow & Pulse effects)
@@ -133,11 +132,11 @@ export default function PitchBoard({ onSlotClick }) {
       const slotWrapperClasses = `relative transition-all duration-500 ease-out flex-shrink-0 rounded-full
         ${pendingPlacement ? 'cursor-pointer' : 'cursor-pointer hover:scale-105 active:scale-95'}
         ${isDroppableSlot 
-            ? 'ring-4 ring-yellow-400/80 shadow-[0_0_30px_rgba(250,204,21,0.6)] scale-110 z-20 animate-[pulse_1.5s_ease-in-out_infinite] bg-yellow-400/10' 
+            ? 'ring-4 ring-emerald-400/80 shadow-[0_0_35px_rgba(52,211,153,0.7)] scale-110 z-20 animate-[pulse_1.5s_ease-in-out_infinite] bg-emerald-400/20' 
             : 'ring-0'
         }
         ${pendingPlacement && !isDroppableSlot 
-            ? 'opacity-30 grayscale-[0.9] scale-90 pointer-events-none' 
+            ? 'opacity-40 grayscale-[0.8] scale-90 pointer-events-none' 
             : 'opacity-100 grayscale-0'
         }
       `;
@@ -157,7 +156,7 @@ export default function PitchBoard({ onSlotClick }) {
           
           {/* ป้ายสติกเกอร์บอกสไตล์ย่อยของเลเยอร์ลอยเด่นขึ้นมาในช่องว่าง (เช่น AM, DM เพื่อชี้แนะแผนการยืน) */}
           {!playerFullData && role !== category && (
-             <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/80 text-cyan-300 text-[9px] font-bold px-1.5 py-0.5 rounded border border-cyan-700/50 pointer-events-none whitespace-nowrap">
+             <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-slate-900/90 text-emerald-300 text-[9px] font-black tracking-widest px-2 py-0.5 rounded-full border border-emerald-700/50 pointer-events-none whitespace-nowrap shadow-md">
                {role}
              </div>
           )}
@@ -166,41 +165,56 @@ export default function PitchBoard({ onSlotClick }) {
     }
 
     return (
-      <div key={`row-${role}`} className="flex justify-evenly items-center w-full z-10 px-2 min-h-[80px]">
+      <div key={`row-${role}`} className="flex justify-evenly items-center w-full z-10 px-1 sm:px-2 min-h-[75px] sm:min-h-[85px]">
         {slots}
       </div>
     );
   };
 
   return (
-    <div className="w-full aspect-[3/4] sm:h-[480px] bg-gradient-to-b from-emerald-600 via-green-600 to-emerald-800 
-                    rounded-[2.5rem] shadow-[inset_0_20px_40px_rgba(0,0,0,0.3),0_15px_30px_rgba(16,185,129,0.2)] 
-                    border-[6px] border-emerald-900/40 relative overflow-hidden flex flex-col justify-between py-6 px-4">
+    <div className="w-full aspect-[4/5] sm:h-[500px] sm:aspect-auto bg-gradient-to-b from-[#1b4332] via-[#2d6a4f] to-[#1b4332] 
+                    rounded-[2rem] sm:rounded-[2.5rem] shadow-[inset_0_20px_50px_rgba(0,0,0,0.5),0_15px_30px_rgba(8,28,21,0.4)] 
+                    border-[4px] sm:border-[6px] border-[#081c15] relative overflow-hidden flex flex-col justify-between py-4 sm:py-6 px-2 sm:px-4">
        
-       {/* ลวดลายหญ้าแบบตารางแนวตั้ง (Chessboard Premium Grid Overlay) */}
-       <div className="absolute inset-0 opacity-10 pointer-events-none" 
-            style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.1) 40px, rgba(255,255,255,0.1) 80px)' }}>
+       {/* 1. ลวดลายหญ้าแบบตารางแนวตั้ง (Tactical Dark Grass Overlay) ดูมีมิติและพรีเมียม */}
+       <div className="absolute inset-0 opacity-25 pointer-events-none" 
+            style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,0,0,0.15) 40px, rgba(0,0,0,0.15) 80px)' }}>
        </div>
 
-       {/* พื้นหลังจำลอง: ตกแต่งเส้นสนามฟุตบอลในกระดาน (Pitch Lines) */}
-       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-[3px] border-white/30 rounded-full pointer-events-none z-0"></div>
-       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/40 rounded-full pointer-events-none z-0"></div>
-       <div className="absolute left-0 right-0 top-1/2 h-[3px] bg-white/30 pointer-events-none z-0"></div>
+       {/* 2. พื้นหลังจำลอง: ตกแต่งเส้นสนามฟุตบอลในกระดาน (Pitch Lines) ที่วาดละเอียดขึ้น */}
+       {/* วงกลมกลางสนาม */}
+       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 sm:w-32 sm:h-32 border-[2px] sm:border-[3px] border-white/20 rounded-full pointer-events-none z-0"></div>
+       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white/30 rounded-full pointer-events-none z-0"></div>
+       {/* เส้นแบ่งครึ่งสนาม */}
+       <div className="absolute left-0 right-0 top-1/2 h-[2px] sm:h-[3px] bg-white/20 pointer-events-none z-0"></div>
        
-       {/* กรอบกรีดเขตโทษ (Penalty Boxes) บน-ล่าง */}
-       <div className="absolute left-1/2 top-0 -translate-x-1/2 w-48 h-20 border-[3px] border-t-0 border-white/30 rounded-b-xl pointer-events-none z-0 flex justify-center">
-          <div className="w-20 h-10 border-[3px] border-t-0 border-white/30 rounded-b-md"></div>
+       {/* 3. กรอบเขตโทษ (Penalty Boxes) และหัวกะโหลก (D-Curve) ด้านบน */}
+       <div className="absolute left-1/2 top-0 -translate-x-1/2 w-40 sm:w-52 h-16 sm:h-24 border-[2px] sm:border-[3px] border-t-0 border-white/20 pointer-events-none z-0 flex justify-center">
+          {/* กรอบ 6 หลา (กรอบประตูเล็ก) */}
+          <div className="w-16 sm:w-24 h-6 sm:h-8 border-[2px] sm:border-[3px] border-t-0 border-white/20"></div>
        </div>
-       <div className="absolute left-1/2 bottom-0 -translate-x-1/2 w-48 h-20 border-[3px] border-b-0 border-white/30 rounded-t-xl pointer-events-none z-0 flex items-end justify-center">
-          <div className="w-20 h-10 border-[3px] border-b-0 border-white/30 rounded-t-md"></div>
-       </div>
+       {/* หัวกะโหลกบน (D-Curve Top) */}
+       <div className="absolute left-1/2 top-16 sm:top-24 -translate-x-1/2 w-16 sm:w-20 h-6 sm:h-8 border-[2px] sm:border-[3px] border-t-0 border-white/20 rounded-b-full pointer-events-none z-0"></div>
 
-       {/* โซนการจัดตำแหน่งนักเตะหลัก (เรนเดอร์แถวแนวนอนอย่างไดนามิกจากระบบแท็คติก) */}
-       <div className="relative z-10 flex flex-col justify-between h-full py-2">
+       {/* 4. กรอบเขตโทษ (Penalty Boxes) และหัวกะโหลก (D-Curve) ด้านล่าง */}
+       <div className="absolute left-1/2 bottom-0 -translate-x-1/2 w-40 sm:w-52 h-16 sm:h-24 border-[2px] sm:border-[3px] border-b-0 border-white/20 pointer-events-none z-0 flex items-end justify-center">
+          {/* กรอบ 6 หลา (กรอบประตูเล็ก) */}
+          <div className="w-16 sm:w-24 h-6 sm:h-8 border-[2px] sm:border-[3px] border-b-0 border-white/20"></div>
+       </div>
+       {/* หัวกะโหลกล่าง (D-Curve Bottom) */}
+       <div className="absolute left-1/2 bottom-16 sm:bottom-24 -translate-x-1/2 w-16 sm:w-20 h-6 sm:h-8 border-[2px] sm:border-[3px] border-b-0 border-white/20 rounded-t-full pointer-events-none z-0"></div>
+
+       {/* 5. โซนการจัดตำแหน่งนักเตะหลัก (เรนเดอร์แถวแนวนอนอย่างไดนามิกจากระบบแท็คติก) */}
+       <div className="relative z-10 flex flex-col justify-between h-full">
+         {/* ดันแผนที่ส่วนบนลงมาเล็กน้อยให้ไม่ชิดขอบจอเกินไป */}
+         <div className="mt-2 sm:mt-4"></div>
+         
          {currentFormation.rows.map(row => renderRow(row))}
          
          {/* เลเยอร์โซนผู้รักษาประตู (GK - ตรึงไว้ด้านล่างสุดของกระดานเสมอ) */}
-         {renderRow({ role: 'GK', category: 'GK', count: 1 })}
+         <div className="mt-auto mb-2">
+            {renderRow({ role: 'GK', category: 'GK', count: 1 })}
+         </div>
        </div>
        
     </div>
