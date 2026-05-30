@@ -2,9 +2,10 @@ import React from 'react';
 import { LogOut, User, Trophy, Users, Activity } from 'lucide-react';
 import { STYLES, playSound } from '../../config/theme';
 import { useUserStore } from '../../store/useUserStore';
+import CountUp from 'react-countup';
 
 export default function TopHeader({ onLogout, onNavigate }) {
-  // ดึงข้อมูลโปรไฟล์และทรัพยากร(Balls)จาก Store ส่วนกลาง (🌟 เปลี่ยนจาก energyBottles เป็น balls)
+  // ดึงข้อมูลโปรไฟล์และทรัพยากร(Balls)จาก Store ส่วนกลาง
   const { userData, balls } = useUserStore();
 
   // ฟังก์ชันช่วยย่อโค้ดเวลาเปลี่ยนหน้า
@@ -28,12 +29,16 @@ export default function TopHeader({ onLogout, onNavigate }) {
       <div className="flex gap-2 items-center">
         
         {/* ⚽ ทรัพยากร Balls (สกุลเงินหลัก) - อัปเกรด UI ระดับ AAA โทนสีทองพรีเมียม */}
+        {/* ลบปุ่ม Plus ออกตามคำสั่ง เนื่องจากเกมเล่นฟรี 100% */}
         <div 
-          className="bg-gradient-to-r from-amber-400 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 shadow-[0_4px_10px_rgba(245,158,11,0.4)] border border-amber-300 mr-1 hover:scale-105 transition-transform cursor-default"
-          title="ทรัพยากรลูกฟุตบอล (Balls)"
+          onClick={() => handleNav('redeem')}
+          className="bg-gradient-to-r from-amber-400 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 shadow-[0_4px_10px_rgba(245,158,11,0.4)] border border-amber-300 mr-1 cursor-pointer hover:scale-105 hover:shadow-md transition-all active:scale-95 group"
+          title="แตะเพื่อไปยังร้านค้า"
         >
-          <span className="text-sm leading-none drop-shadow-sm animate-pulse">⚽</span> 
-          <span className="drop-shadow-sm">{balls}</span>
+          <span className="text-sm leading-none drop-shadow-sm group-hover:animate-bounce">⚽</span> 
+          <span className="drop-shadow-sm min-w-[20px] text-center">
+             <CountUp end={balls || 0} duration={1} separator="," />
+          </span>
         </div>
         
         {/* ไอคอนเมนูด้านบน */}

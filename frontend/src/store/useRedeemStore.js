@@ -1,98 +1,93 @@
 import { create } from 'zustand';
-import { processTransaction } from '../services/firebase/transactionService';
+import { redeemService } from '../services/firebase/redeemService';
 import { useUserStore } from './useUserStore';
 
 export const useRedeemStore = create((set, get) => ({
+  // State หลักสำหรับเก็บของรางวัลที่เปิดขายอยู่
+  rewards: [],
+  isLoading: false,
   isRedeeming: false,
   error: null,
-  
-  // ==========================================
-  // 🎁 ข้อมูลจำลองของรางวัลสุดพรีเมียม (Premium Rewards)
-  // สามารถขยายผลดึงจาก Firebase ได้ในอนาคต
-  // ==========================================
-  rewards: [
-    { 
-      id: 'r1', 
-      title: 'แพ็กเกจการ์ดบูสต์พลัง', 
-      description: 'เพิ่มพลังนักเตะในทีม +20% เป็นเวลา 1 สัปดาห์',
-      cost: 500, 
-      type: 'powerup', 
-      icon: '⚡',
-      color: 'from-amber-400 to-orange-500' 
-    },
-    { 
-      id: 'r2', 
-      title: 'ตั๋วสุ่มนักเตะระดับ S', 
-      description: 'เปิดกาชาสุ่มรับนักเตะระดับ World Class เข้าทีม 1 คน (การันตี)',
-      cost: 1200, 
-      type: 'gacha', 
-      icon: '🎫',
-      color: 'from-fuchsia-500 to-purple-600'
-    },
-    { 
-      id: 'r3', 
-      title: 'เสื้อแข่งทีมโปรด (ของแท้)', 
-      description: 'รางวัลพิเศษ! แลกรับเสื้อบอลของแท้ จัดส่งฟรีถึงบ้าน (จำนวนจำกัด)',
-      cost: 50000, 
-      type: 'physical', 
-      icon: '👕',
-      color: 'from-blue-500 to-indigo-600',
-      stock: 5 // ระบบจำนวนจำกัด
-    },
-  ],
 
   /**
-   * ==========================================
-   * 🛍️ ฟังก์ชันยืนยันการแลกของรางวัล
-   * ==========================================
+   *   * 🛒 ดึงข้อมูลของรางวัล (ที่เปิดใช้งาน) จากร้านค้า
+   */
+  fetchRewards: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      // เรียกใช้ Service ที่ดึงจาก Firebase
+      const activeRewards = await redeemService.fetchActiveRewards();
+      set({ rewards: activeRewards, isLoading: false });
+    } catch (error) {
+      console.error("Store fetchRewards error:", error);
+      set({ error: error.message, isLoading: false });
+    }
+  },
+
+  /**
+   *   * 🛍️ ยืนยันการแลกของรางวัล (เชื่อมกับระบบ Transaction หลังบ้าน)
    * @param {string} userId - UID ของผู้เล่นที่กดแลก
-   * @param {object} reward - Object ของรางวัลที่ถูกเลือก
+   * @param {object} reward - Object ของรางวัลที่ถูกเลือกจากหน้า UI
    */
   redeemReward: async (userId, reward) => {
     set({ isRedeeming: true, error: null });
     
     try {
-      // 💡 PRO TIP: ใช้คำสั่ง getState() ของ zustand เพื่อดึงยอด Balls ⚽ ล่าสุดโดยตรง
+      // 1. Frontend Validation (เช็คเบื้องต้นเพื่อความไว ก่อนยิงไป Firebase)
       const userStore = useUserStore.getState();
       const currentBalls = userStore.balls;
 
-      // 1. Validation: ตรวจสอบความพร้อมของ Balls ⚽ (ทำที่ Frontend เพื่อความไว)
-      if (currentBalls < reward.cost) {
+      if (currentBalls < reward.price) {
         if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
           window.navigator.vibrate([50, 100, 50]); // 📳 สั่นเตือนว่าเงินไม่พอ
         }
-        throw new Error(`ต้องการอีก ${reward.cost - currentBalls} Balls ⚽ เพื่อแลกสิ่งนี้`);
+        throw new Error(`ยอด Balls ไม่พอ ขาดอีก ${reward.price - currentBalls} ⚽`);
       }
 
-      // Validation: เช็คสต็อกสินค้า
-      if (reward.stock !== undefined && reward.stock <= 0) {
-        throw new Error("ของรางวัลนี้หมดสต๊อกแล้ว ไว้วันหลังมาใหม่นะ!");
+      if (reward.stock <= 0) {
+        throw new Error("ของรางวัลนี้หมดสต๊อกแล้ว (Out of Stock)");
       }
 
-      // 2. Execute: ส่งคำสั่งหักเงินและบันทึกประวัติไปยัง Firebase (Atomic Operation)
-      // หักเงินต้องส่งค่าติดลบ (-) ไปที่ processTransaction
-      await processTransaction(
-        userId,
-        -reward.cost, // ส่งยอดติดลบ
-        'spend',
-        'redeem_reward',
-        `แลกรับรางวัล: ${reward.title}`
-      );
+      // 2. เรียกใช้ Firebase Transaction จาก Service ที่ปลอดภัยที่สุด
+      const result = await redeemService.redeemReward(userId, reward.id);
 
-      // 3. Optimistic UI Update: หักเงินบนหน้าจอ (Store) ทันที ไม่ต้องรอรีเฟรชหน้า
-      userStore.useBalls(reward.cost);
+      //      // 3. อัปเดต UI ทันทีเมื่อสำเร็จ (Optimistic Update)
+      
+      // 3.1 อัปเดตยอด Balls ใหม่ใน UserStore (ใช้ค่าที่ Server ยืนยันกลับมาเพื่อความแม่นยำ)
+      if (userStore.setBalls) {
+        userStore.setBalls(result.newBalance);
+      } else if (userStore.useBalls) {
+        // Fallback รองรับ Method เดิมเผื่อยังไม่ได้แก้อีกไฟล์
+        userStore.useBalls(reward.price); 
+      }
 
-      // 4. Background Sync: สั่งโหลดประวัติ Transactions ใหม่แบบเงียบๆ
-      // เพื่อให้เวลาผู้เล่นเปิดหน้า Profile จะเห็นประวัติการหักเงินล่าสุดทันที
-      userStore.loadTransactions(userId).catch(err => console.warn("Background sync failed", err));
+      // 3.2 ลดสต็อกของชิ้นนั้นลง 1 ทันทีบนหน้าจอ โดยไม่ต้องโหลดข้อมูลใหม่
+      const currentRewards = get().rewards;
+      set({
+        rewards: currentRewards.map(r => 
+          r.id === reward.id ? { ...r, stock: r.stock - 1 } : r
+        ),
+        isRedeeming: false
+      });
 
-      set({ isRedeeming: false });
-      return { success: true, message: `ยินดีด้วย! คุณได้รับ "${reward.title}" แล้ว` };
+      // 4. สั่งให้ดึงประวัติการใช้จ่ายใหม่แบบเงียบๆ (Background Sync)
+      if (userStore.loadTransactions) {
+        userStore.loadTransactions(userId).catch(err => console.warn("Background sync failed", err));
+      }
+
+      // 5. ส่งผลลัพธ์กลับไปให้ Component (โดยเฉพาะ wonItem ถ้าเป็นกล่องสุ่ม)
+      return { 
+        success: true, 
+        message: result.wonItem 
+          ? `🎉 แจ็คพอตแตก! คุณได้รับ "${result.wonItem.name}" (${result.wonItem.rarity})` 
+          : `✅ แลกรับ "${reward.name}" สำเร็จ!`,
+        wonItem: result.wonItem
+      };
 
     } catch (error) {
       console.error("❌ Redeem Error:", error);
       set({ error: error.message, isRedeeming: false });
-      throw error;
+      throw error; // โยน Error ให้ UI เอาไปโชว์เป็น Toast Alert
     }
   }
 }));

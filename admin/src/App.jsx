@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
 import QuestManager from './features/quests/QuestManager';
-// 🌟 NEW: นำเข้าไฟล์ UserManager ของจริงที่เราเพิ่งสร้างเสร็จ เพื่อใช้งานระบบจัดการ Balls ⚽
 import UserManager from './features/users/UserManager'; 
+// 🌟 NEW: นำเข้าไฟล์ RewardManager สำหรับจัดการระบบร้านค้าและของรางวัล
+import RewardManager from './features/rewards/RewardManager'; 
 
 // MOCK COMPONENTS สำหรับหน้าอื่นๆ ที่ยังไม่ได้ทำ
 const DashboardScreen = () => (
@@ -54,6 +55,9 @@ export default function App() {
                 {/* 🌟 UPDATED: เรียกใช้ Component ของจริง */}
                 <Route path="/quests" element={<QuestManager />} />
                 <Route path="/users" element={<UserManager />} />
+                
+                {/* 🌟 NEW: Route สำหรับจัดการร้านค้า (Store/Rewards) */}
+                <Route path="/rewards" element={<RewardManager />} />
                 
                 {/* Route จำลองอื่นๆ ป้องกัน Error */}
                 <Route path="/players" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: ฐานข้อมูลนักเตะ</div>} />

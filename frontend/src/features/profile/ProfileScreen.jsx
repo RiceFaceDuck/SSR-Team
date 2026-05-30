@@ -1,31 +1,63 @@
-import React, { useState } from 'react';
-import { Trophy, Settings, Mail, Plus, User, History, LogOut, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  Settings, 
+  Mail, 
+  Plus, 
+  User, 
+  History, 
+  LogOut, 
+  ChevronRight,
+  ArrowDownRight,
+  ArrowUpRight,
+  Receipt,
+  Loader2
+} from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 
 // 🌟 นำเข้า Component ประวัติการทำรายการ (TransactionHistory)
 import TransactionHistory from '../../components/common/TransactionHistory';
 
-// 🎨 Mock STYLES and Theme (กรณีไม่ได้ import เข้ามา)
+// 🎨 Mock STYLES and Theme
 const playSound = (type) => {
-  // จำลองระบบเสียง (ถ้ามี)
   if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
     window.navigator.vibrate(20);
   }
 };
 
 export default function ProfileScreen() {
-  // ดึงข้อมูลผู้ใช้งาน และจำนวนลูกบอล (เปลี่ยนจาก energyBottles)
-  const { userData, balls, clearAuth } = useUserStore();
+  // 🌟 NEW: ดึงข้อมูล transactions และฟังก์ชันโหลดจาก Store มาด้วย
+  const { 
+    userData, 
+    balls, 
+    clearAuth,
+    transactions,
+    isTransactionsLoading,
+    loadTransactions
+  } = useUserStore();
   
-  // State สำหรับควบคุมการเปิด/ปิด Bottom Sheet ประวัติรายการ
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
-  // ฟังก์ชันออกจากระบบ
+  // 🌟 NEW: ให้โหลดประวัติรายการอัตโนมัติเมื่อเข้ามาหน้า Profile
+  useEffect(() => {
+    if (userData?.uid) {
+      loadTransactions(userData.uid);
+    }
+  }, [userData?.uid, loadTransactions]);
+
   const handleLogout = () => {
     playSound('click');
     if (window.confirm('คุณต้องการออกจากระบบใช่หรือไม่?')) {
       clearAuth();
     }
+  };
+
+  // 🌟 NEW: ฟังก์ชันแปลงวันที่ให้สวยงามแบบแอปธนาคาร
+  const formatDate = (timestamp) => {
+    if (!timestamp) return '';
+    // รองรับทั้ง Firestore Timestamp และ Date ปกติ
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }) + ' • ' + 
+           date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
@@ -96,29 +128,71 @@ export default function ProfileScreen() {
             className="flex items-center gap-1.5 text-xs font-bold text-slate-200 bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-xl border border-slate-700 transition-all active:scale-95 shadow-sm"
           >
             <History size={14} className="text-amber-400" />
-            <span>ดูประวัติ</span>
+            <span>ประวัติเต็ม</span>
           </button>
         </div>
       </div>
 
-      {/* 🏆 ตู้โชว์ถ้วยรางวัล (Trophy Cabinet) */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-slate-800 flex items-center gap-2">
-          <Trophy size={18} className="text-amber-500" />
-          ตู้โชว์เกียรติยศ
-        </h3>
-        <button className="text-xs font-semibold text-indigo-600 flex items-center">
-          ดูทั้งหมด <ChevronRight size={14} />
-        </button>
-      </div>
-      
-      <div className="grid grid-cols-3 gap-3 mb-8">
-        {[1, 2, 3].map((item) => (
-          <div key={item} className="aspect-[4/5] bg-white rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center shadow-sm hover:border-indigo-200 transition-colors cursor-pointer group">
-            <span className="text-3xl grayscale opacity-20 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">🏆</span>
-            <span className="text-[10px] font-bold text-slate-400 mt-2 tracking-wide group-hover:text-indigo-500">ล็อคอยู่</span>
-          </div>
-        ))}
+      {/* 💳 Statement: ประวัติรายการล่าสุด (Banking Style) แทนตู้โชว์ */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4 px-1">
+          <h3 className="font-bold text-slate-800 flex items-center gap-2">
+            <Receipt size={18} className="text-blue-600" />
+            รายการล่าสุด
+          </h3>
+          <button 
+            onClick={() => setIsHistoryOpen(true)}
+            className="text-xs font-semibold text-blue-600 flex items-center hover:text-blue-800 transition-colors"
+          >
+            ดูทั้งหมด <ChevronRight size={14} />
+          </button>
+        </div>
+        
+        <div className="bg-white rounded-3xl p-2 border border-slate-100 shadow-sm">
+          {isTransactionsLoading ? (
+            <div className="flex flex-col items-center justify-center py-8 text-slate-400">
+              <Loader2 size={24} className="animate-spin mb-2" />
+              <span className="text-xs font-medium">กำลังโหลดประวัติ...</span>
+            </div>
+          ) : transactions && transactions.length > 0 ? (
+            <div className="divide-y divide-slate-50">
+              {/* ตัดมาโชว์แค่ 3 รายการล่าสุด */}
+              {transactions.slice(0, 3).map((tx) => {
+                const isExpense = tx.type === 'REDEEM' || tx.type === 'SPEND';
+                return (
+                  <div key={tx.id} className="flex items-center justify-between p-3 hover:bg-slate-50 transition-colors rounded-2xl cursor-pointer group">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${
+                        isExpense 
+                          ? 'bg-red-50 text-red-500 group-hover:bg-red-100' 
+                          : 'bg-green-50 text-green-500 group-hover:bg-green-100'
+                      }`}>
+                        {isExpense ? <ArrowDownRight size={20} /> : <ArrowUpRight size={20} />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-800 line-clamp-1">
+                          {tx.rewardName || tx.title || (isExpense ? 'แลกของรางวัล' : 'รับลูกบอล')}
+                        </p>
+                        <p className="text-[10px] text-slate-400 mt-0.5 font-medium">{formatDate(tx.timestamp)}</p>
+                      </div>
+                    </div>
+                    <div className={`text-sm font-black font-mono tracking-tight ${isExpense ? 'text-slate-800' : 'text-green-600'}`}>
+                      {isExpense ? '-' : '+'}{Number(tx.spentBalls || tx.amount || 0).toLocaleString()}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 text-slate-400">
+              <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-2">
+                <Receipt size={20} className="text-slate-300" />
+              </div>
+              <p className="text-sm font-medium text-slate-500">ยังไม่มีประวัติรายการ</p>
+              <p className="text-[10px] mt-1">คุณสามารถหาลูกบอลและนำมาแลกของรางวัลได้</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ⚙️ เมนูอื่นๆ และปุ่ม Logout */}
