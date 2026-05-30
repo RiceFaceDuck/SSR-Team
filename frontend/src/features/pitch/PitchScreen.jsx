@@ -3,20 +3,22 @@
  * @description หน้าจอหลักสำหรับจัดทีมฟุตบอล (Pitch Screen - V2 Premium)
  * ทำหน้าที่เป็น Container หลักรวบรวมชิ้นส่วนทั้งหมด (สนาม, ม้านั่ง, ปุ่มควบคุม, แผนการเล่น)
  * พร้อมระบบจัดการ State การสลับตัวผู้เล่น (Swap) ระหว่างสนามและม้านั่งสำรอง
+ * อัปเกรด: เพิ่มระบบแจ้งเตือนการเปลี่ยนแปลงและผสาน SaveSquadModal
  */
 
 import React, { useState, useEffect } from 'react';
-import { Loader2, X, RefreshCw } from 'lucide-react';
+import { Loader2, X, RefreshCw, Save } from 'lucide-react';
 import FormationSelector from './FormationSelector';
 import PitchBoard from './PitchBoard';
-import PitchActions from '../../components/pitch/PitchActions';
+import PitchActionButtons from './PitchActionButtons'; // 🌟 อัปเดต: เปลี่ยนมาใช้ Component ใหม่
 import BenchArea from './BenchArea';
+import SaveSquadModal from './SaveSquadModal'; // 🌟 อัปเดต: นำเข้าระบบบันทึกทีม
 import { useUserStore } from '../../store/useUserStore';
 import { toast } from '../../utils/toast';
 
 export default function PitchScreen() {
-  // ดึงฟังก์ชันสลับตัวจาก Global Store
-  const { swapPlayer } = useUserStore();
+  // ดึงฟังก์ชันและสถานะจาก Global Store
+  const { swapPlayer, hasUnsavedChanges, markAsSaved } = useUserStore();
   
   // State ควบคุม UI การโหลด (จำลองเพื่อความ Premium)
   const [isLoading, setIsLoading] = useState(true);
@@ -24,6 +26,9 @@ export default function PitchScreen() {
   // State ควบคุมระบบแตะเพื่อสลับตัว (Tap to Swap)
   // เก็บข้อมูล: { id: 'รหัสนักเตะ', name: 'ชื่อ', isOnBench: boolean }
   const [selectedForSwap, setSelectedForSwap] = useState(null);
+
+  // 🌟 State ควบคุม Modal การเซฟทีม
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
   // จำลอง Loading ข้อมูลตอนโหลดหน้าแรก เพื่อให้มีจังหวะ Transition สวยๆ
   useEffect(() => {
@@ -47,7 +52,7 @@ export default function PitchScreen() {
     setSelectedForSwap(null);
   };
 
-  // ฟังก์ชันช่วยเหลือ: ประมวลผลการสลับตัวจริง!
+  // ฟังก์ชันช่วยเหลือ: ประมวลผลการสลับตัวจริง
   const executeSwap = (id1, id2) => {
     swapPlayer(id1, id2); // เรียก Zustand Store เพื่อสลับข้อมูล
     setSelectedForSwap(null); // ล้าง State
@@ -57,7 +62,7 @@ export default function PitchScreen() {
   // 1. จัดการเหตุการณ์เมื่อผู้เล่นแตะ "นักเตะสำรอง" ที่ม้านั่ง
   const handleBenchClick = (fullData, squadData) => {
     const clickedId = squadData.playerId;
-    const clickedName = fullData.name || 'นักเตะ';
+    const clickedName = fullData?.name || 'นักเตะ';
     
     if (selectedForSwap) {
       if (selectedForSwap.id === clickedId) {
@@ -78,7 +83,7 @@ export default function PitchScreen() {
 
   // 2. จัดการเหตุการณ์เมื่อผู้เล่นแตะ "นักเตะตัวจริง" บนสนาม
   const handlePitchClick = (categoryCode, fullData) => {
-    if (!fullData) return; // หากคลิกโดนช่องว่าง (Ghost Slot) ให้ข้ามไป (จัดการโดย PitchBoard ตอนวางการ์ดแล้ว)
+    if (!fullData) return; // หากคลิกโดนช่องว่าง (Ghost Slot) ให้ข้ามไป (จัดการโดย PitchBoard)
     
     const clickedId = String(fullData.sku);
     const clickedName = fullData.name || 'นักเตะ';
@@ -98,6 +103,16 @@ export default function PitchScreen() {
       // เลือกระบุตัวนักเตะบนสนามเพื่อเตรียมสลับ
       selectPlayerForSwap(clickedId, clickedName, false);
     }
+  };
+
+  // 3. จัดการการบันทึกทีมลงคลาวด์
+  const handleConfirmSave = async () => {
+    // 🌟 จำลองการเรียก API ลง Firebase / Backend (ปรับใช้ของจริงที่นี่)
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    markAsSaved(); // เคลียร์สถานะ Draft ใน Store
+    toast.success("บันทึกทีมลงระบบเรียบร้อย!");
+    setIsSaveModalOpen(false);
   };
 
   if (isLoading) {
@@ -125,7 +140,7 @@ export default function PitchScreen() {
         จะปรากฏขึ้นมาลอยๆ เฉพาะตอนที่ผู้เล่นแตะเลือกใครสักคนไว้แล้ว (ช่วยเตือนความจำ)
       */}
       {selectedForSwap && (
-         <div className="fixed sm:absolute bottom-32 sm:bottom-10 right-4 sm:right-4 z-50 animate-bounce-short">
+         <div className="fixed sm:absolute bottom-[8.5rem] sm:bottom-28 right-4 sm:right-4 z-50 animate-bounce-short">
             <button 
               onClick={cancelSwap}
               className="bg-slate-800/90 backdrop-blur-md hover:bg-rose-900/80 text-rose-300 p-2.5 sm:p-3 
@@ -144,20 +159,37 @@ export default function PitchScreen() {
       <FormationSelector />
       
       {/* 2. กระดานสนามฟุตบอล (Pitch Board) */}
-      {/* 
-        หมายเหตุ: ถึงแม้ PitchBoard จะไม่ได้เน้นไฮไลท์ตอนสลับตัวเท่า Bench 
-        แต่การส่งฟังก์ชัน handlePitchClick ลงไปทำให้มันตอบสนองการสลับได้สมบูรณ์ 
-      */}
       <PitchBoard onSlotClick={handlePitchClick} />
       
       {/* 3. ปุ่มควบคุมระดับสนาม (Auto-fill, Clear Pitch) */}
-      <PitchActions />
+      <PitchActionButtons />
       
       {/* 4. ม้านั่งสำรอง (Bench Area) */}
-      {/* ส่ง selectedSwapPlayer ไปเพื่อให้ช่องม้านั่งเรืองแสงได้หากคนนั้นถูกเลือกอยู่ */}
       <BenchArea 
          onPlayerClick={handleBenchClick} 
          selectedSwapPlayer={selectedForSwap ? { playerId: selectedForSwap.id } : null} 
+      />
+
+      {/* 5. 🌟 ปุ่มบันทึกทีม (Save Squad Action) */}
+      <div className="mt-4 px-1 z-10">
+        <button
+          onClick={() => setIsSaveModalOpen(true)}
+          className={`w-full py-4 px-6 rounded-2xl font-black text-lg flex items-center justify-center gap-3 transition-all duration-300
+            ${hasUnsavedChanges 
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white shadow-[0_8px_30px_rgba(16,185,129,0.3)] hover:shadow-[0_8px_40px_rgba(16,185,129,0.5)] active:scale-[0.98]' 
+              : 'bg-slate-800 text-slate-400 border border-slate-700/50 cursor-default'
+            }`}
+        >
+          <Save size={22} className={hasUnsavedChanges ? "animate-pulse" : ""} />
+          <span>{hasUnsavedChanges ? 'บันทึกการจัดทีม' : 'ทีมถูกบันทึกล่าสุดแล้ว'}</span>
+        </button>
+      </div>
+
+      {/* 6. 🌟 โมดอลยืนยันการเซฟทีมพร้อมระบบโฆษณาสปอนเซอร์ */}
+      <SaveSquadModal 
+        isOpen={isSaveModalOpen} 
+        onClose={() => setIsSaveModalOpen(false)} 
+        onConfirmSave={handleConfirmSave} 
       />
       
     </div>

@@ -1,69 +1,79 @@
-/**
- * @file useMarketStore.js
- * @description Global State สำหรับตลาดนักเตะ พร้อมระบบ Cache 1 ชั่วโมง
- * ช่วยลดการดึงข้อมูลจาก Firestore (Reads) อย่างมหาศาล และทำให้ UI ลื่นไหล (Clean Architecture)
- */
-
 import { create } from 'zustand';
-// เตรียม Import Service ที่จะสร้างในขั้นตอนต่อไป (ไฟล์ 4/5)
-import { marketService } from '../services/firebase/marketService';
+// 🌟 หากลูกพี่ใช้ Firebase Firestore ให้เอาคอมเมนต์ 2 บรรทัดล่างนี้ออก (และเช็ค path ให้ตรง)
+// import { collection, getDocs } from 'firebase/firestore';
+// import { db } from '../config/firebase'; 
 
 export const useMarketStore = create((set, get) => ({
-  // --- State ---
-  players: [],          // รายชื่อนักเตะทั้งหมดในตลาด
-  lastFetched: null,    // Timestamp ล่าสุดที่ดึงข้อมูลสำเร็จ
-  isLoading: false,     // สถานะกำลังโหลด
-  error: null,          // ข้อความแจ้งเตือนเมื่อดึงข้อมูลพัง
-
-  // --- Actions ---
+  // State หลักสำหรับเก็บข้อมูลตลาด
+  players: [],
+  isLoading: false,
+  error: null,
+  isDataFetched: false, // Flag ป้องกันการยิง API ซ้ำซ้อนตอนเปลี่ยนหน้าไปมา
 
   /**
-   * ดึงข้อมูลตลาดนักเตะทั้งหมด พร้อมระบบตรวจสอบ Cache
-   * @param {boolean} forceRefresh - บังคับดึงข้อมูลใหม่โดยไม่สน Cache (เช่น เวลากดปุ่ม Refresh ด้วยมือ)
+   * ฟังก์ชันหลักสำหรับดึงข้อมูลนักเตะจาก Backend
+   * @param {boolean} forceRefresh - บังคับดึงข้อมูลใหม่ (เช่น เวลากดปุ่มรีเฟรช)
    */
   fetchMarketPlayers: async (forceRefresh = false) => {
-    const { lastFetched, players } = get();
-    const CACHE_TIME = 60 * 60 * 1000; // ตั้งค่าอายุ Cache ที่ 1 ชั่วโมง (มิลลิวินาที)
-    const now = Date.now();
+    // ถ้าเคยดึงข้อมูลมาแล้ว และไม่ได้สั่งบังคับรีเฟรช ให้ข้ามไปเลย (ประหยัดโควต้า Backend)
+    if (get().isDataFetched && !forceRefresh) return;
 
-    // 1. ตรวจสอบ Cache (Cache Hit)
-    // ถ้าไม่บังคับโหลดใหม่ + มีประวัติดึงข้อมูล + มีข้อมูลนักเตะ + เวลาที่ดึงยังไม่เกิน 1 ชม.
-    if (!forceRefresh && lastFetched && players.length > 0 && (now - lastFetched < CACHE_TIME)) {
-      console.log('✅ [Market Cache Hit] ใช้ข้อมูลนักเตะจาก Memory (ไม่ต้องยิง Firebase)');
-      return; 
-    }
-
-    // 2. ดึงข้อมูลใหม่ (Cache Miss)
     set({ isLoading: true, error: null });
+
     try {
-      console.log('📡 [Market Cache Miss] กำลังดึงข้อมูลนักเตะจาก Firestore...');
-      const fetchedPlayers = await marketService.getAllPlayers();
+      let fetchedPlayers = [];
+
+      // =========================================================
+      // 🔌 โซนเชื่อมต่อ Backend ของจริง (เปิดคอมเมนต์เมื่อเชื่อมต่อฐานข้อมูลจริง)
+      // =========================================================
       
-      // อัปเดตข้อมูลและประทับเวลาล่าสุด
-      set({ 
-        players: fetchedPlayers, 
-        lastFetched: Date.now(),
-        isLoading: false 
-      });
-    } catch (err) {
-      console.error('Market Fetch Error:', err);
-      set({ 
-        error: err.message || 'ไม่สามารถเชื่อมต่อตลาดนักเตะได้ กรุณาลองใหม่อีกครั้ง', 
-        isLoading: false 
-      });
+      /* --- ตัวอย่างถ้าใช้ Firebase Firestore --- */
+      // const querySnapshot = await getDocs(collection(db, "players"));
+      // fetchedPlayers = querySnapshot.docs.map(doc => ({ 
+      //   sku: doc.id, 
+      //   ...doc.data() 
+      // }));
+      
+      /* --- ตัวอย่างถ้าใช้ REST API (Node.js/Go/Python) --- */
+      // const response = await fetch('/api/market/players');
+      // fetchedPlayers = await response.json();
+
+
+      // =========================================================
+      // 🛑 โซน MOCK DATA (ระบบสำรอง) 
+      // ถ้า Backend จริงยังไม่มีข้อมูล ระบบจะยัดข้อมูลจำลองให้ เพื่อให้ UI ไม่พัง
+      // =========================================================
+      if (fetchedPlayers.length === 0) {
+        console.warn("⚠️ ไม่พบข้อมูลจากหลังบ้าน (Backend ว่างเปล่า) ระบบกำลังดึง Mock Data จำลองมาแสดงแทน...");
+        
+        // จำลองการโหลด (Delay)
+        await new Promise(resolve => setTimeout(resolve, 600));
+
+        fetchedPlayers = [
+          { sku: 'FW-01', name: 'ลีโอเนล เมสซี่', fullName: 'Lionel Messi', team: 'Inter Miami', position: 'FW', price: 85.0, totalPoints: 152, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' },
+          { sku: 'FW-02', name: 'เออร์ลิง ฮาลันด์', fullName: 'Erling Haaland', team: 'Man City', position: 'FW', price: 90.0, totalPoints: 140, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' },
+          { sku: 'MF-01', name: 'เควิน เดอ บรอยน์', fullName: 'Kevin De Bruyne', team: 'Man City', position: 'MF', price: 75.5, totalPoints: 110, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' },
+          { sku: 'MF-02', name: 'จู๊ด เบลลิงแฮม', fullName: 'Jude Bellingham', team: 'Real Madrid', position: 'MF', price: 80.0, totalPoints: 125, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' },
+          { sku: 'DF-01', name: 'เวอร์จิล ฟาน ไดจ์ค', fullName: 'Virgil van Dijk', team: 'Liverpool', position: 'DF', price: 55.0, totalPoints: 88, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' },
+          { sku: 'DF-02', name: 'รูเบน ดิอาส', fullName: 'Ruben Dias', team: 'Man City', position: 'DF', price: 50.0, totalPoints: 75, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' },
+          { sku: 'GK-01', name: 'อลิสซง เบ็คเกอร์', fullName: 'Alisson Becker', team: 'Liverpool', position: 'GK', price: 45.0, totalPoints: 92, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' },
+          { sku: 'GK-02', name: 'เอแดร์ซอน', fullName: 'Ederson Moraes', team: 'Man City', position: 'GK', price: 42.0, totalPoints: 85, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' }
+        ];
+      }
+
+      // บันทึกข้อมูลลง Store สำเร็จ
+      set({ players: fetchedPlayers, isLoading: false, isDataFetched: true });
+
+    } catch (error) {
+      console.error("❌ ดึงข้อมูลตลาดนักเตะล้มเหลว:", error);
+      set({ error: error.message, isLoading: false });
     }
   },
 
   /**
-   * ค้นหาและดึงข้อมูลแบบเต็มของนักเตะ 1 คน ด้วย SKU
-   * (เอาไว้ให้ระบบจัดทีมดึงข้อมูลไปแสดงผล โดยไม่ต้องเก็บข้อมูลซ้ำซ้อนใน mySquad)
-   * @param {string|number} sku - รหัสนักเตะ
-   * @returns {Object|null} ข้อมูลนักเตะ หรือ null ถ้าไม่พบ
+   * Helper function สำหรับค้นหานักเตะจากรหัส (SKU)
    */
   getPlayerBySku: (sku) => {
-    const { players } = get();
-    // ค้นหานักเตะ แปลงค่าให้เป็น String เพื่อความชัวร์ในการเปรียบเทียบ
-    return players.find(p => String(p.sku) === String(sku)) || null;
+    return get().players.find(p => String(p.sku) === String(sku));
   }
-
 }));

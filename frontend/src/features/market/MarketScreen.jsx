@@ -2,6 +2,7 @@
  * @file MarketScreen.jsx
  * @description หน้าจอหลักของตลาดนักเตะ (Market)
  * อัปเกรด (Phase 3 - Tap & Place): รองรับ Bottom Sheet, ยกเลิกระบบ Drag & Drop, และยิง Event สลับไปหน้า Pitch อัตโนมัติเมื่อกด "นำเข้าทีม"
+ * อัปเกรด (Phase 3.1 - Seamless Sync): เชื่อมต่อ Filter อัตโนมัติจากการแตะตำแหน่งว่างบน PitchBoard
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -22,11 +23,20 @@ import { toast } from '../../utils/toast';
 export default function MarketScreen() {
   // 1. ดึง State และ Action จาก Stores
   const { players, isLoading, fetchMarketPlayers } = useMarketStore();
-  // 🌟 ดึง startPlacement มาใช้แทนระบบ autoPlacePlayer เดิม
-  const { mySquad, budgetLeft, sellPlayer, startPlacement } = useUserStore();
+  
+  // 🌟 ดึง startPlacement และฟังก์ชันจัดการ Filter Position จากสนาม
+  const { 
+    mySquad, 
+    budgetLeft, 
+    sellPlayer, 
+    startPlacement,
+    marketFilterPos,     // 🌟 NEW: รับค่าตำแหน่งเป้าหมายที่ถูกส่งมาจาก PitchBoard
+    setMarketFilterPos   // 🌟 NEW: ฟังก์ชันอัปเดตสถานะกลับเข้า Store
+  } = useUserStore();
 
   // 2. Local State สำหรับจัดการ UI ภายในหน้านี้
-  const [activeTab, setActiveTab] = useState('ALL');
+  // 🌟 NEW: ตั้งค่าเริ่มต้น Tab จากตำแหน่งที่กดมาจากสนาม (ถ้าไม่มีให้เป็น 'ALL')
+  const [activeTab, setActiveTab] = useState(marketFilterPos || 'ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('price-desc'); // price-desc, price-asc, points-desc
   
@@ -41,9 +51,19 @@ export default function MarketScreen() {
     fetchMarketPlayers();
   }, [fetchMarketPlayers]);
 
+  // 🌟 NEW: ดักจับและซิงค์ Tab อัตโนมัติเมื่อค่า marketFilterPos ถูกเปลี่ยนจากนอก Component (เช่นกดมาจากสนาม)
+  useEffect(() => {
+    if (marketFilterPos && marketFilterPos !== activeTab) {
+      setActiveTab(marketFilterPos);
+    }
+    // ไม่ต้องใส่ activeTab เป็น dependency เพื่อป้องกัน Infinite Loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [marketFilterPos]);
+
   // 4. การจัดการแท็บตัวกรอง (Filters)
   const tabs = [
     { label: 'ทั้งหมด', value: 'ALL' },
+    { label: 'ทีมของฉัน', value: 'MY_TEAM' }, // 🌟 นำแท็บทีมของฉันกลับมาเพื่อให้ดูรายชื่อที่มีอยู่ได้
     { label: 'กองหน้า', value: 'FW' },
     { label: 'กองกลาง', value: 'MF' },
     { label: 'กองหลัง', value: 'DF' },
@@ -54,7 +74,10 @@ export default function MarketScreen() {
   const displayPlayers = useMemo(() => {
     let filtered = [...players];
 
-    if (activeTab !== 'ALL') {
+    if (activeTab === 'MY_TEAM') {
+      // 🌟 กรองแสดงเฉพาะนักเตะที่เราซื้อมาแล้ว (มีใน mySquad)
+      filtered = filtered.filter(p => mySquad.some(sq => String(sq.playerId) === String(p.sku)));
+    } else if (activeTab !== 'ALL') {
       filtered = filtered.filter(p => p.position?.toUpperCase() === activeTab);
     }
 
@@ -180,7 +203,10 @@ export default function MarketScreen() {
             return (
               <button 
                 key={tab.value}
-                onClick={() => setActiveTab(tab.value)}
+                onClick={() => {
+                  setActiveTab(tab.value);
+                  setMarketFilterPos(tab.value); // 🌟 NEW: ซิงค์กลับ Store เมื่อผู้เล่นกดเปลี่ยน Tab เอง
+                }}
                 className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold border transition-colors shadow-sm
                   ${isActive 
                     ? 'bg-slate-800 text-white border-slate-800' 
@@ -200,14 +226,20 @@ export default function MarketScreen() {
         {isLoading ? (
           <SkeletonLoader type="row" count={5} />
         ) : displayPlayers.length > 0 ? (
-          displayPlayers.map((player) => (
-            <PlayerRow 
-              key={player.sku} 
-              player={player} 
-              onClick={handleRowClick}      // 🌟 ส่ง Event กดตรงแถว
-              onActionClick={handleActionClick} 
-            />
-          ))
+          displayPlayers.map((player) => {
+            // 🌟 เช็คว่านักเตะคนนี้มีอยู่ในทีมแล้วหรือยัง เพื่อส่งให้ PlayerRow เปลี่ยนปุ่มเป็น "ขาย"
+            const isOwned = mySquad.some(sq => String(sq.playerId) === String(player.sku));
+            
+            return (
+              <PlayerRow 
+                key={player.sku} 
+                player={player} 
+                isOwned={isOwned} // 🌟 ส่ง props ไปบอก Component ลูก
+                onClick={handleRowClick}      
+                onActionClick={handleActionClick} 
+              />
+            );
+          })
         ) : (
           <div className="text-center py-10 bg-white rounded-2xl border border-slate-100 shadow-sm">
             <span className="text-4xl mb-3 block">🔍</span>

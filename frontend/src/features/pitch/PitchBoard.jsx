@@ -18,7 +18,8 @@ export default function PitchBoard({ onSlotClick }) {
     mySquad, 
     formation, 
     pendingPlacement, 
-    confirmPlacement 
+    confirmPlacement,
+    setMarketFilterPos // 🌟 NEW: ดึงฟังก์ชันจดจำตำแหน่งลง Store
   } = useUserStore();
 
   const getPlayerBySku = useMarketStore((state) => state.getPlayerBySku);
@@ -58,13 +59,31 @@ export default function PitchBoard({ onSlotClick }) {
 
     } else {
       // 2. โหมดปกติ (ไม่ได้ถือการ์ด)
-      // แตะเพื่อเรียกเปิด Modal สถิติ หรือสลับตัวนักเตะที่อยู่บนกระดาน
-      if (onSlotClick && existingPlayer) {
-        // 📳 สั่นสะเทือนเบาๆ ตกกระทบ (Tap Haptic)
-        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-          window.navigator.vibrate(15);
+      if (existingPlayer) {
+        // 2.1 มีนักเตะอยู่แล้ว -> เรียกเปิด Modal สถิติ หรือสลับตัว
+        if (onSlotClick) {
+          // 📳 สั่นสะเทือนเบาๆ ตกกระทบ (Tap Haptic)
+          if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(15);
+          }
+          onSlotClick(categoryCode, existingPlayer);
         }
-        onSlotClick(categoryCode, existingPlayer);
+      } else {
+        // 🌟 2.2 NEW: ไม่มีนักเตะ (Ghost Slot) -> พาไปตลาดซื้อขายพร้อม Auto-Filter
+        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+          window.navigator.vibrate([20, 30, 20]); // สั่นเป็นจังหวะตื่นเต้นเชิญชวน
+        }
+        
+        // ก. จดจำตำแหน่งที่ผู้เล่นต้องการลง Store
+        setMarketFilterPos(categoryCode);
+        
+        // ข. สั่งเปลี่ยนหน้าต่าง (Tab) ไปยัง Market แบบไร้รอยต่อ
+        window.dispatchEvent(new CustomEvent('switchTab', { detail: 'market' }));
+        
+        // ค. แจ้งเตือนสั้นๆ เพื่อให้ UI ไม่กระตุกจนงง
+        // เลือกใช้ชื่อเต็มของตำแหน่งเพื่อความสวยงาม
+        const posNames = { FW: 'กองหน้า', MF: 'กองกลาง', DF: 'กองหลัง', GK: 'ผู้รักษาประตู' };
+        toast.info(`กำลังพาไปยังตลาดเพื่อหา ${posNames[categoryCode] || categoryCode}...`);
       }
     }
   };
@@ -112,7 +131,7 @@ export default function PitchBoard({ onSlotClick }) {
       // การตกแต่งกรอบช่องนักเตะตามสถานะจัดวาง (Glow & Pulse effects)
       const isDroppableSlot = isDroppableRow;
       const slotWrapperClasses = `relative transition-all duration-500 ease-out flex-shrink-0 rounded-full
-        ${pendingPlacement ? 'cursor-pointer' : 'cursor-default'}
+        ${pendingPlacement ? 'cursor-pointer' : 'cursor-pointer hover:scale-105 active:scale-95'}
         ${isDroppableSlot 
             ? 'ring-4 ring-yellow-400/80 shadow-[0_0_30px_rgba(250,204,21,0.6)] scale-110 z-20 animate-[pulse_1.5s_ease-in-out_infinite] bg-yellow-400/10' 
             : 'ring-0'

@@ -37,6 +37,7 @@ export default function FormationSelector() {
         <div className="p-2 bg-indigo-500/20 rounded-lg border border-indigo-500/30 text-indigo-400 mt-0.5 hidden sm:block">
           <LayoutDashboard size={20} />
         </div>
+        
         <div>
           <h4 className="font-bold text-sm text-slate-100 flex items-center gap-2">
             แผนการเล่น <span className="text-indigo-400">({currentFormationData.name})</span>

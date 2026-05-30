@@ -1,115 +1,153 @@
 /**
- * @file BenchArea.jsx
- * @description UI Component สำหรับแสดงม้านั่งสำรอง (Bench)
- * อัปเกรด (Phase 3): รองรับการแสดงผลตัวสำรองทั้งหมด, เพิ่ม Manager Slot (ช่องผู้จัดการทีม),
- * และออกแบบให้เป็นแนวนอนแบบเลื่อนได้ (Horizontal Scroll) พร้อมรองรับระบบคลิกเพื่อสลับตัว (Swap)
+ * @file PlayerSlot.jsx
+ * @description UI Component สำหรับช่องใส่นักเตะ 1 คนบนสนาม (Pitch) หรือม้านั่งสำรอง
+ * อัปเกรด (Phase 3 Final): แสงเงาระดับ AAA, มิติของช่อง (Bevel), และ Interaction ตอนกดสลับตัว
  */
 
 import React from 'react';
-import PlayerSlot from '../../components/player/PlayerSlot';
-import ManagerSlot from '../../components/player/ManagerSlot';
+import { User, Plus, RefreshCw } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
-import { useMarketStore } from '../../store/useMarketStore';
+import { normalizePosition } from '../../utils/squadValidator';
 
-export default function BenchArea({ onPlayerClick, selectedSwapPlayer }) {
-  // ดึงข้อมูลรายชื่อนักเตะในทีมจาก Store
-  const { mySquad } = useUserStore();
-  
-  // ดึงฟังก์ชันสำหรับค้นหาข้อมูลเต็มของนักเตะจาก Market Store (เอาไว้แสดงรูป/พลัง)
-  const getPlayerBySku = useMarketStore((state) => state.getPlayerBySku);
+// 🌟 อัปเกรดสีประจำตำแหน่งให้มีความพรีเมียม (Gradient แวววาว + Drop Shadow ชัดเจน)
+const POS_COLORS = {
+  FW: { 
+    bg: 'bg-gradient-to-t from-rose-800 via-rose-600 to-rose-400', 
+    text: 'text-rose-100', 
+    border: 'border-rose-400', 
+    glow: 'shadow-[0_0_20px_rgba(225,29,72,0.6)]' 
+  },
+  MF: { 
+    bg: 'bg-gradient-to-t from-blue-800 via-blue-600 to-blue-400', 
+    text: 'text-blue-100', 
+    border: 'border-blue-400', 
+    glow: 'shadow-[0_0_20px_rgba(37,99,235,0.6)]' 
+  },
+  DF: { 
+    bg: 'bg-gradient-to-t from-emerald-800 via-emerald-600 to-emerald-400', 
+    text: 'text-emerald-100', 
+    border: 'border-emerald-400', 
+    glow: 'shadow-[0_0_20px_rgba(5,150,105,0.6)]' 
+  },
+  GK: { 
+    bg: 'bg-gradient-to-t from-amber-800 via-amber-600 to-amber-400', 
+    text: 'text-amber-100', 
+    border: 'border-amber-400', 
+    glow: 'shadow-[0_0_20px_rgba(217,119,6,0.6)]' 
+  },
+  DEFAULT: { 
+    bg: 'bg-gradient-to-t from-slate-700 via-slate-500 to-slate-400', 
+    text: 'text-slate-100', 
+    border: 'border-slate-400', 
+    glow: 'shadow-[0_0_20px_rgba(71,85,105,0.6)]' 
+  }
+};
 
-  // คัดกรองเอาเฉพาะนักเตะที่ "ไม่ได้ลงเป็นตัวจริง" (isStarting === false)
-  const benchMembers = mySquad.filter(p => !p.isStarting);
+export default function PlayerSlot({ 
+  player, 
+  expectedPosition = 'MF', 
+  isGhost = false,         
+  onClick, 
+  isSelected = false       
+}) {
+  const { pendingPlacement } = useUserStore();
 
-  // กำหนดจำนวนช่องม้านั่งสำรองขั้นต่ำ (มาตรฐานฟุตบอลคือ 7 คน)
-  // หากผู้เล่นมีตัวสำรองมากกว่า 7 คน ก็จะแสดงตามจำนวนจริง
-  const minBenchSlots = 7;
-  const totalSlots = Math.max(minBenchSlots, benchMembers.length);
+  const position = player ? normalizePosition(player.position) : expectedPosition;
+  const theme = POS_COLORS[position] || POS_COLORS.DEFAULT;
+  const isMatchPending = isGhost && pendingPlacement && normalizePosition(pendingPlacement.position) === expectedPosition;
+  const shortName = player?.name ? (player.name.length > 10 ? player.name.substring(0, 8) + '..' : player.name) : 'Unknown';
+  const playerImage = player?.photoURL || player?.image;
+
+  if (isGhost) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-1 z-10">
+        <button
+          onClick={onClick}
+          className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center
+            transition-all duration-500 border-[2.5px] border-dashed
+            ${isMatchPending 
+              ? `${theme.border} bg-slate-800/90 animate-pulse ${theme.glow} scale-110 z-20` 
+              : 'border-white/20 bg-black/20 hover:border-white/40 hover:bg-black/40 backdrop-blur-md shadow-[inset_0_4px_10px_rgba(0,0,0,0.5)]'
+            }
+            active:scale-95 group`}
+          title={`วางผู้เล่นตำแหน่ง ${expectedPosition}`}
+        >
+          {isMatchPending ? (
+            <div className="relative flex items-center justify-center w-full h-full">
+               <div className="absolute inset-0 bg-white/10 rounded-full animate-ping"></div>
+               <Plus size={28} className={`${theme.text} drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] z-10`} strokeWidth={3} />
+            </div>
+          ) : (
+            <span className="text-white/40 text-sm font-black tracking-wider group-hover:text-white/80 transition-colors drop-shadow-md">
+              {expectedPosition}
+            </span>
+          )}
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full mt-2 z-20">
-      {/* 
-        แผงม้านั่งสำรอง (Bench Panel) 
-        ใช้ดีไซน์ Glassmorphism โทนเข้ม เพื่อให้ตัดกับสีเขียวของสนาม 
-      */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/60 
-                      rounded-2xl p-3 sm:p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.3)]
-                      flex flex-col gap-3">
-        
-        {/* หัวข้อส่วนม้านั่งสำรอง */}
-        <div className="flex justify-between items-end px-1">
-          <h3 className="text-slate-200 font-bold text-sm sm:text-base flex items-center gap-2">
-            ม้านั่งสำรอง <span className="text-slate-500 font-medium text-xs">({benchMembers.length} คน)</span>
-          </h3>
-          <div className="text-[10px] text-cyan-400 font-medium bg-cyan-900/30 px-2 py-0.5 rounded border border-cyan-800/50">
-            แตะนักเตะเพื่อสลับตัว
-          </div>
+    <div className="flex flex-col items-center justify-center gap-1 z-10 relative">
+      <button
+        onClick={onClick}
+        className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center overflow-visible
+          transition-all duration-300 active:scale-90 group
+          ${isSelected 
+            ? 'scale-110 z-30' 
+            : 'hover:scale-[1.05] hover:z-20'
+          }`}
+        title={isSelected ? 'แตะเป้าหมายเพื่อสลับตำแหน่ง' : `เลือก ${player?.name}`}
+      >
+        {/* กรอบวงกลมด้านนอก (ขอบเหล็กพรีเมียมมีแสงเงา) */}
+        <div className={`absolute inset-0 rounded-full border-[3px] transition-all duration-300
+          ${isSelected 
+            ? 'border-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.8)] animate-[pulse_1.5s_infinite]' 
+            : `${theme.border} ${theme.glow} border-t-white/60 border-b-black/60 bg-slate-800 shadow-xl`
+          }`}
+        ></div>
+
+        {/* รูปนักเตะ */}
+        <div className="absolute inset-[2.5px] rounded-full overflow-hidden bg-slate-900 flex items-center justify-center shadow-inner">
+          {playerImage ? (
+            <img 
+              src={playerImage} 
+              alt={player?.name || 'Player'} 
+              className={`w-full h-full object-cover transition-opacity duration-300 ${isSelected ? 'opacity-70 scale-110' : 'opacity-100'}`}
+              onError={(e) => { 
+                e.target.style.display = 'none'; 
+                e.target.nextElementSibling.style.display = 'block';
+              }} 
+            />
+          ) : null}
+          <User size={28} className={`text-slate-400 drop-shadow-md ${playerImage ? 'hidden' : 'block'}`} />
         </div>
 
-        {/* 
-          คอนเทนเนอร์รายชื่อนักเตะ (Scroll แนวนอนได้)
-          รองรับการลากนิ้วบนมือถือ (Touch-friendly) 
-        */}
-        <div className="flex items-center w-full overflow-x-auto pb-2 pt-1 gap-3 sm:gap-4 
-                        scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent">
-          
-          {/* ช่องผู้จัดการทีม (Manager Slot) - ถูกตรึงไว้ซ้ายสุดเสมอ และเว้นระยะด้วยเส้นขอบ */}
-          <div className="flex-shrink-0 pr-3 sm:pr-4 border-r-2 border-slate-700/50">
-            <ManagerSlot />
-          </div>
+        {/* แถบแสงเงา (Inner Glow) โค้งด้านล่าง */}
+        <div className={`absolute -bottom-1.5 w-[85%] h-3 rounded-full blur-[3px] opacity-80 mix-blend-screen ${theme.bg}`}></div>
+      </button>
 
-          {/* เรนเดอร์นักเตะสำรอง และ ช่องว่างให้ครบจำนวนโควต้า */}
-          {Array.from({ length: totalSlots }).map((_, index) => {
-            const member = benchMembers[index];
-            
-            if (member) {
-              // กรณีมีนักเตะสำรองอยู่ในช่องนี้
-              const playerFullData = getPlayerBySku(member.playerId);
-              
-              // เช็คว่านักเตะคนนี้กำลังถูกเลือกเพื่อเตรียมสลับตัวอยู่หรือไม่
-              const isSelected = selectedSwapPlayer && selectedSwapPlayer.playerId === member.playerId;
-
-              return (
-                <div key={`bench-player-${member.playerId}`} className="flex-shrink-0">
-                  <PlayerSlot 
-                    player={playerFullData}
-                    expectedPosition="SUB" // ตำแหน่งคาดหวังเป็น SUB (Substitute)
-                    isGhost={false}
-                    isSelected={isSelected}
-                    onClick={() => {
-                      // 📳 Haptic Feedback เมื่อแตะตัวสำรอง
-                      if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-                        window.navigator.vibrate(20);
-                      }
-                      if (onPlayerClick) {
-                        // ส่งข้อมูลนักเตะพร้อมสถานะปัจจุบันกลับไปให้ PitchScreen จัดการ Swap
-                        onPlayerClick(playerFullData, { ...member, isOnBench: true });
-                      }
-                    }}
-                  />
-                </div>
-              );
-            } else {
-              // กรณีเป็นช่องม้านั่งว่างเปล่า (Ghost Slot)
-              return (
-                <div key={`bench-empty-${index}`} className="flex-shrink-0 opacity-50 grayscale">
-                  <PlayerSlot 
-                    expectedPosition="SUB"
-                    isGhost={true}
-                    onClick={() => {
-                      // แตะช่องว่างบนม้านั่งสำรอง ไม่ต้องทำอะไร หรืออาจจะแค่สั่นตอบสนองเบาๆ
-                      if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-                        window.navigator.vibrate(10);
-                      }
-                    }}
-                  />
-                </div>
-              );
-            }
-          })}
-          
+      {/* ป้ายชื่อและตำแหน่ง */}
+      <div className="flex flex-col items-center -mt-2 z-20 pointer-events-none">
+        <div className={`
+          px-2.5 py-0.5 rounded-md text-[10px] sm:text-xs font-black text-white whitespace-nowrap shadow-[0_4px_10px_rgba(0,0,0,0.5)]
+          border transition-colors duration-300 tracking-tight
+          ${isSelected ? 'bg-gradient-to-b from-yellow-500 to-yellow-600 border-yellow-300 text-yellow-50' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-600'}
+        `}>
+          {shortName}
+        </div>
+        <div className={`text-[10px] mt-0.5 font-black tracking-widest uppercase drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] ${isSelected ? 'text-yellow-400' : theme.text}`}>
+          {position}
         </div>
       </div>
+      
+      {/* ไอคอนแสดงการเลือกสลับตัว (ลอยเด่นขึ้นมา) */}
+      {isSelected && (
+        <div className="absolute -top-2 -right-2 w-7 h-7 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full border-2 border-slate-900 
+                        flex items-center justify-center shadow-lg animate-bounce z-40">
+          <RefreshCw size={14} className="text-slate-900 font-bold" strokeWidth={3} />
+        </div>
+      )}
     </div>
   );
 }
