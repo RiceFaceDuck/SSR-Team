@@ -1,10 +1,10 @@
 /**
  * @file PlayerSlot.jsx
  * @description UI Component สำหรับช่องใส่นักเตะ 1 คนบนสนาม (Pitch) หรือม้านั่งสำรอง
- * อัปเกรด (Phase 3 Final Polish): 
- * - ถอดลูกเล่นสีจางออก ใช้โทนสีทึบ (Solid Dark/Slate-800) ดุดัน
- * - เพิ่มแสงตกกระทบ (Drop shadow/Neon Glow) ตามระดับตำแหน่ง
- * - ลูกเล่นพิกเซล (Dotted Border) เมื่อเข้าสู่โหมดสลับตัว (Swap)
+ * อัปเกรด (Phase 5 - AAA Polish): 
+ * - แยก Layer แอนิเมชันให้กรอบหมุนอิสระโดยที่รูปนักเตะไม่หมุนตาม
+ * - ปรับระบบแสง Neon Glow ให้ดูเป็นเกมแนว Cyber-Sports มากขึ้น
+ * - เพิ่ม Radar Ping Effect สำหรับช่องว่าง (Ghost Slot) เวลารอรับนักเตะ
  */
 
 import React from 'react';
@@ -12,37 +12,42 @@ import { User, Plus, RefreshCw } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { normalizePosition } from '../../utils/squadValidator';
 
-// 🌟 อัปเกรด: โทนสีนีออน (Neon) ตัดกับขอบโลหะทึบ
+// 🌟 อัปเกรด: โทนสีนีออน (Neon) แบบพรีเมียม ตัดกับขอบโลหะทึบ
 const POS_COLORS = {
   FW: { 
     neon: 'text-rose-400', 
     border: 'border-rose-500', 
-    bgBadge: 'bg-rose-600',
-    glow: 'shadow-[0_0_15px_rgba(244,63,94,0.6)]' 
+    bgBadge: 'bg-gradient-to-r from-rose-700 to-rose-600',
+    glow: 'shadow-[0_0_20px_rgba(244,63,94,0.5)]',
+    ring: 'ring-rose-500/50'
   },
   MF: { 
     neon: 'text-blue-400', 
     border: 'border-blue-500', 
-    bgBadge: 'bg-blue-600',
-    glow: 'shadow-[0_0_15px_rgba(59,130,246,0.6)]' 
+    bgBadge: 'bg-gradient-to-r from-blue-700 to-blue-600',
+    glow: 'shadow-[0_0_20px_rgba(59,130,246,0.5)]',
+    ring: 'ring-blue-500/50'
   },
   DF: { 
     neon: 'text-emerald-400', 
     border: 'border-emerald-500', 
-    bgBadge: 'bg-emerald-600',
-    glow: 'shadow-[0_0_15px_rgba(16,185,129,0.6)]' 
+    bgBadge: 'bg-gradient-to-r from-emerald-700 to-emerald-600',
+    glow: 'shadow-[0_0_20px_rgba(16,185,129,0.5)]',
+    ring: 'ring-emerald-500/50'
   },
   GK: { 
     neon: 'text-amber-400', 
     border: 'border-amber-500', 
-    bgBadge: 'bg-amber-600',
-    glow: 'shadow-[0_0_15px_rgba(245,158,11,0.6)]' 
+    bgBadge: 'bg-gradient-to-r from-amber-600 to-orange-500',
+    glow: 'shadow-[0_0_20px_rgba(245,158,11,0.5)]',
+    ring: 'ring-amber-500/50'
   },
   DEFAULT: { 
     neon: 'text-slate-400', 
     border: 'border-slate-500', 
-    bgBadge: 'bg-slate-600',
-    glow: 'shadow-[0_0_15px_rgba(100,116,139,0.6)]' 
+    bgBadge: 'bg-gradient-to-r from-slate-700 to-slate-600',
+    glow: 'shadow-[0_0_15px_rgba(100,116,139,0.4)]',
+    ring: 'ring-slate-500/50'
   }
 };
 
@@ -55,13 +60,13 @@ export default function PlayerSlot({
 }) {
   const { pendingPlacement } = useUserStore();
 
-  const position = player ? normalizePosition(player.position) : expectedPosition;
+  const position = player ? normalizePosition(player.position) : normalizePosition(expectedPosition);
   const theme = POS_COLORS[position] || POS_COLORS.DEFAULT;
   
-  const isMatchPending = isGhost && pendingPlacement && normalizePosition(pendingPlacement.position) === expectedPosition;
-  const shortName = player?.name ? (player.name.length > 10 ? player.name.substring(0, 8) + '..' : player.name) : 'Unknown';
+  // ตรวจสอบว่ากำลังถือการ์ดที่ตำแหน่งตรงกับช่องนี้หรือไม่
+  const isMatchPending = isGhost && pendingPlacement && normalizePosition(pendingPlacement.position) === position;
   
-  // รองรับการอ่านรูปทั้ง 3 ฟิลด์
+  const shortName = player?.name ? (player.name.length > 9 ? player.name.substring(0, 7) + '..' : player.name) : 'Unknown';
   const playerImage = player?.photoURL || player?.imageUrl || player?.image;
 
   // ==========================================
@@ -73,24 +78,24 @@ export default function PlayerSlot({
         <button
           onClick={onClick}
           className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center
-            transition-all duration-300 border-[2px]
+            transition-all duration-300 active:scale-90 group
             ${isMatchPending 
-              // แสงกระพริบเมื่อถือการ์ดตรงตำแหน่ง (เรืองแสงนีออนดุดัน)
-              ? `border-dashed ${theme.border} bg-slate-800 animate-pulse ${theme.glow} scale-110 z-20` 
-              // ช่องว่างปกติ (ขอบทึบ ไม่โปร่งใส)
-              : 'border-slate-700 bg-slate-800/90 hover:border-slate-500 hover:bg-slate-700 shadow-[inset_0_4px_10px_rgba(0,0,0,0.6)]'
-            }
-            active:scale-95 group`}
-          title={`วางผู้เล่นตำแหน่ง ${expectedPosition}`}
+              // 🎯 โหมดเรียกรับนักเตะ: เส้นประหนา, สว่างวาบ, มีคลื่นเรดาร์
+              ? `border-[3px] border-dashed ${theme.border} bg-slate-800/90 ${theme.glow} scale-110 z-20` 
+              // โหมดช่องว่างปกติ: มืดๆ โปร่งแสงนิดๆ
+              : 'border-[2px] border-slate-700/80 bg-slate-900/60 hover:border-slate-500 hover:bg-slate-800/80 shadow-[inset_0_4px_10px_rgba(0,0,0,0.4)]'
+            }`}
+          title={`วางผู้เล่นตำแหน่ง ${position}`}
         >
           {isMatchPending ? (
             <div className="relative flex items-center justify-center w-full h-full">
-               <div className={`absolute inset-0 ${theme.bgBadge} opacity-20 rounded-full animate-ping`}></div>
-               <Plus size={28} className={`${theme.neon} drop-shadow-lg z-10`} strokeWidth={3} />
+               {/* Radar Ping Effect */}
+               <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-30 bg-white"></span>
+               <Plus size={28} className={`${theme.neon} drop-shadow-[0_0_8px_currentColor] z-10 animate-pulse`} strokeWidth={3} />
             </div>
           ) : (
-            <span className="text-slate-500 text-sm font-black tracking-wider group-hover:text-slate-300 transition-colors">
-              {expectedPosition}
+            <span className="text-slate-600/80 text-sm font-black tracking-widest group-hover:text-slate-400 transition-colors drop-shadow-sm">
+              {position}
             </span>
           )}
         </button>
@@ -99,76 +104,74 @@ export default function PlayerSlot({
   }
 
   // ==========================================
-  // ⚽ โหมดมีนักเตะ (Filled Slot) - พื้นหลังทึบ
+  // ⚽ โหมดมีนักเตะ (Filled Slot) - แสดงผลจัดเต็ม
   // ==========================================
   return (
-    <div className="flex flex-col items-center justify-center gap-1 z-10 relative">
+    <div className="flex flex-col items-center justify-center gap-1.5 z-10 relative">
       <button
         onClick={onClick}
         className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center overflow-visible
-          transition-all duration-300 active:scale-90 group
-          ${isSelected 
-            ? 'scale-110 z-30' 
-            : 'hover:scale-[1.05] hover:z-20'
-          }`}
+          transition-transform duration-300 active:scale-[0.85] group focus:outline-none
+          ${isSelected ? 'scale-[1.15] z-30' : 'hover:scale-[1.05] hover:z-20'}`}
         title={isSelected ? 'แตะเป้าหมายเพื่อสลับตำแหน่ง' : `เลือก ${player?.name}`}
       >
-        {/* 🌟 กรอบโลหะด้านนอก (Metallic Ring) */}
-        <div className={`absolute inset-0 rounded-full transition-all duration-300
+        {/* 🌟 เลเยอร์ 1: กรอบแอนิเมชันด้านนอก (หมุนอิสระ ไม่ดึงรูปภาพให้หมุนตาม) */}
+        <div className={`absolute inset-0 rounded-full transition-all duration-300 pointer-events-none
           ${isSelected 
-            // 🌟 ลูกเล่นพิกเซล: เปลี่ยนเป็นขอบประ (Dotted) สีทองกระพริบ เมื่อถูกเลือกให้สลับตัว
-            ? 'border-[3px] border-dotted border-yellow-400 shadow-[0_0_25px_rgba(250,204,21,0.8)] animate-[spin_4s_linear_infinite]' 
-            // ขอบปกติ: สีตามตำแหน่ง + เงาในและเงานอกให้ดูเป็นเหรียญโลหะ
-            : `border-[2px] ${theme.border} ${theme.glow} shadow-[inset_0_2px_4px_rgba(255,255,255,0.2)]`
+            // หมุนติ้วๆ สีทองเมื่อถูกเลือกสลับตัว
+            ? 'border-[3px] border-dashed border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.6)] animate-[spin_4s_linear_infinite]' 
+            // ขอบสีปกติตามตำแหน่ง พร้อมวงแหวนเรืองแสงเบาๆ
+            : `border-[2px] ${theme.border} ${theme.glow} ring-2 ring-offset-2 ring-offset-slate-900 ring-transparent group-hover:${theme.ring}`
           }`}
         ></div>
 
-        {/* 🌟 พื้นหลังภาพนักเตะ (ทึบแสง 100%) */}
-        <div className={`absolute inset-[2.5px] rounded-full overflow-hidden bg-gradient-to-b from-slate-700 to-slate-900 flex items-center justify-center shadow-inner
-          ${isSelected ? 'animate-[spin_4s_linear_infinite_reverse]' : ''} /* แก้ไขรูปให้ไม่หมุนตามขอบประ */
-        `}>
+        {/* 🌟 เลเยอร์ 2: รูปภาพนักเตะ (อยู่นิ่งๆ ขอบมนพอดีเป๊ะ) */}
+        <div className="absolute inset-[3px] rounded-full overflow-hidden bg-gradient-to-b from-slate-700 to-slate-900 flex items-center justify-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.8)] pointer-events-none z-10">
           {playerImage ? (
             <img 
               src={playerImage} 
               alt={player?.name || 'Player'} 
-              // 🌟 ถอด opacity ออกทั้งหมด ใช้รูปชัดๆ ตัดกับขอบดำ
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover transition-opacity duration-300 ${isSelected ? 'opacity-80 scale-110' : 'opacity-100 scale-100 group-hover:scale-110'}`}
               onError={(e) => { 
-                e.target.style.display = 'none'; 
+                e.target.style.opacity = '0'; 
+                setTimeout(() => e.target.style.display = 'none', 300);
                 e.target.nextElementSibling.style.display = 'block';
               }} 
             />
           ) : null}
-          <User size={28} className={`text-slate-400 drop-shadow-md ${playerImage ? 'hidden' : 'block'}`} />
+          <User size={28} className={`text-slate-400 drop-shadow-md transition-all ${playerImage ? 'hidden' : 'block group-hover:scale-110'}`} />
         </div>
+
+        {/* 🌟 เลเยอร์ 3: ไอคอนสลับตัว (โผล่มาเฉพาะตอนถูกเลือก) */}
+        {isSelected && (
+          <div className="absolute -top-2 -right-2 w-7 h-7 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full border-[2px] border-slate-900 flex items-center justify-center shadow-[0_0_15px_rgba(250,204,21,0.8)] animate-bounce z-40">
+            <RefreshCw size={14} className="text-slate-900 font-bold" strokeWidth={3} />
+          </div>
+        )}
       </button>
 
-      {/* 🌟 ป้ายชื่อและตำแหน่ง (Badge) - ปรับโทนสีให้ทึบและพรีเมียมขึ้น */}
-      <div className="flex flex-col items-center -mt-2 z-20 pointer-events-none">
+      {/* 🌟 ป้ายชื่อและตำแหน่ง (Badge Area) */}
+      <div className="flex flex-col items-center -mt-2.5 z-20 pointer-events-none">
+        {/* ป้ายชื่อ */}
         <div className={`
-          px-2.5 py-0.5 rounded-md text-[10px] sm:text-xs font-black text-white whitespace-nowrap shadow-[0_4px_10px_rgba(0,0,0,0.6)]
+          px-2.5 py-0.5 rounded-md text-[9px] sm:text-[11px] font-black whitespace-nowrap shadow-[0_4px_10px_rgba(0,0,0,0.8)]
           border transition-colors duration-300 tracking-tight
           ${isSelected 
-            ? 'bg-yellow-500 border-yellow-300 text-slate-900' 
-            : 'bg-slate-800 border-slate-600'
+            ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 border-yellow-300 text-slate-900' 
+            : 'bg-slate-900 border-slate-600 text-slate-100'
           }
         `}>
           {shortName}
         </div>
         
-        {/* จุดสีนีออนเล็กๆ บอกตำแหน่งด้านล่างชื่อ */}
-        <div className={`text-[9px] mt-0.5 font-black tracking-widest uppercase drop-shadow-lg ${isSelected ? 'text-yellow-400' : theme.neon}`}>
+        {/* แถบสีตำแหน่งย่อย */}
+        <div className={`text-[8px] sm:text-[9px] mt-0.5 font-black tracking-[0.2em] uppercase drop-shadow-lg 
+          ${isSelected ? 'text-yellow-400' : theme.neon}`}
+        >
           {position}
         </div>
       </div>
       
-      {/* ไอคอนแสดงการเลือกสลับตัว (ลอยเด่นขึ้นมา ไม่ต้องพึ่งความโปร่งใส) */}
-      {isSelected && (
-        <div className="absolute -top-2 -right-2 w-7 h-7 bg-yellow-400 rounded-full border-2 border-slate-900 
-                        flex items-center justify-center shadow-[0_0_15px_rgba(250,204,21,0.6)] animate-bounce z-40">
-          <RefreshCw size={14} className="text-slate-900 font-bold" strokeWidth={3} />
-        </div>
-      )}
     </div>
   );
 }

@@ -80,9 +80,8 @@ export default function PitchScreen() {
     if (selectedForSwap) {
       if (selectedForSwap.id === clickedId) {
         cancelSwap();
-      } else if (selectedForSwap.isOnBench) {
-         executeSwap(selectedForSwap.id, clickedId);
       } else {
+         // คลีนอัปโค้ดเงื่อนไขซ้ำซ้อน: ถ้าไม่ได้เลือกตัวเอง ให้ทำการสลับตัวได้เลย
          executeSwap(selectedForSwap.id, clickedId);
       }
     } else {

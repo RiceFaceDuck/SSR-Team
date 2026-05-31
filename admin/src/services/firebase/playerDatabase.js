@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { collection, doc, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
 // อัปเดต Path ให้ตรงกับโฟลเดอร์ config ของคุณ
 import { db } from '../../config/firebase'; 
 
@@ -45,18 +45,34 @@ export const playerDatabase = {
     }
   },
 
-  // 3. เพิ่มนักเตะ 1 คน (Create)
+  // 3. เพิ่มนักเตะ 1 คน (Create) พร้อมระบบกรองข้อมูลขยะ
   addPlayer: async (playerData) => {
     try {
-      // ถ้ามี SKU ให้ใช้ SKU เป็น Document ID เพื่อป้องกันข้อมูลซ้ำ และง่ายต่อการอัปเดตจาก API
+      // 🌟 คลีนข้อมูลก่อนเซฟ ป้องกันค่า undefined ไปทำลายระบบหน้าบ้าน
+      const cleanData = {
+        ...playerData,
+        stats: {
+          pace: Number(playerData.stats?.pace) || 0,
+          shooting: Number(playerData.stats?.shooting) || 0,
+          passing: Number(playerData.stats?.passing) || 0,
+          dribbling: Number(playerData.stats?.dribbling) || 0,
+          defending: Number(playerData.stats?.defending) || 0,
+          physical: Number(playerData.stats?.physical) || 0,
+        },
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        isActive: playerData.isActive !== undefined ? playerData.isActive : true
+      };
+
+      // ถ้ามี SKU ให้ใช้ SKU เป็น Document ID เพื่อป้องกันข้อมูลซ้ำ
       if (playerData.sku) {
         const docRef = getDocRef(String(playerData.sku));
-        await setDoc(docRef, playerData);
-        return { id: String(playerData.sku), ...playerData };
+        await setDoc(docRef, cleanData, { merge: true }); // ใช้ merge ป้องกันการทับหาย
+        return { id: String(playerData.sku), ...cleanData };
       } else {
         // ถ้าไม่มีให้สร้าง Auto-ID
-        const docRef = await addDoc(getCollectionRef(), playerData);
-        return { id: docRef.id, ...playerData };
+        const docRef = await addDoc(getCollectionRef(), cleanData);
+        return { id: docRef.id, ...cleanData };
       }
     } catch (error) {
       console.error("Error adding player:", error);
@@ -64,12 +80,25 @@ export const playerDatabase = {
     }
   },
 
-  // 4. อัปเดตข้อมูลนักเตะ (Update)
+  // 4. อัปเดตข้อมูลนักเตะ (Update) พร้อมระบบลบค่า Undefined
   updatePlayer: async (id, playerData) => {
     try {
       const docRef = getDocRef(String(id));
-      await updateDoc(docRef, playerData);
-      return { id, ...playerData };
+      
+      const cleanUpdate = {
+        ...playerData,
+        updatedAt: serverTimestamp()
+      };
+
+      // 🌟 กวาดล้าง Properties ที่เป็น undefined ทิ้งไปก่อนส่งขึ้น Database
+      Object.keys(cleanUpdate).forEach(key => {
+        if (cleanUpdate[key] === undefined) {
+          delete cleanUpdate[key];
+        }
+      });
+
+      await updateDoc(docRef, cleanUpdate);
+      return { id, ...cleanUpdate };
     } catch (error) {
       console.error("Error updating player:", error);
       throw error;
@@ -98,20 +127,27 @@ export const playerDatabase = {
 
       playersArray.forEach((player) => {
         let docRef;
+        
+        // 🌟 เพิ่ม Timestamp ให้กับการนำเข้าผ่าน Excel ด้วย
+        const cleanPlayer = {
+            ...player,
+            updatedAt: serverTimestamp()
+        };
+
         // จัดการ Document ID
-        if (player.sku) {
-          docRef = getDocRef(String(player.sku));
-          results.push({ id: String(player.sku), ...player });
+        if (cleanPlayer.sku) {
+          docRef = getDocRef(String(cleanPlayer.sku));
+          results.push({ id: String(cleanPlayer.sku), ...cleanPlayer });
         } else {
           docRef = doc(getCollectionRef()); // สร้าง Auto ID
-          results.push({ id: docRef.id, ...player });
+          results.push({ id: docRef.id, ...cleanPlayer });
         }
         
-        currentBatch.set(docRef, player);
+        // 🌟 ใช้ merge: true ใน Batch ด้วย เพื่อความปลอดภัย
+        currentBatch.set(docRef, cleanPlayer, { merge: true });
         operationCount++;
 
         // Firestore จำกัดการเขียนสูงสุดที่ 500 actions ต่อ 1 Batch
-        // เซฟตี้ไว้ที่ 490 actions เผื่อโควต้าขาดเหลือ
         if (operationCount >= 490) { 
           batches.push(currentBatch.commit());
           currentBatch = writeBatch(db); // เริ่ม Batch ใหม่

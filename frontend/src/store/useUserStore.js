@@ -1,3 +1,9 @@
+/**
+ * @file useUserStore.js
+ * @description สมองกลหลัก (Global State) ของระบบจัดทีมและข้อมูลผู้เล่น
+ * อัปเกรด: แก้ไขบั๊คม้านั่งสำรองว่างเปล่า, เพิ่มความแม่นยำในการสลับตำแหน่ง, และป้องกันจุดรั่วไหลของข้อมูลทศนิยม
+ */
+
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware'; 
 import { normalizePosition } from '../utils/squadValidator';
@@ -9,19 +15,23 @@ import { squadService } from '../services/firebase/squadService';
 export const useUserStore = create(
   persist(
     (set, get) => ({
+      // ==========================================
+      // 👤 ข้อมูลผู้เล่นและกระเป๋าเงิน
+      // ==========================================
       isAuthenticated: false, 
       isAuthLoading: true,    
       userData: null,         
       balls: 0,              
       userPoints: 0,          
       budgetLeft: 100.0,      
+      
+      // ==========================================
+      // ⚽ ข้อมูลการจัดทีม
+      // ==========================================
       formation: '4-4-2',     
-      mySquad: [],            
+      mySquad: [],            // โครงสร้าง: [{ playerId, position, isStarting, slotIndex }]
       myCards: [],            
 
-      // ==========================================
-      // 🌟 ระบบเชื่อมโยง Pitch <-> Market และ Save/Ad
-      // ==========================================
       marketFilterPos: 'ALL',   
       isSaveUnlocked: false,    
       hasUnsavedChanges: false, 
@@ -31,7 +41,7 @@ export const useUserStore = create(
       markAsSaved: () => set({ hasUnsavedChanges: false, isSaveUnlocked: false }), 
 
       // ==========================================
-      // 🌟 ระบบบันทึก/โหลดทีมบนคลาวด์ (Cloud Sync)
+      // ☁️ ระบบบันทึก/โหลดทีมบนคลาวด์ (Cloud Sync)
       // ==========================================
       saveSquadToCloud: async (userId) => {
         const { mySquad, budgetLeft, formation, markAsSaved } = get();
@@ -53,7 +63,7 @@ export const useUserStore = create(
           const squadData = await squadService.loadSquad(userId);
           if (squadData) {
             set({
-              mySquad: squadData.mySquad || [],
+              mySquad: Array.isArray(squadData.mySquad) ? squadData.mySquad : [],
               budgetLeft: squadData.budgetLeft !== undefined ? parseFloat(squadData.budgetLeft) : 100.0,
               formation: squadData.formation || '4-4-2',
               hasUnsavedChanges: false 
@@ -65,11 +75,14 @@ export const useUserStore = create(
       },
 
       // ==========================================
-      // 🌟 State สำหรับเก็บประวัติการเงิน (Transaction History)
+      // 💳 State สำหรับเก็บประวัติการเงิน (Transaction History)
       // ==========================================
       transactions: [],
       isTransactionsLoading: false,
 
+      // ==========================================
+      // 🔐 ระบบ Authentication
+      // ==========================================
       setUserAuth: (userPayload) => set({
         isAuthenticated: true,
         isAuthLoading: false,
@@ -80,8 +93,8 @@ export const useUserStore = create(
           photoURL: userPayload.photoURL,
           role: userPayload.role || 'player'
         },
-        balls: userPayload.balls !== undefined ? userPayload.balls : (userPayload.energyBottles || 0),
-        userPoints: userPayload.userPoints || 0,
+        balls: Number(userPayload.balls !== undefined ? userPayload.balls : (userPayload.energyBottles || 0)),
+        userPoints: Number(userPayload.userPoints) || 0,
         hasUnsavedChanges: false, 
         isSaveUnlocked: false
       }),
@@ -97,33 +110,37 @@ export const useUserStore = create(
 
       setAuthReady: () => set({ isAuthLoading: false }),
 
-      // --- ระบบตลาดซื้อขาย ---
+      // ==========================================
+      // 🛒 ระบบตลาดซื้อขาย (Market Actions)
+      // ==========================================
       buyPlayer: (player) => set((state) => {
-        const newBudget = state.budgetLeft - (parseFloat(player.price) || 0);
+        // แก้ปัญหาทศนิยมเพี้ยนด้วย Math.round
+        const newBudget = Math.round((state.budgetLeft - (parseFloat(player.price) || 0)) * 10) / 10;
         const newMember = { 
           playerId: String(player.sku), 
           position: normalizePosition(player.position), 
-          isStarting: false 
+          isStarting: false,
+          slotIndex: null
         };
         return {
-          budgetLeft: parseFloat(newBudget.toFixed(1)),
+          budgetLeft: newBudget,
           mySquad: [...state.mySquad, newMember],
           hasUnsavedChanges: true 
         };
       }),
 
       sellPlayer: (player) => set((state) => {
-        const newBudget = state.budgetLeft + (parseFloat(player.price) || 0);
+        const newBudget = Math.round((state.budgetLeft + (parseFloat(player.price) || 0)) * 10) / 10;
         const newSquad = state.mySquad.filter(p => p.playerId !== String(player.sku));
         return {
-          budgetLeft: parseFloat(newBudget.toFixed(1)),
+          budgetLeft: newBudget,
           mySquad: newSquad,
           hasUnsavedChanges: true 
         };
       }),
 
       // ==========================================
-      // 🌟 Smart Formation Switcher
+      // 🏟️ Smart Formation Switcher (เปลี่ยนแผนการเล่น)
       // ==========================================
       setFormation: (newFormation) => {
         const { mySquad } = get();
@@ -138,6 +155,7 @@ export const useUserStore = create(
             currentCount[pos]++;
             return player; 
           } else {
+            // เด้งกลับไปม้านั่งสำรองอย่างปลอดภัย
             return { ...player, isStarting: false, slotIndex: null };
           }
         });
@@ -149,10 +167,11 @@ export const useUserStore = create(
         set({ formation: newFormation, mySquad: updatedSquad, hasUnsavedChanges: true }); 
       },
       
+      // ขายทิ้งทั้งหมดเพื่อตั้งตัวใหม่
       clearSquad: () => set({ mySquad: [], budgetLeft: 100.0, hasUnsavedChanges: true }), 
 
       // ==========================================
-      // 🌟 Premium Tap & Place System (ระบบจัดทีม V2)
+      // 🎯 Premium Tap & Place System (ระบบซื้อแล้ววางลงสนาม V2)
       // ==========================================
       pendingPlacement: null,   
       projectedBudget: null,    
@@ -183,7 +202,7 @@ export const useUserStore = create(
 
         set({ 
           pendingPlacement: player,
-          projectedBudget: parseFloat((currentBudget - playerPrice).toFixed(1))
+          projectedBudget: Math.round((currentBudget - playerPrice) * 10) / 10
         });
         
         return { success: true, message: 'เลือกนักเตะแล้ว กรุณาไปที่สนามเพื่อวางตำแหน่ง' };
@@ -201,10 +220,11 @@ export const useUserStore = create(
            return { success: false, message: 'เกิดข้อผิดพลาด: งบประมาณไม่เพียงพอ' };
         }
 
-        const newBudget = parseFloat((budgetLeft - playerPrice).toFixed(1));
+        const newBudget = Math.round((budgetLeft - playerPrice) * 10) / 10;
         const newSquad = [...mySquad];
         const normalizedPos = normalizePosition(pendingPlacement.position);
         
+        // ถ้าช่องเป้าหมายมีคนยืนอยู่ ให้เตะคนนั้นไปม้านั่งสำรองอย่างปลอดภัย
         if (slotIndex !== undefined && slotIndex !== null) {
           const existingStarterIndex = newSquad.findIndex(p => p.slotIndex === slotIndex && p.isStarting);
           if (existingStarterIndex !== -1) {
@@ -213,6 +233,7 @@ export const useUserStore = create(
           }
         }
 
+        // นำนักเตะใหม่เข้าทีมและลงสนามทันที
         const newMember = { 
           playerId: String(pendingPlacement.sku), 
           position: normalizedPos, 
@@ -245,24 +266,109 @@ export const useUserStore = create(
       },
 
       // ==========================================
-      // 🌟 Field Actions (Auto Fill & Clear Pitch)
+      // 🔄 Field & Bench Operations (ระบบสลับตัวขั้นเทพ)
       // ==========================================
       
-      // ล้างสนาม (ดึงทุกคนกลับม้านั่ง)
-      clearPitch: () => {
-        const { mySquad } = get();
-        const newSquad = mySquad.map(p => ({ ...p, isStarting: false, slotIndex: null }));
-        set({ mySquad: newSquad, hasUnsavedChanges: true }); 
-      },
+      /**
+       * (อาวุธใหม่) นำนักเตะไปวางในช่องที่ระบุ หากมีคนอยู่ให้เตะไปม้านั่ง
+       * ทำให้สามารถกดนักเตะจากม้านั่ง แล้วไปกดช่องว่างๆ เพื่อลงสนามได้เลย
+       */
+      assignPlayerToSlot: (playerId, slotIndex) => set((state) => {
+        const squad = [...state.mySquad];
+        const playerIdx = squad.findIndex(p => p.playerId === String(playerId));
+        if (playerIdx === -1) return state; 
 
-      // จัดทีมอัตโนมัติ 
+        const targetPlayer = { ...squad[playerIdx] };
+        const oldSlot = targetPlayer.slotIndex;
+
+        // เช็คว่าช่องเป้าหมายมีคนอยู่หรือไม่
+        const occupantIdx = squad.findIndex(p => p.isStarting && p.slotIndex === slotIndex);
+
+        if (occupantIdx !== -1 && occupantIdx !== playerIdx) {
+          const occupant = { ...squad[occupantIdx] };
+          // ถ้านักเตะที่ลากมามาจากสนามอยู่แล้ว -> สลับช่องกัน
+          if (targetPlayer.isStarting && oldSlot) {
+            occupant.slotIndex = oldSlot;
+            occupant.isStarting = true;
+          } else {
+            // ถ้ามาจากม้านั่ง -> เตะคนเก่าไปม้านั่ง
+            occupant.slotIndex = null;
+            occupant.isStarting = false;
+          }
+          squad[occupantIdx] = occupant;
+        }
+
+        // อัปเดตสถานะให้คนใหม่ลงหลุม
+        targetPlayer.isStarting = true;
+        targetPlayer.slotIndex = slotIndex;
+        squad[playerIdx] = targetPlayer;
+
+        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+          window.navigator.vibrate(30);
+        }
+
+        return { mySquad: squad, hasUnsavedChanges: true };
+      }),
+
+      /**
+       * สลับนักเตะ 2 คน (แก้บั๊คข้อมูลหาย)
+       */
+      swapPlayer: (player1Id, player2Id) => set((state) => {
+        const squad = [...state.mySquad];
+        const p1Index = squad.findIndex(p => p.playerId === String(player1Id));
+        const p2Index = squad.findIndex(p => p.playerId === String(player2Id));
+
+        if (p1Index !== -1 && p2Index !== -1) {
+          const p1 = { ...squad[p1Index] };
+          const p2 = { ...squad[p2Index] };
+
+          // สลับสถานะตัวจริง
+          const tempStarting = p1.isStarting;
+          p1.isStarting = p2.isStarting;
+          p2.isStarting = tempStarting;
+
+          // สลับตำแหน่งช่องบนสนาม
+          const tempSlot = p1.slotIndex;
+          p1.slotIndex = p2.slotIndex;
+          p2.slotIndex = tempSlot;
+
+          // 🛡️ ป้องกันบั๊ก: ถ้าใครกลับไปอยู่ม้านั่ง (isStarting: false) ต้องล้างค่า slotIndex ทิ้ง
+          if (!p1.isStarting) p1.slotIndex = null;
+          if (!p2.isStarting) p2.slotIndex = null;
+
+          squad[p1Index] = p1;
+          squad[p2Index] = p2;
+        }
+        
+        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+           window.navigator.vibrate(30);
+        }
+        return { mySquad: squad, hasUnsavedChanges: true }; 
+      }),
+
+      // ดึงนักเตะออกจากสนามกลับม้านั่ง 1 คน
+      removePlayerFromPitch: (playerId) => set((state) => {
+        const squad = [...state.mySquad];
+        const pIndex = squad.findIndex(p => p.playerId === String(playerId));
+        if (pIndex !== -1) {
+          squad[pIndex] = { ...squad[pIndex], isStarting: false, slotIndex: null };
+        }
+        return { mySquad: squad, hasUnsavedChanges: true }; 
+      }),
+
+      // ล้างสนาม (ดึงทุกคนกลับม้านั่ง)
+      clearPitch: () => set((state) => {
+        const newSquad = state.mySquad.map(p => ({ ...p, isStarting: false, slotIndex: null }));
+        return { mySquad: newSquad, hasUnsavedChanges: true }; 
+      }),
+
+      // จัดทีมอัตโนมัติ (อัปเกรดให้ฉลาดขึ้น)
       autoFillTeam: () => {
         const { mySquad, formation } = get();
         let newSquad = [...mySquad];
         const limits = getPositionLimits(formation);
         const formationData = getFormationData(formation);
         
-        // 1. หาว่าช่องไหนบนสนามถูกจองไปแล้วบ้าง
         const occupiedSlots = new Set();
         const currentStarters = { FW: 0, MF: 0, DF: 0, GK: 0 };
         
@@ -273,7 +379,6 @@ export const useUserStore = create(
           }
         });
 
-        // 2. ลิสต์ช่องว่างที่เหลืออยู่
         const availableSlots = { FW: [], MF: [], DF: [], GK: [] };
         
         formationData.rows.forEach(row => {
@@ -285,14 +390,12 @@ export const useUserStore = create(
           }
         });
         
-        // เพิ่มช่องผู้รักษาประตู
         if (!occupiedSlots.has('GK-0')) {
           availableSlots['GK'].push('GK-0');
         }
 
         let isModified = false;
 
-        // 3. จับยัดลงช่องว่างที่ระบุ slotIndex ชัดเจน
         newSquad = newSquad.map(player => {
           if (player.isStarting) return player; 
 
@@ -319,54 +422,17 @@ export const useUserStore = create(
       },
 
       // ==========================================
-      // --- ระบบจัดทีมแบบเก่า (เก็บไว้ซัพพอร์ตบางฟีเจอร์) ---
-      // ==========================================
-      autoPlacePlayer: (playerId) => {
-        return get().autoFillTeam().success;
-      },
-
-      swapPlayer: (player1Id, player2Id) => set((state) => {
-        const squad = [...state.mySquad];
-        const p1Index = squad.findIndex(p => p.playerId === String(player1Id));
-        const p2Index = squad.findIndex(p => p.playerId === String(player2Id));
-
-        if (p1Index !== -1 && p2Index !== -1) {
-          const tempStarting = squad[p1Index].isStarting;
-          const tempSlot = squad[p1Index].slotIndex;
-          
-          squad[p1Index] = { ...squad[p1Index], isStarting: squad[p2Index].isStarting, slotIndex: squad[p2Index].slotIndex };
-          squad[p2Index] = { ...squad[p2Index], isStarting: tempStarting, slotIndex: tempSlot };
-          
-          if (!squad[p1Index].isStarting) squad[p1Index].slotIndex = null;
-          if (!squad[p2Index].isStarting) squad[p2Index].slotIndex = null;
-        }
-        
-        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-           window.navigator.vibrate(30);
-        }
-        return { mySquad: squad, hasUnsavedChanges: true }; 
-      }),
-
-      removePlayerFromPitch: (playerId) => set((state) => {
-        const squad = [...state.mySquad];
-        const pIndex = squad.findIndex(p => p.playerId === String(playerId));
-        if (pIndex !== -1) {
-          squad[pIndex] = { ...squad[pIndex], isStarting: false, slotIndex: null };
-        }
-        return { mySquad: squad, hasUnsavedChanges: true }; 
-      }),
-
-      // ==========================================
       // --- ทรัพยากรหลัก (Balls ⚽) ---
       // ==========================================
-      setBalls: (amount) => set({ balls: amount }),
+      setBalls: (amount) => set({ balls: Number(amount) || 0 }),
 
       useBalls: (amount) => set((state) => {
-        if (state.balls >= amount) {
+        const numAmount = Number(amount) || 0;
+        if (state.balls >= numAmount) {
           if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
             window.navigator.vibrate(20); 
           }
-          return { balls: state.balls - amount };
+          return { balls: state.balls - numAmount };
         }
         return state; 
       }),
@@ -375,7 +441,7 @@ export const useUserStore = create(
         if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
           window.navigator.vibrate([30, 50, 30]); 
         }
-        return { balls: state.balls + amount };
+        return { balls: state.balls + (Number(amount) || 0) };
       }),
 
       loadTransactions: async (userId) => {

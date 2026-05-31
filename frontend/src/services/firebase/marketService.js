@@ -1,7 +1,7 @@
 /**
  * @file marketService.js
- * @description Service Layer สำหรับดึงข้อมูลตลาดนักเตะ
- * อัปเกรด: รองรับ Caching, Promise Deduping, Offline Fallback และ Data Sanitization
+ * @description Service Layer สำหรับดึงข้อมูลตลาดนักเตะ (Frontend)
+ * อัปเกรด: รองรับ Caching, Promise Deduping, Offline Fallback และ Data Sanitization ให้สอดคล้องกับระบบหลังบ้าน
  */
 
 import { collection, getDocs, query } from 'firebase/firestore';
@@ -12,8 +12,8 @@ import { db } from '../../config/firebase';
 // ==========================================
 let cachedPlayers = null;
 let lastFetchTime = 0;
-let fetchPromise = null; // ตัวแปรล็อคสถานะป้องกัน Race condition
-const CACHE_TTL = 5 * 60 * 1000; // อายุ Cache ในหน่วยความจำ (5 นาที)
+let fetchPromise = null; // ตัวแปรล็อคสถานะป้องกัน Race condition (ผู้เล่นกดย้ำๆ)
+const CACHE_TTL = 5 * 60 * 1000; // อายุ Cache ในหน่วยความจำ (5 นาทีประหยัด Reads มหาศาล)
 const LOCAL_STORAGE_KEY = 'ssr_team_players_backup';
 
 /**
@@ -35,21 +35,23 @@ export const marketService = {
 
     // 1. ตรวจสอบ Cache ใน Memory (เร็วกว่าแสง 0ms)
     if (!forceRefresh && cachedPlayers && (now - lastFetchTime < CACHE_TTL)) {
-      console.log('📦 [Market] เสิร์ฟข้อมูลนักเตะจาก Memory Cache');
+      console.log('%c📦 [Market] เสิร์ฟข้อมูลนักเตะจาก Memory Cache (0 Reads)', 'color: #10b981; font-weight: bold;');
       return cachedPlayers;
     }
 
     // 2. ป้องกัน Race Condition: ถ้าระบบกำลังโหลดอยู่ ให้ Request อื่นๆ รอผลลัพธ์ร่วมกัน
     if (fetchPromise && !forceRefresh) {
-      console.log('⏳ [Market] มีการดึงข้อมูลอยู่แล้ว รอรับผลลัพธ์ร่วมกันเพื่อประหยัดโควต้า...');
+      console.log('%c⏳ [Market] มีการดึงข้อมูลอยู่แล้ว รอรับผลลัพธ์ร่วมกัน...', 'color: #f59e0b; font-weight: bold;');
       return fetchPromise;
     }
 
     // 3. เริ่มกระบวนการดึงข้อมูลใหม่
     fetchPromise = (async () => {
       try {
-        console.log('☁️ [Market] ดึงข้อมูลนักเตะล่าสุดจาก Firebase Firestore...');
+        console.log('%c☁️ [Market] ดึงข้อมูลนักเตะล่าสุดจาก Firebase Firestore...', 'color: #3b82f6; font-weight: bold;');
         const playersRef = getPlayersCollection();
+        
+        // ดึงข้อมูลทั้งหมดจาก Database โดยตรง (จะไป Sort ต่อใน MarketStore)
         const q = query(playersRef); 
         const snapshot = await getDocs(q);
         
@@ -57,7 +59,7 @@ export const marketService = {
         snapshot.forEach((doc) => {
           const data = doc.data();
           
-          // 🛡️ Data Sanitization: ซ่อมแซมและจัดฟอร์แมตข้อมูล ป้องกัน UI พัง
+          // 🛡️ Data Sanitization: จัดฟอร์แมตข้อมูลให้เป๊ะที่สุด ป้องกัน UI หน้าบ้านพัง
           players.push({
             id: doc.id,
             sku: data.sku || doc.id,
@@ -65,17 +67,25 @@ export const marketService = {
             fullName: data.fullName || data.name || 'Unknown',
             position: data.position ? String(data.position).toUpperCase() : 'RES',
             team: data.team || data.club || 'Free Agent',
+            // บังคับให้เป็นตัวเลขเสมอ
             price: Number(data.price) || 0.0,
             totalPoints: Number(data.totalPoints || data.points) || 0,
-            imageUrl: data.imageUrl || data.image || null, 
+            // คลีน URL ภาพ
+            imageUrl: typeof data.imageUrl === 'string' ? data.imageUrl.trim() : (data.image || null), 
             status: data.status || 'active',
-            // เผื่อมีระบบสถิติย่อยในอนาคต
+            
+            // 🌟 อัปเกรด: รองรับสถิติชุดใหม่ (FIFA Style) จากระบบแอดมินที่เพิ่งอัปเดตไป
             stats: {
+              pace: Number(data.stats?.pace) || 0,
+              shooting: Number(data.stats?.shooting) || 0,
+              passing: Number(data.stats?.passing) || 0,
+              dribbling: Number(data.stats?.dribbling) || 0,
+              defending: Number(data.stats?.defending) || 0,
+              physical: Number(data.stats?.physical) || 0,
+              // เผื่อระบบดั้งเดิมที่มีอยู่
               goals: Number(data.stats?.goals) || 0,
               assists: Number(data.stats?.assists) || 0,
               cleanSheets: Number(data.stats?.cleanSheets) || 0,
-              yellowCards: Number(data.stats?.yellowCards) || 0,
-              redCards: Number(data.stats?.redCards) || 0,
             }
           });
         });
@@ -90,6 +100,7 @@ export const marketService = {
             timestamp: lastFetchTime,
             data: players
           }));
+          console.log('%c💾 [Market] สร้างแบคอัพ Local สำเร็จ', 'color: #8b5cf6; font-weight: bold;');
         } catch (e) {
           console.warn('⚠️ [Market] ไม่สามารถสร้าง Local Backup ได้ (Storage อาจเต็ม)');
         }
@@ -104,7 +115,7 @@ export const marketService = {
           const backup = localStorage.getItem(LOCAL_STORAGE_KEY);
           if (backup) {
             const parsedBackup = JSON.parse(backup);
-            console.log('🔄 [Market] ใช้งาน Offline Mode: ดึงข้อมูลแบคอัพจาก Local Storage สำเร็จ');
+            console.log('%c🔄 [Market] ใช้งาน Offline Mode: ดึงข้อมูลแบคอัพจาก Local Storage สำเร็จ', 'color: #f97316; font-weight: bold;');
             return parsedBackup.data; // นำข้อมูลเก่ามาให้เล่นแก้ขัด
           }
         } catch (fallbackError) {
@@ -135,6 +146,6 @@ export const marketService = {
     } catch (e) {
       // เพิกเฉย
     }
-    console.log('🧹 [Market] ล้างระบบ Cache และ Backup เรียบร้อย');
+    console.log('%c🧹 [Market] ล้างระบบ Cache และ Backup เรียบร้อย', 'color: #ef4444; font-weight: bold;');
   }
 };

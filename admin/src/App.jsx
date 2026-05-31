@@ -3,8 +3,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
 import QuestManager from './features/quests/QuestManager';
 import UserManager from './features/users/UserManager'; 
-// 🌟 NEW: นำเข้าไฟล์ RewardManager สำหรับจัดการระบบร้านค้าและของรางวัล
 import RewardManager from './features/rewards/RewardManager'; 
+
+// 🌟 NEW: นำเข้า PlayerFeature หน้าจัดการนักเตะตัวเต็ม
+import PlayerFeature from './features/players/PlayerFeature';
 
 // MOCK COMPONENTS สำหรับหน้าอื่นๆ ที่ยังไม่ได้ทำ
 const DashboardScreen = () => (
@@ -52,15 +54,15 @@ export default function App() {
                 {/* หน้าหลัก */}
                 <Route path="/" element={<DashboardScreen />} />
                 
-                {/* 🌟 UPDATED: เรียกใช้ Component ของจริง */}
+                {/* เรียกใช้ Component ของจริง */}
                 <Route path="/quests" element={<QuestManager />} />
                 <Route path="/users" element={<UserManager />} />
-                
-                {/* 🌟 NEW: Route สำหรับจัดการร้านค้า (Store/Rewards) */}
                 <Route path="/rewards" element={<RewardManager />} />
                 
+                {/* 🌟 จุดที่แก้ไข (Hotfix): ลบ div กำลังพัฒนาออก และเสียบระบบจริงเข้าไป */}
+                <Route path="/players" element={<PlayerFeature />} />
+                
                 {/* Route จำลองอื่นๆ ป้องกัน Error */}
-                <Route path="/players" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: ฐานข้อมูลนักเตะ</div>} />
                 <Route path="/matches" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: จัดการแข่งขัน</div>} />
                 <Route path="/settings" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: ตั้งค่าระบบ</div>} />
                 
