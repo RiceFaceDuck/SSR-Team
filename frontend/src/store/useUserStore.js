@@ -1,11 +1,9 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware'; // 🌟 NEW: นำเข้า persist ป้องกันข้อมูลหายตอน Refresh
+import { persist, createJSONStorage } from 'zustand/middleware'; 
 import { normalizePosition } from '../utils/squadValidator';
-import { getPositionLimits, getFormationData } from '../utils/formationUtils'; // 🌟 FIX: นำเข้า getFormationData เพื่อใช้อ้างอิง slot
+import { getPositionLimits, getFormationData } from '../utils/formationUtils'; 
 
-// 🌟 NEW: นำเข้า Service สำหรับดึงประวัติธุรกรรม Balls ⚽ (Anti-Cheat Log)
 import { fetchUserTransactionHistory } from '../services/firebase/transactionService';
-// 🌟 NEW: นำเข้า Service สำหรับจัดการเซฟทีมลง Firebase (ประหยัด Writes/Reads)
 import { squadService } from '../services/firebase/squadService';
 
 export const useUserStore = create(
@@ -14,7 +12,7 @@ export const useUserStore = create(
       isAuthenticated: false, 
       isAuthLoading: true,    
       userData: null,         
-      balls: 0,              // 🌟 UPDATED: เปลี่ยนจาก energyBottles เป็น balls ⚽ 
+      balls: 0,              
       userPoints: 0,          
       budgetLeft: 100.0,      
       formation: '4-4-2',     
@@ -22,27 +20,26 @@ export const useUserStore = create(
       myCards: [],            
 
       // ==========================================
-      // 🌟 NEW: ระบบเชื่อมโยง Pitch <-> Market และ Save/Ad (Phase Update)
+      // 🌟 ระบบเชื่อมโยง Pitch <-> Market และ Save/Ad
       // ==========================================
-      marketFilterPos: 'ALL',   // จดจำว่ากดมาจากตำแหน่งไหนบนสนาม (ALL, FW, MF, DF, GK)
-      isSaveUnlocked: false,    // สถานะอนุญาตให้เซฟทีม (จะ true ก็ต่อเมื่อดู Sponsor Ad จบ)
-      hasUnsavedChanges: false, // สถานะ Draft: แจ้งเตือนผู้เล่นว่าทีมถูกแก้ไขแต่ยังไม่เซฟ
+      marketFilterPos: 'ALL',   
+      isSaveUnlocked: false,    
+      hasUnsavedChanges: false, 
       
       setMarketFilterPos: (pos) => set({ marketFilterPos: pos }),
       unlockSave: () => set({ isSaveUnlocked: true }),
-      markAsSaved: () => set({ hasUnsavedChanges: false, isSaveUnlocked: false }), // ใช้เมื่อเซฟลง Cloud สำเร็จ
+      markAsSaved: () => set({ hasUnsavedChanges: false, isSaveUnlocked: false }), 
 
       // ==========================================
-      // 🌟 NEW: ระบบบันทึก/โหลดทีมบนคลาวด์ (Cloud Sync)
+      // 🌟 ระบบบันทึก/โหลดทีมบนคลาวด์ (Cloud Sync)
       // ==========================================
       saveSquadToCloud: async (userId) => {
         const { mySquad, budgetLeft, formation, markAsSaved } = get();
         if (!userId) return { success: false, message: 'ไม่พบ ID ผู้ใช้งาน กรุณาล็อกอินใหม่' };
 
         try {
-          // ยิงข้อมูลขึ้น Firebase แค่ 1 ครั้ง ถ้วน!
           await squadService.saveSquad(userId, { mySquad, budgetLeft, formation });
-          markAsSaved(); // รีเซ็ตสถานะ Draft หลังจากบันทึกสำเร็จ
+          markAsSaved(); 
           return { success: true, message: 'บันทึกทีมลงระบบคลาวด์สำเร็จ!' };
         } catch (error) {
           console.error("❌ Error saving squad to cloud:", error);
@@ -59,7 +56,7 @@ export const useUserStore = create(
               mySquad: squadData.mySquad || [],
               budgetLeft: squadData.budgetLeft !== undefined ? parseFloat(squadData.budgetLeft) : 100.0,
               formation: squadData.formation || '4-4-2',
-              hasUnsavedChanges: false // โหลดมาจาก Cloud แปลว่าซิงค์ตรงกันแล้ว
+              hasUnsavedChanges: false 
             });
           }
         } catch (error) {
@@ -68,7 +65,7 @@ export const useUserStore = create(
       },
 
       // ==========================================
-      // 🌟 NEW: State สำหรับเก็บประวัติการเงิน (Transaction History)
+      // 🌟 State สำหรับเก็บประวัติการเงิน (Transaction History)
       // ==========================================
       transactions: [],
       isTransactionsLoading: false,
@@ -83,10 +80,8 @@ export const useUserStore = create(
           photoURL: userPayload.photoURL,
           role: userPayload.role || 'player'
         },
-        // รองรับทั้ง payload ใหม่ (balls) และเก่า (energyBottles) เพื่อป้องกันบัค
         balls: userPayload.balls !== undefined ? userPayload.balls : (userPayload.energyBottles || 0),
         userPoints: userPayload.userPoints || 0,
-        // mySquad, budgetLeft, formation จะถูกดึงผ่าน loadSquadFromCloud ใน App.jsx แทนเพื่อความแม่นยำ
         hasUnsavedChanges: false, 
         isSaveUnlocked: false
       }),
@@ -94,7 +89,7 @@ export const useUserStore = create(
       clearAuth: () => set({
         isAuthenticated: false, isAuthLoading: false, userData: null,
         balls: 0, userPoints: 0, budgetLeft: 100.0, mySquad: [], myCards: [], formation: '4-4-2',
-        transactions: [], // เคลียร์ประวัติด้วยเมื่อ Log out
+        transactions: [], 
         hasUnsavedChanges: false,
         isSaveUnlocked: false,
         marketFilterPos: 'ALL'
@@ -102,18 +97,18 @@ export const useUserStore = create(
 
       setAuthReady: () => set({ isAuthLoading: false }),
 
-      // --- ระบบตลาดซื้อขาย (Original) ---
+      // --- ระบบตลาดซื้อขาย ---
       buyPlayer: (player) => set((state) => {
         const newBudget = state.budgetLeft - (parseFloat(player.price) || 0);
         const newMember = { 
           playerId: String(player.sku), 
-          position: normalizePosition(player.position), // บังคับแปลงตำแหน่งก่อนเซฟ!
-          isStarting: false // เพิ่งซื้อมาให้นั่งสำรองก่อน
+          position: normalizePosition(player.position), 
+          isStarting: false 
         };
         return {
           budgetLeft: parseFloat(newBudget.toFixed(1)),
           mySquad: [...state.mySquad, newMember],
-          hasUnsavedChanges: true // 🌟 อัปเดตสถานะ Draft
+          hasUnsavedChanges: true 
         };
       }),
 
@@ -123,57 +118,50 @@ export const useUserStore = create(
         return {
           budgetLeft: parseFloat(newBudget.toFixed(1)),
           mySquad: newSquad,
-          hasUnsavedChanges: true // 🌟 อัปเดตสถานะ Draft
+          hasUnsavedChanges: true 
         };
       }),
 
       // ==========================================
-      // 🌟 NEW: Smart Formation Switcher
+      // 🌟 Smart Formation Switcher
       // ==========================================
       setFormation: (newFormation) => {
         const { mySquad } = get();
-        // 1. ดึงโควต้าของแผนใหม่
         const newLimits = getPositionLimits(newFormation);
         const currentCount = { FW: 0, MF: 0, DF: 0, GK: 0 };
         
-        // 2. เคลียร์ผู้เล่นที่เกินโควต้าในแผนใหม่กลับไปนั่งสำรอง
         const updatedSquad = mySquad.map(player => {
-          if (!player.isStarting) return player; // ตัวสำรองปล่อยไว้
+          if (!player.isStarting) return player; 
 
           const pos = normalizePosition(player.position);
           if (currentCount[pos] < newLimits[pos]) {
             currentCount[pos]++;
-            return player; // ให้อยู่บนสนามต่อ
+            return player; 
           } else {
-            // โควต้าเต็มแล้ว เตะตัวนี้กลับม้านั่ง
             return { ...player, isStarting: false, slotIndex: null };
           }
         });
 
-        // 📳 Haptic: สั่นเบาๆ เมื่อเปลี่ยนแผน
         if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
           window.navigator.vibrate(40);
         }
 
-        set({ formation: newFormation, mySquad: updatedSquad, hasUnsavedChanges: true }); // 🌟 อัปเดตสถานะ Draft
+        set({ formation: newFormation, mySquad: updatedSquad, hasUnsavedChanges: true }); 
       },
       
-      clearSquad: () => set({ mySquad: [], budgetLeft: 100.0, hasUnsavedChanges: true }), // 🌟 อัปเดตสถานะ Draft
+      clearSquad: () => set({ mySquad: [], budgetLeft: 100.0, hasUnsavedChanges: true }), 
 
       // ==========================================
-      // 🌟 NEW: Premium Tap & Place System (ระบบจัดทีม V2)
+      // 🌟 Premium Tap & Place System (ระบบจัดทีม V2)
       // ==========================================
-      pendingPlacement: null,   // เก็บ Object นักเตะที่กำลังรอวางลงสนาม
-      projectedBudget: null,    // งบประมาณล่วงหน้า (Smart Budget Preview)
+      pendingPlacement: null,   
+      projectedBudget: null,    
 
-      // 1. เริ่มต้นการเลือกนักเตะ (แตะจากหน้าตลาด)
       startPlacement: (player) => {
-        // ใช้ get() เพื่อดึง State ปัจจุบันจาก Store
         const currentBudget = get().budgetLeft || 0;
         const currentSquad = get().mySquad || [];
         const playerPrice = parseFloat(player.price) || 0;
         
-        // Validation 1: เช็คเงินงบประมาณล่วงหน้า (ประหยัด Database Reads จบที่ Client)
         if (currentBudget < playerPrice) {
           if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
             window.navigator.vibrate([50, 100, 50]);
@@ -181,7 +169,6 @@ export const useUserStore = create(
           return { success: false, message: 'งบประมาณไม่เพียงพอสำหรับการดึงตัวนักเตะคนนี้' };
         }
 
-        // Validation 2: ป้องกันการดึงนักเตะซ้ำเข้าทีม
         const isDuplicate = currentSquad.some(p => p.playerId === String(player.sku));
         if (isDuplicate) {
           if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
@@ -194,7 +181,6 @@ export const useUserStore = create(
           window.navigator.vibrate(30);
         }
 
-        // เซ็ต State ถือการ์ด และคำนวณ Smart Budget ให้ดูทันที (โชว์ที่ UI)
         set({ 
           pendingPlacement: player,
           projectedBudget: parseFloat((currentBudget - playerPrice).toFixed(1))
@@ -203,7 +189,6 @@ export const useUserStore = create(
         return { success: true, message: 'เลือกนักเตะแล้ว กรุณาไปที่สนามเพื่อวางตำแหน่ง' };
       },
 
-      // 2. ยืนยันการวางนักเตะลงตำแหน่งที่เลือก (แตะที่ Ghost Slot ในสนาม)
       confirmPlacement: (slotIndex) => {
         const { pendingPlacement, budgetLeft, mySquad } = get();
         
@@ -220,7 +205,6 @@ export const useUserStore = create(
         const newSquad = [...mySquad];
         const normalizedPos = normalizePosition(pendingPlacement.position);
         
-        // ถ้าช่อง (slotIndex) ที่แตะวาง มีนักเตะตัวจริงคนเดิมอยู่ ให้เตะคนเก่าออก
         if (slotIndex !== undefined && slotIndex !== null) {
           const existingStarterIndex = newSquad.findIndex(p => p.slotIndex === slotIndex && p.isStarting);
           if (existingStarterIndex !== -1) {
@@ -243,7 +227,7 @@ export const useUserStore = create(
           budgetLeft: newBudget, 
           pendingPlacement: null, 
           projectedBudget: null,
-          hasUnsavedChanges: true // 🌟 อัปเดตสถานะ Draft
+          hasUnsavedChanges: true 
         });
 
         if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
@@ -253,7 +237,6 @@ export const useUserStore = create(
         return { success: true, message: `นำ ${pendingPlacement.name || 'นักเตะ'} ลงสนามสำเร็จ!` };
       },
 
-      // 3. ยกเลิกการจัดวาง
       cancelPlacement: () => {
         if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
           window.navigator.vibrate(20);
@@ -262,24 +245,24 @@ export const useUserStore = create(
       },
 
       // ==========================================
-      // 🌟 NEW: Field Actions (Auto Fill & Clear Pitch)
+      // 🌟 Field Actions (Auto Fill & Clear Pitch)
       // ==========================================
       
       // ล้างสนาม (ดึงทุกคนกลับม้านั่ง)
       clearPitch: () => {
         const { mySquad } = get();
         const newSquad = mySquad.map(p => ({ ...p, isStarting: false, slotIndex: null }));
-        set({ mySquad: newSquad, hasUnsavedChanges: true }); // 🌟 อัปเดตสถานะ Draft
+        set({ mySquad: newSquad, hasUnsavedChanges: true }); 
       },
 
-      // 🌟 FIX: จัดทีมอัตโนมัติ (ฉลาดขึ้น: จับยัดลง slotIndex ที่ว่างอยู่เป๊ะๆ เพื่อให้ Save ได้จริง)
+      // จัดทีมอัตโนมัติ 
       autoFillTeam: () => {
         const { mySquad, formation } = get();
         let newSquad = [...mySquad];
         const limits = getPositionLimits(formation);
         const formationData = getFormationData(formation);
         
-        // 1. หาว่าช่องไหนบนสนาม (slotIndex) ถูกจองไปแล้วบ้าง
+        // 1. หาว่าช่องไหนบนสนามถูกจองไปแล้วบ้าง
         const occupiedSlots = new Set();
         const currentStarters = { FW: 0, MF: 0, DF: 0, GK: 0 };
         
@@ -290,7 +273,7 @@ export const useUserStore = create(
           }
         });
 
-        // 2. ลิสต์ช่องว่างที่เหลืออยู่ของแต่ละตำแหน่งตามแผนการเล่นปัจจุบัน
+        // 2. ลิสต์ช่องว่างที่เหลืออยู่
         const availableSlots = { FW: [], MF: [], DF: [], GK: [] };
         
         formationData.rows.forEach(row => {
@@ -309,27 +292,26 @@ export const useUserStore = create(
 
         let isModified = false;
 
-        // 3. วนลูปสำรอง จับยัดลงช่องว่างที่ระบุ slotIndex ชัดเจน (เพื่อให้บันทึกลงฐานข้อมูลได้)
+        // 3. จับยัดลงช่องว่างที่ระบุ slotIndex ชัดเจน
         newSquad = newSquad.map(player => {
-          if (player.isStarting) return player; // เป็นตัวจริงอยู่แล้ว ข้ามไป
+          if (player.isStarting) return player; 
 
           const pos = normalizePosition(player.position);
           
-          // ถ้าโควต้าตำแหน่งนี้ยังไม่เต็ม และมีช่องว่างของตำแหน่งนี้บนสนาม
           if (currentStarters[pos] < limits[pos] && availableSlots[pos] && availableSlots[pos].length > 0) {
-            const assignedSlot = availableSlots[pos].shift(); // ดึงช่องแรกที่ว่างมาใช้งาน
+            const assignedSlot = availableSlots[pos].shift(); 
             currentStarters[pos]++;
             isModified = true;
-            return { ...player, isStarting: true, slotIndex: assignedSlot }; // เซ็ตค่าพิกัดการยืนเป๊ะๆ
+            return { ...player, isStarting: true, slotIndex: assignedSlot }; 
           }
           return player;
         });
 
         if (isModified) {
           if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-            window.navigator.vibrate([30, 50, 80]); // สั่นรัวๆ แบบฟินๆ ตอนออโต้สำเร็จ
+            window.navigator.vibrate([30, 50, 80]); 
           }
-          set({ mySquad: newSquad, hasUnsavedChanges: true }); // 🌟 อัปเดตสถานะ Draft
+          set({ mySquad: newSquad, hasUnsavedChanges: true }); 
           return { success: true, message: 'จัดทีมอัตโนมัติเรียบร้อยแล้ว!' };
         } else {
           return { success: false, message: 'ไม่มีผู้เล่นในม้านั่งสำรองที่เหมาะสม หรือสนามเต็มแล้ว' };
@@ -340,25 +322,21 @@ export const useUserStore = create(
       // --- ระบบจัดทีมแบบเก่า (เก็บไว้ซัพพอร์ตบางฟีเจอร์) ---
       // ==========================================
       autoPlacePlayer: (playerId) => {
-        // เพื่อให้ไฟล์ไม่ยาวเกินไป และคุณสั่งห้ามลบ ผมจึงดัดแปลงให้ชี้ไปที่ Logic ใหม่
         return get().autoFillTeam().success;
       },
 
-      // อัปเกรด Swap Player ให้ฉลาดขึ้น
       swapPlayer: (player1Id, player2Id) => set((state) => {
         const squad = [...state.mySquad];
         const p1Index = squad.findIndex(p => p.playerId === String(player1Id));
         const p2Index = squad.findIndex(p => p.playerId === String(player2Id));
 
         if (p1Index !== -1 && p2Index !== -1) {
-          // สลับแค่สถานะการลงสนาม (isStarting) และ slotIndex ด้วย
           const tempStarting = squad[p1Index].isStarting;
           const tempSlot = squad[p1Index].slotIndex;
           
           squad[p1Index] = { ...squad[p1Index], isStarting: squad[p2Index].isStarting, slotIndex: squad[p2Index].slotIndex };
           squad[p2Index] = { ...squad[p2Index], isStarting: tempStarting, slotIndex: tempSlot };
           
-          // ล้าง slotIndex ถ้าคนไหนถูกเตะกลับม้านั่ง
           if (!squad[p1Index].isStarting) squad[p1Index].slotIndex = null;
           if (!squad[p2Index].isStarting) squad[p2Index].slotIndex = null;
         }
@@ -366,7 +344,7 @@ export const useUserStore = create(
         if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
            window.navigator.vibrate(30);
         }
-        return { mySquad: squad, hasUnsavedChanges: true }; // 🌟 อัปเดตสถานะ Draft
+        return { mySquad: squad, hasUnsavedChanges: true }; 
       }),
 
       removePlayerFromPitch: (playerId) => set((state) => {
@@ -375,36 +353,31 @@ export const useUserStore = create(
         if (pIndex !== -1) {
           squad[pIndex] = { ...squad[pIndex], isStarting: false, slotIndex: null };
         }
-        return { mySquad: squad, hasUnsavedChanges: true }; // 🌟 อัปเดตสถานะ Draft
+        return { mySquad: squad, hasUnsavedChanges: true }; 
       }),
 
       // ==========================================
-      // --- ทรัพยากรหลัก (Balls ⚽) --- 🌟 UPDATED 
+      // --- ทรัพยากรหลัก (Balls ⚽) ---
       // ==========================================
-      
-      // อัปเดตยอด Balls แบบตรงๆ (ใช้กรณี OnSnapshot ดึงข้อมูลใหม่จาก Firebase มาเซ็ต)
       setBalls: (amount) => set({ balls: amount }),
 
-      // ใช้งาน Balls (อัปเดต UI ชั่วคราว)
       useBalls: (amount) => set((state) => {
         if (state.balls >= amount) {
           if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-            window.navigator.vibrate(20); // สั่นสั้นๆ เมื่อหัก Balls
+            window.navigator.vibrate(20); 
           }
           return { balls: state.balls - amount };
         }
         return state; 
       }),
 
-      // เพิ่ม Balls (อัปเดต UI ชั่วคราว)
       addBalls: (amount) => set((state) => {
         if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-          window.navigator.vibrate([30, 50, 30]); // สั่น 2 จังหวะตื่นเต้นเมื่อได้ Balls ⚽
+          window.navigator.vibrate([30, 50, 30]); 
         }
         return { balls: state.balls + amount };
       }),
 
-      // 🌟 NEW: Action สำหรับโหลดประวัติธุรกรรม
       loadTransactions: async (userId) => {
         if (!userId) return;
         set({ isTransactionsLoading: true });
@@ -419,10 +392,8 @@ export const useUserStore = create(
 
     }),
     {
-      name: 'fantasy-team-draft', // ชื่อ Key ใน Local Storage
+      name: 'fantasy-team-draft', 
       storage: createJSONStorage(() => localStorage),
-      // 🌟 เลือกเซฟเฉพาะ mySquad และ formation ป้องกันการเซฟ auth ผิดพลาด
-      // 🌟 เพิ่ม hasUnsavedChanges เข้ามาเพื่อให้ Refresh แล้วยังแจ้งเตือนอยู่
       partialize: (state) => ({ 
         mySquad: state.mySquad, 
         formation: state.formation,

@@ -60,7 +60,9 @@ export default function PlayerSlot({
   
   const isMatchPending = isGhost && pendingPlacement && normalizePosition(pendingPlacement.position) === expectedPosition;
   const shortName = player?.name ? (player.name.length > 10 ? player.name.substring(0, 8) + '..' : player.name) : 'Unknown';
-  const playerImage = player?.photoURL || player?.image;
+  
+  // รองรับการอ่านรูปทั้ง 3 ฟิลด์
+  const playerImage = player?.photoURL || player?.imageUrl || player?.image;
 
   // ==========================================
   // 👻 โหมดช่องว่าง (Ghost Slot) - รอคนมาใส่

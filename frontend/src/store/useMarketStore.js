@@ -1,79 +1,90 @@
+/**
+ * @file useMarketStore.js
+ * @description Global State สำหรับจัดการข้อมูลนักเตะในตลาด
+ * อัปเกรด: ยกเลิก Mock Data และเชื่อมต่อกับ marketService ตัวจริง
+ */
+
 import { create } from 'zustand';
-// 🌟 หากลูกพี่ใช้ Firebase Firestore ให้เอาคอมเมนต์ 2 บรรทัดล่างนี้ออก (และเช็ค path ให้ตรง)
-// import { collection, getDocs } from 'firebase/firestore';
-// import { db } from '../config/firebase'; 
+import { marketService } from '../services/firebase/marketService';
 
 export const useMarketStore = create((set, get) => ({
-  // State หลักสำหรับเก็บข้อมูลตลาด
+  // ==========================================
+  // 1. State หลัก (ข้อมูลดิบ)
+  // ==========================================
   players: [],
   isLoading: false,
   error: null,
-  isDataFetched: false, // Flag ป้องกันการยิง API ซ้ำซ้อนตอนเปลี่ยนหน้าไปมา
+  isDataFetched: false, // ป้องกันการดึงข้อมูลซ้ำซ้อนตอนเปลี่ยนหน้า (ทำงานร่วมกับ Service)
+
+  // ==========================================
+  // 2. Actions (ฟังก์ชันปรับเปลี่ยน State)
+  // ==========================================
 
   /**
-   * ฟังก์ชันหลักสำหรับดึงข้อมูลนักเตะจาก Backend
-   * @param {boolean} forceRefresh - บังคับดึงข้อมูลใหม่ (เช่น เวลากดปุ่มรีเฟรช)
+   * ดึงข้อมูลนักเตะจากหลังบ้าน (Firebase)
+   * @param {boolean} forceRefresh - บังคับโหลดใหม่โดยไม่สนใจ Cache
    */
   fetchMarketPlayers: async (forceRefresh = false) => {
-    // ถ้าเคยดึงข้อมูลมาแล้ว และไม่ได้สั่งบังคับรีเฟรช ให้ข้ามไปเลย (ประหยัดโควต้า Backend)
+    // 1. เช็คก่อนว่าเคยโหลดมาแล้วและไม่ได้สั่งบังคับรีเฟรช ให้ผ่านไปเลย (รันเร็ว 0ms)
     if (get().isDataFetched && !forceRefresh) return;
 
+    // 2. เริ่มสถานะโหลด เพื่อให้ UI โชว์ Skeleton
     set({ isLoading: true, error: null });
 
     try {
-      let fetchedPlayers = [];
+      // 3. เรียกใช้งาน Service ขั้นเทพที่เราเพิ่งอัปเกรด (มันจะจัดการ Cache & Dedupe ให้เอง)
+      const fetchedPlayers = await marketService.getPlayers(forceRefresh);
 
-      // =========================================================
-      // 🔌 โซนเชื่อมต่อ Backend ของจริง (เปิดคอมเมนต์เมื่อเชื่อมต่อฐานข้อมูลจริง)
-      // =========================================================
-      
-      /* --- ตัวอย่างถ้าใช้ Firebase Firestore --- */
-      // const querySnapshot = await getDocs(collection(db, "players"));
-      // fetchedPlayers = querySnapshot.docs.map(doc => ({ 
-      //   sku: doc.id, 
-      //   ...doc.data() 
-      // }));
-      
-      /* --- ตัวอย่างถ้าใช้ REST API (Node.js/Go/Python) --- */
-      // const response = await fetch('/api/market/players');
-      // fetchedPlayers = await response.json();
-
-
-      // =========================================================
-      // 🛑 โซน MOCK DATA (ระบบสำรอง) 
-      // ถ้า Backend จริงยังไม่มีข้อมูล ระบบจะยัดข้อมูลจำลองให้ เพื่อให้ UI ไม่พัง
-      // =========================================================
-      if (fetchedPlayers.length === 0) {
-        console.warn("⚠️ ไม่พบข้อมูลจากหลังบ้าน (Backend ว่างเปล่า) ระบบกำลังดึง Mock Data จำลองมาแสดงแทน...");
-        
-        // จำลองการโหลด (Delay)
-        await new Promise(resolve => setTimeout(resolve, 600));
-
-        fetchedPlayers = [
-          { sku: 'FW-01', name: 'ลีโอเนล เมสซี่', fullName: 'Lionel Messi', team: 'Inter Miami', position: 'FW', price: 85.0, totalPoints: 152, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' },
-          { sku: 'FW-02', name: 'เออร์ลิง ฮาลันด์', fullName: 'Erling Haaland', team: 'Man City', position: 'FW', price: 90.0, totalPoints: 140, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' },
-          { sku: 'MF-01', name: 'เควิน เดอ บรอยน์', fullName: 'Kevin De Bruyne', team: 'Man City', position: 'MF', price: 75.5, totalPoints: 110, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' },
-          { sku: 'MF-02', name: 'จู๊ด เบลลิงแฮม', fullName: 'Jude Bellingham', team: 'Real Madrid', position: 'MF', price: 80.0, totalPoints: 125, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' },
-          { sku: 'DF-01', name: 'เวอร์จิล ฟาน ไดจ์ค', fullName: 'Virgil van Dijk', team: 'Liverpool', position: 'DF', price: 55.0, totalPoints: 88, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' },
-          { sku: 'DF-02', name: 'รูเบน ดิอาส', fullName: 'Ruben Dias', team: 'Man City', position: 'DF', price: 50.0, totalPoints: 75, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' },
-          { sku: 'GK-01', name: 'อลิสซง เบ็คเกอร์', fullName: 'Alisson Becker', team: 'Liverpool', position: 'GK', price: 45.0, totalPoints: 92, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' },
-          { sku: 'GK-02', name: 'เอแดร์ซอน', fullName: 'Ederson Moraes', team: 'Man City', position: 'GK', price: 42.0, totalPoints: 85, image: 'https://cdn-icons-png.flaticon.com/128/805/805404.png' }
-        ];
-      }
-
-      // บันทึกข้อมูลลง Store สำเร็จ
-      set({ players: fetchedPlayers, isLoading: false, isDataFetched: true });
+      // 4. บันทึกข้อมูลลง Store สำเร็จ พร้อมล็อก Flag ว่ามีข้อมูลแล้ว
+      set({ 
+        players: fetchedPlayers, 
+        isLoading: false, 
+        isDataFetched: true 
+      });
 
     } catch (error) {
-      console.error("❌ ดึงข้อมูลตลาดนักเตะล้มเหลว:", error);
-      set({ error: error.message, isLoading: false });
+      console.error("❌ [MarketStore] ดึงข้อมูลตลาดนักเตะล้มเหลว:", error);
+      set({ 
+        error: error.message || 'ไม่สามารถโหลดข้อมูลนักเตะได้', 
+        isLoading: false 
+      });
     }
   },
 
   /**
-   * Helper function สำหรับค้นหานักเตะจากรหัส (SKU)
+   * ล้างข้อมูลใน Store และสั่ง Service ให้ล้าง Cache ด้วย
+   * (มักใช้ตอนกด Logout)
+   */
+  clearMarketData: () => {
+    marketService.clearCache();
+    set({
+      players: [],
+      isLoading: false,
+      error: null,
+      isDataFetched: false
+    });
+  },
+
+  // ==========================================
+  // 3. Helpers (ฟังก์ชันตัวช่วยค้นหา/กรอง)
+  // ==========================================
+
+  /**
+   * ค้นหานักเตะ 1 คน จากรหัส SKU
+   * @param {string|number} sku - รหัสนักเตะ
+   * @returns {Object|undefined} - ข้อมูลนักเตะ (ถ้าไม่เจอคืนค่า undefined)
    */
   getPlayerBySku: (sku) => {
-    return get().players.find(p => String(p.sku) === String(sku));
+    const allPlayers = get().players;
+    return allPlayers.find(p => String(p.sku) === String(sku));
+  },
+  
+  /**
+   * (ลูกเล่นเสริม) ดึงนักเตะราคาแพง/คะแนนสูง มาโปรโมตหน้าร้าน
+   */
+  getTopPlayers: (limitCount = 5) => {
+    const allPlayers = [...get().players];
+    // เรียงตามคะแนน หรือ ราคา
+    return allPlayers.sort((a, b) => b.totalPoints - a.totalPoints).slice(0, limitCount);
   }
 }));

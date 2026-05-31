@@ -9,7 +9,7 @@ import {
   SlidersHorizontal,
   SearchX
 } from 'lucide-react';
-import PlayerSlot from '../../components/player/PlayerSlot';
+import PlayerSlot from './PlayerSlot'; // อัปเดต Path ให้ชี้ไปที่โฟลเดอร์เดียวกัน
 import { useUserStore } from '../../store/useUserStore';
 
 export default function BenchArea({ selectedPlayerId, onSelectPlayer }) {

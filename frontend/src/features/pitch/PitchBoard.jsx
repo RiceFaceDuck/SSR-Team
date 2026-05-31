@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import PlayerSlot from '../../components/player/PlayerSlot';
+import PlayerSlot from './PlayerSlot'; // อัปเดต Path ให้ชี้ไปที่ไฟล์เดียวกันในโฟลเดอร์ pitch
 import { useUserStore } from '../../store/useUserStore';
 import { useMarketStore } from '../../store/useMarketStore';
 import { getFormationData } from '../../utils/formationUtils';
