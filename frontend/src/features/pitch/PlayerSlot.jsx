@@ -23,7 +23,7 @@ export default function PlayerSlot({
   // โหมดช่องว่าง (Ghost Slot)
   if (isGhost) {
     return (
-      <div className="flex flex-col items-center justify-center gap-1 z-10 w-16 h-20 sm:w-20 sm:h-24">
+      <div className="flex flex-col items-center justify-center gap-1 z-10 w-[52px] h-[64px] sm:w-[60px] sm:h-[72px]">
         <button
           onClick={onClick}
           className={`relative w-full h-full rounded-lg flex flex-col items-center justify-center
@@ -46,7 +46,7 @@ export default function PlayerSlot({
 
   // โหมดมีนักเตะ (Filled Slot) - ตรงตามภาพต้นแบบ
   return (
-    <div className="flex flex-col items-center justify-center z-10 relative w-16 h-24 sm:w-20 sm:h-28">
+    <div className="flex flex-col items-center justify-center z-10 relative w-[56px] h-[80px] sm:w-[68px] sm:h-[96px]">
       <button
         onClick={onClick}
         className={`relative w-full h-full flex flex-col items-center overflow-visible
@@ -67,26 +67,26 @@ export default function PlayerSlot({
               }} 
             />
           ) : null}
-          <User size={32} className={`text-white drop-shadow-md pb-2 ${playerImage ? 'hidden' : 'block'}`} />
+          <User size={28} className={`text-white drop-shadow-md pb-1 ${playerImage ? 'hidden' : 'block'}`} />
           
           {/* Rating Badge ด้านซ้ายบนของรูป */}
-          <div className="absolute top-0 left-0 -ml-1 sm:ml-0 flex flex-col items-center drop-shadow-md">
-             <span className="text-white font-black text-sm sm:text-base leading-none tracking-tighter">{ovr}</span>
-             <span className="text-white/80 font-bold text-[8px] sm:text-[9px] leading-none uppercase">{position}</span>
+          <div className="absolute top-0 left-0 -ml-1 flex flex-col items-center drop-shadow-md">
+             <span className="text-white font-black text-[12px] sm:text-[14px] leading-none tracking-tighter">{ovr}</span>
+             <span className="text-white/90 font-bold text-[7px] sm:text-[8px] leading-none uppercase mt-0.5">{position}</span>
           </div>
         </div>
 
         {/* ป้ายชื่อและสโมสร (ด้านล่าง) */}
-        <div className="relative z-20 w-[110%] -mt-1 sm:-mt-2 flex items-center justify-center pointer-events-none">
+        <div className="relative z-20 w-[110%] -mt-1 flex items-center justify-center pointer-events-none">
           <div className={`
-            px-1.5 py-0.5 rounded shadow-md border-[0.5px] border-white/20 flex items-center gap-1 w-full max-w-full overflow-hidden
+            px-1 py-0.5 rounded shadow-sm border-[0.5px] border-white/20 flex items-center justify-center gap-0.5 w-full max-w-full overflow-hidden
             ${isSelected ? 'bg-yellow-500 text-black' : 'bg-[#1e2a47] text-white'}
           `}>
              {/* ไอคอนเล็กๆ (เช่น ธง หรือระดับการ์ด) */}
-             <div className="w-3 h-3 bg-purple-600 rounded-sm text-[5px] flex items-center justify-center font-bold overflow-hidden shrink-0">
+             <div className="w-2.5 h-2.5 bg-purple-600 rounded-[2px] text-[4px] flex items-center justify-center font-bold overflow-hidden shrink-0">
                 HOT
              </div>
-             <span className="text-[9px] sm:text-[10px] font-bold whitespace-nowrap truncate leading-tight">
+             <span className="text-[8px] sm:text-[9px] font-bold whitespace-nowrap truncate leading-tight">
                 {shortName}
              </span>
           </div>

@@ -27,13 +27,13 @@ export default function BenchArea({ selectedPlayerId, onSelectPlayer }) {
     <div className="w-full bg-[#e5e7eb] relative border-t border-slate-300">
       
       {/* 🌟 พื้นที่แสดงตัวสำรอง */}
-      <div className="flex w-full bg-white border-b border-slate-300">
-        <div className="py-3 px-4 text-sm font-bold text-[#5B8D2F]">
+      <div className="flex w-full bg-white border-b border-slate-200">
+        <div className="py-2 px-3 text-xs font-bold text-[#5B8D2F]">
           นักเตะสำรอง ({benchPlayers.length})
         </div>
       </div>
 
-      <div className="relative w-full h-[140px] flex items-center justify-center overflow-hidden">
+      <div className="relative w-full h-[88px] flex items-center justify-center overflow-hidden">
         
         <div className="w-full max-w-2xl relative h-full">
           {benchPlayers.length === 0 ? (

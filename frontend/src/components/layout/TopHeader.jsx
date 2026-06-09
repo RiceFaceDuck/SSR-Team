@@ -15,11 +15,11 @@ export default function TopHeader({ onLogout, onNavigate }) {
   };
 
   return (
-    <div className="bg-white/80 backdrop-blur-xl pt-6 px-6 pb-4 flex justify-between items-center shadow-sm sticky top-0 z-40 border-b border-white">
+    <div className="bg-white/80 backdrop-blur-xl pt-2 px-4 pb-2 flex justify-between items-center shadow-sm sticky top-0 z-40 border-b border-white">
       
       {/* โลโก้แอป (กดเพื่อกลับหน้าจัดทีมได้) */}
       <h1 
-        className={`text-2xl ${STYLES.glowText} cursor-pointer hover:scale-105 transition-transform`} 
+        className={`text-xl font-black ${STYLES.glowText} cursor-pointer hover:scale-105 transition-transform`} 
         onClick={() => handleNav('pitch')}
       >
         SSR FC

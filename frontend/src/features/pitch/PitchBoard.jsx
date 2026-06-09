@@ -136,7 +136,7 @@ export default function PitchBoard({ onSlotClick }) {
     }
 
     return (
-      <div key={`row-${role}`} className="flex justify-evenly items-center w-full z-10 px-1 sm:px-2 min-h-[75px] sm:min-h-[85px]">
+      <div key={`row-${role}`} className="flex justify-evenly items-center w-full z-10 px-1 sm:px-2 min-h-[55px] sm:min-h-[70px]">
         {slots}
       </div>
     );

@@ -12,7 +12,7 @@ export default function BottomNav({ currentPath, onNavigate }) {
   ];
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 max-w-md mx-auto bg-white/90 backdrop-blur-xl border border-white/80 pb-3 pt-3 px-6 flex justify-between items-center z-50 shadow-[0_20px_40px_rgba(0,0,0,0.1)] rounded-3xl">
+    <div className="fixed bottom-0 left-0 right-0 w-full max-w-md mx-auto bg-white/95 backdrop-blur-xl border-t border-slate-200 py-1.5 px-4 flex justify-between items-center z-50 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
       {navItems.map((item) => {
         const isActive = currentPath === item.id;
         const Icon = item.icon;
@@ -24,17 +24,17 @@ export default function BottomNav({ currentPath, onNavigate }) {
               playSound('click'); 
               onNavigate(item.id); 
             }}
-            className={`flex flex-col items-center justify-center w-16 h-16 rounded-2xl transition-all duration-300 relative ${
+            className={`flex flex-col items-center justify-center w-14 h-12 rounded-xl transition-all duration-300 relative ${
               isActive ? 'text-white' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
             }`}
           >
             {/* เอฟเฟกต์ปุ่มที่กำลังเลือกอยู่ (Active State) */}
             {isActive && (
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl shadow-lg shadow-blue-500/40 -z-10 animate-in zoom-in duration-200"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl shadow-md shadow-blue-500/30 -z-10 animate-in zoom-in duration-200"></div>
             )}
             
-            <Icon size={isActive ? 24 : 22} strokeWidth={isActive ? 2.5 : 2} className="mb-1" />
-            <span className={`text-[10px] ${isActive ? 'font-bold' : 'font-medium'}`}>
+            <Icon size={isActive ? 20 : 18} strokeWidth={isActive ? 2.5 : 2} className="mb-0.5" />
+            <span className={`text-[9px] ${isActive ? 'font-bold' : 'font-medium'}`}>
               {item.label}
             </span>
           </button>

@@ -125,18 +125,7 @@ export default function PitchScreen() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#f3f4f6] flex flex-col relative animate-in fade-in duration-500 pb-[80px]">
-
-      {/* 🌟 2. Sub-Header (Live Data & Formation) */}
-      <div className="w-full bg-[#f8f9fa] flex items-center justify-between px-4 py-2 border-b border-gray-300">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-          <h2 className="text-sm font-bold text-slate-800">TEAM RATING: <span className="text-emerald-600">SS</span></h2>
-        </div>
-        <div className="w-[120px]">
-          <FormationSelector />
-        </div>
-      </div>
+    <div className="w-full h-[calc(100dvh-50px)] bg-[#f3f4f6] flex flex-col relative animate-in fade-in duration-500 pb-[50px] overflow-hidden">
 
       {/* ปุ่มยกเลิกการสลับตัว (ลอยอยู่มุมขวาล่างเหนือ Floating Bar) */}
       {selectedForSwap && (
@@ -156,26 +145,31 @@ export default function PitchScreen() {
       )}
 
       {/* 🌟 3. กระดานสนามฟุตบอล */}
-      <div className="flex-1 w-full relative">
+      <div className="flex-1 w-full relative min-h-0 flex flex-col">
         <PitchBoard onSlotClick={handlePitchClick} />
         
-        {/* Score Board & Tools Overlay (มุมขวาล่างของสนาม) */}
-        <div className="absolute bottom-4 left-0 w-full flex items-end justify-between px-4 pointer-events-none">
-           {/* Score Board */}
-           <div className="bg-white/95 backdrop-blur-sm border-[1.5px] border-slate-300 rounded-lg px-4 py-2 shadow-lg pointer-events-auto flex flex-col min-w-[100px] mb-[70px]">
-             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Score</span>
-             <span className="text-2xl font-black text-slate-800 leading-none">
+        {/* แผงเลือกแผนการเล่น (ทับสนาม มุมขวาบน) */}
+        <div className="absolute top-2 right-2 w-[120px] z-20 pointer-events-auto">
+          <FormationSelector />
+        </div>
+
+        {/* Score Board & Tools Overlay (ทับสนาม มุมซ้ายและขวาล่าง) */}
+        <div className="absolute bottom-2 left-0 w-full flex items-end justify-between px-2 z-20 pointer-events-none">
+           {/* Score Board (ซ้ายล่าง) */}
+           <div className="bg-white/95 backdrop-blur-sm border-[1.5px] border-slate-300 rounded-lg px-3 py-1.5 shadow-lg pointer-events-auto flex flex-col min-w-[80px]">
+             <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Score</span>
+             <span className="text-xl font-black text-slate-800 leading-none">
                 {userData?.userPoints?.toLocaleString() || '0'}
              </span>
            </div>
            
-           {/* Tool Icons (ล้างสนาม, จัดออโต้, บันทึก) */}
-           <div className="flex gap-2 pointer-events-auto mb-[70px]">
+           {/* Tool Icons (ล้างสนาม, จัดออโต้, บันทึก) (ขวาล่าง) */}
+           <div className="flex gap-1.5 pointer-events-auto">
              <button 
                 onClick={handleClearPitch}
                 disabled={isPitchEmpty}
                 title="ล้างสนาม"
-                className="w-11 h-11 bg-white/90 border border-slate-300 flex items-center justify-center rounded shadow-sm hover:bg-slate-100 disabled:opacity-50 transition-colors"
+                className="w-11 h-11 bg-white/95 border border-slate-300 flex items-center justify-center rounded-xl shadow-lg hover:bg-slate-100 disabled:opacity-50 transition-all active:scale-95"
              >
                 <RefreshCw size={20} className="text-rose-500" />
              </button>
@@ -183,7 +177,7 @@ export default function PitchScreen() {
                 onClick={handleAutoFill}
                 disabled={isBenchEmpty || startersCount === 11}
                 title="จัดออโต้"
-                className="w-11 h-11 bg-white/90 border border-slate-300 flex items-center justify-center rounded shadow-sm hover:bg-slate-100 disabled:opacity-50 transition-colors"
+                className="w-11 h-11 bg-white/95 border border-slate-300 flex items-center justify-center rounded-xl shadow-lg hover:bg-slate-100 disabled:opacity-50 transition-all active:scale-95"
              >
                 <Settings size={20} className="text-cyan-600" />
              </button>
@@ -191,7 +185,7 @@ export default function PitchScreen() {
                 onClick={() => setIsSaveModalOpen(true)}
                 disabled={isSquadEmpty || startersCount === 0}
                 title="บันทึกทีม"
-                className="w-11 h-11 bg-[#5B8D2F] border border-[#4a7326] flex items-center justify-center rounded shadow-md hover:bg-[#4a7326] disabled:opacity-50 disabled:bg-slate-400 transition-colors"
+                className="w-11 h-11 bg-[#5B8D2F] border border-[#4a7326] flex items-center justify-center rounded-xl shadow-lg hover:bg-[#4a7326] disabled:opacity-50 disabled:bg-slate-400 transition-all active:scale-95"
              >
                 <Camera size={20} className="text-white" />
              </button>
