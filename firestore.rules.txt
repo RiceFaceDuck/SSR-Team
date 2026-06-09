@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 👤 ระบบผู้ใช้งาน (Users & Sub-collections)
+    match /users/{userId} {
+      // ให้อ่านได้ทุกคนที่ล็อกอิน (เผื่อดูสถิติเพื่อน) แต่แก้ไขได้เฉพาะเจ้าของ
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+      
+      // การเข้าถึง Sub-collection ด้านในของ users
+      match /{document=**} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // ⚽ ระบบจัดการนักเตะ (Database)
+    match /players/{document=**} {
+      // นักเตะทั่วไป ผู้เล่นอ่านได้อย่างเดียว แอดมินแก้ไขได้ (สมมติให้อ่านได้ถ้าล็อกอิน)
+      allow read: if request.auth != null;
+      allow write: if false; // ปิด write จาก client ให้ทำผ่านแอดมินหรือ backend
+    }
+
+    // 🛡️ ระบบจัดการทีม (Teams - Clubs)
+    match /teams/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // 🏆 ระบบจัดการการแข่งขัน
+    match /matches/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // 🎯 ระบบเควสต์และสปอนเซอร์
+    match /quests/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if false; // แก้ไขผ่าน backend/admin
+    }
+
+    // 🎁 ระบบร้านค้า ของรางวัล
+    match /rewards/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    
+    // 💳 ระบบประวัติการทำรายการ Statement
+    match /transactions/{document=**} {
+      allow read, write: if request.auth != null; // ควรใช้ Cloud Function จัดการ แต่เปิดไว้ก่อน
+    }
+
+    // ⚙️ ระบบตั้งค่า
+    match /settings/{document=**} {
+      allow read: if true; // เผื่อการดึงตั้งค่าระบบก่อนล็อกอิน
+      allow write: if false;
+    }
+
+    // 🧩 ระบบไฟล์เสริม (Artifacts) ที่ระบบ Admin จำเป็นต้องใช้งาน
+    match /artifacts/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 🔒 ปิดกั้นการเข้าถึง Collection อื่นๆ นอกเหนือจากนี้ เพื่อความปลอดภัย
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

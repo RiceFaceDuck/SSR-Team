@@ -64,6 +64,21 @@ export const playerDatabase = {
         isActive: playerData.isActive !== undefined ? playerData.isActive : true
       };
 
+      // 🌟 ระบบ Garbage Collector ขั้นสูง (Recursive Deep Clean) ป้องกัน undefined ทุกซอกทุกมุม
+      const deepClean = (obj) => {
+        Object.keys(obj).forEach(key => {
+          if (obj[key] === undefined) {
+            delete obj[key];
+          } else if (typeof obj[key] === 'object' && obj[key] !== null && !(obj[key] instanceof Date)) {
+            // เช็คว่าไม่ใช่ Firestore FieldValue (มีฟังก์ชัน isEqual)
+            if (typeof obj[key].isEqual !== 'function') {
+              deepClean(obj[key]);
+            }
+          }
+        });
+      };
+      deepClean(cleanData);
+
       // ถ้ามี SKU ให้ใช้ SKU เป็น Document ID เพื่อป้องกันข้อมูลซ้ำ
       if (playerData.sku) {
         const docRef = getDocRef(String(playerData.sku));
@@ -128,11 +143,25 @@ export const playerDatabase = {
       playersArray.forEach((player) => {
         let docRef;
         
-        // 🌟 เพิ่ม Timestamp ให้กับการนำเข้าผ่าน Excel ด้วย
+        // 🌟 เพิ่ม Timestamp ให้กับการนำเข้า
         const cleanPlayer = {
             ...player,
             updatedAt: serverTimestamp()
         };
+
+        // 🌟 ระบบ Garbage Collector ขั้นสูง (Recursive Deep Clean) ป้องกัน undefined
+        const deepClean = (obj) => {
+          Object.keys(obj).forEach(key => {
+            if (obj[key] === undefined) {
+              delete obj[key];
+            } else if (typeof obj[key] === 'object' && obj[key] !== null && !(obj[key] instanceof Date)) {
+              if (typeof obj[key].isEqual !== 'function') {
+                deepClean(obj[key]);
+              }
+            }
+          });
+        };
+        deepClean(cleanPlayer);
 
         // จัดการ Document ID
         if (cleanPlayer.sku) {

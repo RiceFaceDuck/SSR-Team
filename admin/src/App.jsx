@@ -7,6 +7,7 @@ import RewardManager from './features/rewards/RewardManager';
 
 // 🌟 NEW: นำเข้า PlayerFeature หน้าจัดการนักเตะตัวเต็ม
 import PlayerFeature from './features/players/PlayerFeature';
+import TeamManager from './features/teams/views/TeamManager';
 
 // MOCK COMPONENTS สำหรับหน้าอื่นๆ ที่ยังไม่ได้ทำ
 const DashboardScreen = () => (
@@ -17,8 +18,22 @@ const DashboardScreen = () => (
 );
 
 export default function App() {
-  // สมมติฐานว่าแอดมินล็อกอินแล้ว
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  React.useEffect(() => {
+    // 🌟 ลงชื่อเข้าใช้แบบไม่ระบุตัวตน (Anonymous Login) อัตโนมัติ เพื่อให้ผ่าน Firestore Security Rules
+    import('firebase/auth').then(({ signInAnonymously }) => {
+      import('./config/firebase').then(({ auth }) => {
+        signInAnonymously(auth)
+          .then(() => setIsAuthenticated(true))
+          .catch((error) => {
+            console.error("Auth Error:", error);
+            // อนุญาตให้เข้าแอดมินได้แม้จะล็อกอินไม่สำเร็จ แต่เวลาเขียน Database อาจจะ Error
+            setIsAuthenticated(true);
+          });
+      });
+    });
+  }, []);
 
   if (!isAuthenticated) {
     return (
@@ -61,6 +76,7 @@ export default function App() {
                 
                 {/* 🌟 จุดที่แก้ไข (Hotfix): ลบ div กำลังพัฒนาออก และเสียบระบบจริงเข้าไป */}
                 <Route path="/players" element={<PlayerFeature />} />
+                <Route path="/teams" element={<TeamManager />} />
                 
                 {/* Route จำลองอื่นๆ ป้องกัน Error */}
                 <Route path="/matches" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: จัดการแข่งขัน</div>} />
