@@ -39,7 +39,7 @@ export default function TransactionHistory({ isOpen, onClose }) {
         icon,
         sign: '+',
         colorClass: 'text-emerald-500',
-        bgClass: 'bg-emerald-50',
+        bgClass: 'bg-emerald-50 border border-emerald-200',
       };
     } else {
       let icon = '💸';
@@ -48,8 +48,8 @@ export default function TransactionHistory({ isOpen, onClose }) {
       return {
         icon,
         sign: '', // ลบจะถูกใส่มาใน amount อยู่แล้ว (ถ้าเป็นค่าติดลบ)
-        colorClass: 'text-rose-500',
-        bgClass: 'bg-rose-50',
+        colorClass: 'text-red-500',
+        bgClass: 'bg-red-50 border border-red-200',
       };
     }
   };
@@ -63,7 +63,7 @@ export default function TransactionHistory({ isOpen, onClose }) {
       />
 
       {/* Bottom Sheet Modal */}
-      <div className="relative w-full sm:w-[400px] bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-8 sm:zoom-in-95 duration-300 max-h-[85vh] flex flex-col">
+      <div className="relative w-full sm:w-[400px] bg-white rounded-t-3xl sm:rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-8 sm:zoom-in-95 duration-300 max-h-[85vh] flex flex-col border border-slate-200">
         
         {/* Header ยึดติดด้านบน */}
         <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-white/95 backdrop-blur z-10">
@@ -73,20 +73,20 @@ export default function TransactionHistory({ isOpen, onClose }) {
           </div>
           <button 
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 active:scale-95 transition-all"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 active:scale-95 transition-all border border-slate-200"
           >
             ✕
           </button>
         </div>
 
         {/* รายการธุรกรรม (Scrollable) */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-slate-50/50">
+        <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-white">
           
           {/* กรณีโหลดข้อมูล */}
           {isTransactionsLoading && (
             <div className="space-y-3">
               {[1, 2, 3, 4].map(i => (
-                <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-2xl border border-slate-100 animate-pulse">
+                <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100 animate-pulse">
                   <div className="w-10 h-10 rounded-xl bg-slate-200"></div>
                   <div className="flex-1 space-y-2">
                     <div className="h-4 bg-slate-200 rounded-md w-3/4"></div>
@@ -100,7 +100,7 @@ export default function TransactionHistory({ isOpen, onClose }) {
 
           {/* กรณีไม่มีประวัติ */}
           {!isTransactionsLoading && transactions.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-10 text-slate-400">
+            <div className="flex flex-col items-center justify-center py-10 text-slate-500">
               <span className="text-4xl mb-3 opacity-50">📭</span>
               <p className="text-sm font-medium">ยังไม่มีประวัติการทำรายการ</p>
             </div>
@@ -115,7 +115,7 @@ export default function TransactionHistory({ isOpen, onClose }) {
             return (
               <div 
                 key={tx.id} 
-                className="flex items-center justify-between p-3.5 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow transition-shadow"
+                className="flex items-center justify-between p-3.5 bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:border-indigo-200 hover:shadow-[0_4px_20px_rgb(0,0,0,0.06)] transition-colors"
               >
                 <div className="flex items-center gap-3">
                   {/* Icon Box */}
@@ -125,10 +125,10 @@ export default function TransactionHistory({ isOpen, onClose }) {
                   
                   {/* Details */}
                   <div className="flex flex-col">
-                    <span className="text-sm font-bold text-slate-700 line-clamp-1">
+                    <span className="text-sm font-bold text-slate-800 line-clamp-1">
                       {tx.description || tx.source}
                     </span>
-                    <span className="text-[10px] font-medium text-slate-400">
+                    <span className="text-[10px] font-medium text-slate-500">
                       {formatDateTime(tx.createdAt)}
                     </span>
                   </div>

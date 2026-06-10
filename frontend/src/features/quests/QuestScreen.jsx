@@ -72,17 +72,17 @@ export default function QuestScreen() {
       {/* Content Area */}
       {isLoading && quests.length === 0 ? (
         // Loading State
-        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-          <div className="w-10 h-10 border-4 border-slate-100 border-t-amber-500 rounded-full animate-spin mb-4"></div>
+        <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+          <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin mb-4"></div>
           <p className="font-semibold text-sm">กำลังค้นหาภารกิจ...</p>
         </div>
       ) : quests.length === 0 ? (
         // Empty State (ยังไม่มีโฆษณา)
-        <div className="bg-white rounded-3xl p-10 flex flex-col items-center justify-center text-center border border-slate-100 shadow-sm mt-8">
-          <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-            <Trophy size={32} className="text-slate-300" />
+        <div className="bg-white rounded-3xl p-10 flex flex-col items-center justify-center text-center border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mt-8">
+          <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-200">
+            <Trophy size={32} className="text-slate-400" />
           </div>
-          <h3 className="text-lg font-bold text-slate-700">ยังไม่มีภารกิจในขณะนี้</h3>
+          <h3 className="text-lg font-bold text-slate-800">ยังไม่มีภารกิจในขณะนี้</h3>
           <p className="text-sm text-slate-500 mt-2">โปรดกลับมาตรวจสอบใหม่ภายหลัง</p>
         </div>
       ) : (

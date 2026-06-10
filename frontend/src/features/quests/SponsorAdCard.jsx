@@ -100,7 +100,7 @@ export default function SponsorAdCard({ quest, record, onClaim, isClaiming }) {
   };
 
   return (
-    <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-3 flex gap-4 border border-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] relative overflow-hidden group hover:shadow-[0_8px_30px_rgba(79,70,229,0.1)] transition-all duration-300">
+    <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-3 flex gap-4 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:border-indigo-200 transition-all duration-300">
       
       {/* 1. ส่วนรูปภาพ (สัดส่วน 1:1) - กดเพื่อไปที่ลิงก์ได้ */}
       <div 
@@ -136,7 +136,7 @@ export default function SponsorAdCard({ quest, record, onClaim, isClaiming }) {
               {quest.title}
             </h3>
             {quest.isVerified && (
-              <ShieldCheck size={16} className="text-blue-500 shrink-0 mt-0.5" title="Verified Sponsor" />
+              <ShieldCheck size={16} className="text-indigo-500 shrink-0 mt-0.5" title="Verified Sponsor" />
             )}
           </div>
           {quest.description && (
@@ -146,7 +146,7 @@ export default function SponsorAdCard({ quest, record, onClaim, isClaiming }) {
 
         {/* ปุ่ม Claim และ Status */}
         <div className="mt-3 flex items-center justify-between">
-          <div className="text-[10px] font-semibold text-slate-400">
+          <div className="text-[10px] font-semibold text-slate-500">
             โควต้า: {record ? record.uses : 0}/{quest.maxClaimsPerUser}
           </div>
 
@@ -158,8 +158,8 @@ export default function SponsorAdCard({ quest, record, onClaim, isClaiming }) {
               ${isMaxed 
                 ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed' 
                 : isCooldown
-                  ? 'bg-orange-50 text-orange-500 border border-orange-200 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-[0_4px_15px_rgba(245,158,11,0.4)] hover:shadow-[0_4px_20px_rgba(245,158,11,0.6)] hover:scale-105 active:scale-95 border border-amber-300/50 cursor-pointer'
+                  ? 'bg-orange-50 text-orange-600 border border-orange-200 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md hover:shadow-lg hover:scale-105 active:scale-95 border border-indigo-500/50 cursor-pointer'
               }
             `}
           >

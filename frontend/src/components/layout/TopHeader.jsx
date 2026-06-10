@@ -15,7 +15,7 @@ export default function TopHeader({ onLogout, onNavigate }) {
   };
 
   return (
-    <div className="bg-white/80 backdrop-blur-xl pt-2 px-4 pb-2 flex justify-between items-center shadow-sm sticky top-0 z-40 border-b border-white">
+    <div className="bg-white/90 backdrop-blur-xl pt-2 px-4 pb-2 flex justify-between items-center shadow-md sticky top-0 z-40 border-b border-slate-200">
       
       {/* โลโก้แอป (กดเพื่อกลับหน้าจัดทีมได้) */}
       <h1 
@@ -42,7 +42,7 @@ export default function TopHeader({ onLogout, onNavigate }) {
         </div>
         
         {/* ไอคอนเมนูด้านบน */}
-        <button onClick={() => handleNav('live')} className="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors shadow-sm border border-slate-100 relative group">
+        <button onClick={() => handleNav('live')} className="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center text-red-500 hover:bg-slate-100 transition-colors shadow-sm border border-slate-200 relative group">
           <Activity size={14} />
           {/* จุดแดงแจ้งเตือนว่ามี Live */}
           <span className="absolute top-0 right-0 flex h-2 w-2">
@@ -50,19 +50,19 @@ export default function TopHeader({ onLogout, onNavigate }) {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
           </span>
         </button>
-        <button onClick={() => handleNav('leaderboard')} className="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center text-yellow-600 hover:bg-yellow-50 transition-colors shadow-sm border border-slate-100">
+        <button onClick={() => handleNav('leaderboard')} className="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center text-amber-500 hover:bg-slate-100 transition-colors shadow-sm border border-slate-200">
           <Trophy size={14} />
         </button>
-        <button onClick={() => handleNav('social')} className="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors shadow-sm border border-slate-100">
+        <button onClick={() => handleNav('social')} className="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center text-indigo-500 hover:bg-slate-100 transition-colors shadow-sm border border-slate-200">
           <Users size={14} />
         </button>
         
-        {/* ปุ่มไปหน้าโปรไฟล์ (โชว์รูป Gmail ของจริง ถ้ามี) */}
-        <button onClick={() => handleNav('profile')} className="w-8 h-8 rounded-full shadow-sm border-2 border-indigo-100 hover:border-indigo-400 transition-colors overflow-hidden flex items-center justify-center bg-slate-50">
+        {/* ปุ่มไปหน้าโปรไฟล์ */}
+        <button onClick={() => handleNav('profile')} className="w-8 h-8 rounded-full shadow-sm border-2 border-slate-200 hover:border-indigo-400 transition-colors overflow-hidden flex items-center justify-center bg-slate-50">
           {userData?.photoURL ? (
             <img src={userData.photoURL} alt="Profile" className="w-full h-full object-cover" />
           ) : (
-            <User size={14} className="text-indigo-600" />
+            <User size={14} className="text-indigo-400" />
           )}
         </button>
         
@@ -72,7 +72,7 @@ export default function TopHeader({ onLogout, onNavigate }) {
             playSound('click');
             onLogout();
           }}
-          className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500 transition-colors ml-1"
+          className="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors ml-1 border border-transparent hover:border-red-100"
           title="ออกจากระบบ"
         >
           <LogOut size={14} />

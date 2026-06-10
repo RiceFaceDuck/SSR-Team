@@ -21,24 +21,24 @@ export default function BudgetBar() {
   const percentage = Math.max(0, Math.min(100, (budgetLeft / MAX_BUDGET) * 100));
 
   // กำหนดสีของหลอดตามจำนวนเงินที่เหลือ (Premium Feedback)
-  let barColor = 'bg-gradient-to-r from-blue-400 to-indigo-500 shadow-indigo-400/50';
-  let textColor = 'text-indigo-600';
-  let iconBg = 'bg-indigo-50';
+  let barColor = 'bg-gradient-to-r from-[#fbbf24] to-yellow-500 shadow-yellow-500/50';
+  let textColor = 'text-[#fbbf24]';
+  let iconBg = 'bg-[#0a192f]';
 
   if (percentage <= 15) {
     // เงินเหลือน้อยมาก (ต้ำกว่า 15%) - สีแดงเตือนภัย
-    barColor = 'bg-gradient-to-r from-rose-400 to-red-500 shadow-red-400/50';
-    textColor = 'text-red-600';
-    iconBg = 'bg-red-50';
+    barColor = 'bg-gradient-to-r from-red-500 to-rose-600 shadow-red-500/50';
+    textColor = 'text-red-400';
+    iconBg = 'bg-[#0a192f] border border-red-500/30';
   } else if (percentage <= 40) {
     // เงินเหลือปานกลาง (ต่ำกว่า 40%) - สีส้มระวัง
-    barColor = 'bg-gradient-to-r from-amber-400 to-orange-500 shadow-orange-400/50';
-    textColor = 'text-orange-600';
-    iconBg = 'bg-orange-50';
+    barColor = 'bg-gradient-to-r from-orange-400 to-amber-500 shadow-orange-400/50';
+    textColor = 'text-orange-400';
+    iconBg = 'bg-[#0a192f] border border-orange-500/30';
   }
 
   return (
-    <div className="bg-white/90 backdrop-blur-xl p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 w-full mb-5">
+    <div className="bg-[#0f284e]/90 backdrop-blur-xl p-4 rounded-xl shadow-lg border border-[#1e3a8a] w-full mb-5">
       <div className="flex justify-between items-end mb-3">
         <div className="flex items-center gap-2.5">
           {/* ไอคอนกระเป๋าเงิน */}
@@ -46,7 +46,7 @@ export default function BudgetBar() {
             <Wallet size={18} strokeWidth={2.5} />
           </div>
           <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+            <span className="text-xs font-bold text-[#8b9bb4] uppercase tracking-wider block mb-0.5">
               งบประมาณคงเหลือ
             </span>
             <span className={`text-xl font-black ${textColor} leading-none transition-colors duration-500`}>
@@ -57,14 +57,14 @@ export default function BudgetBar() {
         
         {/* ข้อความกำกับสัดส่วน */}
         <div className="text-right">
-          <span className="text-[10px] font-bold text-slate-400">
+          <span className="text-[10px] font-bold text-[#8b9bb4]">
             {percentage.toFixed(0)}%
           </span>
         </div>
       </div>
       
       {/* โครงสร้างหลอด Progress Bar */}
-      <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden relative shadow-inner">
+      <div className="w-full h-2.5 bg-[#061121] rounded-full overflow-hidden relative shadow-inner border border-[#1e3a8a]">
         {/* แอนิเมชันของหลอดที่วิ่งตามเปอร์เซ็นต์จริง */}
         <div 
           className={`h-full rounded-full transition-all duration-700 ease-out shadow-sm ${barColor}`}

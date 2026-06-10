@@ -1,1 +1,21 @@
-/* อิมพอร์ตระบบดีไซน์ Tailwind CSS */@tailwind base;@tailwind components;@tailwind utilities;/* ซ่อนแถบ Scrollbar แต่ยังใช้นิ้วเลื่อนได้ (เพื่อความสวยงามบนมือถือ) */.scrollbar-hide::-webkit-scrollbar {display: none;}.scrollbar-hide {-ms-overflow-style: none;scrollbar-width: none;}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ซ่อนแถบ Scrollbar แต่ยังใช้นิ้วเลื่อนได้ (เพื่อความสวยงามบนมือถือ) */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ซ่อน Scrollbar ของทั้งหน้าเว็บและ Element ทั้งหมด (Global) แต่ยังให้ Scroll ได้ */
+* {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+*::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari and Opera */
+}

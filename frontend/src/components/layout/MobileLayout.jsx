@@ -13,8 +13,8 @@ export default function MobileLayout({ children, currentPath, onNavigate, onLogo
         {/* แถบด้านบน */}
         <TopHeader onLogout={onLogout} onNavigate={onNavigate} />
 
-        {/* พื้นที่แสดงเนื้อหาตรงกลาง */}
-        <div className="h-full animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+        {/* พื้นที่แสดงเนื้อหาตรงกลาง (ให้ Scroll ได้เฉพาะข้างในนี้) */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col pb-16">
           {children}
         </div>
 

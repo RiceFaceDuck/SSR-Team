@@ -168,7 +168,7 @@ export default function MarketScreen() {
       </div>
       
       {/* Filters & Search Area */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6 space-y-4">
+      <div className="bg-white p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 mb-6 space-y-4">
         
         {/* Search & Sort */}
         <div className="flex gap-2">
@@ -179,7 +179,7 @@ export default function MarketScreen() {
               placeholder="ค้นหาชื่อ, สโมสร..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow text-slate-700 placeholder-slate-400"
             />
           </div>
           <div className="relative shrink-0 w-[110px]">
@@ -187,7 +187,7 @@ export default function MarketScreen() {
             <select 
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 text-slate-600 rounded-xl pl-9 pr-2 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer"
+              className="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-xl pl-9 pr-2 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer"
             >
               <option value="price-desc">แพงสุด</option>
               <option value="price-asc">ถูกสุด</option>
@@ -209,8 +209,8 @@ export default function MarketScreen() {
                 }}
                 className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold border transition-colors shadow-sm
                   ${isActive 
-                    ? 'bg-slate-800 text-white border-slate-800' 
-                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' 
+                    : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
                   }`}
               >
                 {tab.label}
@@ -241,7 +241,7 @@ export default function MarketScreen() {
             );
           })
         ) : (
-          <div className="text-center py-10 bg-white rounded-2xl border border-slate-100 shadow-sm">
+          <div className="text-center py-10 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             <span className="text-4xl mb-3 block">🔍</span>
             <p className="text-slate-500 font-bold text-sm">ไม่พบนักเตะที่คุณค้นหา</p>
           </div>

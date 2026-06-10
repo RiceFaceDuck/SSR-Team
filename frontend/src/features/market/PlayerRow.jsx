@@ -43,14 +43,14 @@ export default function PlayerRow({ player, onActionClick, onClick }) {
       // ฝัง Event รับการคลิก (Tap) ไว้ที่ตัวกรอบนอกสุดของการ์ด แทนระบบเซ็นเซอร์ลากเดิม
       onClick={handleRowClick}
       // เปลี่ยนจาก cursor-grab เป็น cursor-pointer และเพิ่ม active:scale-[0.98] ให้ปุ่มยุบตัวนิดนึงตอนกด
-      className="bg-white p-4 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between group select-none cursor-pointer active:scale-[0.98]"
+      className="bg-white p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:border-indigo-200 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between group select-none cursor-pointer active:scale-[0.98]"
     >
       
       {/* ฝั่งซ้าย: รูป, ชื่อ, ตำแหน่ง, ทีม */}
       <div className="flex items-center gap-4 overflow-hidden pointer-events-none">
         
         {/* รูปจำลองนักเตะ รองรับทั้งรูปภาพจริงและตัวอักษร */}
-        <div className="relative w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 font-black text-lg border-2 border-slate-100 shrink-0 group-hover:border-indigo-200 transition-colors shadow-inner overflow-hidden">
+        <div className="relative w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 font-black text-lg border border-slate-200 shrink-0 group-hover:border-indigo-300 transition-colors shadow-inner overflow-hidden">
           {safePlayer.image ? (
             <img 
               src={safePlayer.image} 
@@ -83,7 +83,7 @@ export default function PlayerRow({ player, onActionClick, onClick }) {
           <p className="font-black text-sm text-indigo-600 leading-none mb-1">
             £{safePlayer.price?.toFixed(1) || '0.0'}m
           </p>
-          <span className="text-[10px] font-bold text-slate-400 leading-none">
+          <span className="text-[10px] font-bold text-slate-500 leading-none">
             {safePlayer.totalPoints || 0} Pts
           </span>
         </div>
@@ -101,8 +101,8 @@ export default function PlayerRow({ player, onActionClick, onClick }) {
           }}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-90 shadow-sm relative z-10
             ${isInSquad 
-              ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200' 
-              : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-200'
+              ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200' 
+              : 'bg-indigo-600 text-white hover:bg-indigo-700 border border-transparent hover:shadow-md'
             }`}
         >
           {isInSquad ? 'ขาย' : 'ซื้อ'}
