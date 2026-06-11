@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { playSound } from '../../config/theme';
 import { signInWithGoogle } from './authService';
-import { AlertCircle, Loader2, ShieldCheck, Sparkles } from 'lucide-react';
+import { AlertCircle, Loader2, ShieldCheck, ExternalLink } from 'lucide-react';
 import { useGameStore } from '../../store/useGameStore';
 
 export default function LoginScreen({ onLogin }) {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isInAppBrowser, setIsInAppBrowser] = useState(false);
   
   // ดึงข้อมูลธีม และ ฟังก์ชันดักฟัง จากคลังกลาง
   const { themeConfig, initThemeListener } = useGameStore();
 
-  // สั่งให้ระบบดักฟังรูปภาพจาก Firebase ทำงานทันทีที่เปิดหน้านี้
   useEffect(() => {
+    // เช็คว่าเป็น In-App Browser หรือไม่ (Line, Facebook, IG)
+    const checkInApp = () => {
+      const ua = navigator.userAgent || navigator.vendor || window.opera;
+      if (ua.indexOf("FBAN") > -1 || ua.indexOf("FBAV") > -1 || ua.indexOf("Instagram") > -1 || ua.indexOf("Line") > -1) {
+        setIsInAppBrowser(true);
+      }
+    };
+    checkInApp();
+
     const unsubscribe = initThemeListener();
     return () => {
       if (unsubscribe) unsubscribe();
@@ -21,6 +30,13 @@ export default function LoginScreen({ onLogin }) {
 
   const handleGoogleLogin = async () => {
     if (isLoggingIn) return; 
+    
+    // ถ้าเป็น In-App browser โชว์เตือนไปเลยว่า login ไม่ได้
+    if (isInAppBrowser) {
+        setErrorMessage('กรุณาเปิดในเบราว์เซอร์ปกติ (Chrome/Safari) เพื่อเข้าสู่ระบบ');
+        return;
+    }
+
     playSound('click');
     setIsLoggingIn(true);
     setErrorMessage('');
@@ -33,6 +49,11 @@ export default function LoginScreen({ onLogin }) {
     } else if (onLogin) {
       onLogin();
     }
+  };
+
+  const copyUrl = () => {
+      navigator.clipboard.writeText(window.location.href);
+      alert('คัดลอกลิงก์แล้ว! นำไปวางใน Chrome หรือ Safari ได้เลยครับ');
   };
 
   return (
@@ -61,7 +82,23 @@ export default function LoginScreen({ onLogin }) {
       {/* 3. ปุ่ม Login (วางตรงกลาง-ล่าง กะทัดรัด ไม่บังฉากหลัง) */}
       <div className="absolute bottom-28 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center w-full px-6 animate-in slide-in-from-bottom-8 duration-700 fade-in">
         
-        {errorMessage && (
+        {isInAppBrowser && (
+           <div className="mb-4 w-full max-w-sm px-4 py-3 bg-blue-600/90 backdrop-blur-md border border-blue-400 rounded-2xl shadow-xl flex flex-col items-center text-center gap-2 animate-in zoom-in duration-300">
+             <div className="flex items-center gap-2 justify-center">
+                 <AlertCircle className="text-white shrink-0" size={20} />
+                 <p className="text-sm text-white font-bold">ไม่สามารถล็อกอินผ่านแอปนี้ได้</p>
+             </div>
+             <p className="text-xs text-blue-100 mb-2">เพื่อความปลอดภัย Google ไม่อนุญาตให้ล็อกอินผ่าน Line/Facebook<br/>กรุณากด <strong className="text-white">จุด 3 จุด</strong> มุมขวาบน แล้วเลือก<br/><strong className="text-white">"เปิดในเบราว์เซอร์เริ่มต้น"</strong></p>
+             <button 
+                 onClick={copyUrl}
+                 className="flex items-center gap-2 bg-white text-blue-700 text-xs font-bold px-4 py-2 rounded-full hover:bg-blue-50 transition-colors"
+             >
+                 <ExternalLink size={14} /> คัดลอกลิงก์ไปเปิดใน Chrome/Safari
+             </button>
+           </div>
+        )}
+
+        {errorMessage && !isInAppBrowser && (
           <div className="mb-4 px-4 py-2 bg-red-500/80 backdrop-blur-md border border-red-400 rounded-full flex items-center gap-2 text-left animate-in zoom-in duration-300 shadow-lg">
             <AlertCircle className="text-white shrink-0" size={16} />
             <p className="text-xs text-white font-bold">{errorMessage}</p>

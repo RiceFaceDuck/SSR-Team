@@ -3,8 +3,9 @@ import PlayerNode from './PlayerNode';
 import { getFormationData } from '../../../utils/formationUtils';
 import { useUserStore } from '../../../store/useUserStore';
 import { toast } from '../../../utils/toast';
+import { normalizePosition } from '../../../utils/squadValidator';
 
-const Pitch = ({ squad, formation }) => {
+const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId, pendingPlacement }) => {
   const { setMarketFilterPos } = useUserStore();
   const currentFormation = getFormationData(formation);
 
@@ -26,30 +27,46 @@ const Pitch = ({ squad, formation }) => {
       const slotId = `${role}-${i}`;
       const player = squad.find(p => p.id === slotId);
 
+      const isTargetValid = pendingPlacement && normalizePosition(pendingPlacement.position) === normalizePosition(category);
+      const highlightClass = isTargetValid && !player ? 'ring-4 ring-[#fbbf24] shadow-[0_0_25px_rgba(251,191,36,1)] rounded-md animate-pulse z-30 scale-110' : '';
+
       slots.push(
         <div 
           key={slotId} 
-          onClick={!player ? () => handleEmptySlotClick(category) : undefined}
-          className={`relative transition-transform duration-300 ${!player ? 'cursor-pointer hover:scale-110 active:scale-95 opacity-60' : 'cursor-pointer'}`}
+          onClick={() => {
+            if (!player) {
+              if (onSlotClick) onSlotClick(slotId, category);
+              else handleEmptySlotClick(category);
+            } else {
+              if (onPlayerClick) onPlayerClick(player);
+            }
+          }}
+          className={`relative transition-all duration-300 cursor-pointer active:scale-95 ${selectedPlayerId === String(player?.playerId) ? 'scale-105 z-20' : ''} ${highlightClass} ${!player ? 'hover:-translate-y-1' : ''}`}
         >
-          <PlayerNode player={player} expectedPosition={category} />
+          {isTargetValid && !player && (
+             <div className="absolute inset-0 bg-[#fbbf24] bg-opacity-20 rounded-md"></div>
+          )}
+          <PlayerNode 
+            player={player} 
+            expectedPosition={category} 
+            isSelected={selectedPlayerId === String(player?.playerId)}
+          />
         </div>
       );
     }
 
     return (
-      <div key={`row-${role}`} className="flex justify-center gap-2 sm:gap-6 w-full px-2 py-2">
+      <div key={`row-${role}`} className="flex justify-evenly items-end w-full px-2 sm:px-4 py-2">
         {slots}
       </div>
     );
   };
 
-  // We want to render rows from GK down to FW
+  // We want to render rows from FW down to GK
   const renderAllRows = () => {
     // formationUtils usually defines rows from FW -> MF -> DF
-    // We reverse it and put GK at the top.
-    const rows = [...currentFormation.rows].reverse();
-    const allRows = [{ role: 'GK', category: 'GK', count: 1 }, ...rows];
+    // We keep that order and put GK at the very bottom.
+    const allRows = [...currentFormation.rows, { role: 'GK', category: 'GK', count: 1 }];
     return allRows.map(row => renderRow(row));
   };
 
@@ -66,19 +83,31 @@ const Pitch = ({ squad, formation }) => {
       
       {/* Pitch Lines (Penalty box, half way line) */}
       <div className="absolute inset-0 z-0 pointer-events-none flex flex-col items-center justify-between opacity-50">
-        {/* Top Penalty Box */}
-        <div className="w-[60%] h-[15%] border-b-2 border-x-2 border-white/60 mt-0 flex justify-center items-end pb-2">
-           <div className="w-1/3 h-1/2 border-t-2 border-x-2 border-white/60 rounded-t-full"></div>
+        {/* Top Area */}
+        <div className="w-[60%] h-[20%] flex flex-col items-center">
+          {/* Penalty Box */}
+          <div className="w-full h-[75%] border-b-2 border-x-2 border-white/60 relative flex justify-center">
+            {/* 6-Yard Box */}
+            <div className="absolute top-0 w-[40%] h-[40%] border-b-2 border-x-2 border-white/60"></div>
+          </div>
+          {/* Penalty Arc */}
+          <div className="w-[30%] h-[25%] border-b-2 border-x-2 border-white/60 rounded-b-[100%] border-t-0 -mt-[2px]"></div>
         </div>
         
         {/* Halfway Line */}
-        <div className="w-full border-t-2 border-white/60 relative flex justify-center items-center">
+        <div className="w-full border-t-2 border-white/60 relative flex justify-center items-center z-0">
            <div className="w-20 h-20 border-2 border-white/60 rounded-full absolute -top-10 bg-transparent"></div>
         </div>
         
-        {/* Bottom Penalty Box */}
-        <div className="w-[60%] h-[15%] border-t-2 border-x-2 border-white/60 mb-0 flex justify-center items-start pt-2">
-           <div className="w-1/3 h-1/2 border-b-2 border-x-2 border-white/60 rounded-b-full"></div>
+        {/* Bottom Area */}
+        <div className="w-[60%] h-[20%] flex flex-col items-center justify-end">
+          {/* Penalty Arc */}
+          <div className="w-[30%] h-[25%] border-t-2 border-x-2 border-white/60 rounded-t-[100%] border-b-0 -mb-[2px]"></div>
+          {/* Penalty Box */}
+          <div className="w-full h-[75%] border-t-2 border-x-2 border-white/60 relative flex justify-center">
+            {/* 6-Yard Box */}
+            <div className="absolute bottom-0 w-[40%] h-[40%] border-t-2 border-x-2 border-white/60"></div>
+          </div>
         </div>
       </div>
 

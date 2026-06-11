@@ -69,7 +69,7 @@ export default function TransactionHistory({ isOpen, onClose }) {
         <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-white/95 backdrop-blur z-10">
           <div>
             <h3 className="text-xl font-black text-slate-800 tracking-tight">ประวัติรายการ</h3>
-            <p className="text-xs font-medium text-slate-500">การเคลื่อนไหว Balls ⚽ ล่าสุด</p>
+            <p className="text-xs font-medium text-slate-500">ความเคลื่อนไหว Balls ⚽ ล่าสุด</p>
           </div>
           <button 
             onClick={onClose}

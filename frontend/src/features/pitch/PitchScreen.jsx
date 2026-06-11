@@ -1,88 +1,57 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { useUserStore } from '../../store/useUserStore';
-import { useMarketStore } from '../../store/useMarketStore';
 import SquadHeader from './components/SquadHeader';
 import Pitch from './components/Pitch';
-import PlayerNode from './components/PlayerNode';
 import SquadActions from './components/SquadActions';
-import SaveSquadModal from './SaveSquadModal'; 
+import SaveSquadManager from './components/save/SaveSquadManager'; 
+import PitchBenchArea from './components/PitchBenchArea';
+import FloatingActionBar from './components/FloatingActionBar';
+import ManagerSelectionModal from './ManagerSelectionModal';
+import PlayerActionPopup from './components/PlayerActionPopup';
+import PowerCardPopup from './PowerCardPopup';
+import { usePitchLogic } from './hooks/usePitchLogic';
 import { toast } from '../../utils/toast';
 
 export default function PitchScreen() {
-  const { 
-    mySquad, 
-    formation, 
-    setFormation,
-    budgetLeft,
-    clearPitch,
-    autoFillTeam,
-    markAsSaved,
-    userData 
-  } = useUserStore();
+  const {
+    isLoading,
+    enrichedStarters,
+    enrichedBench,
+    formation,
+    userData,
+    manager,
+    getEffectiveBudget,
+    mySquad,
+    pendingPlacement,
+    cancelPlacement,
+    selectedPlayer,
+    setSelectedPlayer,
+    popupPlayer,
+    setPopupPlayer,
+    powerCardPlayer,
+    setPowerCardPlayer,
+    actions,
+    handlers,
+    saveSquadToCloud
+  } = usePitchLogic();
 
-  const { players: marketPlayers, fetchMarketPlayers, isDataFetched } = useMarketStore();
-
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isFormationOpen, setIsFormationOpen] = useState(false);
-  const formationsList = ['4-3-3', '4-4-2', '3-5-2', '3-4-3', '4-5-1', '5-3-2', '5-4-1'];
-
-  useEffect(() => {
-    if (!isDataFetched) {
-      fetchMarketPlayers();
-    }
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [isDataFetched, fetchMarketPlayers]);
-
-  const { enrichedStarters, enrichedBench } = useMemo(() => {
-    const enriched = mySquad.map(squadPlayer => {
-      const fullData = marketPlayers.find(p => String(p.sku) === String(squadPlayer.playerId));
-      return {
-        id: String(squadPlayer.slotIndex), 
-        name: fullData?.name || fullData?.fullName || 'Unknown',
-        team: fullData?.team || 'UNK',
-        position: squadPlayer.position,
-        price: fullData?.price || 0,
-        role: null,
-        isStarting: squadPlayer.isStarting
-      };
-    });
-    return {
-      enrichedStarters: enriched.filter(p => p.isStarting),
-      enrichedBench: enriched.filter(p => !p.isStarting)
-    };
-  }, [mySquad, marketPlayers]);
-
-  const handleClearPitch = () => {
-    clearPitch();
-    toast.success("ดึงนักเตะกลับม้านั่งสำรองทั้งหมดแล้ว");
-  };
-
-  const handleAutoFill = () => {
-    const result = autoFillTeam();
-    if (result.success) {
-      toast.success(result.message);
-    } else {
-      toast.error(result.message);
-    }
-  };
+  const [isManagerModalOpen, setIsManagerModalOpen] = useState(false);
+  
+  const formationsList = manager?.effectLogic?.type === 'UNLOCK_FORMATION' && Array.isArray(manager.effectLogic.formations)
+    ? ['4-3-3', '4-4-2', '3-5-2', '3-4-3', '4-5-1', '5-3-2', '5-4-1', ...manager.effectLogic.formations]
+    : ['4-3-3', '4-4-2', '3-5-2', '3-4-3', '4-5-1', '5-3-2', '5-4-1'];
 
   const handleConfirmSave = async () => {
     await new Promise(resolve => setTimeout(resolve, 800));
-    markAsSaved(); 
-    toast.success("บันทึกทีมลงระบบเรียบร้อย!");
-    setIsSaveModalOpen(false);
-  };
-
-  const actions = {
-    handleAutoPick: handleAutoFill,
-    handleReset: handleClearPitch,
-    handleSaveTeam: () => setIsSaveModalOpen(true),
-    changeFormation: setFormation
+    const result = await saveSquadToCloud(userData?.uid);
+    if (result && result.success) {
+      toast.success(result.message);
+      setIsSaveModalOpen(false);
+    } else if (result && !result.success) {
+      toast.error(result.message);
+    }
   };
 
   if (isLoading) {
@@ -98,15 +67,13 @@ export default function PitchScreen() {
   return (
     <div className="w-full h-full bg-[#040f1d] flex flex-col overflow-hidden animate-in fade-in duration-500">
       
-      {/* 1. Header Area (Static height) */}
-      <SquadHeader 
-        totalPoints={userData?.userPoints || 0} 
-      />
+      {/* Header Area */}
+      <SquadHeader totalPoints={userData?.userPoints || 0} />
 
-      {/* 2. Pitch Area (Flexible height) */}
+      {/* Pitch Area */}
       <div className="flex-1 min-h-0 overflow-hidden relative flex flex-col">
          
-         {/* Formation Selector (Top Right inside Pitch) */}
+         {/* Formation Selector */}
          <div className="absolute top-2 right-2 z-30">
            <button 
              onClick={() => setIsFormationOpen(!isFormationOpen)}
@@ -137,50 +104,63 @@ export default function PitchScreen() {
            )}
          </div>
 
-         {/* Green Pitch */}
-         <Pitch squad={enrichedStarters} formation={formation || '4-4-2'} />
+         <Pitch 
+           squad={enrichedStarters} 
+           formation={formation || '4-4-2'} 
+           onSlotClick={handlers.handleSlotClick}
+           onPlayerClick={handlers.handlePlayerClick}
+           selectedPlayerId={selectedPlayer?.playerId}
+           pendingPlacement={pendingPlacement}
+         />
          
-         {/* Bench Area */}
-         <div className="h-[70px] sm:h-[80px] bg-[#0a192f] border-t-2 border-[#fbbf24] flex items-center justify-center gap-1 sm:gap-2 px-1 relative z-10 w-full overflow-x-hidden">
-            <div className="absolute top-0 left-0 bg-[#fbbf24] text-[#0a192f] text-[8px] font-bold px-1.5 py-0.5 rounded-br-md">
-              BENCH
-            </div>
-            
-            {/* Render 5 Bench Slots */}
-            {['GK', 'DEF', 'MID', 'FW', 'ANY'].map((pos, index) => {
-              const player = enrichedBench[index];
-              return (
-                <div key={`bench-${index}`} className="mt-2 scale-90 flex-shrink-0">
-                  <PlayerNode player={player} expectedPosition={player?.position || pos} />
-                </div>
-              );
-            })}
+         <PitchBenchArea 
+            enrichedBench={enrichedBench}
+            pendingPlacement={pendingPlacement}
+            selectedPlayer={selectedPlayer}
+            manager={manager}
+            handleBenchSlotClick={handlers.handleBenchSlotClick}
+            handlePlayerClick={handlers.handlePlayerClick}
+            onManagerClick={() => setIsManagerModalOpen(true)}
+         />
+       </div>
 
-            {/* Divider between Bench and Manager */}
-            <div className="h-10 w-px bg-[#1e3a8a] mx-0.5 sm:mx-1 mt-2 flex-shrink-0"></div>
+       <FloatingActionBar 
+          pendingPlacement={pendingPlacement}
+          selectedPlayer={selectedPlayer}
+          cancelPlacement={cancelPlacement}
+          setSelectedPlayer={setSelectedPlayer}
+       />
 
-            {/* Manager Slot (Right side) */}
-            <div className="mt-2 scale-90 flex-shrink-0 relative">
-               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#3b82f6] text-white text-[6px] font-bold px-1 rounded-sm whitespace-nowrap z-20">
-                 MANAGER
-               </div>
-               {/* Mock empty manager for now, using PlayerNode's EmptyNode style */}
-               <PlayerNode player={undefined} expectedPosition="MGR" />
-            </div>
-         </div>
-      </div>
-
-      {/* 3. Actions Area (Static height) */}
       <SquadActions 
-        bank={budgetLeft} 
+        bank={getEffectiveBudget()} 
         squadCount={mySquad.filter(p => p.isStarting).length} 
-        actions={actions} 
+        actions={{ ...actions, handleSaveTeam: () => setIsSaveModalOpen(true) }} 
       />
 
-      <SaveSquadModal 
+      <SaveSquadManager 
         isOpen={isSaveModalOpen} 
         onClose={() => setIsSaveModalOpen(false)} 
-        onConfirmSave={handleConfirmSave} 
+        onConfirmSave={handleConfirmSave}
+      />
+      <ManagerSelectionModal
+        isOpen={isManagerModalOpen}
+        onClose={() => setIsManagerModalOpen(false)}
+      />
+
+      {/* Player Action Popup */}
+      {popupPlayer && (
+        <PlayerActionPopup 
+          player={popupPlayer} 
+          onClose={() => setPopupPlayer(null)}
+          onAction={actions.handlePopupAction}
+        />
+      )}
+
+      {/* Power Card Popup */}
+      <PowerCardPopup 
+        isOpen={!!powerCardPlayer}
+        onClose={() => setPowerCardPlayer(null)}
+        player={powerCardPlayer}
       />
       
     </div>

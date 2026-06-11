@@ -12,7 +12,8 @@ import { useUserStore } from '../../store/useUserStore';
 
 export default function BudgetBar() {
   // ดึงค่าเงินที่เหลือจาก Store ส่วนกลาง
-  const budgetLeft = useUserStore((state) => state.budgetLeft);
+  const getEffectiveBudget = useUserStore((state) => state.getEffectiveBudget);
+  const budgetLeft = getEffectiveBudget();
   
   // สมมติว่าทุนเริ่มต้นคือ 100.0M เพื่อนำมาหาเปอร์เซ็นต์ความยาวของหลอด
   const MAX_BUDGET = 100.0;

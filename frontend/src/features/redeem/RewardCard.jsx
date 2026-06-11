@@ -114,10 +114,10 @@ export function RewardCard({ reward, title, cost, imageSlot, onSuccess }) {
     
     switch (step) {
       case 'confirm': return { text: 'กดยืนยันอีกครั้ง!', classes: 'bg-amber-500 hover:bg-amber-600 text-white animate-pulse shadow-lg shadow-amber-500/40 border border-amber-400' };
-      case 'loading': return { text: 'กำลังประมวลผล...', classes: 'bg-slate-100 text-slate-500 cursor-wait' };
+      case 'loading': return { text: 'กำลังตรวจสอบ...', classes: 'bg-slate-100 text-slate-500 cursor-wait' };
       case 'success': return { text: 'รับสำเร็จ! 🎉', classes: 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 scale-105 border border-emerald-400' };
       case 'error': return { text: '❌ พลาด', classes: 'bg-red-500 text-white border border-red-600' };
-      default: return { text: 'แลกรับ', classes: 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md active:scale-95 transition-all duration-200' };
+      default: return { text: 'แลกรับรางวัล', classes: 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md active:scale-95 transition-all duration-200' };
     }
   };
 

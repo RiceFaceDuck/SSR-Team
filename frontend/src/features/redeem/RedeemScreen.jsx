@@ -66,9 +66,9 @@ export default function RedeemScreen() {
             <Store size={24} />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-slate-800 mb-0.5 tracking-tight">ร้านค้าของรางวัล</h2>
+            <h2 className="text-2xl font-black text-slate-800 mb-0.5 tracking-tight">ร้านค้ารางวัล</h2>
             <p className="text-slate-500 font-medium text-xs">
-              สะสม <span className="font-bold text-amber-500">Balls ⚽</span> แล้วมาเปย์ที่นี่!
+              สะสม <span className="font-bold text-amber-500">Balls ⚽</span> เพื่อแลกรับรางวัลและแพ็คเกจนักเตะสุดพิเศษ!
             </p>
           </div>
         </div>

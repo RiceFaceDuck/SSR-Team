@@ -16,9 +16,12 @@
     - `utils/`: `excelParser.js`, `templateUtil.js`
     - `views/`: `PlayerList.jsx`, `PlayerDetails.jsx`
     - `PlayerFeature.jsx`: Main entry point for the player module
+  - `managers/`: Manager Management Feature (New!)
+    - `components/`: `ManagerForm.jsx`
+    - `views/`: `ManagerList.jsx`
   - `gameweek/`, `quests/`, `rewards/`, `users/`, `verify/`: Other features
 - `services/`: External integrations
-  - `firebase/`: `playerDatabase.js`, etc.
+  - `firebase/`: `playerDatabase.js`, `managerDatabase.js`, etc.
   - `api/`: `apiFootballService.js`
 - `store/`: Zustand global state
 - `utils/`: Global utilities
@@ -27,19 +30,36 @@
 - `components/`: Shared UI components
 - `features/`: Domain-driven feature modules (`auth/`, `market/`, `pitch/`, etc.)
   - `pitch/`:
-    - `BenchArea.jsx`: แถบนักเตะสำรอง/เสริม (Tabs)
-    - `FloatingActionBar.jsx`: ปุ่มควบคุมการเซฟและล้างสนาม
+    - `components/`:
+      - `PitchBenchArea.jsx`: แถบนักเตะสำรองและผู้จัดการทีม
+      - `FloatingActionBar.jsx`: ปุ่มควบคุมการจัดวางนักเตะ
+      - `PlayerActionPopup.jsx`: ป็อปอัปเมนูเมื่อคลิกผู้เล่นในสนาม
+      - `Pitch.jsx`, `PlayerNode.jsx`, `SquadHeader.jsx`, `SquadActions.jsx`
+    - `hooks/`:
+      - `usePitchLogic.js`: Custom hook จัดการ Logic ของ PitchScreen
     - `FormationSelector.jsx`: เมนูเลือกแผนการเล่น
     - `PitchBoard.jsx`: คอมโพเนนต์หลักที่จัดเรียงนักเตะบนสนาม
-    - `PitchFieldUI.jsx`: UI วาดลายหญ้าและเส้นสนามฟุตบอล
     - `PitchScreen.jsx`: หน้าจอหลัก (Layout รวม)
-    - `PlayerSlot.jsx`: การ์ดนักเตะบนสนาม/ม้านั่ง
-    - `SaveSquadModal.jsx`: ป็อปอัปบันทึกทีมและดูโฆษณา
-- `services/`: External integrations (`firebase/squadService.js`)
+    - `ManagerSelectionModal.jsx`: ป็อปอัปเลือกผู้จัดการทีม
+    - `components/save/`:
+      - `AdSponsorView.jsx`: UI แสดงโฆษณาสปอนเซอร์
+      - `SquadSummaryView.jsx`: UI สรุปทีมและยืนยันการเซฟ
+      - `SaveSquadManager.jsx`: ควบคุมการทำงานของป็อปอัปบันทึกทีมและดูโฆษณา
+    - `PowerCardPopup.jsx`: ป็อปอัปสำหรับดึงข้อมูลการ์ดและสวมใส่ให้นักเตะ
+  - `profile/`:
+    - `ProfileScreen.jsx`: หน้าจอโปรไฟล์หลักและกระเป๋าเงิน (Wallet)
+    - `components/`:
+      - `ProfileSettingsModal.jsx`: ป็อปอัปสำหรับตั้งค่าบัญชีและชื่อทีม
+- `services/`: External integrations 
+  - `firebase/`: `squadService.js`, `managerService.js`, `cardService.js`
 - `store/`: Zustand global state
   - `useUserStore.js`: Store หลักที่รวม Slices เข้าด้วยกัน
   - `slices/`: 
     - `createAuthSlice.js`: จัดการข้อมูลผู้ใช้
-    - `createSquadSlice.js`: จัดการการจัดทีม แผนการเล่น
+    - `squadCoreSlice.js`: จัดการการจัดทีม แผนการเล่น สถานะพื้นฐานและการเซฟ
+    - `squadActionSlice.js`: จัดการการกระทำในสนาม 
+    - `squadMarketSlice.js`: จัดการการซื้อขายนักเตะ
+    - `squadAutoFillSlice.js`: จัดการการจัดทีมอัตโนมัติ
+    - `squadCardSlice.js`: จัดการระบบการ์ดเสริมพลัง
     - `createWalletSlice.js`: จัดการงบและ Balls
 - `hooks/`, `utils/`: Global app structure

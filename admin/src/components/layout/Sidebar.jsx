@@ -8,7 +8,10 @@ import {
   Megaphone,
   Store, 
   Settings, 
-  LogOut 
+  LogOut,
+  Briefcase,
+  Zap,
+  BookOpen
 } from 'lucide-react';
 
 export default function Sidebar({ onLogout }) {
@@ -18,7 +21,10 @@ export default function Sidebar({ onLogout }) {
     { title: 'แดชบอร์ด', path: '/', icon: LayoutDashboard },
     { title: 'ผู้ใช้งาน', path: '/users', icon: Users },
     { title: 'นักเตะ (Database)', path: '/players', icon: Shirt },
+    { title: 'ผู้จัดการทีม', path: '/managers', icon: Briefcase },
     { title: 'การแข่งขัน', path: '/matches', icon: Trophy },
+    { title: 'การ์ดเสริมพลัง', path: '/cards', icon: Zap },
+    { title: 'ตำรา Logic', path: '/logic-manual', icon: BookOpen },
     { title: 'จัดการสปอนเซอร์', path: '/quests', icon: Megaphone },
     { title: 'จัดการร้านค้า', path: '/rewards', icon: Store }, // เมนูใหม่สำหรับระบบ Rewards/Store
     { title: 'ตั้งค่าระบบ', path: '/settings', icon: Settings },
@@ -33,7 +39,7 @@ export default function Sidebar({ onLogout }) {
           <Trophy size={18} className="text-white" />
         </div>
         <div>
-          <h1 className="text-white font-bold text-lg tracking-wide">BALLS<span className="text-blue-500">ADMIN</span></h1>
+          <h1 className="text-white font-bold text-lg tracking-wide">FANTASY<span className="text-blue-500">ADMIN</span></h1>
           <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Management System</p>
         </div>
       </div>

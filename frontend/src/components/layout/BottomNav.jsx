@@ -3,12 +3,11 @@ import { Home, ShoppingBag, Target, Gift } from 'lucide-react';
 import { playSound, STYLES } from '../../config/theme';
 
 export default function BottomNav({ currentPath, onNavigate }) {
-  // เมนูนำทางหลัก 4 หน้า
   const navItems = [
-    { id: 'pitch', icon: Home, label: 'จัดทีม' },
-    { id: 'market', icon: ShoppingBag, label: 'ตลาด' },
+    { id: 'pitch', icon: Home, label: 'แผนการเล่น' },
+    { id: 'market', icon: ShoppingBag, label: 'นักเตะ' },
     { id: 'quest', icon: Target, label: 'ภารกิจ' },
-    { id: 'redeem', icon: Gift, label: 'รางวัล' },
+    { id: 'redeem', icon: Gift, label: 'ร้านค้า' },
   ];
 
   return (

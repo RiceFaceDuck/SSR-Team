@@ -22,7 +22,7 @@ export default function TopHeader({ onLogout, onNavigate }) {
         className={`text-xl font-black ${STYLES.glowText} cursor-pointer hover:scale-105 transition-transform`} 
         onClick={() => handleNav('pitch')}
       >
-        SSR FC
+        SSR FANTASY
       </h1>
       
       {/* โซนเมนูขวาบน: ข้อมูลผู้เล่นและปุ่มต่างๆ */}

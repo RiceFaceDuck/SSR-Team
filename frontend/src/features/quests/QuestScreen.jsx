@@ -62,10 +62,10 @@ export default function QuestScreen() {
       <div className="mb-6 relative">
         <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-2">
           <Sparkles className="text-amber-500" />
-          ภารกิจพิเศษ
+          ภารกิจพิเศษ (Quests)
         </h2>
         <p className="text-slate-500 mt-1 font-medium text-sm">
-          เยี่ยมชมสปอนเซอร์เพื่อรับ <span className="font-bold text-amber-500">Balls ⚽</span>
+          ทำภารกิจจากสปอนเซอร์ให้สำเร็จเพื่อรับ <span className="font-bold text-amber-500">Balls ⚽</span> ไปช้อปนักเตะ!
         </p>
       </div>
 

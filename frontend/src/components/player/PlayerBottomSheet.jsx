@@ -5,7 +5,8 @@ import PositionBadge from './PositionBadge';
 
 const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const budgetLeft = useUserStore((state) => state.budgetLeft);
+  const getEffectiveBudget = useUserStore((state) => state.getEffectiveBudget);
+  const budgetLeft = getEffectiveBudget();
 
   // ควบคุม Animation เปิด/ปิด
   useEffect(() => {
@@ -108,19 +109,19 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
           <div className="bg-slate-800/80 rounded-2xl p-4 mb-6 border border-slate-700/50">
             <div className="flex items-center gap-2 mb-3 text-slate-300 font-medium">
               <Wallet size={18} className="text-emerald-400" />
-              <span>สรุปงบประมาณ (Smart Budget)</span>
+              <span>ข้อมูลการเซ็นสัญญา</span>
             </div>
             
             <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-slate-400">งบปัจจุบัน</span>
+              <span className="text-slate-400">งบประมาณสโมสร</span>
               <span className="text-white font-mono">{budgetLeft.toFixed(1)} M</span>
             </div>
             <div className="flex items-center justify-between text-sm mb-2 pb-2 border-b border-slate-700 border-dashed">
-              <span className="text-slate-400">ค่าตัวนักเตะ</span>
+              <span className="text-slate-400">ค่าเหนื่อย / ค่าตัว</span>
               <span className="text-rose-400 font-mono font-medium">-{playerPrice.toFixed(1)} M</span>
             </div>
             <div className="flex items-center justify-between mt-2">
-              <span className="text-slate-300 font-medium">งบประเมินหลังหักเงิน</span>
+              <span className="text-slate-300 font-medium">งบประมาณคงเหลือหลังเซ็นสัญญา</span>
               <span className={`text-lg font-bold font-mono ${isAffordable ? 'text-emerald-400' : 'text-rose-500'}`}>
                 {projectedBudget.toFixed(1)} M
               </span>
@@ -143,12 +144,12 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
                   window.navigator.vibrate(20);
                 }
                 // TODO: นำไปสู่หน้าสถิติแบบละเอียด (Phase ถัดไป)
-                alert('ระบบดูสถิติเชิงลึกกำลังพัฒนา!');
+                alert('ระบบสถิติเชิงลึกกำลังพัฒนา!');
               }}
               className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 active:scale-[0.98] transition-all"
             >
               <BarChart2 size={20} />
-              ดูสถิติ
+              STATS
             </button>
             
             <button 
@@ -161,7 +162,7 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
               }`}
             >
               <UserPlus size={20} />
-              นำเข้าทีม
+              SIGN
             </button>
           </div>
         </div>

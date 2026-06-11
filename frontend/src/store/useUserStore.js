@@ -3,14 +3,22 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 
 import { createAuthSlice } from './slices/createAuthSlice';
 import { createWalletSlice } from './slices/createWalletSlice';
-import { createSquadSlice } from './slices/createSquadSlice';
+import { squadCoreSlice } from './slices/squadCoreSlice';
+import { squadActionSlice } from './slices/squadActionSlice';
+import { squadMarketSlice } from './slices/squadMarketSlice';
+import { squadAutoFillSlice } from './slices/squadAutoFillSlice';
+import { squadCardSlice } from './slices/squadCardSlice';
 
 export const useUserStore = create(
   persist(
     (set, get) => ({
       ...createAuthSlice(set, get),
       ...createWalletSlice(set, get),
-      ...createSquadSlice(set, get),
+      ...squadCoreSlice(set, get),
+      ...squadActionSlice(set, get),
+      ...squadMarketSlice(set, get),
+      ...squadAutoFillSlice(set, get),
+      ...squadCardSlice(set, get),
     }),
     {
       name: 'fantasy-team-draft', 

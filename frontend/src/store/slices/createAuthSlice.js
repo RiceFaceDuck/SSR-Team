@@ -20,13 +20,18 @@ export const createAuthSlice = (set, get) => ({
     },
     balls: Number(userPayload.balls !== undefined ? userPayload.balls : (userPayload.energyBottles || 0)),
     userPoints: Number(userPayload.userPoints) || 0,
+    rank: userPayload.rank || '-',
     hasUnsavedChanges: false, 
     isSaveUnlocked: false
   }),
 
+  updateUserData: (updates) => set((state) => ({
+    userData: state.userData ? { ...state.userData, ...updates } : null
+  })),
+
   clearAuth: () => set({
     isAuthenticated: false, isAuthLoading: false, userData: null,
-    balls: 0, userPoints: 0, budgetLeft: 100.0, mySquad: [], myCards: [], formation: '4-4-2',
+    balls: 0, userPoints: 0, rank: '-', budgetLeft: 100.0, mySquad: [], myCards: [], formation: '4-4-2',
     transactions: [], 
     hasUnsavedChanges: false,
     isSaveUnlocked: false,

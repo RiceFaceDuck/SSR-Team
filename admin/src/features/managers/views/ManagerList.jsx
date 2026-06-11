@@ -1,0 +1,155 @@
+import React, { useState, useEffect } from 'react';
+import { managerDatabase } from '../../../services/firebase/managerDatabase';
+import ManagerForm from '../components/ManagerForm';
+
+export default function ManagerList() {
+  const [managers, setManagers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [editingManager, setEditingManager] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
+
+  const mockManagers = [
+    { id: 'A', name: 'Arthur Shield', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=A', effectLogic: { type: 'DEF_CLEAN_SHEET_BONUS', value: 2 }, description: 'กองหลังได้รับ +2 คะแนน เมื่อทำคลีนชีตสำเร็จ', isActive: true },
+    { id: 'B', name: 'Victor Wealth', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=B', effectLogic: { type: 'BUDGET_BONUS', value: 25 }, description: 'เพิ่มงบประมาณสโมสรในการซื้อนักเตะ +25M', isActive: true },
+    { id: 'C', name: 'Prof. Tacticus', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=C', effectLogic: { type: 'UNLOCK_FORMATION' }, description: 'ปลดล็อกแผนการเล่นพิเศษเพื่อใช้จัดทีม', isActive: true },
+    { id: 'D', name: 'Max Firepower', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=D', effectLogic: { type: 'FW_GOAL_FEST_BONUS', value: 2 }, description: 'กองหน้าได้รับ +2 คะแนน เมื่อทีมยิงได้ 3 ประตูขึ้นไป', isActive: true },
+    { id: 'E', name: 'Simon Synergy', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=E', effectLogic: { type: 'CLUB_SYNERGY_BONUS', value: 1 }, description: 'นักเตะที่มาจากสโมสรเดียวกัน 3 คนขึ้นไป ได้รับโบนัสคนละ +1 คะแนน', isActive: true },
+    { id: 'F', name: 'Nigel Negotiator', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=F', effectLogic: { type: 'MARKET_DISCOUNT', value: 10 }, description: 'ลดราคานักเตะในตลาดซื้อขายลง 10%', isActive: true },
+    { id: 'G', name: 'Master Commander', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=G', effectLogic: { type: 'CAPTAIN_TRIPLE_BONUS' }, description: 'กัปตันทีมจะได้รับโบนัสคะแนนคูณ 3 (จากเดิมคูณ 2)', isActive: true },
+  ];
+
+  const fetchManagers = async () => {
+    setIsLoading(true);
+    try {
+      const data = await managerDatabase.getAllManagers();
+      setManagers(data);
+    } catch (e) {
+      console.error(e);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchManagers();
+  }, []);
+
+  const handleEdit = (manager) => {
+    setEditingManager(manager);
+    setIsFormOpen(true);
+  };
+
+  const handleCreate = () => {
+    setEditingManager(null);
+    setIsFormOpen(true);
+  };
+
+  const handleSaved = () => {
+    setIsFormOpen(false);
+    fetchManagers();
+  };
+
+  const handleSeedData = async () => {
+    if (!window.confirm('Are you sure you want to seed the default managers? This will overwrite existing managers with the same IDs.')) return;
+    setIsSeeding(true);
+    try {
+      for (const m of mockManagers) {
+        await managerDatabase.saveManager(m.id, m);
+      }
+      alert('Mock managers seeded successfully!');
+      fetchManagers();
+    } catch (e) {
+      console.error(e);
+      alert('Failed to seed managers: ' + e.message);
+    }
+    setIsSeeding(false);
+  };
+
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Manager Management</h1>
+        <div className="flex gap-2">
+          {managers.length === 0 && (
+            <button 
+              onClick={handleSeedData}
+              disabled={isSeeding}
+              className="bg-amber-500 text-white px-4 py-2 rounded shadow hover:bg-amber-600 font-medium disabled:opacity-50"
+            >
+              {isSeeding ? 'Seeding...' : 'Seed Data'}
+            </button>
+          )}
+          <button 
+            onClick={handleCreate}
+            className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 font-medium"
+          >
+            + Add Manager
+          </button>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="text-gray-500">Loading managers...</div>
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <table className="w-full text-left">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="p-4 text-gray-600 font-semibold text-sm">ID</th>
+                <th className="p-4 text-gray-600 font-semibold text-sm">Avatar</th>
+                <th className="p-4 text-gray-600 font-semibold text-sm">Name</th>
+                <th className="p-4 text-gray-600 font-semibold text-sm">Effect Type</th>
+                <th className="p-4 text-gray-600 font-semibold text-sm">Status</th>
+                <th className="p-4 text-gray-600 font-semibold text-sm">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {managers.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="p-8 text-center text-gray-400">No managers found.</td>
+                </tr>
+              )}
+              {managers.map(m => (
+                <tr key={m.id} className="border-b hover:bg-gray-50 transition-colors">
+                  <td className="p-4 font-mono text-xs text-gray-500">{m.id}</td>
+                  <td className="p-4">
+                    <img src={m.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.id}`} alt="" className="w-10 h-10 rounded-full border border-gray-200" />
+                  </td>
+                  <td className="p-4 font-semibold text-gray-800">{m.name}</td>
+                  <td className="p-4">
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-mono">
+                      {m.effectLogic?.type || 'N/A'}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    {m.isActive ? (
+                      <span className="text-green-600 font-bold text-sm">Active</span>
+                    ) : (
+                      <span className="text-gray-400 text-sm">Inactive</span>
+                    )}
+                  </td>
+                  <td className="p-4">
+                    <button 
+                      onClick={() => handleEdit(m)}
+                      className="text-blue-600 hover:text-blue-800 hover:underline font-medium text-sm"
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {isFormOpen && (
+        <ManagerForm 
+          initialData={editingManager} 
+          onClose={() => setIsFormOpen(false)}
+          onSaved={handleSaved}
+        />
+      )}
+    </div>
+  );
+}

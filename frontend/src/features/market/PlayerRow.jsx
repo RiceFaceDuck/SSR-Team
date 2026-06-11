@@ -26,6 +26,10 @@ export default function PlayerRow({ player, onActionClick, onClick }) {
   // เช็คว่านักเตะคนนี้ (SKU นี้) มีอยู่ในทีมของเราแล้วหรือยัง?
   const isInSquad = mySquad.some(p => p.playerId === String(safePlayer.sku));
 
+  // รูปจำลองนักเตะ คาแรคเตอร์การ์ตูนเหมือนในสนาม
+  const playerImageUrl = safePlayer.imageUrl || safePlayer.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${safePlayer.name}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffdfbf,ffd5dc`;
+
+
   // ฟังก์ชันรองรับการกด (Tap) ที่ตัวแถวเพื่อส่งข้อมูลไปเปิด Bottom Sheet
   const handleRowClick = () => {
     // 📳 Haptic Feedback: สั่นเบาๆ ให้ความรู้สึกตอบสนองเวลาจิ้มนักเตะ (รองรับบนมือถือ)
@@ -49,18 +53,13 @@ export default function PlayerRow({ player, onActionClick, onClick }) {
       {/* ฝั่งซ้าย: รูป, ชื่อ, ตำแหน่ง, ทีม */}
       <div className="flex items-center gap-4 overflow-hidden pointer-events-none">
         
-        {/* รูปจำลองนักเตะ รองรับทั้งรูปภาพจริงและตัวอักษร */}
-        <div className="relative w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 font-black text-lg border border-slate-200 shrink-0 group-hover:border-indigo-300 transition-colors shadow-inner overflow-hidden">
-          {safePlayer.image ? (
-            <img 
-              src={safePlayer.image} 
-              alt={safePlayer.name} 
-              className="w-full h-full object-cover"
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-          ) : (
-            <span>{safePlayer.name.charAt(0)}</span>
-          )}
+        {/* รูปจำลองนักเตะ รองรับทั้งรูปภาพจริงและคาแรคเตอร์การ์ตูน */}
+        <div className="relative w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0 border border-slate-200 group-hover:border-indigo-300 transition-colors shadow-sm overflow-hidden">
+          <img 
+            src={playerImageUrl} 
+            alt={safePlayer.name} 
+            className="w-full h-full object-cover"
+          />
         </div>
         
         <div className="min-w-0">
@@ -69,8 +68,8 @@ export default function PlayerRow({ player, onActionClick, onClick }) {
           </h3>
           <div className="flex items-center gap-2 mt-1">
             <PositionBadge position={safePlayer.position} />
-            <p className="text-[10px] text-slate-500 font-medium truncate max-w-[100px] sm:max-w-[150px]">
-              {safePlayer.team || safePlayer.club}
+            <p className="text-[10px] text-slate-500 font-bold truncate max-w-[100px] sm:max-w-[150px] uppercase">
+              {(safePlayer.team || safePlayer.club || 'UNK').substring(0, 3)}
             </p>
           </div>
         </div>
@@ -81,7 +80,7 @@ export default function PlayerRow({ player, onActionClick, onClick }) {
         
         <div className="flex flex-col items-end pointer-events-none">
           <p className="font-black text-sm text-indigo-600 leading-none mb-1">
-            £{safePlayer.price?.toFixed(1) || '0.0'}m
+            {safePlayer.price?.toFixed(1) || '0.0'}m
           </p>
           <span className="text-[10px] font-bold text-slate-500 leading-none">
             {safePlayer.totalPoints || 0} Pts
@@ -105,7 +104,7 @@ export default function PlayerRow({ player, onActionClick, onClick }) {
               : 'bg-indigo-600 text-white hover:bg-indigo-700 border border-transparent hover:shadow-md'
             }`}
         >
-          {isInSquad ? 'ขาย' : 'ซื้อ'}
+          {isInSquad ? 'RELEASE' : 'SIGN'}
         </button>
       </div>
 

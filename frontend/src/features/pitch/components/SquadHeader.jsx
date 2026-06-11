@@ -1,37 +1,55 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useUserStore } from '../../../store/useUserStore';
+import { useGameStore } from '../../../store/useGameStore';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
-const SquadHeader = ({ totalPoints }) => {
+const SquadHeader = () => {
+  const { userData, userPoints, rank, mySquad } = useUserStore();
+  const { currentGameweek, isMarketOpen, totalJoinedTeams } = useGameStore();
+
+  const teamName = userData?.displayName || 'My Dream Team';
+
   return (
-    <div className="flex-shrink-0 w-full px-2 pt-1 pb-1 bg-[#061121] z-10">
+    <div className="flex-shrink-0 w-full px-3 py-1.5 z-10 bg-slate-900/95 backdrop-blur-md border-b border-white/10 shadow-sm">
       
-      <div className="text-center text-[9px] font-semibold text-[#8b9bb4] tracking-widest mb-0.5">
-        MY DREAM TEAM - WEEK 1
-      </div>
-
-      {/* User Info & Points */}
-      <div className="flex justify-between items-center mb-0.5 relative">
-        {/* User Info Placeholder */}
-        <div className="flex items-center gap-1.5">
-          <div className="w-6 h-6 rounded-full bg-[#1e3a8a] border border-[#fbbf24] flex items-center justify-center text-[#fbbf24] text-[10px] font-bold shadow-[0_0_10px_rgba(251,191,36,0.3)]">
-            JD
-          </div>
-          <div className="flex flex-col justify-center leading-tight">
-            <span className="font-bold text-white text-xs">John Doe</span>
-            <span className="text-[8px] text-[#8b9bb4]">RANK <span className="text-white font-semibold">1,500</span></span>
-          </div>
+      {/* Row 1: Team Name | Rank | Points */}
+      <div className="flex justify-between items-end mb-1">
+        <div className="flex items-baseline gap-2 overflow-hidden">
+          <span className="font-black text-white text-base truncate drop-shadow-md tracking-wide max-w-[150px]">
+            {teamName}
+          </span>
+          <span className="text-[10px] text-blue-300 font-semibold whitespace-nowrap">
+            อันดับ <span className="text-white font-black drop-shadow-[0_0_2px_rgba(59,130,246,0.8)]">{rank?.toLocaleString() || '-'}</span>
+          </span>
         </div>
 
-        {/* Title Center */}
-        <div className="absolute left-1/2 -translate-x-1/2 text-base font-black tracking-widest text-white">
-          SQUAD
-        </div>
-
-        {/* Total Points */}
-        <div className="flex flex-col items-end leading-tight">
-          <span className="text-[8px] text-[#8b9bb4]">TOTAL POINTS</span>
-          <span className="font-bold text-lg text-[#fbbf24] drop-shadow-[0_0_5px_rgba(251,191,36,0.5)]">{totalPoints}</span>
+        <div className="flex items-baseline gap-1.5 flex-shrink-0">
+          <span className="text-[9px] text-amber-400/90 font-black tracking-widest">PTS</span>
+          <span className="font-black text-2xl text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] tabular-nums leading-none">
+            {userPoints?.toLocaleString() || 0}
+          </span>
         </div>
       </div>
+
+      {/* Row 2: Gameweek | Joined | Market Status */}
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2.5">
+          <div className="px-2 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/30 leading-none">
+            <span className="text-[9px] font-bold text-indigo-300 tracking-wider">{currentGameweek}</span>
+          </div>
+          <span className="text-[10px] font-medium text-slate-300 leading-none">
+            เข้าร่วม <span className="text-white font-bold">{totalJoinedTeams?.toLocaleString() || 0}</span> ทีม
+          </span>
+        </div>
+
+        <div className={`flex items-center gap-1 px-2 py-0.5 rounded border leading-none ${isMarketOpen ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-400'}`}>
+          {isMarketOpen ? <CheckCircle2 size={10} /> : <AlertCircle size={10} />}
+          <span className="text-[9px] font-bold tracking-wider">
+            ตลาด{isMarketOpen ? 'เปิด' : 'ปิด'}
+          </span>
+        </div>
+      </div>
+
     </div>
   );
 };

@@ -16,6 +16,7 @@ import { useUserStore } from '../../store/useUserStore';
 
 // 🌟 นำเข้า Component ประวัติการทำรายการ (TransactionHistory)
 import TransactionHistory from '../../components/common/TransactionHistory';
+import ProfileSettingsModal from './components/ProfileSettingsModal';
 
 // 🎨 Mock STYLES and Theme
 const playSound = (type) => {
@@ -36,6 +37,7 @@ export default function ProfileScreen() {
   } = useUserStore();
   
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // 🌟 NEW: ให้โหลดประวัติรายการอัตโนมัติเมื่อเข้ามาหน้า Profile
   useEffect(() => {
@@ -82,7 +84,10 @@ export default function ProfileScreen() {
           </div>
         </div>
         <button 
-          onClick={() => playSound('click')}
+          onClick={() => {
+            playSound('click');
+            setIsSettingsOpen(true);
+          }}
           className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all active:scale-95"
         >
           <Settings size={20} />
@@ -98,7 +103,7 @@ export default function ProfileScreen() {
 
         <div className="flex justify-between items-center relative z-10">
           <div>
-            <p className="text-slate-500 text-xs font-medium mb-1 tracking-wide">ยอดลูกบอลคงเหลือ</p>
+            <p className="text-slate-500 text-xs font-medium mb-1 tracking-wide">ยอด Balls คงเหลือ</p>
             <div className="flex items-baseline gap-2">
               <h3 className="text-3xl font-black text-slate-800 tracking-tight">
                 {balls?.toLocaleString() || 0}
@@ -118,7 +123,7 @@ export default function ProfileScreen() {
         {/* ปุ่มดูประวัติการทำรายการ */}
         <div className="mt-5 border-t border-slate-100 pt-4 flex justify-between items-center relative z-10">
           <p className="text-[10px] text-slate-500 font-medium max-w-[60%] leading-relaxed">
-            ใช้ลูกฟุตบอลสำหรับแลกของรางวัล หรือทำกิจกรรมต่างๆ
+            ใช้ Balls สำหรับแลกของรางวัล หรือทำกิจกรรมต่างๆ
           </p>
           <button 
             onClick={() => {
@@ -219,6 +224,12 @@ export default function ProfileScreen() {
       <TransactionHistory 
         isOpen={isHistoryOpen} 
         onClose={() => setIsHistoryOpen(false)} 
+      />
+
+      {/* ⚙️ Settings Modal */}
+      <ProfileSettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
       />
 
     </div>

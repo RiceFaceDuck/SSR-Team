@@ -24,7 +24,7 @@ export const squadService = {
    * @param {Object} squadPayload - ข้อมูลที่จะบันทึก (mySquad, budgetLeft, formation)
    * @returns {Promise<boolean>} สถานะการบันทึกสำเร็จหรือไม่
    */
-  saveSquad: async (userId, { mySquad, budgetLeft, formation }) => {
+  saveSquad: async (userId, { mySquad, budgetLeft, formation, manager, captainId }) => {
     if (!userId) throw new Error("เซิร์ฟเวอร์ปฏิเสธการเข้าถึง: ไม่พบรหัสผู้ใช้งาน (UID)");
 
     try {
@@ -36,6 +36,8 @@ export const squadService = {
         mySquad: mySquad || [],
         budgetLeft: parseFloat(budgetLeft) || 0,
         formation: formation || '4-4-2',
+        manager: manager || null,
+        captainId: captainId || null,
         updatedAt: serverTimestamp()
       };
 

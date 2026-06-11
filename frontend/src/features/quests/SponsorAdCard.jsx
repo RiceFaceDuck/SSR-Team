@@ -147,7 +147,7 @@ export default function SponsorAdCard({ quest, record, onClaim, isClaiming }) {
         {/* ปุ่ม Claim และ Status */}
         <div className="mt-3 flex items-center justify-between">
           <div className="text-[10px] font-semibold text-slate-500">
-            โควต้า: {record ? record.uses : 0}/{quest.maxClaimsPerUser}
+            สิทธิ์คงเหลือ: {record ? record.uses : 0}/{quest.maxClaimsPerUser}
           </div>
 
           <button

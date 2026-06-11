@@ -23,12 +23,17 @@ export const useGameStore = create((set, get) => ({
   },
   isNoAdsMode: false,
   isListenerActive: false, 
+  
+  // Game & System Config variables
+  currentGameweek: 'WEEK 1',
+  isMarketOpen: true,
+  totalJoinedTeams: 0,
 
   // ฟังก์ชันดักฟังการเปลี่ยนแปลงจากระบบแอดมิน
   initThemeListener: () => {
     if (get().isListenerActive) return () => {};
     
-    console.log("🎧 เริ่มดักฟังการเปลี่ยนธีม...");
+    console.log("🎧 เริ่มดักฟังการเปลี่ยนธีมและระบบ...");
     const docRef = doc(db, 'public_data', 'system_config');
     
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
@@ -45,11 +50,14 @@ export const useGameStore = create((set, get) => ({
             floatingObjectUrl: convertToDirectLink(rawObjUrl) || '',
           },
           isNoAdsMode: data.isNoAdsMode || false,
+          currentGameweek: data.currentGameweek || 'WEEK 1',
+          isMarketOpen: data.isMarketOpen !== undefined ? data.isMarketOpen : true,
+          totalJoinedTeams: data.totalJoinedTeams || 0,
         });
         
       }
     }, (error) => {
-      console.error("❌ เกิดข้อผิดพลาดในการดักฟังธีม:", error);
+      console.error("❌ เกิดข้อผิดพลาดในการดักฟังธีมและระบบ:", error);
     });
 
     set({ isListenerActive: true });

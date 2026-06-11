@@ -28,8 +28,8 @@ export default function PlayerActionModal({ isOpen, onClose, player, actionType 
       ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-indigo-500/30' 
       : 'bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 shadow-rose-500/30',
     icon: isBuy ? <ShoppingCart size={20} /> : <Tag size={20} />,
-    title: isBuy ? 'ยืนยันการซื้อนักเตะ' : 'ยืนยันการขายนักเตะ',
-    actionText: isBuy ? 'ซื้อเข้าร่วมทีม' : 'ขายออกจากทีม'
+    title: isBuy ? 'CONFIRM SIGN' : 'CONFIRM RELEASE',
+    actionText: isBuy ? 'SIGN' : 'RELEASE'
   };
 
   return (
@@ -57,7 +57,7 @@ export default function PlayerActionModal({ isOpen, onClose, player, actionType 
                 {theme.title}
               </h3>
               <p className="text-xs font-medium text-slate-500 mt-0.5">
-                {isBuy ? 'หักงบประมาณของคุณเพื่อซื้อนักเตะคนนี้' : 'รับงบประมาณคืนจากการขายนักเตะคนนี้'}
+                {isBuy ? 'หักงบประมาณสโมสรเพื่อเซ็นสัญญานักเตะ' : 'รับงบประมาณคืนจากการปล่อยตัวนักเตะ'}
               </p>
             </div>
           </div>
@@ -105,8 +105,8 @@ export default function PlayerActionModal({ isOpen, onClose, player, actionType 
             <ShieldAlert size={16} className="shrink-0 mt-0.5" />
             <p className="text-xs font-medium">
               {isBuy 
-                ? 'โปรดตรวจสอบงบประมาณของคุณให้แน่ใจก่อนทำการซื้อ' 
-                : 'เมื่อขายแล้ว คุณสามารถซื้อกลับมาใหม่ได้ในราคาปัจจุบันของตลาด'}
+                ? 'โปรดตรวจสอบงบประมาณของสโมสรให้แน่ใจก่อนทำการเซ็นสัญญา' 
+                : 'เมื่อปล่อยตัวแล้ว คุณสามารถเซ็นสัญญากลับมาใหม่ได้ในราคาปัจจุบัน'}
             </p>
           </div>
         </div>
@@ -117,7 +117,7 @@ export default function PlayerActionModal({ isOpen, onClose, player, actionType 
             onClick={onClose}
             className="flex-1 py-3.5 bg-white text-slate-600 font-bold rounded-xl border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all shadow-sm"
           >
-            ยกเลิก
+            CANCEL
           </button>
           <button 
             onClick={() => {

@@ -31,7 +31,9 @@ export default function MarketScreen() {
     sellPlayer, 
     startPlacement,
     marketFilterPos,     // 🌟 NEW: รับค่าตำแหน่งเป้าหมายที่ถูกส่งมาจาก PitchBoard
-    setMarketFilterPos   // 🌟 NEW: ฟังก์ชันอัปเดตสถานะกลับเข้า Store
+    setMarketFilterPos,  // 🌟 NEW: ฟังก์ชันอัปเดตสถานะกลับเข้า Store
+    setPendingTargetSlot, // 🌟 NEW: เคลียร์ช่องเป้าหมายเมื่อเปลี่ยน Tab เอง
+    getEffectiveBudget
   } = useUserStore();
 
   // 2. Local State สำหรับจัดการ UI ภายในหน้านี้
@@ -62,12 +64,11 @@ export default function MarketScreen() {
 
   // 4. การจัดการแท็บตัวกรอง (Filters)
   const tabs = [
-    { label: 'ทั้งหมด', value: 'ALL' },
-    { label: 'ทีมของฉัน', value: 'MY_TEAM' }, // 🌟 นำแท็บทีมของฉันกลับมาเพื่อให้ดูรายชื่อที่มีอยู่ได้
-    { label: 'กองหน้า', value: 'FW' },
-    { label: 'กองกลาง', value: 'MF' },
-    { label: 'กองหลัง', value: 'DF' },
-    { label: 'ผู้รักษาประตู', value: 'GK' }
+    { label: 'ALL', value: 'ALL' },
+    { label: 'FW', value: 'FW' },
+    { label: 'MF', value: 'MF' },
+    { label: 'DF', value: 'DF' },
+    { label: 'GK', value: 'GK' }
   ];
 
   // 5. กรองและเรียงลำดับข้อมูลนักเตะ
@@ -162,9 +163,14 @@ export default function MarketScreen() {
       
       {/* Header & Budget */}
       <div className="mb-6">
-        <h2 className="text-3xl font-black text-slate-800 mb-1 tracking-tight">ตลาดนักเตะ</h2>
-        <p className="text-slate-500 mb-4 font-medium text-sm">ซื้อขายผู้เล่น จัดการทีมของคุณ</p>
-        <BudgetBar />
+        <div className="flex justify-between items-center px-4 pt-4 pb-2">
+            <h2 className="text-3xl font-black text-slate-800 mb-1 tracking-tight">ค้นหานักเตะ</h2>
+            <div className="bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full flex flex-col items-end">
+              <span className="text-[10px] text-slate-400 font-bold leading-none">งบประมาณคงเหลือ</span>
+              <span className="text-sm font-black text-indigo-600 leading-none mt-1">£{getEffectiveBudget().toFixed(1)}m</span>
+            </div>
+        </div>
+        <p className="text-slate-500 mb-4 font-medium text-sm px-4">ค้นหานักเตะและสร้างดรีมทีมในแบบของคุณ</p>
       </div>
       
       {/* Filters & Search Area */}
@@ -206,6 +212,7 @@ export default function MarketScreen() {
                 onClick={() => {
                   setActiveTab(tab.value);
                   setMarketFilterPos(tab.value); // 🌟 NEW: ซิงค์กลับ Store เมื่อผู้เล่นกดเปลี่ยน Tab เอง
+                  setPendingTargetSlot(null); // ยกเลิกการจำตำแหน่งเป้าหมาย
                 }}
                 className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold border transition-colors shadow-sm
                   ${isActive 
@@ -243,7 +250,7 @@ export default function MarketScreen() {
         ) : (
           <div className="text-center py-10 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             <span className="text-4xl mb-3 block">🔍</span>
-            <p className="text-slate-500 font-bold text-sm">ไม่พบนักเตะที่คุณค้นหา</p>
+            <p className="text-slate-500 font-bold text-sm">ไม่พบรายชื่อนักเตะ</p>
           </div>
         )}
       </div>
