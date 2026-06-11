@@ -15,6 +15,7 @@ import { toast } from '../../utils/toast';
 export default function PitchScreen() {
   const {
     isLoading,
+    isAutoFilling,
     enrichedStarters,
     enrichedBench,
     formation,
@@ -74,7 +75,7 @@ export default function PitchScreen() {
       <div className="flex-1 min-h-0 overflow-hidden relative flex flex-col">
          
          {/* Formation Selector */}
-         <div className="absolute top-2 right-2 z-30">
+         <div className="absolute bottom-[115px] sm:bottom-[130px] right-2 z-30">
            <button 
              onClick={() => setIsFormationOpen(!isFormationOpen)}
              className="bg-[#fbbf24] hover:bg-[#f59e0b] text-[#0a192f] transition-colors rounded-md px-2 py-0.5 flex flex-col items-center shadow-lg active:scale-95 cursor-pointer border border-[#b45309]/30"
@@ -87,7 +88,7 @@ export default function PitchScreen() {
            </button>
 
            {isFormationOpen && (
-             <div className="absolute top-full right-0 mt-1 bg-[#0f284e] border border-[#1e3a8a] rounded-md shadow-2xl overflow-hidden w-28 animate-in fade-in zoom-in-95 duration-150 z-40">
+             <div className="absolute bottom-full right-0 mb-1 bg-[#0f284e] border border-[#1e3a8a] rounded-md shadow-2xl overflow-hidden w-28 animate-in fade-in zoom-in-95 duration-150 z-40">
                {formationsList.map((f) => (
                  <button
                    key={f}
@@ -135,6 +136,7 @@ export default function PitchScreen() {
         bank={getEffectiveBudget()} 
         squadCount={mySquad.filter(p => p.isStarting).length} 
         actions={{ ...actions, handleSaveTeam: () => setIsSaveModalOpen(true) }} 
+        isAutoFilling={isAutoFilling}
       />
 
       <SaveSquadManager 

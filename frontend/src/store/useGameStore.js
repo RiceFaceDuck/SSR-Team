@@ -6,17 +6,15 @@ import { db } from '../config/firebase';
 const convertToDirectLink = (url) => {
   if (!url) return '';
   if (url.includes('drive.google.com') || url.includes('script.google.com')) {
-    // หาคำว่า id=... เพื่อดึงรหัสไฟล์ออกมา
     const idMatch = url.match(/id=([^&]+)/);
     if (idMatch && idMatch[1]) {
       return `https://lh3.googleusercontent.com/d/${idMatch[1]}`;
     }
   }
-  return url; // ถ้าไม่ใช่ลิงก์ Drive ก็ปล่อยผ่านตามปกติ
+  return url;
 };
 
 export const useGameStore = create((set, get) => ({
-  // ภาพตั้งต้น (เปลี่ยนเป็นภาพสนามฟุตบอลเท่ๆ เพื่อเทส Clean UI)
   themeConfig: {
     loginBackgroundUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2000', 
     floatingObjectUrl: '',
@@ -24,12 +22,10 @@ export const useGameStore = create((set, get) => ({
   isNoAdsMode: false,
   isListenerActive: false, 
   
-  // Game & System Config variables
   currentGameweek: 'WEEK 1',
   isMarketOpen: true,
   totalJoinedTeams: 0,
 
-  // ฟังก์ชันดักฟังการเปลี่ยนแปลงจากระบบแอดมิน
   initThemeListener: () => {
     if (get().isListenerActive) return () => {};
     
@@ -40,7 +36,6 @@ export const useGameStore = create((set, get) => ({
       if (docSnap.exists()) {
         const data = docSnap.data();
         
-        // ดึงข้อมูลมา แล้วเข้าเครื่องแปลงลิงก์ทันที
         const rawBgUrl = data.themeConfig?.loginBackgroundUrl || data.loginBackgroundUrl;
         const rawObjUrl = data.themeConfig?.floatingObjectUrl || data.floatingObjectUrl;
 
@@ -52,9 +47,8 @@ export const useGameStore = create((set, get) => ({
           isNoAdsMode: data.isNoAdsMode || false,
           currentGameweek: data.currentGameweek || 'WEEK 1',
           isMarketOpen: data.isMarketOpen !== undefined ? data.isMarketOpen : true,
-          totalJoinedTeams: data.totalJoinedTeams || 0,
+          totalJoinedTeams: data.totalJoinedTeams || 0, // กลับมาใช้จากเอกสารกลางเพื่อเลี่ยงบั๊ค Query
         });
-        
       }
     }, (error) => {
       console.error("❌ เกิดข้อผิดพลาดในการดักฟังธีมและระบบ:", error);

@@ -21,12 +21,7 @@ export default function LoginScreen({ onLogin }) {
       }
     };
     checkInApp();
-
-    const unsubscribe = initThemeListener();
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, [initThemeListener]);
+  }, []);
 
   const handleGoogleLogin = async () => {
     if (isLoggingIn) return; 

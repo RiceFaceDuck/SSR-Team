@@ -33,6 +33,7 @@ export const usePitchLogic = () => {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [popupPlayer, setPopupPlayer] = useState(null);
   const [powerCardPlayer, setPowerCardPlayer] = useState(null);
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
 
   useEffect(() => {
     if (!isDataFetched) {
@@ -78,13 +79,19 @@ export const usePitchLogic = () => {
     toast.success("รีเซ็ตทีมและคืนเงินทั้งหมดแล้ว!");
   };
 
-  const handleAutoFill = () => {
+  const handleAutoFill = async () => {
+    setIsAutoFilling(true);
+    toast.info("🧠 AI กำลังวิเคราะห์ฟอร์มนักเตะเพื่อจัดทีมที่ดีที่สุด...", { duration: 1500 });
+    
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
     const result = autoFillTeam(marketPlayers);
     if (result.success) {
       toast.success(result.message);
     } else {
       toast.error(result.message);
     }
+    setIsAutoFilling(false);
   };
 
   const handleSlotClick = (slotId, category) => {
@@ -185,6 +192,7 @@ export const usePitchLogic = () => {
 
   return {
     isLoading,
+    isAutoFilling,
     enrichedStarters,
     enrichedBench,
     formation,

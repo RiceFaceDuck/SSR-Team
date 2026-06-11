@@ -46,6 +46,8 @@
       - `SquadSummaryView.jsx`: UI สรุปทีมและยืนยันการเซฟ
       - `SaveSquadManager.jsx`: ควบคุมการทำงานของป็อปอัปบันทึกทีมและดูโฆษณา
     - `PowerCardPopup.jsx`: ป็อปอัปสำหรับดึงข้อมูลการ์ดและสวมใส่ให้นักเตะ
+    - `utils/`:
+      - `autoFillEngine.js`: Engine แบบ Standalone คำนวณตรรกะจัดทีมอัตโนมัติ
   - `profile/`:
     - `ProfileScreen.jsx`: หน้าจอโปรไฟล์หลักและกระเป๋าเงิน (Wallet)
     - `components/`:

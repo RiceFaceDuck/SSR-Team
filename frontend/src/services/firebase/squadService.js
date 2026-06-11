@@ -4,8 +4,11 @@
  * ทำหน้าที่เขียนข้อมูลลง Firestore โดยเน้นขนาดข้อมูลที่เล็กที่สุด (ประหยัด Writes/Reads)
  */
 
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+
+import { participationService } from './participationService';
+import { useGameStore } from '../../store/useGameStore';
 
 /**
  * ฟังก์ชันช่วยสร้าง Document Reference สำหรับข้อมูลทีมของผู้เล่น
@@ -30,8 +33,7 @@ export const squadService = {
     try {
       const docRef = getSquadDocRef(userId);
 
-      // เตรียมชุดข้อมูลสำหรับบันทึก (Data Optimization)
-      // mySquad จะเก็บแค่ Array ของ { playerId, position } ช่วยลดภาระฐานข้อมูล
+      // เซฟข้อมูลการจัดทีม
       const dataToSave = {
         mySquad: mySquad || [],
         budgetLeft: parseFloat(budgetLeft) || 0,
@@ -41,10 +43,24 @@ export const squadService = {
         updatedAt: serverTimestamp()
       };
 
-      // ใช้ merge: true เพื่อให้เกิดการอัปเดตเฉพาะ Field ที่เปลี่ยนโดยไม่ทับ Field อื่น (ถ้ามีในอนาคต)
       await setDoc(docRef, dataToSave, { merge: true });
-      
       console.log('💾 [SquadService] บันทึกทีมขึ้น Cloud สำเร็จ!');
+
+      // ส่งมอบหน้าที่การนับยอด และประทับตรา ให้ "ศูนย์การเข้าร่วม" (Participation Center)
+      const isFullSquad = participationService.isSquadComplete(mySquad, manager);
+      
+      if (isFullSquad) {
+        const hasAlreadyJoined = await participationService.checkUserParticipation(userId);
+        
+        if (!hasAlreadyJoined) {
+          // ถ้าเพิ่งครบ 16 คนเป็นครั้งแรก ส่งไปลงทะเบียน
+          await participationService.registerParticipation(userId);
+        } else {
+          // ถ้าเคยเข้าร่วมแล้ว ส่งไปเช็คระบบเผื่อย้อนกลับไปซ่อมแซมตัวเลขสถิติที่พัง (Fallback)
+          await participationService.syncAndRepairCounter(userId);
+        }
+      }
+
       return true;
 
     } catch (error) {

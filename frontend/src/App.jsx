@@ -3,6 +3,7 @@ import { auth, db } from './config/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'; // 🌟 UPDATED: นำเข้า setDoc และ serverTimestamp เผื่อกรณีสร้าง User ใหม่
 import { useUserStore } from './store/useUserStore';
+import { useGameStore } from './store/useGameStore';
 import { logoutUser } from './features/auth/authService';
 
 import MobileLayout from './components/layout/MobileLayout';
@@ -30,7 +31,15 @@ export default function App() {
     loadSquadFromCloud // 🌟 NEW: นำเข้าฟังก์ชันโหลดทีมจาก Cloud
   } = useUserStore();
   
+  const { initThemeListener } = useGameStore();
+
   const [currentPath, setCurrentPath] = useState('pitch');
+
+  // 🌟 เปิดการทำงานของระบบซิงค์สถิติและข้อมูลเกมแบบ Real-time ให้ครอบคลุมทั้งแอป (Global Listener)
+  useEffect(() => {
+    const unsubscribeTheme = initThemeListener();
+    return () => unsubscribeTheme();
+  }, [initThemeListener]);
 
   // 🌟 เพิ่มระบบ Seamless Navigation รับ Event สลับหน้าจออัตโนมัติจากทุกที่ในแอป
   useEffect(() => {

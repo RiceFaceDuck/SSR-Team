@@ -60,7 +60,13 @@ service cloud.firestore {
     // 🧩 ระบบไฟล์เสริม (Artifacts) ที่ระบบ Admin จำเป็นต้องใช้งาน
     match /artifacts/{document=**} {
       allow read: if true;
-      allow write: if false;
+      allow write: if request.auth != null;
+    }
+
+    // 📊 ระบบสถิติส่วนกลาง (อนุญาตให้ Frontend บันทึกยอดผู้เข้าร่วมได้)
+    match /public_data/system_config {
+      allow read: if true;
+      allow write: if request.auth != null;
     }
 
     // 🔒 ปิดกั้นการเข้าถึง Collection อื่นๆ นอกเหนือจากนี้ เพื่อความปลอดภัย

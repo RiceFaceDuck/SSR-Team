@@ -1,4 +1,7 @@
 {
+  "firestore": {
+    "rules": "firestore.rules.txt"
+  },
   "hosting": [
     {
       "site": "ssr-team",
