@@ -18,6 +18,7 @@ export const useGameStore = create((set, get) => ({
   themeConfig: {
     loginBackgroundUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2000', 
     floatingObjectUrl: '',
+    marketBackgroundUrl: 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000',
   },
   isNoAdsMode: false,
   isListenerActive: false, 
@@ -25,6 +26,15 @@ export const useGameStore = create((set, get) => ({
   currentGameweek: 'WEEK 1',
   isMarketOpen: true,
   totalJoinedTeams: 0,
+  referralRewardBalls: 50,
+  chatConfig: { 
+    normalChatCost: 2, 
+    superChatCost: 15, 
+    superChatDuration: 30,
+    superChatCostIncrement: 5,
+    superChatResetTime: 60,
+    normalChatFreeInterval: 300
+  },
 
   initThemeListener: () => {
     if (get().isListenerActive) return () => {};
@@ -43,11 +53,21 @@ export const useGameStore = create((set, get) => ({
           themeConfig: {
             loginBackgroundUrl: convertToDirectLink(rawBgUrl) || get().themeConfig.loginBackgroundUrl,
             floatingObjectUrl: convertToDirectLink(rawObjUrl) || '',
+            marketBackgroundUrl: convertToDirectLink(data.themeConfig?.marketBackgroundUrl) || get().themeConfig.marketBackgroundUrl,
           },
           isNoAdsMode: data.isNoAdsMode || false,
           currentGameweek: data.currentGameweek || 'WEEK 1',
           isMarketOpen: data.isMarketOpen !== undefined ? data.isMarketOpen : true,
           totalJoinedTeams: data.totalJoinedTeams || 0, // กลับมาใช้จากเอกสารกลางเพื่อเลี่ยงบั๊ค Query
+          referralRewardBalls: data.referralRewardBalls !== undefined ? data.referralRewardBalls : 50,
+          chatConfig: data.chatConfig || { 
+            normalChatCost: 2, 
+            superChatCost: 15, 
+            superChatDuration: 30,
+            superChatCostIncrement: 5,
+            superChatResetTime: 60,
+            normalChatFreeInterval: 300
+          },
         });
       }
     }, (error) => {

@@ -13,10 +13,11 @@ import {
   Loader2
 } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
+import { useGameStore } from '../../store/useGameStore';
 
-// 🌟 นำเข้า Component ประวัติการทำรายการ (TransactionHistory)
 import TransactionHistory from '../../components/common/TransactionHistory';
 import ProfileSettingsModal from './components/ProfileSettingsModal';
+import GameweekHistory from './components/GameweekHistory';
 
 // 🎨 Mock STYLES and Theme
 const playSound = (type) => {
@@ -35,6 +36,8 @@ export default function ProfileScreen() {
     isTransactionsLoading,
     loadTransactions
   } = useUserStore();
+  
+  const themeConfig = useGameStore(state => state.themeConfig);
   
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -63,7 +66,22 @@ export default function ProfileScreen() {
   };
 
   return (
-    <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24 max-w-lg mx-auto">
+    <div 
+      className="p-3 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24 min-h-screen bg-cover bg-center bg-fixed relative flex flex-col"
+      style={{ backgroundImage: `url(${themeConfig?.marketBackgroundUrl || 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000'})` }}
+    >
+      {/* Blurred overlay */}
+      <div className="absolute inset-0 bg-slate-50/80 backdrop-blur-md pointer-events-none"></div>
+
+      <div className="relative z-10 max-w-lg mx-auto w-full">
+        {/* Header Section (Matched with MarketScreen) */}
+        <div className="mb-4">
+          <div className="flex justify-between items-center px-2 pt-2 pb-1">
+            <h2 className="text-4xl font-black italic tracking-tighter uppercase bg-clip-text text-transparent bg-gradient-to-br from-slate-800 via-slate-700 to-indigo-900 drop-shadow-md pb-1">
+              PROFILE.
+            </h2>
+          </div>
+        </div>
       
       {/* 👤 Header: ข้อมูลผู้เล่น */}
       <div className="flex items-center gap-4 mb-8">
@@ -137,6 +155,9 @@ export default function ProfileScreen() {
           </button>
         </div>
       </div>
+
+      {/* 🏆 Gameweek History Slider */}
+      <GameweekHistory />
 
       {/* 💳 Statement: ประวัติรายการล่าสุด (Banking Style) แทนตู้โชว์ */}
       <div className="mb-8">
@@ -232,6 +253,7 @@ export default function ProfileScreen() {
         onClose={() => setIsSettingsOpen(false)} 
       />
 
+      </div>
     </div>
   );
 }

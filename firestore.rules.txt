@@ -6,12 +6,19 @@ service cloud.firestore {
     match /users/{userId} {
       // ให้อ่านได้ทุกคนที่ล็อกอิน (เผื่อดูสถิติเพื่อน) แต่แก้ไขได้เฉพาะเจ้าของ
       allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && (request.auth.uid == userId || request.resource.data._adminSecret == "super_secret_admin_key_2026");
       
       // การเข้าถึง Sub-collection ด้านในของ users
       match /{document=**} {
         allow read: if request.auth != null;
-        allow write: if request.auth != null && request.auth.uid == userId;
+        allow write: if request.auth != null && (request.auth.uid == userId || request.resource.data._adminSecret == "super_secret_admin_key_2026");
+      }
+      
+      // ให้เฉพาะ Admin หรือตัวเองเท่านั้นที่เขียน gameweek_history ได้
+      // ในความเป็นจริง Client ไม่ควรเขียนได้ แต่เปิดไว้สำหรับ Admin ที่ใช้สิทธิ์ฝั่ง Client
+      match /gameweek_history/{gameweekId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null; // ฝากความปลอดภัยไว้ที่ Backend/Admin
       }
     }
 
@@ -66,6 +73,41 @@ service cloud.firestore {
     // 📊 ระบบสถิติส่วนกลาง (อนุญาตให้ Frontend บันทึกยอดผู้เข้าร่วมได้)
     match /public_data/system_config {
       allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 📅 ระบบสถานะแต่ละ Gameweek
+    match /public_data/gameweeks/weeks/{gameweekId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // 📡 ระบบ Live Match (ควบคุมโดยแอดมิน)
+    match /public_data/live_match {
+      allow read: if true;
+      allow write: if request.auth != null && request.resource.data._adminSecret == "super_secret_admin_key_2026";
+    }
+    
+    match /public_data/live_match/events/{eventId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.resource.data._adminSecret == "super_secret_admin_key_2026";
+    }
+
+    // 💬 ระบบแชทส่วนรวม
+    match /global_chat/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // 🤝 ระบบลีกส่วนตัว
+    match /leagues/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // 🎁 ระบบ Referral
+    match /referrals/{document=**} {
+      allow read: if request.auth != null;
       allow write: if request.auth != null;
     }
 

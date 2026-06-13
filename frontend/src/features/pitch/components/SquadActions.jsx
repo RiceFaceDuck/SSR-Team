@@ -44,7 +44,7 @@ const SquadActions = ({ bank, squadCount, actions, isAutoFilling }) => {
       <div className="flex justify-between items-center text-xs font-semibold text-white px-1">
         <span className="opacity-80">MY SQUAD ({squadCount}/11)</span>
         <span className="opacity-80">
-          REMAINING BANK: <span className="text-[#fbbf24] text-sm">£{bank}m</span>
+          REMAINING BANK: <span className="text-[#fbbf24] text-sm">{bank}m</span>
         </span>
       </div>
       

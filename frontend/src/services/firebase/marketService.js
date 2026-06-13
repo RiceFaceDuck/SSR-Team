@@ -67,8 +67,8 @@ export const marketService = {
             fullName: data.fullName || data.name || 'Unknown',
             position: data.position ? String(data.position).toUpperCase() : 'RES',
             team: data.team || data.club || 'Free Agent',
-            // บังคับให้เป็นตัวเลขเสมอ
-            price: Number(data.price) || 0.0,
+            // บังคับให้เป็นตัวเลขเสมอ และแก้บั๊กถ้าราคามาเป็นหลักล้าน (เช่น 5000000 ให้เป็น 5.0)
+            price: (Number(data.price) > 1000) ? (Number(data.price) / 1000000) : (Number(data.price) || 0.0),
             totalPoints: Number(data.totalPoints || data.points) || 0,
             // คลีน URL ภาพ
             imageUrl: typeof data.imageUrl === 'string' ? data.imageUrl.trim() : (data.image || null), 

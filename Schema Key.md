@@ -44,7 +44,9 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `name`        | String  | ชื่อการ์ด (เช่น 'รอดพ้นใบเหลือง') |
 | `description` | String  | คำอธิบายความสามารถ |
 | `icon`        | String  | Emoji ไอคอน (เช่น '🛡️') |
+| `rarity`      | String  | ระดับความหายาก ('COMMON', 'RARE', 'EPIC', 'LEGENDARY') |
 | `effectLogic` | Object  | `{"type":"IMMUNE_YELLOW"}` |
+| `price`       | Number  | ราคาในการซื้อ (Balls) |
 | `isActive`    | Boolean | เปิด/ปิดการ์ดในเกม |
 
 ## 2. Squad Schema (ทีมของผู้เล่น)
@@ -68,6 +70,7 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `avatarUrl`   | String  | ลิงก์รูปภาพของผู้จัดการทีม |
 | `description` | String  | คำอธิบายความสามารถ (แสดงผลให้ผู้ใช้เห็น) |
 | `effectLogic` | Object  | JSON Object กำหนดความสามารถพิเศษ เช่น `{"type":"BUDGET_BONUS", "value":25}` หรือ `{"type":"UNLOCK_FORMATION", "formations":["3-3-4"]}` |
+| `price`       | Number  | ราคาในการซื้อ (Balls) |
 | `isActive`    | Boolean | สถานะเปิด/ปิดการใช้งาน |
 | `updatedAt`   | Timestamp| Firestore server timestamp |
 
@@ -76,24 +79,111 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
-| `uid`       | String | รหัสผู้ใช้งาน |
-| `displayName`| String | ชื่อที่แสดงผล |
-| `email`     | String | อีเมล |
-| `photoURL`  | String | URL รูปภาพโปรไฟล์ |
-| `role`      | String | บทบาท ('player', 'admin') |
-| `balls`     | Number | ทรัพยากรสำหรับดึงตัวนักเตะ |
-| `userPoints`| Number | คะแนนรวม |
-| `rank`      | Number | อันดับของผู้เล่น |
-| `createdAt` | Timestamp | วันที่สร้าง |
-| `lastLoginAt`| Timestamp | ล็อกอินล่าสุด |
+| Field          | Type      | Description |
+| -------------- | --------- | ----------- |
+| `uid`          | String    | รหัสผู้ใช้งาน |
+| `displayName`  | String    | ชื่อที่แสดงผล |
+| `email`        | String    | อีเมล |
+| `photoURL`     | String    | URL รูปภาพโปรไฟล์ |
+| `role`         | String    | บทบาท ('player', 'admin') |
+| `balls`        | Number    | เหรียญ/แต้มสำหรับใช้ทำกิจกรรม (แชท, สุ่มกาชา) |
+| `userPoints`   | Number    | คะแนนสะสมโดยรวมของผู้เล่น |
+| `createdAt`    | Timestamp | วันเวลาที่สร้างบัญชี |
+| `lastLoginAt`  | Timestamp | วันเวลาที่ล็อกอินล่าสุด |
+| `lastFreeChatAt`| Timestamp | วันเวลาที่ส่งแชทฟรีครั้งล่าสุด |
+
+### 4.1 Gameweek History Sub-collection
+`users/{userId}/gameweek_history/{gameweekId}`
+
+| Field       | Type   | Description |
+| ----------- | ------ | ----------- |
+| `gameweekId`| String | รหัสสัปดาห์ (เช่น 'GW1') |
+| `squad`     | Array  | Snapshot ทีมในสัปดาห์นั้น `[{ playerId, position, isStarting, pointsEarned }]` |
+| `managerId` | String | ผู้จัดการทีมที่ใช้ |
+| `captainId` | String | กัปตันทีม |
+| `points`    | Number | คะแนนที่ได้ในสัปดาห์นี้ |
+| `createdAt` | Timestamp | วันที่บันทึก |
 
 ## 6. System Config Schema (การตั้งค่าระบบ)
 `public_data/system_config`
 
 | Field              | Type    | Description |
 | ------------------ | ------- | ----------- |
-| `currentGameweek`  | String  | สัปดาห์การแข่งขันปัจจุบัน (เช่น 'WEEK 1') |
+| `currentGameweek`  | String  | สัปดาห์การแข่งขันปัจจุบัน (เช่น 'GW1') |
 | `isMarketOpen`     | Boolean | สถานะตลาดซื้อขาย (เปิด = true, ปิด = false) |
 | `totalJoinedTeams` | Number  | จำนวนทีมที่เข้าร่วมแล้ว (16 คนครบ) |
 | `isNoAdsMode`      | Boolean | โหมดปิดโฆษณา |
-| `themeConfig`      | Object  | `{"loginBackgroundUrl":"", "floatingObjectUrl":""}` |
+| `themeConfig`      | Object  | `{"loginBackgroundUrl":"", "floatingObjectUrl":"", "marketBackgroundUrl":""}` |
+| `chatConfig`       | Object  | `{"normalChatCost":2, "superChatCost":15, "superChatDuration":30, "superChatCostIncrement":5, "superChatResetTime":60, "normalChatFreeInterval":300}` |
+| `latestSuperChatEndTime` | Timestamp | เวลาสิ้นสุดของ Super Chat ตัวสุดท้าย (ใช้คำนวณคิว) |
+
+## 7. Gameweek Config Schema
+`public_data/gameweeks/weeks/{gameweekId}`
+
+| Field         | Type    | Description |
+| ------------- | ------- | ----------- |
+| `gameweekId`  | String  | รหัสสัปดาห์ (เช่น 'GW1') |
+| `status`      | String  | 'upcoming', 'active', 'completed' |
+| `deadlineAt`  | Timestamp| เวลาปิดรับการจัดทีม |
+| `updatedAt`   | Timestamp| วันที่อัปเดต |
+
+## 8. Global Chat Schema
+`global_chat/{messageId}`
+
+| Field       | Type   | Description |
+| ----------- | ------ | ----------- |
+| `userId`    | String | รหัสผู้ส่ง |
+| `userName`  | String | ชื่อผู้ส่ง |
+| `userPhoto` | String | รูปโปรไฟล์ผู้ส่ง |
+| `text`      | String | ข้อความแชท |
+| `createdAt` | Timestamp | วันที่ส่ง |
+| `isSystem`  | Boolean | เป็นข้อความระบบหรือไม่ |
+| `isSuperChat`| Boolean| เป็นข้อความพิเศษหรือไม่ (หัก Balls เยอะกว่า) |
+| `startTime`  | Timestamp| เวลาที่เริ่มแสดง Super Chat (ตามคิว) |
+| `pinnedUntil`| Timestamp| เวลาที่สิ้นสุดการปักหมุดข้อความ (สำหรับ Super Chat) |
+
+## 9. League Schema (ลีกส่วนตัว)
+`leagues/{leagueId}`
+
+| Field       | Type   | Description |
+| ----------- | ------ | ----------- |
+| `name`      | String | ชื่อลีก |
+| `code`      | String | รหัส 6 หลักสำหรับเข้าร่วม |
+| `creatorId` | String | รหัสผู้สร้างลีก |
+| `members`   | Array  | เก็บ userId ผู้เข้าร่วม `[userId1, userId2]` |
+| `createdAt` | Timestamp | วันที่สร้าง |
+## 10. Live Match Schema
+`public_data/live_match` (Main real-time document)
+
+| Field       | Type   | Description |
+| ----------- | ------ | ----------- |
+| `homeTeam`  | Object | `{"code":"MUN", "logo":"url", "name":"Manchester United"}` |
+| `awayTeam`  | Object | `{"code":"LIV", "logo":"url", "name":"Liverpool"}` |
+| `homeScore` | Number | คะแนนทีมเย้า |
+| `awayScore` | Number | คะแนนทีมเยือน |
+| `minute`    | String | นาทีของการแข่งขัน (เช่น '47', 'HT', 'FT') |
+| `status`    | String | 'upcoming', 'LIVE', 'FT' |
+| `latestEvent`| Object | เก็บเหตุการณ์ล่าสุด (`primaryDetail`, `secondaryDetail`, `timestamp`) เพื่อความประหยัด Reads |
+| `updatedAt` | Timestamp | เวลาอัปเดตล่าสุด |
+
+### 10.1 Live Match Events Sub-collection
+`public_data/live_match/events/{eventId}`
+
+| Field             | Type   | Description |
+| ----------------- | ------ | ----------- |
+| `homeScore`       | Number | คะแนนขณะเกิดเหตุการณ์ |
+| `awayScore`       | Number | คะแนนขณะเกิดเหตุการณ์ |
+| `minute`          | String | นาที |
+| `primaryDetail`   | String | เช่น 'B. Sesko Goal ⚽' |
+| `secondaryDetail` | String | เช่น 'B. Fernandes Assist 👟' |
+| `timestamp`       | Timestamp | เวลาเกิดเหตุการณ์ |
+
+## 11. Inventory Schema (คลังเก็บของรายสัปดาห์)
+`users/{userId}/game_data/inventory`
+
+| Field            | Type   | Description |
+| ---------------- | ------ | ----------- |
+| `ownedManagers`  | Array  | รายการ ID ของผู้จัดการทีมที่ซื้อไว้ (เช่น `['A', 'C']`) |
+| `ownedCards`     | Object | จำนวนการ์ดแต่ละชนิดที่มีในคลัง (เช่น `{"CARD_01": 2, "CARD_02": 1}`) |
+| `lastUpdatedGW`  | String | รหัสสัปดาห์ล่าสุดที่มีการอัปเดต (ใช้เพื่อ Reset เมื่อเปลี่ยนสัปดาห์) |
+

@@ -7,6 +7,7 @@ export default function ManagerForm({ initialData, onClose, onSaved }) {
     name: '',
     avatarUrl: '',
     description: '',
+    price: 0,
     isActive: true,
     effectLogic: '{\n  "type": "UNKNOWN_BONUS"\n}'
   });
@@ -23,6 +24,7 @@ export default function ManagerForm({ initialData, onClose, onSaved }) {
         name: initialData.name || '',
         avatarUrl: initialData.avatarUrl || '',
         description: initialData.description || '',
+        price: initialData.price || 0,
         isActive: initialData.isActive !== false,
         effectLogic: initialData.effectLogic ? JSON.stringify(initialData.effectLogic, null, 2) : '{\n  "type": "UNKNOWN_BONUS"\n}'
       });
@@ -62,6 +64,7 @@ export default function ManagerForm({ initialData, onClose, onSaved }) {
         name: formData.name,
         avatarUrl: formData.avatarUrl,
         description: formData.description,
+        price: Number(formData.price) || 0,
         isActive: formData.isActive,
         effectLogic: parsedLogic
       });
@@ -111,15 +114,29 @@ export default function ManagerForm({ initialData, onClose, onSaved }) {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Avatar URL</label>
-            <input 
-              type="text" 
-              name="avatarUrl" 
-              value={formData.avatarUrl} 
-              onChange={handleChange}
-              className="w-full border rounded p-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Avatar URL</label>
+              <input 
+                type="text" 
+                name="avatarUrl" 
+                value={formData.avatarUrl} 
+                onChange={handleChange}
+                className="w-full border rounded p-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Price (Balls)</label>
+              <input 
+                type="number" 
+                name="price" 
+                value={formData.price} 
+                onChange={handleChange}
+                required
+                min="0"
+                className="w-full border rounded p-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
           </div>
 
           <div>

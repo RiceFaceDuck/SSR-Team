@@ -11,7 +11,9 @@ import {
   LogOut,
   Briefcase,
   Zap,
-  BookOpen
+  BookOpen,
+  Activity,
+  Wallet
 } from 'lucide-react';
 
 export default function Sidebar({ onLogout }) {
@@ -20,13 +22,15 @@ export default function Sidebar({ onLogout }) {
   const navLinks = [
     { title: 'แดชบอร์ด', path: '/', icon: LayoutDashboard },
     { title: 'ผู้ใช้งาน', path: '/users', icon: Users },
+    { title: 'จัดการ Balls ⚽', path: '/balls', icon: Wallet },
+    { title: 'Game Engine (GW)', path: '/gameweek', icon: Activity },
     { title: 'นักเตะ (Database)', path: '/players', icon: Shirt },
     { title: 'ผู้จัดการทีม', path: '/managers', icon: Briefcase },
     { title: 'การแข่งขัน', path: '/matches', icon: Trophy },
     { title: 'การ์ดเสริมพลัง', path: '/cards', icon: Zap },
     { title: 'ตำรา Logic', path: '/logic-manual', icon: BookOpen },
     { title: 'จัดการสปอนเซอร์', path: '/quests', icon: Megaphone },
-    { title: 'จัดการร้านค้า', path: '/rewards', icon: Store }, // เมนูใหม่สำหรับระบบ Rewards/Store
+    { title: 'จัดการร้านค้า', path: '/rewards', icon: Store },
     { title: 'ตั้งค่าระบบ', path: '/settings', icon: Settings },
   ];
 

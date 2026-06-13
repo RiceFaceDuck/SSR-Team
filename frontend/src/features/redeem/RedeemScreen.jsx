@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { RewardCard } from './RewardCard'; 
 import { useRedeemStore } from '../../store/useRedeemStore';
 import { useUserStore } from '../../store/useUserStore';
+import { useGameStore } from '../../store/useGameStore';
 import ConfettiEffect from '../../components/common/ConfettiEffect';
 import { Sparkles, Store, PackageOpen, X, Loader2, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +13,7 @@ export default function RedeemScreen() {
   // ดึง State และ Action จาก Store
   const { rewards, isLoading, fetchRewards } = useRedeemStore();
   const { balls } = useUserStore();
+  const themeConfig = useGameStore(state => state.themeConfig);
 
   // Local State สำหรับจัดการ Gamification (พลุ & ป๊อปอัป)
   const [confetti, setConfetti] = useState({ isActive: false, type: 'burst' });
@@ -48,8 +50,14 @@ export default function RedeemScreen() {
   const normalRewards = rewards.filter(r => r.type !== 'gacha');
 
   return (
-    <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24 max-w-4xl mx-auto min-h-screen">
-      
+    <div 
+      className="p-3 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24 min-h-screen bg-cover bg-center bg-fixed relative"
+      style={{ backgroundImage: `url(${themeConfig?.marketBackgroundUrl || 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000'})` }}
+    >
+      {/* Blurred overlay */}
+      <div className="absolute inset-0 bg-slate-50/80 backdrop-blur-md pointer-events-none"></div>
+
+      <div className="relative z-10 max-w-4xl mx-auto">
       {/* 🎆 วางระบบพลุกระดาษ */}
       <ConfettiEffect 
         isActive={confetti.isActive} 
@@ -59,37 +67,27 @@ export default function RedeemScreen() {
       />
 
       {}
-      {/* Header Section */}
-      <div className="flex justify-between items-start mb-8 bg-white p-5 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
-        <div className="flex gap-4 items-center">
-          <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center shadow-inner border border-amber-100">
-            <Store size={24} />
-          </div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-800 mb-0.5 tracking-tight">ร้านค้ารางวัล</h2>
-            <p className="text-slate-500 font-medium text-xs">
-              สะสม <span className="font-bold text-amber-500">Balls ⚽</span> เพื่อแลกรับรางวัลและแพ็คเกจนักเตะสุดพิเศษ!
-            </p>
-          </div>
-        </div>
-        
-        <div className="flex flex-col items-end gap-2.5">
-          {/* กล่องแสดงยอด Balls (Premium UI) */}
-          <div className="bg-white text-slate-800 px-4 py-2 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center gap-2 border border-slate-200 hover:scale-105 transition-transform cursor-pointer">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">ยอดเงิน</span>
-            <div className="flex items-center gap-1">
-              <span className="font-black text-lg text-amber-500 leading-none">{balls?.toLocaleString() || 0}</span>
-              <span className="text-amber-500 drop-shadow-sm leading-none">⚽</span>
+      {/* Header Section (Matched with MarketScreen) */}
+      <div className="mb-4">
+        <div className="flex justify-between items-center px-2 pt-2 pb-1">
+          <h2 className="text-4xl font-black italic tracking-tighter uppercase bg-clip-text text-transparent bg-gradient-to-br from-slate-800 via-slate-700 to-indigo-900 drop-shadow-md pb-1">
+            STORE.
+          </h2>
+          <div className="flex flex-col items-end gap-2">
+            <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-300 shadow-md px-3 py-1.5 rounded-lg flex items-center gap-2 cursor-pointer hover:scale-105 transition-transform">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">ยอดเงิน</span>
+              <div className="flex items-center gap-1">
+                <span className="font-black text-lg text-amber-500 leading-none">{balls?.toLocaleString() || 0}</span>
+                <span className="text-amber-500 drop-shadow-sm leading-none text-sm">⚽</span>
+              </div>
             </div>
+            <button 
+              onClick={() => navigate('/profile')}
+              className="text-[10px] font-bold text-slate-500 hover:text-slate-700 bg-white/50 hover:bg-white px-3 py-1 rounded-full border border-slate-200 hover:border-slate-300 transition-all active:scale-95 flex items-center gap-1"
+            >
+              <RefreshCw size={10} /> ประวัติการใช้จ่าย
+            </button>
           </div>
-          
-          {/* ปุ่มไปดูประวัติ (ลิงก์ไปหน้า Profile เพราะเราทำ History ไว้ที่นั่นแล้ว) */}
-          <button 
-            onClick={() => navigate('/profile')}
-            className="text-[10px] font-bold text-slate-500 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 hover:border-slate-300 transition-all active:scale-95 flex items-center gap-1"
-          >
-            <RefreshCw size={10} /> ประวัติการใช้จ่าย
-          </button>
         </div>
       </div>
 
@@ -195,6 +193,7 @@ export default function RedeemScreen() {
         </div>
       )}
 
+      </div>
     </div>
   );
 }

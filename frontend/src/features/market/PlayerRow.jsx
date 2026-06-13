@@ -47,7 +47,7 @@ export default function PlayerRow({ player, onActionClick, onClick }) {
       // ฝัง Event รับการคลิก (Tap) ไว้ที่ตัวกรอบนอกสุดของการ์ด แทนระบบเซ็นเซอร์ลากเดิม
       onClick={handleRowClick}
       // เปลี่ยนจาก cursor-grab เป็น cursor-pointer และเพิ่ม active:scale-[0.98] ให้ปุ่มยุบตัวนิดนึงตอนกด
-      className="bg-white p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:border-indigo-200 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between group select-none cursor-pointer active:scale-[0.98]"
+      className="bg-white p-3 rounded-lg shadow-[0_4px_12px_rgb(0,0,0,0.06)] border border-slate-300 hover:shadow-[0_8px_24px_rgb(0,0,0,0.12)] hover:border-indigo-400 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between group select-none cursor-pointer active:scale-[0.98]"
     >
       
       {/* ฝั่งซ้าย: รูป, ชื่อ, ตำแหน่ง, ทีม */}
@@ -98,13 +98,13 @@ export default function PlayerRow({ player, onActionClick, onClick }) {
             e.stopPropagation();
             if (onActionClick) onActionClick(safePlayer, isInSquad ? 'sell' : 'buy');
           }}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-90 shadow-sm relative z-10
+          className={`px-4 py-2 rounded-md text-xs font-bold transition-all active:scale-90 relative z-10 border
             ${isInSquad 
-              ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200' 
-              : 'bg-indigo-600 text-white hover:bg-indigo-700 border border-transparent hover:shadow-md'
+              ? 'bg-slate-700 hover:bg-slate-600 text-white border-slate-500 shadow-sm' 
+              : 'bg-gradient-to-b from-[#3b82f6] to-[#2563eb] text-white hover:from-[#60a5fa] hover:to-[#3b82f6] border-[#1e40af] shadow-[0_2px_10px_rgba(59,130,246,0.3)]'
             }`}
         >
-          {isInSquad ? 'RELEASE' : 'SIGN'}
+          {isInSquad ? 'ใช้งานอยู่' : 'เลือก'}
         </button>
       </div>
 

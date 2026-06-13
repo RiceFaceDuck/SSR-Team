@@ -1,46 +1,42 @@
 import React from 'react';
-import { STYLES } from '../../config/theme';
-import { Activity, MessageCircle } from 'lucide-react';
+import { Activity } from 'lucide-react';
+import { useGameStore } from '../../store/useGameStore';
+import LiveMatchContainer from './components/LiveMatchContainer';
+import LiveChatContainer from './components/LiveChatContainer';
 
 export default function LiveScoreScreen() {
+  const themeConfig = useGameStore(state => state.themeConfig);
+
   return (
-    <div className="p-6 h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-3xl font-black text-slate-800 mb-1 tracking-tight flex items-center gap-2">
-            <Activity className="text-red-500" /> Live Match
-          </h2>
-          <p className="text-slate-500 font-medium text-sm">แชทเดือดตอนบอลเตะ (No Ads Mode)</p>
-        </div>
-        <span className="relative flex h-3 w-3">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-        </span>
-      </div>
+    <div 
+      className="p-3 animate-in fade-in slide-in-from-bottom-4 duration-500 h-[100dvh] overflow-hidden pb-20 bg-cover bg-center relative flex flex-col"
+      style={{ backgroundImage: `url(${themeConfig?.marketBackgroundUrl || 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000'})` }}
+    >
+      {/* Blurred overlay */}
+      <div className="absolute inset-0 bg-slate-50/80 backdrop-blur-md pointer-events-none"></div>
 
-      {/* Live Match Scoreboard */}
-      <div className="bg-white border border-slate-100 text-slate-800 p-6 rounded-2xl mb-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay"></div>
-        <div className="flex justify-between items-center relative z-10">
-          <div className="font-bold text-xl">ARS</div>
-          <div className="bg-red-500 px-3 py-1 rounded-full text-xs font-bold animate-pulse">45' HT</div>
-          <div className="font-bold text-xl">MCI</div>
+      <div className="relative z-10 max-w-2xl mx-auto w-full flex-1 flex flex-col">
+        {/* Header Section */}
+        <div className="mb-4">
+          <div className="flex justify-between items-center px-2 pt-2 pb-1">
+            <h2 className="text-4xl font-black italic tracking-tighter uppercase bg-clip-text text-transparent bg-gradient-to-br from-red-600 via-rose-500 to-orange-500 drop-shadow-md pb-1 flex items-center gap-2">
+              <Activity className="text-red-500" size={32} /> LIVE.
+            </h2>
+            <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-300 shadow-md px-3 py-1.5 rounded-lg flex flex-col items-end">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-slate-500 font-bold uppercase">สถานะ</span>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+              </div>
+              <span className="text-xs font-black text-red-500 leading-none mt-1">Online</span>
+            </div>
+          </div>
         </div>
-        <div className="text-4xl font-black mt-2 relative z-10">1 - 0</div>
-      </div>
 
-      {/* Chat Box */}
-      <div className={`${STYLES.card} flex-1 flex flex-col`}>
-        <h3 className="font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2 flex items-center gap-2">
-          <MessageCircle size={18}/> ห้องแชทรวม
-        </h3>
-        <div className="flex-1 bg-slate-50 rounded-xl p-4 flex items-center justify-center text-slate-400 text-sm border-2 border-dashed border-slate-200">
-          รอระบบ Firebase Realtime Database
-        </div>
-        <div className="mt-4 flex gap-2">
-          <input type="text" placeholder="พิมพ์ข้อความ..." className="flex-1 bg-white border border-slate-200 text-slate-800 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-slate-400" disabled />
-          <button className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-sm font-bold opacity-50" disabled>ส่ง</button>
-        </div>
+        <LiveMatchContainer />
+        <LiveChatContainer />
       </div>
     </div>
   );

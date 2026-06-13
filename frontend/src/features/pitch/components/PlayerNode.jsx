@@ -39,15 +39,9 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench }) => {
         <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-t-md shadow-sm border border-b-0 border-slate-300 overflow-hidden relative flex items-end justify-center">
           <img src={playerImage} alt={player.name} className="w-full h-full object-cover" />
           
-          {/* Team Logo Badge (Top Left) */}
-          <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-slate-200 rounded-full border border-slate-300 flex items-center justify-center text-[6px] font-bold">
-            {teamAbbr.substring(0, 1)}
-          </div>
 
-          {/* Position Text (Top Right) */}
-          <div className="absolute top-0.5 right-0.5 text-[7px] font-black text-slate-700 bg-white/80 px-0.5 rounded shadow-sm">
-            {expectedPosition}
-          </div>
+
+
 
           {/* Equipped Card Icon */}
           {cardIcon && (
@@ -62,13 +56,19 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench }) => {
       <div className={`w-full bg-white rounded-b-md shadow-md overflow-hidden flex flex-col z-10 transition-colors ${isSelected ? 'border-2 border-[#fbbf24]' : isCaptain ? 'border-2 border-[#d97706]' : 'border border-slate-300'}`}>
         
         {/* Name and Team/Role */}
-        <div className="bg-white px-0.5 py-0.5 text-center flex flex-col items-center justify-center min-h-[18px]">
-          <span className="text-[8px] sm:text-[9px] font-black text-slate-800 leading-none truncate w-full text-center">
-            {player.name.split(' ').pop()}
-          </span>
-          <span className="text-[6px] sm:text-[7px] font-semibold text-slate-500 leading-none mt-0.5">
-            {teamAbbr.substring(0, 3).toUpperCase()} {role && <span className="font-bold text-slate-800">({role})</span>}
-          </span>
+        <div className="bg-white px-1 py-0.5 flex flex-row items-center justify-start min-h-[20px] w-full overflow-hidden">
+          {/* Position Badge in Name Panel */}
+          <div className="text-[6px] sm:text-[7px] font-black text-slate-700 bg-slate-100 border border-slate-300 px-[2px] py-[1px] rounded shadow-sm mr-1 shrink-0 leading-none">
+            {expectedPosition}
+          </div>
+          <div className="flex flex-col items-start justify-center flex-1 overflow-hidden">
+            <span className="text-[8px] sm:text-[9px] font-black text-slate-800 leading-none truncate w-full text-left">
+              {player.name.split(' ').pop()}
+            </span>
+            <span className="text-[6px] sm:text-[7px] font-semibold text-slate-500 leading-none mt-0.5 text-left truncate w-full">
+              {teamAbbr.substring(0, 3).toUpperCase()} {role && <span className="font-bold text-slate-800">({role})</span>}
+            </span>
+          </div>
         </div>
 
         {/* Price and Plus Button Bar */}
@@ -111,19 +111,22 @@ const EmptyNode = ({ expectedPosition, isBench }) => {
             +
           </span>
           
-          {/* Position Badge */}
-          <div className="absolute top-0.5 right-0.5 text-[6px] font-black text-[#0a192f] bg-[#fbbf24] px-0.5 rounded shadow-sm z-10 leading-none">
-            {expectedPosition}
-          </div>
+
         </div>
       </div>
 
       {/* Bottom Part (Info Card) matching PlayerNode exactly */}
       <div className={`w-full bg-gradient-to-b ${bottomGradient} rounded-b-md shadow-md overflow-hidden flex flex-col z-10 transition-colors border ${borderClass} group-hover:border-[#fbbf24]`}>
-        <div className="px-0.5 py-0.5 text-center flex flex-col items-center justify-center min-h-[18px]">
-          <span className="text-[7px] sm:text-[8px] font-bold text-[#60a5fa] tracking-wider group-hover:text-white transition-colors leading-none">
-            ADD PLAYER
-          </span>
+        <div className="px-1 py-0.5 flex flex-row items-center justify-start min-h-[20px] w-full overflow-hidden">
+          {/* Position Badge in Name Panel */}
+          <div className="text-[6px] sm:text-[7px] font-black text-[#0a192f] bg-[#fbbf24] px-[2px] py-[1px] rounded shadow-sm mr-1 shrink-0 leading-none">
+            {expectedPosition}
+          </div>
+          <div className="flex flex-col items-start justify-center flex-1 overflow-hidden">
+            <span className="text-[7px] sm:text-[8px] font-bold text-[#60a5fa] tracking-wider group-hover:text-white transition-colors leading-none truncate w-full text-left">
+              ADD PLAYER
+            </span>
+          </div>
         </div>
         <div className={`flex justify-center items-center h-3.5 sm:h-4 w-full border-t ${borderClass}`}>
           <span className="text-[#fbbf24] text-[6px] sm:text-[7px] font-bold px-0.5 text-center leading-none opacity-80">

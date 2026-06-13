@@ -8,6 +8,7 @@ import { doc, getDoc, setDoc, updateDoc, increment, serverTimestamp } from 'fire
 import { db } from '../../config/firebase';
 
 import { participationService } from './participationService';
+import { referralService } from './referralService';
 import { useGameStore } from '../../store/useGameStore';
 
 /**
@@ -55,6 +56,16 @@ export const squadService = {
         if (!hasAlreadyJoined) {
           // ถ้าเพิ่งครบ 16 คนเป็นครั้งแรก ส่งไปลงทะเบียน
           await participationService.registerParticipation(userId);
+
+          // 🌟 เช็คเรื่องการชวนเพื่อน (Referral)
+          const userDocSnap = await getDoc(doc(db, 'users', userId));
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            if (userData.referredBy) {
+              const rewardBalls = useGameStore.getState().referralRewardBalls || 50;
+              await referralService.triggerReward(userData.referredBy, userId, rewardBalls);
+            }
+          }
         } else {
           // ถ้าเคยเข้าร่วมแล้ว ส่งไปเช็คระบบเผื่อย้อนกลับไปซ่อมแซมตัวเลขสถิติที่พัง (Fallback)
           await participationService.syncAndRepairCounter(userId);

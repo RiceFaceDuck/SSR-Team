@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import useUserStore from '../../store/userStore';
 
 const UserManager = () => {
+  const location = useLocation();
+  const isBallsMode = location.pathname === '/balls';
   const { users, isLoading, error, fetchUsers, updateUserBallsAction } = useUserStore();
   
   // State สำหรับจัดการ Modal ปรับยอด Balls
@@ -67,7 +70,7 @@ const UserManager = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">จัดการผู้เล่น (User Management)</h1>
+        <h1 className="text-2xl font-bold text-gray-800">{isBallsMode ? 'จัดการ Balls ⚽' : 'จัดการผู้เล่น (User Management)'}</h1>
         <div className="text-sm text-gray-500">
           จำนวนผู้เล่นทั้งหมด: <span className="font-bold text-blue-600">{users.length}</span> บัญชี
         </div>

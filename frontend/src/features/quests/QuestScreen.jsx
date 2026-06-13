@@ -2,13 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Trophy, Sparkles } from 'lucide-react';
 import { useQuestStore } from '../../store/useQuestStore';
 import { useUserStore } from '../../store/useUserStore';
+import { useGameStore } from '../../store/useGameStore';
 import SponsorAdCard from './SponsorAdCard';
 import { showToast } from '../../utils/toast';
 import { playSound } from '../../config/theme';
 
 export default function QuestScreen() {
   // ดึง State ผู้เล่น และ ฟังก์ชันเพิ่ม Balls (⚽)
-  const { userData, addBalls } = useUserStore();
+  const { userData, addBalls, balls } = useUserStore();
+  const themeConfig = useGameStore(state => state.themeConfig);
   
   // ดึง State และ Functions สำหรับระบบภารกิจ
   const { 
@@ -56,18 +58,29 @@ export default function QuestScreen() {
   };
 
   return (
-    <div className="p-4 md:p-6 pb-24 max-w-2xl mx-auto min-h-screen animate-in fade-in duration-500">
-      
-      {/* Header Section */}
-      <div className="mb-6 relative">
-        <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-          <Sparkles className="text-amber-500" />
-          ภารกิจพิเศษ (Quests)
-        </h2>
-        <p className="text-slate-500 mt-1 font-medium text-sm">
-          ทำภารกิจจากสปอนเซอร์ให้สำเร็จเพื่อรับ <span className="font-bold text-amber-500">Balls ⚽</span> ไปช้อปนักเตะ!
-        </p>
-      </div>
+    <div 
+      className="p-3 animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-screen pb-24 bg-cover bg-center bg-fixed relative"
+      style={{ backgroundImage: `url(${themeConfig?.marketBackgroundUrl || 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000'})` }}
+    >
+      {/* Blurred overlay */}
+      <div className="absolute inset-0 bg-slate-50/80 backdrop-blur-md pointer-events-none"></div>
+
+      <div className="relative z-10 max-w-2xl mx-auto">
+        {/* Header Section (Matched with MarketScreen) */}
+        <div className="mb-4">
+          <div className="flex justify-between items-center px-2 pt-2 pb-1">
+            <h2 className="text-4xl font-black italic tracking-tighter uppercase bg-clip-text text-transparent bg-gradient-to-br from-slate-800 via-slate-700 to-indigo-900 drop-shadow-md pb-1">
+              QUESTS.
+            </h2>
+            <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-300 shadow-md px-3 py-1.5 rounded-lg flex flex-col items-end">
+              <span className="text-[10px] text-slate-500 font-bold leading-none uppercase">ยอดเงิน</span>
+              <div className="flex items-center gap-1 mt-1">
+                <span className="text-sm font-black text-amber-500 leading-none">{balls?.toLocaleString() || 0}</span>
+                <span className="text-amber-500 drop-shadow-sm leading-none text-xs">⚽</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
       {/* Content Area */}
       {isLoading && quests.length === 0 ? (
@@ -100,6 +113,7 @@ export default function QuestScreen() {
         </div>
       )}
       
+      </div>
     </div>
   );
 }

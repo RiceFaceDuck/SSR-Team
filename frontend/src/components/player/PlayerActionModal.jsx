@@ -88,7 +88,7 @@ export default function PlayerActionModal({ isOpen, onClose, player, actionType 
               <div className="p-2 bg-white rounded-xl text-green-500 shadow-sm"><Coins size={16}/></div>
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ราคา</p>
-                <p className="text-sm font-black text-slate-700">£{player.price?.toFixed(1) || '0.0'}m</p>
+                <p className="text-sm font-black text-slate-700">{player.price?.toFixed(1) || '0.0'}m</p>
               </div>
             </div>
             <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex items-center gap-3">

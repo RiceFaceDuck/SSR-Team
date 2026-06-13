@@ -8,21 +8,25 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, ArrowUpDown } from 'lucide-react';
 import PlayerRow from './PlayerRow';
+import MarketFilters from './MarketFilters';
+import MarketHeader from './MarketHeader';
+import MarketPlayerList from './MarketPlayerList';
 import GoogleAdWrapper from '../../components/ads/GoogleAdWrapper';
 import BudgetBar from '../../components/common/BudgetBar';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 import PlayerActionModal from '../../components/player/PlayerActionModal';
 import PlayerBottomSheet from '../../components/player/PlayerBottomSheet'; // 🌟 นำเข้า Bottom Sheet ตัวใหม่
 
-// แก้ไข Path ให้ถูกต้อง
 import { useMarketStore } from '../../store/useMarketStore';
 import { useUserStore } from '../../store/useUserStore';
+import { useGameStore } from '../../store/useGameStore';
 import { validateSellPlayer } from '../../utils/squadValidator';
 import { toast } from '../../utils/toast';
 
 export default function MarketScreen() {
   // 1. ดึง State และ Action จาก Stores
   const { players, isLoading, fetchMarketPlayers } = useMarketStore();
+  const themeConfig = useGameStore(state => state.themeConfig);
   
   // 🌟 ดึง startPlacement และฟังก์ชันจัดการ Filter Position จากสนาม
   const { 
@@ -62,14 +66,7 @@ export default function MarketScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [marketFilterPos]);
 
-  // 4. การจัดการแท็บตัวกรอง (Filters)
-  const tabs = [
-    { label: 'ALL', value: 'ALL' },
-    { label: 'FW', value: 'FW' },
-    { label: 'MF', value: 'MF' },
-    { label: 'DF', value: 'DF' },
-    { label: 'GK', value: 'GK' }
-  ];
+  // 4. (Moved tabs array to MarketFilters.jsx)
 
   // 5. กรองและเรียงลำดับข้อมูลนักเตะ
   const displayPlayers = useMemo(() => {
@@ -92,6 +89,13 @@ export default function MarketScreen() {
     }
 
     filtered.sort((a, b) => {
+      // 🌟 นำนักเตะที่มีอยู่ในทีมแล้ว (isInSquad) ไปไว้ล่างสุดเสมอ
+      const isOwnedA = mySquad.some(sq => String(sq.playerId) === String(a.sku));
+      const isOwnedB = mySquad.some(sq => String(sq.playerId) === String(b.sku));
+
+      if (isOwnedA && !isOwnedB) return 1;
+      if (!isOwnedA && isOwnedB) return -1;
+
       const priceA = parseFloat(a.price) || 0;
       const priceB = parseFloat(b.price) || 0;
       const pointsA = parseInt(a.totalPoints) || 0;
@@ -104,7 +108,7 @@ export default function MarketScreen() {
     });
 
     return filtered;
-  }, [players, activeTab, searchQuery, sortBy]);
+  }, [players, activeTab, searchQuery, sortBy, mySquad]);
 
   // 6. ฟังก์ชันเมื่อกดที่แถวนักเตะ (Tap Row) -> เปิด Bottom Sheet
   const handleRowClick = (player) => {
@@ -159,101 +163,37 @@ export default function MarketScreen() {
   };
 
   return (
-    <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-screen pb-24">
-      
-      {/* Header & Budget */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center px-4 pt-4 pb-2">
-            <h2 className="text-3xl font-black text-slate-800 mb-1 tracking-tight">ค้นหานักเตะ</h2>
-            <div className="bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full flex flex-col items-end">
-              <span className="text-[10px] text-slate-400 font-bold leading-none">งบประมาณคงเหลือ</span>
-              <span className="text-sm font-black text-indigo-600 leading-none mt-1">£{getEffectiveBudget().toFixed(1)}m</span>
-            </div>
-        </div>
-        <p className="text-slate-500 mb-4 font-medium text-sm px-4">ค้นหานักเตะและสร้างดรีมทีมในแบบของคุณ</p>
-      </div>
-      
-      {/* Filters & Search Area */}
-      <div className="bg-white p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 mb-6 space-y-4">
+    <div 
+      className="p-3 animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-screen pb-24 bg-cover bg-center bg-fixed relative"
+      style={{ backgroundImage: `url(${themeConfig?.marketBackgroundUrl || 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000'})` }}
+    >
+      {/* Blurred overlay */}
+      <div className="absolute inset-0 bg-slate-50/80 backdrop-blur-md pointer-events-none"></div>
+
+      <div className="relative z-10">
+        {/* Header & Budget */}
+        <MarketHeader budgetLeft={getEffectiveBudget()} />
         
-        {/* Search & Sort */}
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="ค้นหาชื่อ, สโมสร..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow text-slate-700 placeholder-slate-400"
-            />
-          </div>
-          <div className="relative shrink-0 w-[110px]">
-            <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
-            <select 
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-xl pl-9 pr-2 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer"
-            >
-              <option value="price-desc">แพงสุด</option>
-              <option value="price-asc">ถูกสุด</option>
-              <option value="points-desc">คะแนน</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.value;
-            return (
-              <button 
-                key={tab.value}
-                onClick={() => {
-                  setActiveTab(tab.value);
-                  setMarketFilterPos(tab.value); // 🌟 NEW: ซิงค์กลับ Store เมื่อผู้เล่นกดเปลี่ยน Tab เอง
-                  setPendingTargetSlot(null); // ยกเลิกการจำตำแหน่งเป้าหมาย
-                }}
-                className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold border transition-colors shadow-sm
-                  ${isActive 
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' 
-                    : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
-                  }`}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-
-      </div>
+        {/* Filters & Search Area */}
+      <MarketFilters 
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        setMarketFilterPos={setMarketFilterPos}
+        setPendingTargetSlot={setPendingTargetSlot}
+      />
 
       {/* Players List Area */}
-      <div className="space-y-3 pb-4">
-        {isLoading ? (
-          <SkeletonLoader type="row" count={5} />
-        ) : displayPlayers.length > 0 ? (
-          displayPlayers.map((player) => {
-            // 🌟 เช็คว่านักเตะคนนี้มีอยู่ในทีมแล้วหรือยัง เพื่อส่งให้ PlayerRow เปลี่ยนปุ่มเป็น "ขาย"
-            const isOwned = mySquad.some(sq => String(sq.playerId) === String(player.sku));
-            
-            return (
-              <PlayerRow 
-                key={player.sku} 
-                player={player} 
-                isOwned={isOwned} // 🌟 ส่ง props ไปบอก Component ลูก
-                onClick={handleRowClick}      
-                onActionClick={handleActionClick} 
-              />
-            );
-          })
-        ) : (
-          <div className="text-center py-10 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <span className="text-4xl mb-3 block">🔍</span>
-            <p className="text-slate-500 font-bold text-sm">ไม่พบรายชื่อนักเตะ</p>
-          </div>
-        )}
-      </div>
+      <MarketPlayerList 
+        isLoading={isLoading}
+        displayPlayers={displayPlayers}
+        mySquad={mySquad}
+        onRowClick={handleRowClick}
+        onActionClick={handleActionClick}
+      />
 
       <GoogleAdWrapper />
 
@@ -274,6 +214,7 @@ export default function MarketScreen() {
         onConfirm={handleConfirmAction}
       />
 
+      </div>
     </div>
   );
 }

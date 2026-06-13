@@ -10,13 +10,13 @@ export default function ManagerList() {
   const [isSeeding, setIsSeeding] = useState(false);
 
   const mockManagers = [
-    { id: 'A', name: 'Arthur Shield', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=A', effectLogic: { type: 'DEF_CLEAN_SHEET_BONUS', value: 2 }, description: 'กองหลังได้รับ +2 คะแนน เมื่อทำคลีนชีตสำเร็จ', isActive: true },
-    { id: 'B', name: 'Victor Wealth', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=B', effectLogic: { type: 'BUDGET_BONUS', value: 25 }, description: 'เพิ่มงบประมาณสโมสรในการซื้อนักเตะ +25M', isActive: true },
-    { id: 'C', name: 'Prof. Tacticus', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=C', effectLogic: { type: 'UNLOCK_FORMATION' }, description: 'ปลดล็อกแผนการเล่นพิเศษเพื่อใช้จัดทีม', isActive: true },
-    { id: 'D', name: 'Max Firepower', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=D', effectLogic: { type: 'FW_GOAL_FEST_BONUS', value: 2 }, description: 'กองหน้าได้รับ +2 คะแนน เมื่อทีมยิงได้ 3 ประตูขึ้นไป', isActive: true },
-    { id: 'E', name: 'Simon Synergy', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=E', effectLogic: { type: 'CLUB_SYNERGY_BONUS', value: 1 }, description: 'นักเตะที่มาจากสโมสรเดียวกัน 3 คนขึ้นไป ได้รับโบนัสคนละ +1 คะแนน', isActive: true },
-    { id: 'F', name: 'Nigel Negotiator', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=F', effectLogic: { type: 'MARKET_DISCOUNT', value: 10 }, description: 'ลดราคานักเตะในตลาดซื้อขายลง 10%', isActive: true },
-    { id: 'G', name: 'Master Commander', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=G', effectLogic: { type: 'CAPTAIN_TRIPLE_BONUS' }, description: 'กัปตันทีมจะได้รับโบนัสคะแนนคูณ 3 (จากเดิมคูณ 2)', isActive: true },
+    { id: 'A', name: 'Arthur Shield', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=A', effectLogic: { type: 'DEF_CLEAN_SHEET_BONUS', value: 2 }, description: 'กองหลังได้รับ +2 คะแนน เมื่อทำคลีนชีตสำเร็จ', price: 150, isActive: true },
+    { id: 'B', name: 'Victor Wealth', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=B', effectLogic: { type: 'BUDGET_BONUS', value: 25 }, description: 'เพิ่มงบประมาณสโมสรในการซื้อนักเตะ +25M', price: 200, isActive: true },
+    { id: 'C', name: 'Prof. Tacticus', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=C', effectLogic: { type: 'UNLOCK_FORMATION' }, description: 'ปลดล็อกแผนการเล่นพิเศษเพื่อใช้จัดทีม', price: 100, isActive: true },
+    { id: 'D', name: 'Max Firepower', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=D', effectLogic: { type: 'FW_GOAL_FEST_BONUS', value: 2 }, description: 'กองหน้าได้รับ +2 คะแนน เมื่อทีมยิงได้ 3 ประตูขึ้นไป', price: 150, isActive: true },
+    { id: 'E', name: 'Simon Synergy', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=E', effectLogic: { type: 'CLUB_SYNERGY_BONUS', value: 1 }, description: 'นักเตะที่มาจากสโมสรเดียวกัน 3 คนขึ้นไป ได้รับโบนัสคนละ +1 คะแนน', price: 120, isActive: true },
+    { id: 'F', name: 'Nigel Negotiator', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=F', effectLogic: { type: 'MARKET_DISCOUNT', value: 10 }, description: 'ลดราคานักเตะในตลาดซื้อขายลง 10%', price: 180, isActive: true },
+    { id: 'G', name: 'Master Commander', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=G', effectLogic: { type: 'CAPTAIN_TRIPLE_BONUS' }, description: 'กัปตันทีมจะได้รับโบนัสคะแนนคูณ 3 (จากเดิมคูณ 2)', price: 250, isActive: true },
   ];
 
   const fetchManagers = async () => {
@@ -98,6 +98,7 @@ export default function ManagerList() {
                 <th className="p-4 text-gray-600 font-semibold text-sm">ID</th>
                 <th className="p-4 text-gray-600 font-semibold text-sm">Avatar</th>
                 <th className="p-4 text-gray-600 font-semibold text-sm">Name</th>
+                <th className="p-4 text-gray-600 font-semibold text-sm">Price</th>
                 <th className="p-4 text-gray-600 font-semibold text-sm">Effect Type</th>
                 <th className="p-4 text-gray-600 font-semibold text-sm">Status</th>
                 <th className="p-4 text-gray-600 font-semibold text-sm">Actions</th>
@@ -116,6 +117,7 @@ export default function ManagerList() {
                     <img src={m.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.id}`} alt="" className="w-10 h-10 rounded-full border border-gray-200" />
                   </td>
                   <td className="p-4 font-semibold text-gray-800">{m.name}</td>
+                  <td className="p-4 font-bold text-amber-500">{m.price || 0}</td>
                   <td className="p-4">
                     <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-mono">
                       {m.effectLogic?.type || 'N/A'}

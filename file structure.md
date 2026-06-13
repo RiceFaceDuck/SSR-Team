@@ -11,17 +11,27 @@
 - `config/`: Firebase config (`firebase.js`)
 - `features/`: Domain-driven feature modules
   - `players/`: Player Management Feature
-    - `components/`: `ExcelPreview.jsx`, `PlayerManualForm.jsx`, `forms/` (Identity, GameInfo, Stats)
-    - `hooks/`: `usePlayers.js` (Business logic)
+    - `components/`: `ExcelPreview.jsx`, `PlayerManualForm.jsx`, `PlayerToolbar.jsx`, `PlayerTable.jsx`, `forms/` (Identity, GameInfo, Stats)
+    - `hooks/`: `usePlayers.js` (Business logic), `usePlayerSync.js` (API Sync Logic)
     - `utils/`: `excelParser.js`, `templateUtil.js`
-    - `views/`: `PlayerList.jsx`, `PlayerDetails.jsx`
+    - `views/`: `PlayerList.jsx` (Container), `PlayerDetails.jsx`
     - `PlayerFeature.jsx`: Main entry point for the player module
   - `managers/`: Manager Management Feature (New!)
     - `components/`: `ManagerForm.jsx`
     - `views/`: `ManagerList.jsx`
-  - `gameweek/`, `quests/`, `rewards/`, `users/`, `verify/`: Other features
+  - `cards/`: Power Card Management Feature
+    - `components/`: `CardForm.jsx`, `CardItem.jsx`, `CardListHeader.jsx`
+    - `views/`: `CardList.jsx`
+  - `system/`: System Settings Feature
+    - `views/`: `SystemSettings.jsx`, `LogicManual.jsx`
+  - `gameweek/`: Gameweek Management Feature
+    - `components/`: `PlayerStatsEntry.jsx`, `GameweekFixtures.jsx`, `ApiSettingsPanel.jsx`
+    - `views/`: `GameweekDashboard.jsx`
+    - `TimeController.jsx`, `NoAdsToggle.jsx`
+  - `quests/`, `rewards/`, `users/`, `verify/`: Other features
 - `services/`: External integrations
   - `firebase/`: `playerDatabase.js`, `managerDatabase.js`, etc.
+  - `engine/`: `gameweekCalculationService.js`, `leaderboardEngine.js` (Game Loop Logic)
   - `api/`: `apiFootballService.js`
 - `store/`: Zustand global state
 - `utils/`: Global utilities
@@ -29,6 +39,12 @@
 ## Frontend Structure `frontend/src/`
 - `components/`: Shared UI components
 - `features/`: Domain-driven feature modules (`auth/`, `market/`, `pitch/`, etc.)
+  - `market/`:
+    - `MarketScreen.jsx`: หน้าจอหลักของตลาดนักเตะ
+    - `MarketHeader.jsx`: คอมโพเนนต์ส่วนหัว และงบประมาณคงเหลือ (Refactored)
+    - `MarketFilters.jsx`: UI ค้นหาและกรองตำแหน่ง
+    - `MarketPlayerList.jsx`: คอมโพเนนต์แสดงลิสต์รายชื่อ (Refactored)
+    - `PlayerRow.jsx`
   - `pitch/`:
     - `components/`:
       - `PitchBenchArea.jsx`: แถบนักเตะสำรองและผู้จัดการทีม
@@ -50,10 +66,24 @@
       - `autoFillEngine.js`: Engine แบบ Standalone คำนวณตรรกะจัดทีมอัตโนมัติ
   - `profile/`:
     - `ProfileScreen.jsx`: หน้าจอโปรไฟล์หลักและกระเป๋าเงิน (Wallet)
-    - `components/`:
       - `ProfileSettingsModal.jsx`: ป็อปอัปสำหรับตั้งค่าบัญชีและชื่อทีม
+      - `GameweekHistory.jsx`: สรุปคะแนนการจัดทีมย้อนหลังรายสัปดาห์
+  - `live/`:
+    - `LiveScoreScreen.jsx`: หน้าจอหลักของ Live Match และ Global Chat
+    - `components/`:
+      - `LiveMatchContainer.jsx`: รวบรวมแผงคะแนนและเหตุการณ์สำคัญ (Refactored)
+      - `LiveMatchScore.jsx`: ส่วนหัวแสดงคะแนนล่าสุดแบบกระชับ (Refactored)
+      - `LiveLatestEvent.jsx`: แผงแสดงเหตุการณ์ใหม่ล่าสุด 1 รายการ
+      - `LiveEventsModal.jsx`: ป็อปอัปแสดงประวัติเหตุการณ์ทั้งหมด
+      - `LiveChatContainer.jsx`: ควบคุม State ของแชท
+      - `ChatMessageList.jsx`: แสดงรายการข้อความแชท และจัดการ Pinned Super Chat
+      - `ChatMessageInput.jsx`: กล่องป้อนข้อความพร้อมปุ่ม Normal / Super Chat
+  - `social/`:
+    - `SocialScreen.jsx`: หน้าจอหลักของคอมมูนิตี้และลีกส่วนตัว
+    - `components/`: `ReferralCard.jsx` (ชวนเพื่อน), `LeagueManager.jsx` (สร้าง/เข้าร่วมลีก), `LeagueList.jsx` (รายการลีก)
 - `services/`: External integrations 
-  - `firebase/`: `squadService.js`, `managerService.js`, `cardService.js`
+  - `firebase/`: `squadService.js`, `managerService.js`, `cardService.js`, `chatService.js`, `leagueService.js`, `inventoryService.js` (NEW)
+  - `api/`: `apiFootballService.js`
 - `store/`: Zustand global state
   - `useUserStore.js`: Store หลักที่รวม Slices เข้าด้วยกัน
   - `slices/`: 
@@ -64,4 +94,5 @@
     - `squadAutoFillSlice.js`: จัดการการจัดทีมอัตโนมัติ
     - `squadCardSlice.js`: จัดการระบบการ์ดเสริมพลัง
     - `createWalletSlice.js`: จัดการงบและ Balls
+    - `inventorySlice.js`: จัดการคลังเก็บการ์ดและผู้จัดการทีม (NEW)
 - `hooks/`, `utils/`: Global app structure

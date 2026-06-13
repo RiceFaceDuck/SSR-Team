@@ -11,6 +11,8 @@ import TeamManager from './features/teams/views/TeamManager';
 import ManagerList from './features/managers/views/ManagerList';
 import CardList from './features/cards/views/CardList';
 import LogicManual from './features/system/views/LogicManual';
+import SystemSettings from './features/system/views/SystemSettings';
+import GameweekDashboard from './features/gameweek/views/GameweekDashboard';
 
 // MOCK COMPONENTS สำหรับหน้าอื่นๆ ที่ยังไม่ได้ทำ
 const DashboardScreen = () => (
@@ -75,6 +77,7 @@ export default function App() {
                 {/* เรียกใช้ Component ของจริง */}
                 <Route path="/quests" element={<QuestManager />} />
                 <Route path="/users" element={<UserManager />} />
+                <Route path="/balls" element={<UserManager />} />
                 <Route path="/rewards" element={<RewardManager />} />
                 
                 {/* 🌟 จุดที่แก้ไข (Hotfix): ลบ div กำลังพัฒนาออก และเสียบระบบจริงเข้าไป */}
@@ -83,10 +86,11 @@ export default function App() {
                 <Route path="/managers" element={<ManagerList />} />
                 <Route path="/cards" element={<CardList />} />
                 <Route path="/logic-manual" element={<LogicManual />} />
+                <Route path="/settings" element={<SystemSettings />} />
+                <Route path="/gameweek" element={<GameweekDashboard />} />
                 
                 {/* Route จำลองอื่นๆ ป้องกัน Error */}
                 <Route path="/matches" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: จัดการแข่งขัน</div>} />
-                <Route path="/settings" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: ตั้งค่าระบบ</div>} />
                 
                 {/* ดักจับ Route มั่วๆ ให้กลับไปหน้าแรก */}
                 <Route path="*" element={<Navigate to="/" replace />} />

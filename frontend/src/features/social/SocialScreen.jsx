@@ -1,37 +1,50 @@
-import React from 'react';
-import { STYLES } from '../../config/theme';
-import { Users, Link as LinkIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Users } from 'lucide-react';
+import { useGameStore } from '../../store/useGameStore';
+import ReferralCard from './components/ReferralCard';
+import LeagueManager from './components/LeagueManager';
+import LeagueList from './components/LeagueList';
 
 export default function SocialScreen() {
+  const themeConfig = useGameStore(state => state.themeConfig);
+  const [refreshLeagues, setRefreshLeagues] = useState(0);
+  const [leagueCount, setLeagueCount] = useState(0);
+
+  const handleLeagueAdded = () => {
+    setRefreshLeagues(prev => prev + 1);
+  };
+
   return (
-    <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <h2 className="text-3xl font-black text-slate-800 mb-1 tracking-tight">คอมมูนิตี้</h2>
-      <p className="text-slate-500 mb-6 font-medium text-sm">ลีกส่วนตัวและระบบชวนเพื่อน</p>
+    <div 
+      className="p-3 animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-screen pb-24 bg-cover bg-center bg-fixed relative flex flex-col"
+      style={{ backgroundImage: `url(${themeConfig?.marketBackgroundUrl || 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000'})` }}
+    >
+      {/* Blurred overlay */}
+      <div className="absolute inset-0 bg-slate-50/80 backdrop-blur-md pointer-events-none"></div>
 
-      {}
-      {/* บล็อกชวนเพื่อน */}
-      <div className="bg-white border border-slate-100 p-5 rounded-2xl mb-6 relative overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 rounded-full mix-blend-screen filter blur-[40px] opacity-10"></div>
-        <h3 className="font-bold text-slate-800 mb-1 flex items-center gap-2">
-          <Users size={20} className="text-amber-500" /> ชวนเพื่อนรับ 50 Pts
-        </h3>
-        <p className="text-xs text-slate-500 mb-4">ส่งลิงก์ให้เพื่อนสมัครเล่นเกม รับแต้มฟรีทันทีเมื่อเพื่อนจัดทีมเสร็จ</p>
-        <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
-          <LinkIcon size={16} /> คัดลอกลิงก์คำเชิญ
-        </button>
-      </div>
-
-      {}
-      <h3 className="font-bold text-lg text-slate-800 mb-4 px-2">ลีกส่วนตัว (Private Leagues)</h3>
-      <div className={STYLES.card}>
-        <div className="text-center py-6 text-slate-500">
-          <Users size={32} className="mx-auto mb-2 opacity-50" />
-          <p className="text-sm font-medium">คุณยังไม่ได้เข้าร่วมลีกส่วนตัว</p>
-          <div className="mt-4 flex gap-2 justify-center">
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors">สร้างลีกใหม่</button>
-            <button className="bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors">เข้าร่วมด้วยรหัส</button>
+      <div className="relative z-10 max-w-2xl mx-auto w-full">
+        {/* Header Section */}
+        <div className="mb-4">
+          <div className="flex justify-between items-center px-2 pt-2 pb-1">
+            <h2 className="text-4xl font-black italic tracking-tighter uppercase bg-clip-text text-transparent bg-gradient-to-br from-slate-800 via-slate-700 to-indigo-900 drop-shadow-md pb-1 flex items-center gap-2">
+              <Users className="text-indigo-600" size={32} /> SOCIAL.
+            </h2>
+            <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-300 shadow-md px-3 py-1.5 rounded-lg flex flex-col items-end">
+              <span className="text-[10px] text-slate-500 font-bold leading-none uppercase">คอมมูนิตี้</span>
+              <span className="text-sm font-black text-indigo-600 leading-none mt-1">LEAGUES</span>
+            </div>
           </div>
         </div>
+
+        {/* บล็อกชวนเพื่อน */}
+        <ReferralCard />
+
+        {/* จัดการลีก (สร้าง/เข้าร่วม) */}
+        <LeagueManager onLeagueAdded={handleLeagueAdded} compactMode={leagueCount > 0} />
+
+        {/* รายการลีกส่วนตัว */}
+        <LeagueList refreshTrigger={refreshLeagues} onLeaguesLoaded={setLeagueCount} />
+
       </div>
     </div>
   );

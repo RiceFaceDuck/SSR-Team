@@ -5,6 +5,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'; // �
 import { useUserStore } from './store/useUserStore';
 import { useGameStore } from './store/useGameStore';
 import { logoutUser } from './features/auth/authService';
+import { referralService } from './services/firebase/referralService';
 
 import MobileLayout from './components/layout/MobileLayout';
 import { STYLES } from './config/theme';
@@ -38,6 +39,14 @@ export default function App() {
   // 🌟 เปิดการทำงานของระบบซิงค์สถิติและข้อมูลเกมแบบ Real-time ให้ครอบคลุมทั้งแอป (Global Listener)
   useEffect(() => {
     const unsubscribeTheme = initThemeListener();
+
+    // 🌟 ดักจับ Referral Code จาก URL ก่อน (เผื่อ User เพิ่งเข้าครั้งแรก)
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      localStorage.setItem('referralCode', refCode);
+    }
+
     return () => unsubscribeTheme();
   }, [initThemeListener]);
 
@@ -87,7 +96,8 @@ export default function App() {
               balls: 100, // ทุนเริ่มต้น 100 Balls
               userPoints: 0,
               createdAt: serverTimestamp(),
-              lastLoginAt: serverTimestamp()
+              lastLoginAt: serverTimestamp(),
+              referredBy: localStorage.getItem('referralCode') || null
             };
 
             await setDoc(userDocRef, newUserData);
@@ -96,6 +106,14 @@ export default function App() {
             // 🌟 โหลดทีมเผื่อไว้ (ถึงจะเป็นไอดีใหม่ก็ต้องเรียก เพื่อให้เซ็ตค่าเริ่มต้นที่ถูกต้อง)
             await loadSquadFromCloud(user.uid);
           }
+
+          // 🌟 3. ตรวจสอบรางวัลชวนเพื่อนที่ยังไม่ได้เคลม
+          const claimedBalls = await referralService.claimRewards(user.uid);
+          if (claimedBalls > 0) {
+            // อัปเดตใน state ให้แสดงผลทันที
+            useUserStore.getState().addBalls(claimedBalls);
+          }
+
         } catch (error) {
           console.error("❌ Auth Fetch Error:", error);
           clearAuth();

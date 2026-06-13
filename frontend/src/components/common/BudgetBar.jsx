@@ -51,7 +51,7 @@ export default function BudgetBar() {
               งบประมาณคงเหลือ
             </span>
             <span className={`text-xl font-black ${textColor} leading-none transition-colors duration-500`}>
-              £{budgetLeft.toFixed(1)}m
+              {budgetLeft.toFixed(1)}m
             </span>
           </div>
         </div>
