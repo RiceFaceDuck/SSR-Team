@@ -13,7 +13,10 @@ import {
   Zap,
   BookOpen,
   Activity,
-  Wallet
+  Wallet,
+  ScrollText,
+  Target,
+  Sliders
 } from 'lucide-react';
 
 export default function Sidebar({ onLogout }) {
@@ -32,6 +35,7 @@ export default function Sidebar({ onLogout }) {
     { title: 'จัดการสปอนเซอร์', path: '/quests', icon: Megaphone },
     { title: 'จัดการร้านค้า', path: '/rewards', icon: Store },
     { title: 'ตั้งค่าระบบ', path: '/settings', icon: Settings },
+    { title: 'กติกา', path: '/rules', icon: ScrollText },
   ];
 
   return (

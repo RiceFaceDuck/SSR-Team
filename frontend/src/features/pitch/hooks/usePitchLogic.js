@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useUserStore } from '../../../store/useUserStore';
 import { useMarketStore } from '../../../store/useMarketStore';
 import { toast } from '../../../utils/toast';
+import { normalizePosition } from '../../../utils/squadValidator';
 
 export const usePitchLogic = () => {
   const { 
@@ -114,7 +115,17 @@ export const usePitchLogic = () => {
 
   const handlePlayerClick = (player) => {
     if (pendingPlacement) {
-      toast.error("กรุณาวางนักเตะที่เลือกไว้ลงในตำแหน่งที่ว่าง หรือกดยกเลิก");
+      const pendingPos = normalizePosition(pendingPlacement.position);
+      const clickedPos = normalizePosition(player.position);
+      
+      if (pendingPos === clickedPos) {
+        const result = confirmPlacement(player.id);
+        if (result.success) toast.success(result.message);
+        else toast.error(result.message);
+        setSelectedPlayer(null);
+      } else {
+        toast.error(`ไม่สามารถวางนักเตะตำแหน่ง ${pendingPos} แทนที่ตำแหน่ง ${clickedPos} ได้`);
+      }
       return;
     }
     

@@ -47,7 +47,8 @@ const ExcelPreview = ({ data = [], onConfirm, onCancel, isLoading = false }) => 
       header: 'ราคา',
       accessorKey: 'displayPrice',
       // ไฮไลท์ราคาให้ดูชัดเจน
-      className: 'text-right text-emerald-600 font-bold'
+      className: 'text-right text-emerald-600 font-bold',
+      cell: (row) => row.displayPrice ? String(row.displayPrice).replace('£', '') : '-'
     },
     {
       header: 'คะแนน',

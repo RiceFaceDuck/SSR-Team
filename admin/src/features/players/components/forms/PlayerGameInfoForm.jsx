@@ -39,7 +39,7 @@ const PlayerGameInfoForm = ({ formData, handleChange }) => {
 
       <div className="grid grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">ราคา (£ m)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">ราคา (m)</label>
           <input
             type="number"
             step="0.1"

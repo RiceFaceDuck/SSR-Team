@@ -1,6 +1,7 @@
 import React from 'react';
-import { Search, Plus, FileSpreadsheet, RefreshCw, DatabaseZap } from 'lucide-react';
+import { Search, Plus, FileSpreadsheet, RefreshCw, DatabaseZap, ShieldAlert } from 'lucide-react';
 import TeamTabs from '../../teams/components/TeamTabs';
+import { useNavigate } from 'react-router-dom';
 
 const PlayerToolbar = ({
   searchTerm,
@@ -18,6 +19,8 @@ const PlayerToolbar = ({
   onAddManual,
   onImportExcel
 }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-4">
       {/* 🌟 แสดง Team Tabs ด้านบนตาราง (ลูกเล่นพรีเมียม) */}
@@ -96,6 +99,11 @@ const PlayerToolbar = ({
           {/* 🌟 เพิ่มปุ่ม นำเข้า Excel ที่เคยหายไป */}
           <button onClick={onImportExcel} className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-emerald-200 shadow-sm text-sm font-medium rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors">
             <FileSpreadsheet className="w-4 h-4 mr-2" /> นำเข้าชุดข้อมูล
+          </button>
+
+          {/* ปุ่มไปหน้าตรวจสอบข้อมูลซ้ำซ้อน */}
+          <button onClick={() => navigate('/players/overlap')} className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-rose-200 shadow-sm text-sm font-medium rounded-lg text-rose-700 bg-rose-50 hover:bg-rose-100 hover:border-rose-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-colors">
+            <ShieldAlert className="w-4 h-4 mr-2" /> ตรวจสอบข้อมูลซ้ำซ้อน
           </button>
 
           <button onClick={onAddManual} className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5 transform duration-200">

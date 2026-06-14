@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, ArrowUpDown } from 'lucide-react';
+import { Search, ArrowUpDown, RotateCcw } from 'lucide-react';
 
 const MarketFilters = ({
   searchQuery,
@@ -18,6 +18,8 @@ const MarketFilters = ({
     { label: 'DF', value: 'DF' },
     { label: 'GK', value: 'GK' }
   ];
+
+  const hasFilters = searchQuery !== '' || sortBy !== 'price-desc' || activeTab !== 'ALL';
 
   return (
     <div className="bg-gradient-to-b from-[#0a192f] to-[#112240] p-3 rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.3)] border border-[#1a365d] mb-3 space-y-3 relative overflow-hidden">
@@ -49,28 +51,46 @@ const MarketFilters = ({
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.value;
-          return (
-            <button 
-              key={tab.value}
-              onClick={() => {
-                setActiveTab(tab.value);
-                setMarketFilterPos(tab.value); 
-                setPendingTargetSlot(null); 
-              }}
-              className={`whitespace-nowrap px-4 py-2 rounded-lg text-xs font-bold border transition-all 
-                ${isActive 
-                  ? 'bg-gradient-to-b from-[#3b82f6] to-[#2563eb] text-white border-[#1e40af] shadow-[0_2px_10px_rgba(59,130,246,0.3)]' 
-                  : 'bg-slate-700/50 text-slate-300 border-[#1a365d] shadow-sm hover:border-slate-500 hover:bg-slate-700'
-                }`}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
+      {/* Tabs & Reset */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide relative z-10">
+        <div className="flex gap-2 shrink-0">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.value;
+            return (
+              <button 
+                key={tab.value}
+                onClick={() => {
+                  setActiveTab(tab.value);
+                  setMarketFilterPos(tab.value); 
+                  setPendingTargetSlot(null); 
+                }}
+                className={`whitespace-nowrap px-4 py-2 rounded-lg text-xs font-bold border transition-all 
+                  ${isActive 
+                    ? 'bg-gradient-to-b from-[#3b82f6] to-[#2563eb] text-white border-[#1e40af] shadow-[0_2px_10px_rgba(59,130,246,0.3)]' 
+                    : 'bg-slate-700/50 text-slate-300 border-[#1a365d] shadow-sm hover:border-slate-500 hover:bg-slate-700'
+                  }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+        
+        {hasFilters && (
+          <button
+            onClick={() => {
+              setSearchQuery('');
+              setSortBy('price-desc');
+              setActiveTab('ALL');
+              setMarketFilterPos('ALL');
+              setPendingTargetSlot(null);
+            }}
+            className="whitespace-nowrap px-3 py-2 ml-auto shrink-0 rounded-lg text-xs font-bold border transition-all bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20 hover:border-red-500/40 flex items-center gap-1.5 shadow-sm"
+          >
+            <RotateCcw size={14} />
+            รีเซ็ต
+          </button>
+        )}
       </div>
     </div>
   );

@@ -30,18 +30,23 @@ export default function MarketPlayerList({
 
   return (
     <div className="space-y-2 pb-4">
-      {displayPlayers.map((player) => {
+      {displayPlayers.map((player, index) => {
         // เช็คว่านักเตะคนนี้มีอยู่ในทีมแล้วหรือยัง เพื่อส่งให้ PlayerRow เปลี่ยนปุ่มเป็น "ขาย"
         const isOwned = mySquad.some(sq => String(sq.playerId) === String(player.sku));
         
         return (
-          <PlayerRow 
-            key={player.sku} 
-            player={player} 
-            isOwned={isOwned} 
-            onClick={onRowClick}      
-            onActionClick={onActionClick} 
-          />
+          <div 
+            key={player.sku}
+            className="animate-in fade-in slide-in-from-bottom-4 duration-300 fill-mode-both"
+            style={{ animationDelay: `${index * 50}ms` }}
+          >
+            <PlayerRow 
+              player={player} 
+              isOwned={isOwned} 
+              onClick={onRowClick}      
+              onActionClick={onActionClick} 
+            />
+          </div>
         );
       })}
     </div>

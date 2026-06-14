@@ -27,21 +27,21 @@ export const formatShortName = (fullName) => {
 };
 
 /**
- * 2. จัดรูปแบบราคานักเตะสำหรับเกม Fantasy (เช่น 5.5 -> "£5.5m")
+ * 2. จัดรูปแบบราคานักเตะสำหรับเกม Fantasy (เช่น 5.5 -> "5.5m")
  * @param {number|string} price - ราคานักเตะ
  * @returns {string} ราคาที่จัดรูปแบบแล้ว
  */
 export const formatPrice = (price) => {
   const numPrice = Number(price);
-  if (isNaN(numPrice)) return '£0.0m';
+  if (isNaN(numPrice)) return '0.0m';
   
   // สมมติว่าถ้าค่ามาเป็นหลักล้าน (เช่น 5500000) ให้หาร 1000000
   // แต่ถ้าค่ามาเป็นทศนิยมอยู่แล้ว (เช่น 5.5) ให้แสดงผลได้เลย
   if (numPrice >= 1000000) {
-    return `£${(numPrice / 1000000).toFixed(1)}m`;
+    return `${(numPrice / 1000000).toFixed(1)}m`;
   }
   
-  return `£${numPrice.toFixed(1)}m`;
+  return `${numPrice.toFixed(1)}m`;
 };
 
 /**

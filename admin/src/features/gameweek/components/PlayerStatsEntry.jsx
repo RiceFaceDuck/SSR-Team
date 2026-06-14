@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
 import { apiFootballService } from '../../../services/api/apiFootballService';
+import PlayerStatsTable from './PlayerStatsTable';
+import PlayerStatsToolbar from './PlayerStatsToolbar';
 
 const APP_ID = 'ssr-team';
 
@@ -200,115 +202,19 @@ export default function PlayerStatsEntry() {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-      
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <div>
-          <h3 className="text-lg font-bold text-slate-800">📝 กรอกสถิตินักเตะ</h3>
-          <p className="text-sm text-slate-500">แก้ไขด้วยมือ หรือให้บอทดึงตัวเลขให้อัตโนมัติ</p>
-        </div>
-        
-        <div className="flex flex-wrap items-center gap-3">
-          {isSyncing && (
-            <span className="text-sm font-semibold text-blue-600 animate-pulse bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
-              {syncProgress}
-            </span>
-          )}
-          
-          <button 
-            onClick={syncApi}
-            disabled={isSyncing}
-            className="flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm font-bold border border-blue-200 hover:bg-blue-100 transition-colors disabled:opacity-50"
-          >
-            {isSyncing ? 'กำลังทำงาน...' : '🔄 ดึงสถิติจาก API อัตโนมัติ'}
-          </button>
-          
-          <button 
-            onClick={saveAllStats}
-            disabled={isSavingAll || isSyncing}
-            className="flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-900 transition-colors disabled:opacity-50 shadow-md shadow-slate-200"
-          >
-            {isSavingAll ? 'กำลังบันทึก...' : '💾 บันทึกสถิติทั้งหมด (Save All)'}
-          </button>
-        </div>
-      </div>
-
-      <div className="overflow-y-auto max-h-[500px] border border-slate-100 rounded-lg">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-slate-50 text-slate-600 sticky top-0 shadow-sm">
-            <tr>
-              <th className="px-4 py-3">นักเตะ</th>
-              <th className="px-4 py-3 w-20">ลงสนาม</th>
-              <th className="px-4 py-3 w-20 text-blue-700 bg-blue-50/50">ยิง</th>
-              <th className="px-4 py-3 w-20 text-blue-700 bg-blue-50/50">จ่าย</th>
-              <th className="px-4 py-3 w-20 text-emerald-700 bg-emerald-50/50">คลีนชีต</th>
-              <th className="px-4 py-3 w-20 text-amber-600 bg-amber-50/50">เหลือง</th>
-              <th className="px-4 py-3 w-20 text-red-600 bg-red-50/50">แดง</th>
-              <th className="px-4 py-3 w-24 text-center">จัดการ</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {players.map(p => (
-              <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-4 py-3 font-medium text-slate-800">
-                  <div className="flex items-center gap-3">
-                    {p.imageUrl ? (
-                      <img src={p.imageUrl} alt="" className="w-8 h-8 rounded-full object-cover border border-slate-200" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">👤</div>
-                    )}
-                    <div className="flex flex-col">
-                      <span>{p.name}</span>
-                      <span className="text-[10px] text-slate-400 font-mono tracking-tight">{p.sku || '-'} • {p.position}</span>
-                    </div>
-                  </div>
-                </td>
-                
-                {['minutesPlayed'].map(field => (
-                  <td key={field} className="px-4 py-2">
-                    <input type="number" min="0" className="w-16 px-2 py-1.5 border border-slate-200 rounded text-center focus:ring-2 focus:ring-blue-100 outline-none transition-all" value={p.stats?.[field] || 0} onChange={(e) => handleStatChange(p.id, field, e.target.value)} />
-                  </td>
-                ))}
-                
-                {/* API Fields: Goals, Assists */}
-                {['goals', 'assists'].map(field => (
-                  <td key={field} className="px-4 py-2 bg-blue-50/10">
-                    <input type="number" min="0" className="w-16 px-2 py-1.5 border border-blue-200 rounded text-center text-blue-900 font-bold focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-blue-50" value={p.stats?.[field] || 0} onChange={(e) => handleStatChange(p.id, field, e.target.value)} />
-                  </td>
-                ))}
-                
-                {/* Clean sheets */}
-                {['cleanSheets'].map(field => (
-                  <td key={field} className="px-4 py-2 bg-emerald-50/10">
-                    <input type="number" min="0" className="w-16 px-2 py-1.5 border border-emerald-200 rounded text-center text-emerald-900 font-bold focus:ring-2 focus:ring-emerald-200 outline-none transition-all bg-emerald-50" value={p.stats?.[field] || 0} onChange={(e) => handleStatChange(p.id, field, e.target.value)} />
-                  </td>
-                ))}
-                
-                {/* Cards */}
-                {['yellowCards'].map(field => (
-                  <td key={field} className="px-4 py-2 bg-amber-50/10">
-                    <input type="number" min="0" className="w-16 px-2 py-1.5 border border-amber-200 rounded text-center text-amber-900 font-bold focus:ring-2 focus:ring-amber-200 outline-none transition-all bg-amber-50" value={p.stats?.[field] || 0} onChange={(e) => handleStatChange(p.id, field, e.target.value)} />
-                  </td>
-                ))}
-                {['redCards'].map(field => (
-                  <td key={field} className="px-4 py-2 bg-red-50/10">
-                    <input type="number" min="0" className="w-16 px-2 py-1.5 border border-red-200 rounded text-center text-red-900 font-bold focus:ring-2 focus:ring-red-200 outline-none transition-all bg-red-50" value={p.stats?.[field] || 0} onChange={(e) => handleStatChange(p.id, field, e.target.value)} />
-                  </td>
-                ))}
-
-                <td className="px-4 py-2 text-center">
-                  <button 
-                    onClick={() => saveStats(p.id, p.stats)}
-                    disabled={savingId === p.id}
-                    className="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50 text-xs font-semibold"
-                  >
-                    {savingId === p.id ? '...' : 'บันทึกคนนี้'}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <PlayerStatsToolbar 
+        isSyncing={isSyncing} 
+        syncProgress={syncProgress} 
+        syncApi={syncApi} 
+        isSavingAll={isSavingAll} 
+        saveAllStats={saveAllStats} 
+      />
+      <PlayerStatsTable 
+        players={players} 
+        handleStatChange={handleStatChange} 
+        saveStats={saveStats} 
+        savingId={savingId} 
+      />
     </div>
   );
 }

@@ -28,7 +28,7 @@ const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId,
       const player = squad.find(p => p.id === slotId);
 
       const isTargetValid = pendingPlacement && normalizePosition(pendingPlacement.position) === normalizePosition(category);
-      const highlightClass = isTargetValid && !player ? 'ring-4 ring-[#fbbf24] shadow-[0_0_25px_rgba(251,191,36,1)] rounded-md animate-pulse z-30 scale-110' : '';
+      const highlightClass = isTargetValid ? 'ring-4 ring-[#fbbf24] shadow-[0_0_20px_rgba(251,191,36,0.8)] rounded-md animate-pulse z-30' : '';
 
       slots.push(
         <div 
@@ -43,8 +43,8 @@ const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId,
           }}
           className={`relative transition-all duration-300 cursor-pointer active:scale-95 ${selectedPlayerId === String(player?.playerId) ? 'scale-105 z-20' : ''} ${highlightClass} ${!player ? 'hover:-translate-y-1' : ''}`}
         >
-          {isTargetValid && !player && (
-             <div className="absolute inset-0 bg-[#fbbf24] bg-opacity-20 rounded-md"></div>
+          {isTargetValid && (
+             <div className="absolute inset-0 bg-[#fbbf24] bg-opacity-20 rounded-md pointer-events-none"></div>
           )}
           <PlayerNode 
             player={player} 

@@ -75,6 +75,20 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth != null;
     }
+
+    // 📋 กติกาเกม คะแนน และเงื่อนไข
+    match /public_data/game_rules {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /public_data/scoring_rules {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /public_data/game_conditions {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
     
     // 📅 ระบบสถานะแต่ละ Gameweek
     match /public_data/gameweeks/weeks/{gameweekId} {

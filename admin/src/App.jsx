@@ -5,14 +5,15 @@ import QuestManager from './features/quests/QuestManager';
 import UserManager from './features/users/UserManager'; 
 import RewardManager from './features/rewards/RewardManager'; 
 
-// 🌟 NEW: นำเข้า PlayerFeature หน้าจัดการนักเตะตัวเต็ม
 import PlayerFeature from './features/players/PlayerFeature';
+import DataOverlapManagement from './features/players/views/DataOverlapManagement';
 import TeamManager from './features/teams/views/TeamManager';
 import ManagerList from './features/managers/views/ManagerList';
 import CardList from './features/cards/views/CardList';
 import LogicManual from './features/system/views/LogicManual';
 import SystemSettings from './features/system/views/SystemSettings';
 import GameweekDashboard from './features/gameweek/views/GameweekDashboard';
+import GameRulesDashboard from './features/gameRules/views/GameRulesDashboard';
 
 // MOCK COMPONENTS สำหรับหน้าอื่นๆ ที่ยังไม่ได้ทำ
 const DashboardScreen = () => (
@@ -81,6 +82,7 @@ export default function App() {
                 <Route path="/rewards" element={<RewardManager />} />
                 
                 {/* 🌟 จุดที่แก้ไข (Hotfix): ลบ div กำลังพัฒนาออก และเสียบระบบจริงเข้าไป */}
+                <Route path="/players/overlap" element={<DataOverlapManagement />} />
                 <Route path="/players" element={<PlayerFeature />} />
                 <Route path="/teams" element={<TeamManager />} />
                 <Route path="/managers" element={<ManagerList />} />
@@ -88,6 +90,7 @@ export default function App() {
                 <Route path="/logic-manual" element={<LogicManual />} />
                 <Route path="/settings" element={<SystemSettings />} />
                 <Route path="/gameweek" element={<GameweekDashboard />} />
+                <Route path="/rules" element={<GameRulesDashboard />} />
                 
                 {/* Route จำลองอื่นๆ ป้องกัน Error */}
                 <Route path="/matches" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: จัดการแข่งขัน</div>} />

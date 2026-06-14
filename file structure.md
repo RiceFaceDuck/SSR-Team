@@ -14,7 +14,7 @@
     - `components/`: `ExcelPreview.jsx`, `PlayerManualForm.jsx`, `PlayerToolbar.jsx`, `PlayerTable.jsx`, `forms/` (Identity, GameInfo, Stats)
     - `hooks/`: `usePlayers.js` (Business logic), `usePlayerSync.js` (API Sync Logic)
     - `utils/`: `excelParser.js`, `templateUtil.js`
-    - `views/`: `PlayerList.jsx` (Container), `PlayerDetails.jsx`
+    - `views/`: `PlayerList.jsx` (Container), `PlayerDetails.jsx`, `DataOverlapManagement.jsx`
     - `PlayerFeature.jsx`: Main entry point for the player module
   - `managers/`: Manager Management Feature (New!)
     - `components/`: `ManagerForm.jsx`
@@ -24,13 +24,19 @@
     - `views/`: `CardList.jsx`
   - `system/`: System Settings Feature
     - `views/`: `SystemSettings.jsx`, `LogicManual.jsx`
+  - `gameRules/`: Game Rules, Scoring, and Conditions Feature (New!)
+    - `components/`: `ToggleSwitch.jsx`
+    - `views/`: `GameRulesManager.jsx`, `ScoreRulesManager.jsx`, `GameConditionsManager.jsx`
   - `gameweek/`: Gameweek Management Feature
-    - `components/`: `PlayerStatsEntry.jsx`, `GameweekFixtures.jsx`, `ApiSettingsPanel.jsx`
+    - `components/`: `PlayerStatsEntry.jsx`, `PlayerStatsTable.jsx`, `PlayerStatsToolbar.jsx`, `GameweekFixtures.jsx`, `ApiSettingsPanel.jsx`
     - `views/`: `GameweekDashboard.jsx`
     - `TimeController.jsx`, `NoAdsToggle.jsx`
-  - `quests/`, `rewards/`, `users/`, `verify/`: Other features
+  - `quests/`: Quest and Sponsor Management Feature
+    - `components/`: `QuestImageUploader.jsx`, `QuestBasicInputs.jsx`, `QuestSettingsInputs.jsx`
+    - `QuestFormModal.jsx`
+  - `rewards/`, `users/`, `verify/`: Other features
 - `services/`: External integrations
-  - `firebase/`: `playerDatabase.js`, `managerDatabase.js`, etc.
+  - `firebase/`: `playerDatabase.js`, `managerDatabase.js`, `gameRulesDatabase.js`, etc.
   - `engine/`: `gameweekCalculationService.js`, `leaderboardEngine.js` (Game Loop Logic)
   - `api/`: `apiFootballService.js`
 - `store/`: Zustand global state
@@ -50,18 +56,23 @@
       - `PitchBenchArea.jsx`: แถบนักเตะสำรองและผู้จัดการทีม
       - `FloatingActionBar.jsx`: ปุ่มควบคุมการจัดวางนักเตะ
       - `PlayerActionPopup.jsx`: ป็อปอัปเมนูเมื่อคลิกผู้เล่นในสนาม
-      - `Pitch.jsx`, `PlayerNode.jsx`, `SquadHeader.jsx`, `SquadActions.jsx`
-    - `hooks/`:
+      - `Pitch.jsx`, `PlayerNode.jsx`, `EmptyNode.jsx`, `SquadHeader.jsx`, `SquadActions.jsx`
+      - `PlayerStatsBar.jsx`: แถบแสดงสถิติ Goals, Assists, Cards (New)
+      - `powerCard/`: 
+        - `PowerCardHeader.jsx`, `PowerCardList.jsx`, `PowerCardItem.jsx` (Refactored)
+      - `manager/`:
+        - `ManagerHeader.jsx`, `ManagerList.jsx`, `ManagerCard.jsx` (Refactored)
+    - `hooks`:
       - `usePitchLogic.js`: Custom hook จัดการ Logic ของ PitchScreen
     - `FormationSelector.jsx`: เมนูเลือกแผนการเล่น
     - `PitchBoard.jsx`: คอมโพเนนต์หลักที่จัดเรียงนักเตะบนสนาม
     - `PitchScreen.jsx`: หน้าจอหลัก (Layout รวม)
-    - `ManagerSelectionModal.jsx`: ป็อปอัปเลือกผู้จัดการทีม
+    - `ManagerSelectionModal.jsx`: ป็อปอัปเลือกผู้จัดการทีม (Main Container)
     - `components/save/`:
       - `AdSponsorView.jsx`: UI แสดงโฆษณาสปอนเซอร์
       - `SquadSummaryView.jsx`: UI สรุปทีมและยืนยันการเซฟ
       - `SaveSquadManager.jsx`: ควบคุมการทำงานของป็อปอัปบันทึกทีมและดูโฆษณา
-    - `PowerCardPopup.jsx`: ป็อปอัปสำหรับดึงข้อมูลการ์ดและสวมใส่ให้นักเตะ
+    - `PowerCardPopup.jsx`: ป็อปอัปสำหรับดึงข้อมูลการ์ดและสวมใส่ให้นักเตะ (Main Container)
     - `utils/`:
       - `autoFillEngine.js`: Engine แบบ Standalone คำนวณตรรกะจัดทีมอัตโนมัติ
   - `profile/`:

@@ -38,8 +38,12 @@ const PlayerDetails = ({ player, onClose, onEdit }) => {
         </button>
 
         <div className="flex items-center gap-5">
-          <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/30 shadow-inner">
-            <User className="w-10 h-10 text-white" />
+          <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/30 shadow-inner overflow-hidden">
+            {player.imageUrl ? (
+              <img src={player.imageUrl} alt={player.name} className="w-full h-full object-cover" />
+            ) : (
+              <User className="w-10 h-10 text-white" />
+            )}
           </div>
           <div>
             <h2 className="text-2xl font-bold tracking-wide">{player.name}</h2>
@@ -96,7 +100,7 @@ const PlayerDetails = ({ player, onClose, onEdit }) => {
               </div>
               <div>
                 <p className="text-xs font-medium text-green-800">ราคาปัจจุบัน</p>
-                <p className="text-2xl font-bold text-green-700">{player.displayPrice || `£${player.price || 0}m`}</p>
+                <p className="text-2xl font-bold text-green-700">{player.displayPrice ? String(player.displayPrice).replace('£', '') : `${player.price || 0}m`}</p>
               </div>
             </div>
             

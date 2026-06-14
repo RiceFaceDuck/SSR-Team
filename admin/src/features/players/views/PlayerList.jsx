@@ -5,6 +5,7 @@ import { usePlayerSync } from '../hooks/usePlayerSync';
 import PlayerToolbar from '../components/PlayerToolbar';
 import PlayerTable from '../components/PlayerTable';
 import SyncPreviewModal from '../components/SyncPreviewModal';
+import PlayerDetails from './PlayerDetails';
 import ApiSettingsModal from '../../settings/components/ApiSettingsModal';
 
 const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
@@ -17,6 +18,8 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
   // States สำหรับระบบ Sync Preview (Row level & Bulk)
   const [syncModal, setSyncModal] = useState({ isOpen: false, player: null, apiData: null, updates: {} });
   const [isCheckingRow, setIsCheckingRow] = useState(null);
+  
+  const [detailModalPlayer, setDetailModalPlayer] = useState(null);
   
   // Bulk Sync States
   const [bulkUpdatesList, setBulkUpdatesList] = useState([]);
@@ -182,6 +185,7 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
         handleRowSync={handleRowSync}
         onEditPlayer={onEditPlayer}
         handleDelete={handleDelete}
+        onRowClick={(player) => setDetailModalPlayer(player)}
       />
 
       {/* 🌟 Modal พรีวิวเมื่อกด Sync */}
@@ -197,6 +201,23 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
               updates={syncModal.updates}
               onConfirm={handleConfirmSync}
               onCancel={() => setSyncModal({ ...syncModal, isOpen: false })}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 🌟 Modal แสดงรายละเอียดนักเตะ */}
+      {detailModalPlayer && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setDetailModalPlayer(null)}></div>
+          <div className="relative z-10 w-full flex justify-center">
+            <PlayerDetails 
+              player={detailModalPlayer} 
+              onClose={() => setDetailModalPlayer(null)} 
+              onEdit={(p) => {
+                setDetailModalPlayer(null);
+                onEditPlayer(p);
+              }}
             />
           </div>
         </div>

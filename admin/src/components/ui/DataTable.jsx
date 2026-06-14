@@ -13,7 +13,8 @@ const DataTable = ({
   columns = [], 
   data = [], 
   isLoading = false, 
-  emptyMessage = "ไม่พบข้อมูล" 
+  emptyMessage = "ไม่พบข้อมูล",
+  onRowClick
 }) => {
 
   return (
@@ -62,7 +63,8 @@ const DataTable = ({
             {!isLoading && data.length > 0 && data.map((row, rowIndex) => (
               <tr 
                 key={row.id || rowIndex} 
-                className="hover:bg-gray-50 transition-colors duration-150"
+                className={`hover:bg-gray-50 transition-colors duration-150 ${onRowClick ? 'cursor-pointer' : ''}`}
+                onClick={() => onRowClick && onRowClick(row)}
               >
                 {columns.map((col, colIndex) => (
                   <td 

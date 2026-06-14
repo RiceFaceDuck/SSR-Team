@@ -21,7 +21,7 @@ export default function PitchBenchArea({
       {['GK', 'DF', 'MF', 'FW'].map((pos, index) => {
         const player = enrichedBench[index];
         const isTargetValid = pendingPlacement && normalizePosition(pendingPlacement.position) === pos;
-        const highlightClass = isTargetValid && !player ? 'ring-4 ring-[#fbbf24] shadow-[0_0_25px_rgba(251,191,36,1)] rounded-md animate-pulse z-30 scale-110' : '';
+        const highlightClass = isTargetValid ? 'ring-4 ring-[#fbbf24] shadow-[0_0_20px_rgba(251,191,36,0.8)] rounded-md animate-pulse z-30' : '';
         return (
           <div 
             key={`bench-${index}`} 

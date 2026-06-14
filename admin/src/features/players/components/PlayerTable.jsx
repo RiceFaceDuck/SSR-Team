@@ -11,7 +11,8 @@ const PlayerTable = ({
   isCheckingRow, 
   handleRowSync, 
   onEditPlayer, 
-  handleDelete 
+  handleDelete,
+  onRowClick
 }) => {
   const columns = useMemo(() => [
     { header: 'SKU', accessorKey: 'sku', className: 'font-mono text-xs text-gray-500 w-24' },
@@ -26,13 +27,13 @@ const PlayerTable = ({
     },
     { header: 'ตำแหน่ง', accessorKey: 'position', className: 'text-center font-medium w-20' },
     { header: 'สโมสร', accessorKey: 'team' },
-    { header: 'ราคา', accessorKey: 'displayPrice', className: 'text-green-600 font-medium w-20' },
+    { header: 'ราคา', accessorKey: 'displayPrice', className: 'text-green-600 font-medium w-20', cell: (row) => row.displayPrice ? String(row.displayPrice).replace('£', '') : `${row.price || 0}m` },
     { header: 'สถานะ', cell: (row) => <StatusBadge status={row.status} /> },
     {
       header: 'จัดการ',
       className: 'text-right w-36',
       cell: (row) => (
-        <div className="flex items-center justify-end gap-1.5">
+        <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
           <button 
             onClick={() => handleRowSync(row)} 
             disabled={isCheckingRow === row.id}
@@ -66,6 +67,7 @@ const PlayerTable = ({
           data={players} 
           isLoading={isLoading} 
           emptyMessage={searchTerm || selectedTeam !== 'All' ? `ไม่พบนักเตะในเงื่อนไขการค้นหานี้` : "ยังไม่มีข้อมูลนักเตะในระบบ"}
+          onRowClick={onRowClick}
         />
       </div>
     </>

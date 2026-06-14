@@ -59,10 +59,18 @@ export const runAutoFillEngine = ({ marketPlayers = [], mySquad = [], formation,
   if (marketPlayers.length > 0) {
     ['GK', 'DF', 'MF', 'FW'].forEach(pos => {
       while (currentCount[pos] < totalRequired[pos]) {
-        const affordablePlayer = marketPlayers
+        const affordablePlayers = marketPlayers
           .filter(p => normalizePosition(p.position) === pos && !ownedPlayerIds.has(String(p.sku)))
-          .sort((a, b) => (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0))
-          .find(p => (parseFloat(p.price) || 0) <= currentEffectiveBudget);
+          .filter(p => (parseFloat(p.price) || 0) <= currentEffectiveBudget)
+          .sort((a, b) => (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0));
+
+        let affordablePlayer = null;
+        if (affordablePlayers.length > 0) {
+          // สุ่มเลือกจากนักเตะ 5 คนที่ถูกที่สุด (หรือน้อยกว่าถ้ามีไม่ถึง) เพื่อเพิ่มความหลากหลาย
+          const poolSize = Math.min(affordablePlayers.length, 5);
+          const randomIndex = Math.floor(Math.random() * poolSize);
+          affordablePlayer = affordablePlayers[randomIndex];
+        }
 
         if (affordablePlayer) {
           const price = parseFloat(affordablePlayer.price) || 0;

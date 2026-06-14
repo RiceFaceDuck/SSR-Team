@@ -7,7 +7,7 @@ This document outlines the standard data structures used across the SSR Team Fan
 
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
-| `sku`       | String | Unique identifier for the player (e.g. 'PLY-001' or 'API-1234') |
+| `sku`       | String | Unique identifier directly from API-Football (e.g. 'API-1234') |
 | `name`      | String | Short name used in game UI (e.g. 'Saka') |
 | `fullName`  | String | Full name of the player |
 | `imageUrl`  | String | URL to the player's photo |
@@ -79,8 +79,6 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
-| Field          | Type      | Description |
-| -------------- | --------- | ----------- |
 | `uid`          | String    | รหัสผู้ใช้งาน |
 | `displayName`  | String    | ชื่อที่แสดงผล |
 | `email`        | String    | อีเมล |
@@ -187,3 +185,34 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `ownedCards`     | Object | จำนวนการ์ดแต่ละชนิดที่มีในคลัง (เช่น `{"CARD_01": 2, "CARD_02": 1}`) |
 | `lastUpdatedGW`  | String | รหัสสัปดาห์ล่าสุดที่มีการอัปเดต (ใช้เพื่อ Reset เมื่อเปลี่ยนสัปดาห์) |
 
+## 12. Game Rules Schema (กติกาและเงื่อนไข)
+
+### 12.1 Game Rules
+`public_data/game_rules`
+เก็บกติกาพื้นฐานในการจัดทีม เช่น โควต้าผู้เล่น กัปตัน
+| Field | Type | Description |
+| --- | --- | --- |
+| `maxPlayersPerTeam` | Object | `{"value": 3, "isActive": true}` |
+| `freeTransfers` | Object | `{"value": 1, "isActive": true}` |
+| `captainMultiplier` | Object | `{"value": 2, "isActive": true}` |
+
+### 12.2 Scoring Rules
+`public_data/scoring_rules`
+เก็บกติกาการให้คะแนนสำหรับแต่ละเหตุการณ์ โดยอ้างอิงข้อมูลจาก API-Football Pro
+| Field | Type | Description |
+| --- | --- | --- |
+| `goal` | Object | `{"FWD": 4, "MID": 5, "DEF": 6, "GK": 6, "isActive": true}` |
+| `assist` | Object | `{"value": 3, "isActive": true}` |
+| `cleanSheet` | Object | `{"DEF": 4, "GK": 4, "MID": 1, "isActive": true}` |
+| `tackles` | Object | `{"value": 1, "per": 3, "isActive": true}` |
+| ... | Object | และสถิติอื่นๆ เช่น `saves`, `keyPasses`, `yellowCard`, etc. |
+
+### 12.3 Game Conditions
+`public_data/game_conditions`
+เก็บเงื่อนไขสภาพแวดล้อมและข้อจำกัดในแต่ละ Gameweek
+| Field | Type | Description |
+| --- | --- | --- |
+| `startingBudget` | Object | `{"value": 100, "isActive": true}` |
+| `cardLimitPerGW` | Object | `{"value": 1, "isActive": true}` |
+| `deadlineOffsetMinutes`| Object | `{"value": 90, "isActive": true}` |
+| `allowedFormations` | Object | `{"isActive": true, "formations": {"4-4-2": true, "3-5-2": false}}` |

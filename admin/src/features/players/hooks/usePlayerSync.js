@@ -100,7 +100,7 @@ export const usePlayerSync = () => {
                 newUpdatesCount++;
                 // ใส่ราคาเริ่มต้น 5.0m
                 mappedData.price = 5000000;
-                mappedData.displayPrice = "£5.0m";
+                mappedData.displayPrice = "5.0m";
                 
                 const finalTeamName = teamName !== 'All' ? teamName : mappedData.team;
                 mappedData.team = finalTeamName;
