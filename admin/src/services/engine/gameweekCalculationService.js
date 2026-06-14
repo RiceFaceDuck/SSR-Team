@@ -5,38 +5,59 @@
 
 import { collection, getDocs, doc, writeBatch, serverTimestamp, getDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import { getScoringRules } from '../firebase/gameRulesDatabase';
 
 const APP_ID = 'ssr-team';
 
 /**
  * ฟังก์ชันคำนวณคะแนนตามสถิตินักเตะ (Fantasy Football Standard Rules)
  */
-const calculatePlayerPoints = (stats, position) => {
+const calculatePlayerPoints = (stats, position, rules) => {
   if (!stats) return 0;
   let points = 0;
 
-  // ลงสนาม (สมมติว่าถ้ามี stats แปลว่าลงสนาม)
+  // Defaults if rules not set
+  const defaults = {
+    goal: { FWD: 4, MID: 5, DEF: 6, GK: 6, isActive: true },
+    assist: { value: 3, isActive: true },
+    cleanSheet: { DEF: 4, GK: 4, MID: 1, isActive: true },
+    yellowCard: { value: -1, isActive: true },
+    redCard: { value: -3, isActive: true }
+  };
+
+  const r = rules || defaults;
+
+  // ลงสนาม
   points += 2;
 
   // Goals
-  if (stats.goals) {
-    if (position === 'FWD') points += (stats.goals * 4);
-    else if (position === 'MID') points += (stats.goals * 5);
-    else points += (stats.goals * 6); // DEF, GK
+  if (stats.goals && r.goal?.isActive) {
+    const val = r.goal[position] || r.goal.value || defaults.goal[position];
+    points += (stats.goals * val);
   }
 
   // Assists
-  if (stats.assists) points += (stats.assists * 3);
+  if (stats.assists && r.assist?.isActive) {
+    const val = r.assist.value || defaults.assist.value;
+    points += (stats.assists * val);
+  }
 
   // Clean Sheets
-  if (stats.cleanSheets) {
-    if (position === 'DEF' || position === 'GK') points += (stats.cleanSheets * 4);
-    else if (position === 'MID') points += (stats.cleanSheets * 1);
+  if (stats.cleanSheets && r.cleanSheet?.isActive) {
+    const val = r.cleanSheet[position] || 0;
+    points += (stats.cleanSheets * val);
   }
 
   // Cards
-  if (stats.yellowCards) points -= (stats.yellowCards * 1);
-  if (stats.redCards) points -= (stats.redCards * 3);
+  if (stats.yellowCards && r.yellowCard?.isActive) {
+    const val = r.yellowCard.value || defaults.yellowCard.value;
+    points += (stats.yellowCards * val);
+  }
+  
+  if (stats.redCards && r.redCard?.isActive) {
+    const val = r.redCard.value || defaults.redCard.value;
+    points += (stats.redCards * val);
+  }
 
   return points;
 };
@@ -49,6 +70,9 @@ export const gameweekCalculationService = {
   processGameweek: async (gameweekId) => {
     try {
       console.log(`[GW Engine] เริ่มประมวลผลคะแนนสำหรับ ${gameweekId}...`);
+      
+      // ดึง Scoring Rules
+      const scoringRules = await getScoringRules();
       
       // 1. ดึงข้อมูลนักเตะทั้งหมด และสร้าง Dictionary (Map) ของสถิติล่าสุด
       const playersSnap = await getDocs(collection(db, `artifacts/${APP_ID}/public/data/players`));
@@ -92,7 +116,7 @@ export const gameweekCalculationService = {
             if (playerItem.isStarting) {
               const pData = playerStatsMap[playerItem.playerId];
               if (pData) {
-                pointsEarned = calculatePlayerPoints(pData.stats, pData.position);
+                pointsEarned = calculatePlayerPoints(pData.stats, pData.position, scoringRules);
                 
                 // กัปตันทีม x2
                 if (playerItem.playerId === captainId) {

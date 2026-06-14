@@ -10,6 +10,7 @@ export default function GameRulesManager({ isEmbedded = false }) {
   const [error, setError] = useState('');
 
   const defaultRules = {
+    startingBudget: { value: 100, isActive: true },
     maxPlayersPerTeam: { value: 3, isActive: true },
     freeTransfers: { value: 1, isActive: true },
     captainMultiplier: { value: 2, isActive: true },
@@ -102,6 +103,26 @@ export default function GameRulesManager({ isEmbedded = false }) {
           <h2 className="text-lg font-bold text-slate-800 border-b pb-3">กติกาการจัดทีม (Team Building Rules)</h2>
           
           <div className="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 flex flex-col md:flex-row justify-between md:items-center gap-4 hover:bg-slate-100 transition-colors">
+            <ToggleSwitch
+              label="งบประมาณเริ่มต้น (Starting Budget)"
+              description="เปิด/ปิด การจำกัดงบในการสร้างทีม"
+              checked={rules.startingBudget?.isActive}
+              onChange={(val) => updateRule('startingBudget', 'isActive', val)}
+            />
+            {rules.startingBudget?.isActive && (
+              <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-200 shrink-0">
+                <label className="text-sm font-bold text-slate-700">จำนวนงบ (M):</label>
+                <input
+                  type="number"
+                  value={rules.startingBudget?.value || 0}
+                  onChange={(e) => updateRule('startingBudget', 'value', parseFloat(e.target.value) || 0)}
+                  className="w-24 border border-slate-300 rounded-lg px-3 py-1.5 focus:border-blue-500 outline-none text-center"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 flex flex-col md:flex-row justify-between md:items-center gap-4 hover:bg-slate-100 transition-colors mt-4">
             <ToggleSwitch
               label="จำกัดโควต้านักเตะสโมสรเดียวกัน"
               description="เปิด/ปิด การจำกัดจำนวนนักเตะจากสโมสรเดียวกัน"

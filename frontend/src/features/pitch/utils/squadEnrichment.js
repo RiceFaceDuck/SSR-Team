@@ -11,10 +11,13 @@ export const enrichSquadData = (
   liveGwStats,
   isMarketOpen
 ) => {
-  if (!mySquad || !marketPlayers) {
-    return { enrichedStarters: [], enrichedBench: [] };
-  }
-
+  if (!mySquad || !Array.isArray(mySquad)) return { enrichedStarters: [], enrichedBench: [] };
+  
+  // DEBUG LOG
+  console.log("🔍 DEBUG ENRICHMENT:");
+  console.log("➡️ mySquad (first 3):", JSON.stringify(mySquad.slice(0, 3)));
+  console.log("➡️ marketPlayers (first 3):", JSON.stringify(marketPlayers.slice(0, 3).map(p => ({ sku: p.sku, name: p.name }))));
+  
   const enriched = mySquad.map(squadPlayer => {
     const fullData = marketPlayers.find(p => String(p.sku) === String(squadPlayer.playerId));
     const appliedCard = availableCards.find(c => c.id === squadPlayer.appliedCardId);
@@ -33,6 +36,7 @@ export const enrichSquadData = (
       team: fullData?.team || 'UNK',
       position: squadPlayer.position,
       price: fullData?.price || 0,
+      imageUrl: fullData?.imageUrl || null,
       totalPoints: fullData?.totalPoints || 0,
       role: captainId === squadPlayer.playerId ? 'C' : null,
       isStarting: squadPlayer.isStarting,

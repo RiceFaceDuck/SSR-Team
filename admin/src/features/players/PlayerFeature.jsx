@@ -6,6 +6,7 @@ import PlayerDetails from './views/PlayerDetails';
 import PlayerManualForm from './components/PlayerManualForm';
 import ExcelPreview from './components/ExcelPreview';
 import Dropzone from '../../components/ui/Dropzone';
+import PlayerValueManager from './views/PlayerValueManager';
 
 import { usePlayers } from './hooks/usePlayers';
 import { parseExcelFile } from './utils/excelParser';
@@ -33,6 +34,7 @@ const PlayerFeature = () => {
   const openManualForm = (player = null) => setModal({ isOpen: true, type: 'manual', data: player });
   const openImportExcel = () => setModal({ isOpen: true, type: 'import-drop', data: null });
   const openPlayerDetails = (player) => setModal({ isOpen: true, type: 'details', data: player });
+  const openValueEngine = () => setModal({ isOpen: true, type: 'value-engine', data: null });
 
   const handleDownloadTemplate = () => {
     const success = downloadPlayerTemplate();
@@ -146,20 +148,34 @@ const PlayerFeature = () => {
             />
           </div>
         );
+      case 'value-engine':
+        return (
+          <div className="w-full max-w-6xl">
+            <PlayerValueManager onClose={closeModal} />
+          </div>
+        );
       default: return null;
     }
   };
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg text-white shadow-md shadow-blue-500/20">
-            <Users className="w-6 h-6" />
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg text-white shadow-md shadow-blue-500/20">
+              <Users className="w-6 h-6" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">จัดการข้อมูลนักเตะ (Players)</h1>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">จัดการข้อมูลนักเตะ (Players)</h1>
+          <p className="text-gray-500">เพิ่ม, แก้ไข, อัปเดตสถิติ และราคาของนักเตะในระบบ Fantasy</p>
         </div>
-        <p className="text-gray-500">เพิ่ม, แก้ไข, อัปเดตสถิติ และราคาของนักเตะในระบบ Fantasy</p>
+        <button
+          onClick={openValueEngine}
+          className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-5 py-2.5 rounded-xl font-bold text-sm transition-colors border border-indigo-200 shadow-sm flex items-center justify-center"
+        >
+          คำนวณมูลค่านักเตะ (Value Engine)
+        </button>
       </div>
 
       <PlayerList 

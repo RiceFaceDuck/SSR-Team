@@ -59,6 +59,7 @@ export const playerDatabase = {
           defending: Number(playerData.stats?.defending) || 0,
           physical: Number(playerData.stats?.physical) || 0,
         },
+        dataSource: playerData.dataSource || (playerData.sku?.startsWith('API-') ? 'API' : 'MANUAL'),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         isActive: playerData.isActive !== undefined ? playerData.isActive : true
@@ -143,9 +144,10 @@ export const playerDatabase = {
       playersArray.forEach((player) => {
         let docRef;
         
-        // 🌟 เพิ่ม Timestamp ให้กับการนำเข้า
+        // 🌟 เพิ่ม Timestamp และ DataSource
         const cleanPlayer = {
             ...player,
+            dataSource: player.dataSource || (player.sku?.startsWith('API-') ? 'API' : 'EXCEL'),
             updatedAt: serverTimestamp()
         };
 

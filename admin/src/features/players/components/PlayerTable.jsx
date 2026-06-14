@@ -15,7 +15,24 @@ const PlayerTable = ({
   onRowClick
 }) => {
   const columns = useMemo(() => [
-    { header: 'SKU', accessorKey: 'sku', className: 'font-mono text-xs text-gray-500 w-24' },
+    { 
+      header: 'SKU', 
+      className: 'w-24',
+      cell: (row) => (
+        <div className="flex flex-col gap-1">
+          <span className="font-mono text-xs text-slate-500">{row.sku}</span>
+          {row.dataSource === 'API' ? (
+            <span className="bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0.5 rounded border border-emerald-200 font-bold w-max">API</span>
+          ) : row.dataSource ? (
+            <span className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0.5 rounded border border-amber-200 font-bold w-max">{row.dataSource}</span>
+          ) : (
+            <span className="bg-slate-100 text-slate-500 text-[10px] px-1.5 py-0.5 rounded border border-slate-200 font-bold w-max">
+              {row.sku?.startsWith('API-') ? 'API' : 'MANUAL'}
+            </span>
+          )}
+        </div>
+      )
+    },
     {
       header: 'นักเตะ',
       cell: (row) => (

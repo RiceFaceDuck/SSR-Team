@@ -2,15 +2,18 @@ import { runAutoFillEngine } from '../../features/pitch/utils/autoFillEngine';
 
 export const squadAutoFillSlice = (set, get) => ({
   autoFillTeam: (marketPlayers = []) => {
-    const { mySquad, formation, budgetLeft, getEffectiveBudget } = get();
+    const { mySquad, formation, getEffectiveBudget, budgetLeft } = get();
     
     // Delegate complex logic to engine
+    // ใช้ getEffectiveBudget() ทั้งคู่ได้เลยเพื่อลดปัญหา Sync หรือดึง state ตรงๆ มาเป็น fallback
+    const currentBaseBudget = getEffectiveBudget() || budgetLeft;
+
     const result = runAutoFillEngine({
       marketPlayers,
       mySquad,
       formation,
-      budgetLeft,
-      effectiveBudget: getEffectiveBudget()
+      budgetLeft: currentBaseBudget,
+      effectiveBudget: currentBaseBudget
     });
 
     if (result.success) {

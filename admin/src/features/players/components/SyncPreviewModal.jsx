@@ -112,6 +112,17 @@ const SyncPreviewModal = ({ isBulk, updatesList, player, updates, apiData, onCon
                 ) : (
                   <p className="text-sm text-gray-500 text-center py-4">ไม่พบการเปลี่ยนแปลงข้อมูล (ข้อมูลตรงกับ API แล้ว)</p>
                 )}
+                
+                {/* แจ้งเตือนเรื่อง SKU */}
+                {player && apiData && player.sku && apiData.sku && player.sku !== apiData.sku && (
+                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-xs text-amber-800 font-semibold mb-1">⚠️ คำเตือน: รหัสอ้างอิง (SKU) จะถูกเปลี่ยนแปลง</p>
+                    <p className="text-[10px] text-amber-700">
+                      ระบบจะเปลี่ยน SKU จาก <span className="font-mono bg-amber-100 px-1 rounded">{player.sku}</span> เป็น <span className="font-mono bg-amber-100 px-1 rounded">{apiData.sku}</span> เพื่อให้ตรงกับ API<br/>
+                      ** ข้อมูลเดิมจะถูกลบและแทนที่ด้วยข้อมูลนี้ **
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </>

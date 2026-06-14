@@ -16,6 +16,7 @@ This document outlines the standard data structures used across the SSR Team Fan
 | `price`     | Number | Fantasy price (e.g. 12.5) |
 | `totalPoints`| Number | Total fantasy points accumulated |
 | `status`    | String | 'active', 'injured', or 'suspended' |
+| `dataSource`| String | Source of data: 'API', 'EXCEL', 'MANUAL' |
 | `createdAt` | Timestamp | Firestore server timestamp |
 | `updatedAt` | Timestamp | Firestore server timestamp |
 | `isActive`  | Boolean | Logical deletion flag |
@@ -54,7 +55,7 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
-| `mySquad`   | Array  | เก็บนักเตะ `[{ playerId, position, isStarting, slotIndex, appliedCardId }]` |
+| `mySquad`   | Array  | เก็บนักเตะ `[{ playerId, position, isStarting, slotIndex, appliedCardId, isLocked }]` |
 | `budgetLeft`| Number | งบประมาณที่เหลืออยู่ |
 | `formation` | String | แผนการเล่นปัจจุบัน (เช่น '4-4-2') |
 | `managerId` | String | รหัสผู้จัดการทีมที่เลือกใช้งาน |
@@ -112,6 +113,7 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `totalJoinedTeams` | Number  | จำนวนทีมที่เข้าร่วมแล้ว (16 คนครบ) |
 | `isNoAdsMode`      | Boolean | โหมดปิดโฆษณา |
 | `themeConfig`      | Object  | `{"loginBackgroundUrl":"", "floatingObjectUrl":"", "marketBackgroundUrl":""}` |
+| `autoPickConfig`   | Object  | `{"cooldownSeconds": 15, "adLinkUrl": ""}` |
 | `chatConfig`       | Object  | `{"normalChatCost":2, "superChatCost":15, "superChatDuration":30, "superChatCostIncrement":5, "superChatResetTime":60, "normalChatFreeInterval":300}` |
 | `latestSuperChatEndTime` | Timestamp | เวลาสิ้นสุดของ Super Chat ตัวสุดท้าย (ใช้คำนวณคิว) |
 
@@ -205,6 +207,7 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 เก็บกติกาพื้นฐานในการจัดทีม เช่น โควต้าผู้เล่น กัปตัน
 | Field | Type | Description |
 | --- | --- | --- |
+| `startingBudget` | Object | `{"value": 100, "isActive": true}` |
 | `maxPlayersPerTeam` | Object | `{"value": 3, "isActive": true}` |
 | `freeTransfers` | Object | `{"value": 1, "isActive": true}` |
 | `captainMultiplier` | Object | `{"value": 2, "isActive": true}` |
@@ -225,7 +228,56 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 เก็บเงื่อนไขสภาพแวดล้อมและข้อจำกัดในแต่ละ Gameweek
 | Field | Type | Description |
 | --- | --- | --- |
-| `startingBudget` | Object | `{"value": 100, "isActive": true}` |
 | `cardLimitPerGW` | Object | `{"value": 1, "isActive": true}` |
 | `deadlineOffsetMinutes`| Object | `{"value": 90, "isActive": true}` |
 | `allowedFormations` | Object | `{"isActive": true, "formations": {"4-4-2": true, "3-5-2": false}}` |
+
+## 13. Historical Data Archive (คลังข้อมูลในอดีต)
+ข้อมูลสถิติในอดีตใช้สำหรับอ้างอิงและประมวลผล (เช่น Value Engine) ไม่แสดงผลสดเพื่อประหยัด Reads
+
+### 13.1 Historical Players
+`public_data/historical_players/{season_sku}` (เช่น `2022_API-1234`)
+
+| Field       | Type   | Description |
+| ----------- | ------ | ----------- |
+| `id`        | String | ID ที่รวม Season และ Player ID (เช่น '2022_API-1234') |
+| `sku`       | String | รหัสอ้างอิงดั้งเดิม ('API-1234') |
+| `season`    | Number | ปีฤดูกาล (เช่น 2022) |
+| `name`      | String | ชื่อนักเตะ |
+| `team`      | String | ชื่อทีม |
+| `position`  | String | ตำแหน่งหลักในฤดูกาลนั้น |
+| `stats`     | Object | สถิติรวมของฤดูกาลนั้น (goals, assists, cleanSheets ฯลฯ) |
+| `updatedAt` | Timestamp | เวลาที่ดึงข้อมูล |
+
+### 13.2 Historical Teams
+`public_data/historical_teams/{season_teamId}`
+
+| Field       | Type   | Description |
+| ----------- | ------ | ----------- |
+| `id`        | String | ID ที่รวม Season และ Team ID (เช่น '2022_33') |
+| `teamId`    | String | รหัสทีม ('33' = Man Utd) |
+| `season`    | Number | ปีฤดูกาล |
+| `name`      | String | ชื่อทีม |
+| `stats`     | Object | สถิติรวมของทีม (played, wins, draws, loses, goalsFor, goalsAgainst) |
+| `updatedAt` | Timestamp | เวลาที่ดึงข้อมูล |
+
+### 13.3 API Fetch History
+`admin_data/api_fetch_history/{fetchId}`
+
+| Field       | Type   | Description |
+| ----------- | ------ | ----------- |
+| `type`      | String | 'PLAYERS', 'TEAMS', 'FIXTURES' |
+| `season`    | Number | ปีฤดูกาลที่ดึง |
+| `status`    | String | 'SUCCESS', 'FAILED', 'IN_PROGRESS' |
+| `recordsFetched` | Number | จำนวนที่ดึงมาได้ |
+| `timestamp` | Timestamp | เวลาที่ทำการดึง |
+| `adminId`   | String | UID แอดมินที่สั่งดึง |
+
+## 14. Ads Configuration Schema
+`public_data/ads_config`
+จัดการตั้งค่าการแสดงผลโฆษณาทั้งแบบ Custom Links และ Google AdSense
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `adLinks` | Array | รายการโฆษณาแบบกำหนดเอง `[{ id, position, imageUrl, linkUrl, isActive }]` |
+| `googleAdsense` | Object | การตั้งค่า Google AdSense `{"clientId": "", "slotId": "", "isActive": false}` |

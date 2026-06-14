@@ -14,6 +14,7 @@ import LogicManual from './features/system/views/LogicManual';
 import SystemSettings from './features/system/views/SystemSettings';
 import GameweekDashboard from './features/gameweek/views/GameweekDashboard';
 import GameRulesDashboard from './features/gameRules/views/GameRulesDashboard';
+import HistoryArchive from './features/history/views/HistoryArchive';
 
 // MOCK COMPONENTS สำหรับหน้าอื่นๆ ที่ยังไม่ได้ทำ
 const DashboardScreen = () => (
@@ -91,6 +92,7 @@ export default function App() {
                 <Route path="/settings" element={<SystemSettings />} />
                 <Route path="/gameweek" element={<GameweekDashboard />} />
                 <Route path="/rules" element={<GameRulesDashboard />} />
+                <Route path="/history" element={<HistoryArchive />} />
                 
                 {/* Route จำลองอื่นๆ ป้องกัน Error */}
                 <Route path="/matches" element={<div className="p-8 bg-white rounded-3xl shadow-sm">กำลังพัฒนา: จัดการแข่งขัน</div>} />

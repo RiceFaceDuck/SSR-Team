@@ -32,12 +32,22 @@ export const squadActionSlice = (set, get) => ({
     if (marketPlayers && marketPlayers.length > 0) {
       state.mySquad.forEach(p => {
         const fullP = marketPlayers.find(m => String(m.sku) === String(p.playerId));
-        if (fullP) refund += (parseFloat(fullP.price) || 0);
+        if (fullP) {
+          refund += (parseFloat(fullP.price) || 0);
+        } else {
+          // Fallback if player was deleted from DB by Admin
+          refund += 5.0; 
+        }
       });
     } else {
       refund = 100.0 - state.budgetLeft;
     }
-    return { mySquad: [], budgetLeft: Math.round((state.budgetLeft + refund) * 10) / 10, hasUnsavedChanges: true };
+    
+    // ป้องกันบั๊กงบประมาณทะลุ 100 (เผื่อข้อมูลเก่าค้าง)
+    let finalBudget = state.budgetLeft + refund;
+    if (finalBudget > 100.0) finalBudget = 100.0;
+
+    return { mySquad: [], budgetLeft: Math.round(finalBudget * 10) / 10, hasUnsavedChanges: true };
   }), 
 
   pendingPlacement: null,   

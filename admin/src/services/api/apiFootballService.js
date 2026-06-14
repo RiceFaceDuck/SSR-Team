@@ -155,7 +155,8 @@ export const apiFootballService = {
         assists: stat?.goals?.assists || 0,
         yellowCards: stat?.cards?.yellow || 0,
         redCards: stat?.cards?.red || 0,
-      }
+      },
+      dataSource: 'API'
     };
   }
 };

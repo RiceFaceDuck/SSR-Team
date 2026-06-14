@@ -40,6 +40,27 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
     }
   };
 
+  const handleDeleteAll = async () => {
+    const isAll = selectedTeam === 'All' && !searchTerm;
+    const msg = isAll 
+      ? `🚨 คำเตือน: คุณแน่ใจหรือไม่ว่าต้องการ "ลบนักเตะทั้งหมดในระบบ" (${filteredPlayers.length} คน)?\nการกระทำนี้ไม่สามารถกู้คืนได้!`
+      : `คุณแน่ใจหรือไม่ว่าต้องการ "ลบนักเตะที่กำลังแสดงผลอยู่ (${filteredPlayers.length} คน)"?`;
+
+    if (window.confirm(msg)) {
+      if (window.confirm(`โปรดยืนยันการลบ ${filteredPlayers.length} รายการอีกครั้ง?`)) {
+        let successCount = 0;
+        let failCount = 0;
+        for (const p of filteredPlayers) {
+          const res = await removePlayer(p.id);
+          if (res.success) successCount++;
+          else failCount++;
+        }
+        alert(`✅ ลบสำเร็จ ${successCount} รายการ\n❌ ล้มเหลว ${failCount} รายการ`);
+        fetchPlayers();
+      }
+    }
+  };
+
   // 🔥 จัดการ Row-level Sync
   const handleRowSync = async (player) => {
     setIsCheckingRow(player.id);
@@ -62,7 +83,8 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
     if (syncModal.isBulk) {
       // กรณีอัปเดตกลุ่มทั้งหมด
       const playersToSave = payload.map(item => {
-        const finalSku = item.player.sku || item.apiData.sku;
+        // ให้ความสำคัญกับ API SKU เป็นอันดับแรก
+        const finalSku = item.apiData.sku || item.player.sku;
         const dataToSave = { 
           ...item.player, 
           ...item.apiData, 
@@ -73,6 +95,14 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
         return dataToSave;
       });
       
+      // ลบตัวเก่าที่มี SKU ไม่ตรงกับ API (ถ้ามี)
+      for (const item of payload) {
+        const finalSku = item.apiData.sku || item.player.sku;
+        if (!item.player.isNew && item.player.id && item.player.id !== finalSku) {
+           await removePlayer(item.player.id);
+        }
+      }
+
       await addMultiplePlayers(playersToSave);
       setBulkUpdatesList([]);
       setSyncModal({ isOpen: false, isBulk: false, player: null, apiData: null, updates: {}, updatesList: [] });
@@ -81,7 +111,8 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
       // กรณีอัปเดตคนเดียว
       const apiData = payload;
       const originalPlayer = syncModal.player;
-      const finalSku = originalPlayer.sku || apiData.sku;
+      // ให้ความสำคัญกับ API SKU เป็นอันดับแรก
+      const finalSku = apiData.sku || originalPlayer.sku;
       
       const dataToSave = { 
         ...originalPlayer, 
@@ -91,6 +122,11 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
       };
       delete dataToSave.isNew;
       
+      // ลบตัวเก่าที่มี SKU ไม่ตรงกับ API
+      if (!originalPlayer.isNew && originalPlayer.id && originalPlayer.id !== finalSku) {
+        await removePlayer(originalPlayer.id);
+      }
+
       await saveManualPlayer(dataToSave);
       setSyncModal({ isOpen: false, isBulk: false, player: null, apiData: null, updates: {}, updatesList: [] });
       fetchPlayers();
@@ -174,6 +210,7 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
         fetchPlayers={fetchPlayers}
         onAddManual={onAddManual}
         onImportExcel={onImportExcel}
+        handleDeleteAll={handleDeleteAll}
       />
 
       <PlayerTable 

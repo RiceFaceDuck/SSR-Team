@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Plus, FileSpreadsheet, RefreshCw, DatabaseZap, ShieldAlert } from 'lucide-react';
+import { Search, Plus, FileSpreadsheet, RefreshCw, DatabaseZap, ShieldAlert, Trash2 } from 'lucide-react';
 import TeamTabs from '../../teams/components/TeamTabs';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,7 +17,8 @@ const PlayerToolbar = ({
   isLoading,
   fetchPlayers,
   onAddManual,
-  onImportExcel
+  onImportExcel,
+  handleDeleteAll
 }) => {
   const navigate = useNavigate();
 
@@ -73,6 +74,18 @@ const PlayerToolbar = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          {/* ปุ่ม ซิงก์ และ Refresh */}
+          <button 
+            onClick={async () => {
+              await handleBulkCheck();
+              fetchPlayers();
+            }}
+            disabled={isCheckingBulk}
+            className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-sky-200 shadow-sm text-sm font-medium rounded-lg text-sky-700 bg-sky-50 hover:bg-sky-100 hover:border-sky-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isCheckingBulk ? 'animate-spin' : ''}`} /> ซิงก์ และ Refresh
+          </button>
+
           {/* ปุ่มเช็คอัปเดตแบบกลุ่ม (ทั้งหมด) */}
           <button 
             onClick={handleBulkCheck} 
@@ -108,6 +121,10 @@ const PlayerToolbar = ({
 
           <button onClick={onAddManual} className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5 transform duration-200">
             <Plus className="w-4 h-4 mr-2" /> เพิ่มนักเตะ
+          </button>
+
+          <button onClick={handleDeleteAll} className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors hover:shadow-lg hover:shadow-red-500/30 hover:-translate-y-0.5 transform duration-200">
+            <Trash2 className="w-4 h-4 mr-2" /> ลบทั้งหมด
           </button>
         </div>
       </div>

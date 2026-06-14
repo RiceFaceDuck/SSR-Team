@@ -16,7 +16,8 @@ import {
   Wallet,
   ScrollText,
   Target,
-  Sliders
+  Sliders,
+  Archive
 } from 'lucide-react';
 
 export default function Sidebar({ onLogout }) {
@@ -36,6 +37,7 @@ export default function Sidebar({ onLogout }) {
     { title: 'จัดการร้านค้า', path: '/rewards', icon: Store },
     { title: 'ตั้งค่าระบบ', path: '/settings', icon: Settings },
     { title: 'กติกา', path: '/rules', icon: ScrollText },
+    { title: 'คลังข้อมูลในอดีต', path: '/history', icon: Archive },
   ];
 
   return (

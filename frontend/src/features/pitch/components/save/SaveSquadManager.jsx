@@ -7,11 +7,10 @@ import AdSponsorView from './AdSponsorView';
 import SquadSummaryView from './SquadSummaryView';
 
 export default function SaveSquadManager({ isOpen, onClose, onConfirmSave }) {
-  const { isSaveUnlocked, unlockSave, mySquad, formation } = useUserStore();
+  const { isSaveUnlocked, unlockSave, mySquad, formation, fetchAdsConfig, adsConfig, isAdsLoading } = useUserStore();
   
   // Local State
   const [isAdPlaying, setIsAdPlaying] = useState(false);
-  const [adProgress, setAdProgress] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
 
   // คำนวณจำนวนผู้เล่นตัวจริงบนสนาม
@@ -20,36 +19,40 @@ export default function SaveSquadManager({ isOpen, onClose, onConfirmSave }) {
   const isSquadComplete = mySquad.length === 15 && useUserStore.getState().managerId !== null;
 
   useEffect(() => {
+    // Load config on mount if not loaded
+    if (!adsConfig || (adsConfig.adLinks.length === 0 && !adsConfig.googleAdsense.isActive)) {
+       fetchAdsConfig();
+    }
+  }, [fetchAdsConfig]);
+
+  useEffect(() => {
     if (!isOpen) {
       setIsAdPlaying(false);
-      setAdProgress(0);
       setIsSaving(false);
+    } else {
+      // When opened, if save is locked, check if there's any active ad for "save_team"
+      if (!isSaveUnlocked && adsConfig) {
+        const { googleAdsense, adLinks } = adsConfig;
+        const activeLinkAd = adLinks?.find(ad => ad.isActive && ad.position === 'save_team');
+        const hasActiveAd = googleAdsense?.isActive || activeLinkAd;
+        
+        if (!hasActiveAd) {
+           // Auto skip if no active ads
+           unlockSave();
+        }
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, isSaveUnlocked, adsConfig, unlockSave]);
 
   const handleWatchAd = () => {
     setIsAdPlaying(true);
-    setAdProgress(0);
-    
-    // จำลองระยะเวลาโฆษณา 3 วินาที
-    const duration = 3000;
-    const intervalTime = 50;
-    const steps = duration / intervalTime;
-    let currentStep = 0;
+    // Real ad view logic is delegated to AdSponsorView
+  };
 
-    const interval = setInterval(() => {
-      currentStep++;
-      setAdProgress((currentStep / steps) * 100);
-
-      if (currentStep >= steps) {
-        clearInterval(interval);
-        setTimeout(() => {
-          setIsAdPlaying(false);
-          unlockSave(); 
-          toast.success('ปลดล็อกการเซฟเรียบร้อย!');
-        }, 300);
-      }
-    }, intervalTime);
+  const handleAdFinished = () => {
+    setIsAdPlaying(false);
+    unlockSave();
+    toast.success('ปลดล็อกการเซฟเรียบร้อย!');
   };
 
   const handleSaveClick = async () => {
@@ -107,8 +110,9 @@ export default function SaveSquadManager({ isOpen, onClose, onConfirmSave }) {
           {!isSaveUnlocked || isAdPlaying ? (
             <AdSponsorView 
               isAdPlaying={isAdPlaying} 
-              adProgress={adProgress} 
-              onWatchAd={handleWatchAd} 
+              adsConfig={adsConfig}
+              onWatchAd={handleWatchAd}
+              onAdFinished={handleAdFinished} 
             />
           ) : (
             <SquadSummaryView 

@@ -6,6 +6,7 @@
 
 import { collection, getDocs, query } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import { sanitizePlayerMarketData } from './marketDataParser';
 
 // ==========================================
 // 🧠 ระบบจัดการ Cache & Data Synchronization
@@ -60,41 +61,7 @@ export const marketService = {
           const data = doc.data();
           
           // 🛡️ Data Sanitization: จัดฟอร์แมตข้อมูลให้เป๊ะที่สุด ป้องกัน UI หน้าบ้านพัง
-          let rawPos = data.position ? String(data.position).toUpperCase() : 'RES';
-          let normPos = rawPos;
-          if (rawPos === 'ATTACKER' || rawPos === 'FORWARD') normPos = 'FW';
-          else if (rawPos === 'MIDFIELDER' || rawPos === 'MIDFIELD') normPos = 'MF';
-          else if (rawPos === 'DEFENDER' || rawPos === 'BACK') normPos = 'DF';
-          else if (rawPos === 'GOALKEEPER' || rawPos === 'KEEPER') normPos = 'GK';
-
-          players.push({
-            id: doc.id,
-            sku: data.sku || doc.id,
-            name: data.name || 'Unknown Player',
-            fullName: data.fullName || data.name || 'Unknown',
-            position: normPos,
-            team: data.team || data.club || 'Free Agent',
-            // บังคับให้เป็นตัวเลขเสมอ และแก้บั๊กถ้าราคามาเป็นหลักล้าน (เช่น 5000000 ให้เป็น 5.0)
-            price: (Number(data.price) > 1000) ? (Number(data.price) / 1000000) : (Number(data.price) || 0.0),
-            totalPoints: Number(data.totalPoints || data.points) || 0,
-            // คลีน URL ภาพ
-            imageUrl: typeof data.imageUrl === 'string' ? data.imageUrl.trim() : (data.image || null), 
-            status: data.status || 'active',
-            
-            // 🌟 อัปเกรด: รองรับสถิติชุดใหม่ (FIFA Style) จากระบบแอดมินที่เพิ่งอัปเดตไป
-            stats: {
-              pace: Number(data.stats?.pace) || 0,
-              shooting: Number(data.stats?.shooting) || 0,
-              passing: Number(data.stats?.passing) || 0,
-              dribbling: Number(data.stats?.dribbling) || 0,
-              defending: Number(data.stats?.defending) || 0,
-              physical: Number(data.stats?.physical) || 0,
-              // เผื่อระบบดั้งเดิมที่มีอยู่
-              goals: Number(data.stats?.goals) || 0,
-              assists: Number(data.stats?.assists) || 0,
-              cleanSheets: Number(data.stats?.cleanSheets) || 0,
-            }
-          });
+          players.push(sanitizePlayerMarketData(doc.id, data));
         });
 
         // 4. อัปเดต Memory Cache เมื่อดึงข้อมูลสำเร็จ

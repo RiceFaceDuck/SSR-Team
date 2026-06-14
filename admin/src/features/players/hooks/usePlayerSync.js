@@ -12,7 +12,10 @@ export const usePlayerSync = () => {
     setIsSyncing(true);
     setSyncError(null);
     try {
-      const apiPlayers = await apiFootballService.fetchPlayers(player.fullName || player.name);
+      // 🌟 นำอักขระพิเศษออกให้เหลือแค่ตัวอักษรและช่องว่าง (เช่น ลบจุด .)
+      const searchQuery = (player.fullName || player.name).replace(/[^a-zA-Z0-9\s]/g, '').trim();
+      
+      const apiPlayers = await apiFootballService.fetchPlayers(searchQuery);
       
       if (!apiPlayers || apiPlayers.length === 0) {
         throw new Error("ไม่พบข้อมูลนักเตะนี้ในระบบ API-Football");
@@ -30,6 +33,7 @@ export const usePlayerSync = () => {
       if (mappedData.stats.cleanSheets !== player.stats?.cleanSheets) { updates.cleanSheets = mappedData.stats.cleanSheets; hasChanges = true; }
       if (mappedData.team && mappedData.team !== player.team) { updates.team = mappedData.team; hasChanges = true; }
       if (mappedData.status !== player.status) { updates.status = mappedData.status; hasChanges = true; }
+      if (mappedData.sku && String(mappedData.sku) !== String(player.sku)) { updates.sku = mappedData.sku; hasChanges = true; }
 
       return { success: true, data: mappedData, updates, hasChanges };
     } catch (err) {
@@ -88,6 +92,7 @@ export const usePlayerSync = () => {
                 }
 
                 if (mappedData.status !== existingPlayer.status) { updates.status = mappedData.status; hasChanges = true; }
+                if (mappedData.sku && String(mappedData.sku) !== String(existingPlayer.sku)) { updates.sku = mappedData.sku; hasChanges = true; }
 
                 if (hasChanges) {
                   newUpdatesCount++;
@@ -99,7 +104,7 @@ export const usePlayerSync = () => {
                 // เป็นนักเตะใหม่ที่ยังไม่มีใน Database
                 newUpdatesCount++;
                 // ใส่ราคาเริ่มต้น 5.0m
-                mappedData.price = 5000000;
+                mappedData.price = 5.0;
                 mappedData.displayPrice = "5.0m";
                 
                 const finalTeamName = teamName !== 'All' ? teamName : mappedData.team;
@@ -120,7 +125,8 @@ export const usePlayerSync = () => {
       // 2. ถ้าไม่ได้เลือกทีม หรือหาทีมไม่เจอ ให้ดึงตามลิสต์ทีละคนเหมือนเดิม
       for (const player of playersList) {
         try {
-          const apiPlayers = await apiFootballService.fetchPlayers(player.fullName || player.name);
+          const searchQuery = (player.fullName || player.name).replace(/[^a-zA-Z0-9\s]/g, '').trim();
+          const apiPlayers = await apiFootballService.fetchPlayers(searchQuery);
           if (apiPlayers && apiPlayers.length > 0) {
             const mappedData = apiFootballService.mapApiDataToSchema(apiPlayers[0]);
             if (mappedData) {
@@ -132,6 +138,7 @@ export const usePlayerSync = () => {
               if (mappedData.stats.cleanSheets !== player.stats?.cleanSheets) { updates.cleanSheets = mappedData.stats.cleanSheets; hasChanges = true; }
               if (mappedData.team && mappedData.team !== player.team) { updates.team = mappedData.team; hasChanges = true; }
               if (mappedData.status !== player.status) { updates.status = mappedData.status; hasChanges = true; }
+              if (mappedData.sku && String(mappedData.sku) !== String(player.sku)) { updates.sku = mappedData.sku; hasChanges = true; }
 
               if (hasChanges) {
                 newUpdatesCount++;

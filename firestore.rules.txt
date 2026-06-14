@@ -70,8 +70,12 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
 
-    // 📊 ระบบสถิติส่วนกลาง (อนุญาตให้ Frontend บันทึกยอดผู้เข้าร่วมได้)
+    // 📊 ระบบสถิติส่วนกลาง และ การตั้งค่าโฆษณา
     match /public_data/system_config {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /public_data/ads_config {
       allow read: if true;
       allow write: if request.auth != null;
     }
@@ -105,6 +109,26 @@ service cloud.firestore {
     match /public_data/live_match/events/{eventId} {
       allow read: if true;
       allow write: if request.auth != null && request.resource.data._adminSecret == "super_secret_admin_key_2026";
+    }
+
+    // 📚 คลังข้อมูลอดีต (Historical Data)
+    match /historical_players/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null; // อนุญาตให้ admin เขียน
+    }
+    match /historical_teams/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /historical_fixtures/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // 🛡️ ประวัติการดึงข้อมูล (Admin Data)
+    match /api_fetch_history/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
     }
 
     // 💬 ระบบแชทส่วนรวม

@@ -1,5 +1,8 @@
 import { squadService } from '../../services/firebase/squadService';
 
+import { useGameStore } from '../useGameStore';
+import { useMarketStore } from '../useMarketStore';
+
 export const squadCoreSlice = (set, get) => ({
   formation: '4-4-2',     
   mySquad: [],            // โครงสร้าง: [{ playerId, position, isStarting, slotIndex }]
@@ -13,13 +16,38 @@ export const squadCoreSlice = (set, get) => ({
   setPendingTargetSlot: (slotId) => set({ pendingTargetSlot: slotId }), 
   setManager: (managerObj) => set({ manager: managerObj, hasUnsavedChanges: true }), // 🌟 NEW: เปลี่ยน Manager
   setCaptain: (playerId) => set({ captainId: playerId, hasUnsavedChanges: true }), // 🌟 NEW: ตั้งกัปตันทีม
+  togglePlayerLock: (playerId) => set((state) => {
+    const updatedSquad = state.mySquad.map(p => 
+      String(p.playerId) === String(playerId) 
+        ? { ...p, isLocked: !p.isLocked } 
+        : p
+    );
+    return { mySquad: updatedSquad, hasUnsavedChanges: true };
+  }),
+  
   getEffectiveBudget: () => {
     const { budgetLeft, manager } = get();
     if (manager?.effectLogic?.type === 'BUDGET_BONUS') {
-      return budgetLeft + (manager.effectLogic.value || 0);
+      return Math.round((budgetLeft + (manager.effectLogic.value || 0)) * 10) / 10;
     }
     return budgetLeft;
   },
+
+  syncBudget: () => set((state) => {
+    const startingBudget = useGameStore.getState().startingBudget || 100;
+    const marketPlayers = useMarketStore.getState().players || [];
+    if (marketPlayers.length === 0) return state; // wait till loaded
+    
+    let squadValue = 0;
+    state.mySquad.forEach(member => {
+       const p = marketPlayers.find(p => String(p.sku) === String(member.playerId));
+       if (p) {
+         squadValue += parseFloat(p.price) || 0;
+       }
+    });
+    return { budgetLeft: Math.round((startingBudget - squadValue) * 10) / 10 };
+  }),
+
   unlockSave: () => set({ isSaveUnlocked: true }),
   markAsSaved: () => set({ hasUnsavedChanges: false, isSaveUnlocked: false }), 
 
@@ -44,7 +72,7 @@ export const squadCoreSlice = (set, get) => ({
       if (squadData) {
         set({
           mySquad: Array.isArray(squadData.mySquad) ? squadData.mySquad : [],
-          budgetLeft: squadData.budgetLeft !== undefined ? parseFloat(squadData.budgetLeft) : 100.0,
+          budgetLeft: squadData.budgetLeft !== undefined ? parseFloat(squadData.budgetLeft) : (await import('../useGameStore')).useGameStore.getState().startingBudget,
           formation: squadData.formation || '4-4-2',
           manager: squadData.manager || null, // Will need to fetch manager detail later, or just store ID and fetch on load
           captainId: squadData.captainId || null,

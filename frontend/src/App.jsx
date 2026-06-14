@@ -82,6 +82,9 @@ export default function App() {
               userPoints: userData.userPoints || 0,
             });
 
+            // 🌟 1.5 Fetch latest game rules first so budget is ready
+            await useGameStore.getState().fetchGameRules();
+
             // 🌟 2. สั่งโหลดทีมจาก Cloud ผ่าน Service ที่ถูกต้อง (แก้บั๊กเซฟทีมหาย!)
             await loadSquadFromCloud(user.uid);
 
@@ -103,6 +106,8 @@ export default function App() {
             await setDoc(userDocRef, newUserData);
 
             setUserAuth(newUserData);
+            // 🌟 1.5 Fetch latest game rules first so budget is ready
+            await useGameStore.getState().fetchGameRules();
             // 🌟 โหลดทีมเผื่อไว้ (ถึงจะเป็นไอดีใหม่ก็ต้องเรียก เพื่อให้เซ็ตค่าเริ่มต้นที่ถูกต้อง)
             await loadSquadFromCloud(user.uid);
           }

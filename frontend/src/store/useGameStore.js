@@ -27,6 +27,7 @@ export const useGameStore = create((set, get) => ({
   isMarketOpen: true,
   totalJoinedTeams: 0,
   referralRewardBalls: 50,
+  autoPickConfig: { cooldownSeconds: 15, adLinkUrl: '' },
   chatConfig: { 
     normalChatCost: 2, 
     superChatCost: 15, 
@@ -60,6 +61,7 @@ export const useGameStore = create((set, get) => ({
           isMarketOpen: data.isMarketOpen !== undefined ? data.isMarketOpen : true,
           totalJoinedTeams: data.totalJoinedTeams || 0, // กลับมาใช้จากเอกสารกลางเพื่อเลี่ยงบั๊ค Query
           referralRewardBalls: data.referralRewardBalls !== undefined ? data.referralRewardBalls : 50,
+          autoPickConfig: data.autoPickConfig || { cooldownSeconds: 15, adLinkUrl: '' },
           chatConfig: data.chatConfig || { 
             normalChatCost: 2, 
             superChatCost: 15, 
@@ -80,5 +82,21 @@ export const useGameStore = create((set, get) => ({
       unsubscribe();
       set({ isListenerActive: false });
     };
+  },
+
+  startingBudget: 100, // Default fallback
+  fetchGameRules: async () => {
+    try {
+      const docRef = doc(db, 'public_data', 'game_rules');
+      const docSnap = await import('firebase/firestore').then(m => m.getDoc(docRef));
+      if (docSnap.exists()) {
+        const rules = docSnap.data();
+        if (rules.startingBudget?.isActive) {
+          set({ startingBudget: Number(rules.startingBudget.value) || 100 });
+        }
+      }
+    } catch (e) {
+      console.error("Error fetching game_rules:", e);
+    }
   }
 }));

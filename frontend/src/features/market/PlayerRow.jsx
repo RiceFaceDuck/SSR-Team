@@ -79,9 +79,16 @@ export default function PlayerRow({ player, onActionClick, onClick }) {
       <div className="text-right flex items-center gap-3 shrink-0 pl-2">
         
         <div className="flex flex-col items-end pointer-events-none">
-          <p className="font-black text-sm text-indigo-600 leading-none mb-1">
-            {safePlayer.price?.toFixed(1) || '0.0'}m
-          </p>
+          <div className="flex items-center gap-1.5 mb-1">
+            {safePlayer.priceDiff && safePlayer.priceDiff !== 0 ? (
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-sm flex items-center leading-none ${safePlayer.priceDiff > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                {safePlayer.priceDiff > 0 ? '▲' : '▼'}{Math.abs(safePlayer.priceDiff).toFixed(1)}
+              </span>
+            ) : null}
+            <p className="font-black text-sm text-indigo-600 leading-none">
+              {safePlayer.price?.toFixed(1) || '0.0'}m
+            </p>
+          </div>
           <span className="text-[10px] font-bold text-slate-500 leading-none">
             {safePlayer.totalPoints || 0} Pts
           </span>

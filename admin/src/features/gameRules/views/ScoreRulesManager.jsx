@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Target, Save, AlertCircle } from 'lucide-react';
 import ToggleSwitch from '../components/ToggleSwitch';
+import ScoreStatItem from '../components/ScoreStatItem';
+import PositionScoreCard from '../components/PositionScoreCard';
 import { getScoringRules, updateScoringRules } from '../../../services/firebase/gameRulesDatabase';
 
 export default function ScoreRulesManager({ isEmbedded = false }) {
@@ -89,43 +91,6 @@ export default function ScoreRulesManager({ isEmbedded = false }) {
     );
   }
 
-  // Helper render function for simple value stats
-  const renderSimpleStat = (key, label, desc) => (
-    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-3 hover:bg-slate-100 transition-colors">
-      <div className="mb-3">
-        <ToggleSwitch
-          label={label}
-          description={desc || rules[key]?.desc}
-          checked={rules[key]?.isActive}
-          onChange={(val) => updateRule(key, 'isActive', val)}
-        />
-      </div>
-      {rules[key]?.isActive && (
-        <div className="flex flex-wrap items-center gap-4 bg-white p-3 rounded-lg border border-slate-100">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-700">คะแนน (Points):</span>
-            <input
-              type="number"
-              value={rules[key]?.value || 0}
-              onChange={(e) => updateRule(key, 'value', parseInt(e.target.value) || 0)}
-              className="w-20 border border-slate-300 rounded-lg px-3 py-1.5 text-center focus:border-blue-500 outline-none"
-            />
-          </div>
-          {rules[key]?.per && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-slate-700">ต่อจำนวน (Per):</span>
-              <input
-                type="number"
-                value={rules[key]?.per || 0}
-                onChange={(e) => updateRule(key, 'per', parseInt(e.target.value) || 0)}
-                className="w-20 border border-slate-300 rounded-lg px-3 py-1.5 text-center focus:border-blue-500 outline-none"
-              />
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <div className="max-w-4xl space-y-6 pb-20">
@@ -164,58 +129,16 @@ export default function ScoreRulesManager({ isEmbedded = false }) {
           <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
             <h2 className="text-lg font-bold text-slate-800 border-b pb-3 mb-4">คะแนนพื้นฐาน (Basic Stats)</h2>
             
-            {renderSimpleStat('playUnder60', 'ลงเล่นน้อยกว่า 60 นาที')}
-            {renderSimpleStat('playOver60', 'ลงเล่นตั้งแต่ 60 นาทีขึ้นไป')}
-            {renderSimpleStat('assist', 'แอสซิสต์ (Assist)')}
+            <ScoreStatItem ruleKey="playUnder60" label="ลงเล่นน้อยกว่า 60 นาที" ruleData={rules.playUnder60} onUpdate={updateRule} />
+            <ScoreStatItem ruleKey="playOver60" label="ลงเล่นตั้งแต่ 60 นาทีขึ้นไป" ruleData={rules.playOver60} onUpdate={updateRule} />
+            <ScoreStatItem ruleKey="assist" label="แอสซิสต์ (Assist)" ruleData={rules.assist} onUpdate={updateRule} />
 
             {/* Goals (Position Based) */}
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <ToggleSwitch
-                label="การทำประตู (Goals)"
-                description="คะแนนแยกตามตำแหน่ง"
-                checked={rules.goal?.isActive}
-                onChange={(val) => updateRule('goal', 'isActive', val)}
-              />
-              {rules.goal?.isActive && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                  {['FWD', 'MID', 'DEF', 'GK'].map(pos => (
-                    <div key={`goal-${pos}`}>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">{pos}</label>
-                      <input
-                        type="number"
-                        value={rules.goal?.[pos] || 0}
-                        onChange={(e) => updateRule('goal', pos, parseInt(e.target.value) || 0)}
-                        className="w-full border border-slate-200 rounded-xl px-3 py-2 text-center focus:ring-2 focus:ring-indigo-500 outline-none"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <PositionScoreCard ruleKey="goal" label="การทำประตู (Goals)" desc="คะแนนแยกตามตำแหน่ง" ruleData={rules.goal} onUpdate={updateRule} />
 
             {/* Clean Sheets (Position Based) */}
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <ToggleSwitch
-                label="คลีนชีต (Clean Sheets)"
-                description="คะแนนแยกตามตำแหน่ง (มักจะให้เฉพาะ DEF/GK/MID)"
-                checked={rules.cleanSheet?.isActive}
-                onChange={(val) => updateRule('cleanSheet', 'isActive', val)}
-              />
-              {rules.cleanSheet?.isActive && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                  {['FWD', 'MID', 'DEF', 'GK'].map(pos => (
-                    <div key={`cs-${pos}`}>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">{pos}</label>
-                      <input
-                        type="number"
-                        value={rules.cleanSheet?.[pos] || 0}
-                        onChange={(e) => updateRule('cleanSheet', pos, parseInt(e.target.value) || 0)}
-                        className="w-full border border-slate-200 rounded-xl px-3 py-2 text-center focus:ring-2 focus:ring-indigo-500 outline-none"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
+            <div className="mt-4">
+              <PositionScoreCard ruleKey="cleanSheet" label="คลีนชีต (Clean Sheets)" desc="คะแนนแยกตามตำแหน่ง (มักจะให้เฉพาะ DEF/GK/MID)" ruleData={rules.cleanSheet} onUpdate={updateRule} />
             </div>
           </div>
 
@@ -223,15 +146,15 @@ export default function ScoreRulesManager({ isEmbedded = false }) {
           <div className="space-y-6">
             <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200">
               <h2 className="text-lg font-bold text-slate-800 border-b pb-3 mb-4">สถิติเกมรับ (Defensive)</h2>
-              {renderSimpleStat('tackles', 'แทคเกิล (Tackles)')}
-              {renderSimpleStat('blocks', 'บล็อคลูกยิง (Blocks)')}
-              {renderSimpleStat('saves', 'เซฟประตู (Saves)')}
+              <ScoreStatItem ruleKey="tackles" label="แทคเกิล (Tackles)" ruleData={rules.tackles} onUpdate={updateRule} />
+              <ScoreStatItem ruleKey="blocks" label="บล็อคลูกยิง (Blocks)" ruleData={rules.blocks} onUpdate={updateRule} />
+              <ScoreStatItem ruleKey="saves" label="เซฟประตู (Saves)" ruleData={rules.saves} onUpdate={updateRule} />
             </div>
 
             <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200">
               <h2 className="text-lg font-bold text-slate-800 border-b pb-3 mb-4">สถิติเกมรุก (Offensive)</h2>
-              {renderSimpleStat('keyPasses', 'จ่ายบอลสำคัญ (Key Passes)')}
-              {renderSimpleStat('dribbles', 'เลี้ยงผ่านคู่แข่ง (Dribbles)')}
+              <ScoreStatItem ruleKey="keyPasses" label="จ่ายบอลสำคัญ (Key Passes)" ruleData={rules.keyPasses} onUpdate={updateRule} />
+              <ScoreStatItem ruleKey="dribbles" label="เลี้ยงผ่านคู่แข่ง (Dribbles)" ruleData={rules.dribbles} onUpdate={updateRule} />
             </div>
           </div>
 
@@ -239,13 +162,13 @@ export default function ScoreRulesManager({ isEmbedded = false }) {
           <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 mt-6 mb-6">
             <h2 className="text-lg font-bold text-slate-800 border-b pb-3 mb-4">เหตุการณ์พิเศษและบทลงโทษ</h2>
             <div className="space-y-3">
-              {renderSimpleStat('penaltySaved', 'เซฟจุดโทษ (GK)')}
-              {renderSimpleStat('penaltyMissed', 'ยิงจุดโทษพลาด')}
-              {renderSimpleStat('penaltyWon', 'เรียกจุดโทษได้')}
-              {renderSimpleStat('penaltyCommitted', 'ทำเสียจุดโทษ')}
-              {renderSimpleStat('yellowCard', 'โดนใบเหลือง')}
-              {renderSimpleStat('redCard', 'โดนใบแดง')}
-              {renderSimpleStat('ownGoal', 'ทำเข้าประตูตัวเอง')}
+              <ScoreStatItem ruleKey="penaltySaved" label="เซฟจุดโทษ (GK)" ruleData={rules.penaltySaved} onUpdate={updateRule} />
+              <ScoreStatItem ruleKey="penaltyMissed" label="ยิงจุดโทษพลาด" ruleData={rules.penaltyMissed} onUpdate={updateRule} />
+              <ScoreStatItem ruleKey="penaltyWon" label="เรียกจุดโทษได้" ruleData={rules.penaltyWon} onUpdate={updateRule} />
+              <ScoreStatItem ruleKey="penaltyCommitted" label="ทำเสียจุดโทษ" ruleData={rules.penaltyCommitted} onUpdate={updateRule} />
+              <ScoreStatItem ruleKey="yellowCard" label="โดนใบเหลือง" ruleData={rules.yellowCard} onUpdate={updateRule} />
+              <ScoreStatItem ruleKey="redCard" label="โดนใบแดง" ruleData={rules.redCard} onUpdate={updateRule} />
+              <ScoreStatItem ruleKey="ownGoal" label="ทำเข้าประตูตัวเอง" ruleData={rules.ownGoal} onUpdate={updateRule} />
             </div>
           </div>
 

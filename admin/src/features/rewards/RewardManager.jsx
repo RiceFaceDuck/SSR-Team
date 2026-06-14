@@ -1,60 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRewardStore } from '../../store/rewardStore';
 import RewardFormModal from './RewardFormModal';
+import RewardTable from './components/RewardTable';
+import DeleteConfirmModal from './components/DeleteConfirmModal';
 import { 
   Plus, 
   Search, 
-  Edit2, 
-  Trash2, 
   PackageOpen, 
-  Zap, 
-  AlertTriangle,
   RefreshCw,
-  Box,
-  Image as ImageIcon
+  Box
 } from 'lucide-react';
-
-// Component สำหรับยืนยันการลบ (แทนการใช้ window.confirm)
-const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, itemName, isDeleting }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all scale-100">
-        <div className="p-6 text-center">
-          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="text-red-500 w-8 h-8" />
-          </div>
-          <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">ยืนยันการลบ?</h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-            คุณแน่ใจหรือไม่ว่าต้องการลบ <span className="font-semibold text-slate-700 dark:text-slate-300">"{itemName}"</span>? <br/>การกระทำนี้ไม่สามารถย้อนกลับได้
-          </p>
-          <div className="flex gap-3 justify-center">
-            <button
-              onClick={onClose}
-              disabled={isDeleting}
-              className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl transition-colors disabled:opacity-50"
-            >
-              ยกเลิก
-            </button>
-            <button
-              onClick={onConfirm}
-              disabled={isDeleting}
-              className="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors flex items-center gap-2 disabled:opacity-50"
-            >
-              {isDeleting ? (
-                <RefreshCw size={16} className="animate-spin" />
-              ) : (
-                <Trash2 size={16} />
-              )}
-              {isDeleting ? 'กำลังลบ...' : 'ลบข้อมูล'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const RewardManager = () => {
   // ดึง State และ Action จาก Zustand Store
@@ -178,115 +133,11 @@ const RewardManager = () => {
           </div>
         ) : (
           /* Table Content */
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ไอเทม</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ราคา (Balls)</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">สต็อกคงเหลือ</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">สถานะ</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {filteredRewards.map((reward) => (
-                  <tr key={reward.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                    
-                    {/* Column 1: Item Info */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-700 overflow-hidden shrink-0 border border-slate-200 dark:border-slate-600 flex items-center justify-center">
-                          {reward.imageUrl ? (
-                            <img src={reward.imageUrl} alt={reward.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <ImageIcon className="text-slate-400" size={20} />
-                          )}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                            {reward.name}
-                            {reward.type === 'gacha' && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">GACHA</span>
-                            )}
-                          </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]">
-                            {reward.description || 'ไม่มีรายละเอียด'}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Column 2: Price */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5 font-mono font-medium text-amber-600 dark:text-amber-400">
-                        ⚽ {reward.price.toLocaleString()}
-                      </div>
-                    </td>
-
-                    {/* Column 3: Stock */}
-                    <td className="px-6 py-4">
-                      <div className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium border ${
-                        reward.stock > 10 
-                          ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
-                          : reward.stock > 0
-                          ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800'
-                          : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'
-                      }`}>
-                        {reward.stock > 0 ? `${reward.stock} ชิ้น` : 'Out of Stock'}
-                      </div>
-                    </td>
-
-                    {/* Column 4: Status */}
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col gap-2">
-                        {/* Active Status */}
-                        {reward.isActive ? (
-                          <span className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                            เปิดใช้งาน
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-xs text-slate-400">
-                            <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
-                            ซ่อนจากร้านค้า
-                          </span>
-                        )}
-
-                        {/* Flash Sale Status */}
-                        {reward.isFlashSale && (
-                          <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 w-fit">
-                            <Zap size={10} /> Flash Sale
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Column 5: Actions */}
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => handleEdit(reward)}
-                          className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                          title="แก้ไข"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteRequest(reward)}
-                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                          title="ลบ"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <RewardTable 
+            filteredRewards={filteredRewards} 
+            handleEdit={handleEdit} 
+            handleDeleteRequest={handleDeleteRequest} 
+          />
         )}
       </div>
 

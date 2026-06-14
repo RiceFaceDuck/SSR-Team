@@ -34,8 +34,14 @@ const PlayerIdentityForm = ({ formData, handleChange, handleFullNameChange, isEd
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          SKU (รหัสอ้างอิง) <span className="text-red-500">*</span>
+        <label className="flex justify-between items-end text-sm font-medium text-gray-700 mb-1">
+          <span>SKU (รหัสอ้างอิง) <span className="text-red-500">*</span></span>
+          {formData.sku && formData.sku.startsWith('API-') && (
+            <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded border border-green-200">API Synced</span>
+          )}
+          {formData.sku && formData.sku.startsWith('EXCEL-') && (
+            <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded border border-blue-200">Excel Import</span>
+          )}
         </label>
         <input
           type="text"
@@ -43,9 +49,9 @@ const PlayerIdentityForm = ({ formData, handleChange, handleFullNameChange, isEd
           value={formData.sku}
           onChange={handleChange}
           placeholder="เช่น PLY-001"
-          className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+          className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all disabled:opacity-50"
           required
-          disabled={isEdit}
+          disabled={isEdit || (formData.sku && formData.sku.startsWith('API-'))}
         />
       </div>
 

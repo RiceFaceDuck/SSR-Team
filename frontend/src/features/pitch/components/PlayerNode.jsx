@@ -1,4 +1,5 @@
 import React from 'react';
+import { Lock } from 'lucide-react';
 import EmptyNode from './EmptyNode';
 import PlayerStatsBar from './PlayerStatsBar';
 
@@ -10,7 +11,7 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench }) => {
   if (!player) return <EmptyNode expectedPosition={expectedPosition} isBench={isBench} />;
 
   // Mocks for image and team abbreviation
-  const playerImage = player.imageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffdfbf,ffd5dc`;
+  const playerImage = player.imageUrl || player.fullData?.imageUrl || player.fullData?.image || ('https://ui-avatars.com/api/?background=random&color=fff&name=' + player.name);
   const teamAbbr = player.team || 'UNK';
   const role = player.role || ''; // e.g. (C)
   const isCaptain = role === 'C';
@@ -37,6 +38,13 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench }) => {
           {isCaptain && (
             <div className="absolute bottom-0 left-0 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-white/80 backdrop-blur-sm rounded-tr-lg flex items-center justify-center shadow-sm z-10 border-t border-r border-slate-200">
               <span className="text-[9px] sm:text-[10px] font-black text-slate-800">C</span>
+            </div>
+          )}
+
+          {/* Lock Indicator */}
+          {player.isLocked && (
+            <div className="absolute top-1 right-1 z-10 text-white drop-shadow-md">
+              <Lock size={12} strokeWidth={3} />
             </div>
           )}
 

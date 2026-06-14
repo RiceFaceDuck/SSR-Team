@@ -13,6 +13,7 @@ import FormationSelector from './FormationSelector';
 import { usePitchLogic } from './hooks/usePitchLogic';
 import { toast } from '../../utils/toast';
 import ConfettiEffect from '../../components/common/ConfettiEffect';
+import { useGameStore } from '../../store/useGameStore';
 
 export default function PitchScreen() {
   const {
@@ -41,6 +42,9 @@ export default function PitchScreen() {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isManagerModalOpen, setIsManagerModalOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+
+  // Fix: Move hook call above any early returns
+  const totalBudget = useGameStore(state => state.startingBudget);
 
   const handleConfirmSave = async () => {
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -111,6 +115,8 @@ export default function PitchScreen() {
        />
 
       <SquadActions 
+        totalBudget={totalBudget}
+        managerBonus={manager?.effectLogic?.type === 'BUDGET_BONUS' ? manager.effectLogic.value : 0}
         bank={getEffectiveBudget()} 
         squadCount={mySquad.filter(p => p.isStarting).length} 
         actions={{ ...actions, handleSaveTeam: () => setIsSaveModalOpen(true) }} 

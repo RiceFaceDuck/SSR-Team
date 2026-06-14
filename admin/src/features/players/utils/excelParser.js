@@ -69,7 +69,7 @@ export const parseExcelFile = (file) => {
 
           return {
             // SKU สำคัญมากสำหรับผูก API: ถ้าไม่มีให้สร้าง Fallback ที่ไม่ซ้ำกัน
-            sku: row['sku'] ? String(row['sku']) : `temp-sku-${Date.now()}-${index}`, 
+            sku: row['sku'] ? String(row['sku']) : `EXCEL-${Date.now()}-${index}`, 
             name: shortName, 
             fullName: rawName, 
             

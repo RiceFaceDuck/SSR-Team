@@ -11,11 +11,10 @@
 - `config/`: Firebase config (`firebase.js`)
 - `features/`: Domain-driven feature modules
   - `players/`: Player Management Feature
-    - `components/`: `ExcelPreview.jsx`, `PlayerManualForm.jsx`, `PlayerToolbar.jsx`, `PlayerTable.jsx`, `forms/` (Identity, GameInfo, Stats)
+    - `components/`: `PlayerManualForm.jsx`, `PlayerTable.jsx`, `ExcelPreview.jsx`, `PlayerValueFormulaConfig.jsx`, `PlayerValuePreviewTable.jsx`
     - `hooks/`: `usePlayers.js` (Business logic), `usePlayerSync.js` (API Sync Logic)
     - `utils/`: `excelParser.js`, `templateUtil.js`
-    - `views/`: `PlayerList.jsx` (Container), `PlayerDetails.jsx`, `DataOverlapManagement.jsx`
-    - `PlayerFeature.jsx`: Main entry point for the player module
+    - `views/`: `PlayerFeature.jsx`, `PlayerList.jsx`, `PlayerDetails.jsx`, `DataOverlapManagement.jsx`, `PlayerValueManager.jsx`
   - `managers/`: Manager Management Feature (New!)
     - `components/`: `ManagerForm.jsx`
     - `views/`: `ManagerList.jsx`
@@ -23,22 +22,30 @@
     - `components/`: `CardForm.jsx`, `CardItem.jsx`, `CardListHeader.jsx`
     - `views/`: `CardList.jsx`
   - `system/`: System Settings Feature
+    - `components/`: `GameSettings.jsx`, `ThemeSettings.jsx`
     - `views/`: `SystemSettings.jsx`, `LogicManual.jsx`
   - `gameRules/`: Game Rules, Scoring, and Conditions Feature (New!)
-    - `components/`: `ToggleSwitch.jsx`
+    - `components/`: `ToggleSwitch.jsx`, `ScoreStatItem.jsx`, `PositionScoreCard.jsx`
     - `views/`: `GameRulesManager.jsx`, `ScoreRulesManager.jsx`, `GameConditionsManager.jsx`
   - `gameweek/`: Gameweek Management Feature
     - `components/`: `PlayerStatsEntry.jsx`, `PlayerStatsTable.jsx`, `PlayerStatsToolbar.jsx`, `GameweekFixtures.jsx`, `ApiSettingsPanel.jsx`
     - `views/`: `GameweekDashboard.jsx`
     - `TimeController.jsx`, `NoAdsToggle.jsx`
-  - `quests/`: Quest and Sponsor Management Feature
-    - `components/`: `QuestImageUploader.jsx`, `QuestBasicInputs.jsx`, `QuestSettingsInputs.jsx`
+  - `quests/`: Quest and Sponsor Management Feature (Refactored)
+    - `components/`: `QuestImageUploader.jsx`, `QuestBasicInputs.jsx`, `QuestSettingsInputs.jsx`, `QuestTab.jsx`, `AdLinksTab.jsx`, `AdSenseTab.jsx`
     - `QuestFormModal.jsx`
-  - `rewards/`, `users/`, `verify/`: Other features
+    - `QuestManager.jsx` (Tab Container)
+  - `rewards/`: Reward Management Feature
+    - `components/`: `RewardTable.jsx`, `DeleteConfirmModal.jsx`
+    - `views/`: `RewardManager.jsx`, `RewardFormModal.jsx`
+  - `history/`: Historical Data Archive Feature (New!)
+    - `components/`: `HistoricalApiConfig.jsx`, `DataFetchMonitor.jsx`
+    - `views/`: `HistoryArchive.jsx`
+  - `users/`, `verify/`: Other features
 - `services/`: External integrations
-  - `firebase/`: `playerDatabase.js`, `managerDatabase.js`, `gameRulesDatabase.js`, etc.
+  - `firebase/`: `playerDatabase.js`, `managerDatabase.js`, `gameRulesDatabase.js`, `historyDatabase.js` etc.
   - `engine/`: `gameweekCalculationService.js`, `leaderboardEngine.js` (Game Loop Logic)
-  - `api/`: `apiFootballService.js`
+  - `api/`: `apiFootballService.js`, `historyApi.js`
 - `store/`: Zustand global state
 - `utils/`: Global utilities
 
@@ -56,6 +63,7 @@
       - `PitchBenchArea.jsx`: แถบนักเตะสำรองและผู้จัดการทีม
       - `FloatingActionBar.jsx`: ปุ่มควบคุมการจัดวางนักเตะ
       - `PlayerActionPopup.jsx`: ป็อปอัปเมนูเมื่อคลิกผู้เล่นในสนาม
+      - `popup/`: `PopupHeader.jsx`, `PopupStats.jsx`, `PopupActions.jsx`
       - `Pitch.jsx`, `PlayerNode.jsx`, `EmptyNode.jsx`, `SquadHeader.jsx`, `SquadActions.jsx`
       - `PlayerStatsBar.jsx`: แถบแสดงสถิติ Goals, Assists, Cards (New)
       - `powerCard/`: 
@@ -63,7 +71,10 @@
       - `manager/`:
         - `ManagerHeader.jsx`, `ManagerList.jsx`, `ManagerCard.jsx` (Refactored)
     - `hooks`:
-      - `usePitchLogic.js`: Custom hook จัดการ Logic ของ PitchScreen
+      - `usePitchLogic.js`: Custom hook จัดการ Logic ของ PitchScreen (Facade)
+      - `usePitchDataLoad.js`: Logic โหลดข้อมูลเริ่มต้น (SRP)
+      - `usePitchEnrichment.js`: Logic ประกอบข้อมูลนักเตะ (SRP)
+      - `usePitchActions.js`, `usePitchHandlers.js`: Logic and event handlers
     - `FormationSelector.jsx`: เมนูเลือกแผนการเล่น
     - `PitchBoard.jsx`: คอมโพเนนต์หลักที่จัดเรียงนักเตะบนสนาม
     - `PitchScreen.jsx`: หน้าจอหลัก (Layout รวม)
@@ -77,6 +88,10 @@
       - `autoFillEngine.js`: Engine แบบ Standalone คำนวณตรรกะจัดทีมอัตโนมัติ
   - `profile/`:
     - `ProfileScreen.jsx`: หน้าจอโปรไฟล์หลักและกระเป๋าเงิน (Wallet)
+    - `components/`: 
+      - `ProfileHeaderCard.jsx`: การ์ดแสดงข้อมูลผู้ใช้งาน
+      - `WalletSummaryView.jsx`: การ์ดแสดงยอดเงิน
+      - `TransactionHistoryPreview.jsx`: ประวัติการทำรายการล่าสุดแบบย่อ
       - `ProfileSettingsModal.jsx`: ป็อปอัปสำหรับตั้งค่าบัญชีและชื่อทีม
       - `GameweekHistory.jsx`: สรุปคะแนนการจัดทีมย้อนหลังรายสัปดาห์
   - `live/`:
@@ -92,9 +107,13 @@
   - `social/`:
     - `SocialScreen.jsx`: หน้าจอหลักของคอมมูนิตี้และลีกส่วนตัว
     - `components/`: `ReferralCard.jsx` (ชวนเพื่อน), `LeagueManager.jsx` (สร้าง/เข้าร่วมลีก), `LeagueList.jsx` (รายการลีก)
-- `services/`: External integrations 
-  - `firebase/`: `squadService.js`, `managerService.js`, `cardService.js`, `chatService.js`, `leagueService.js`, `inventoryService.js`, `liveStatsService.js` (NEW)
-  - `api/`: `apiFootballService.js`
+  - `services/`: Core logic decoupled from React
+    - `api/`: `apiFootballService.js`, `apiStatusService.js`
+    - `engine/`: 
+      - `squadCalculationService.js`: Engine สำหรับคำนวณคะแนนรวมของทีมตาม Gameweek
+      - `gameweekCalculationService.js`: Engine ย่อย
+      - `playerValueCalculationService.js`: Engine สำหรับคำนวณและปรับสมดุลราคานักเตะ
+    - `firebase/`: Firestore database wrappers (`playerDatabase.js`, `questDatabase.js`, etc.)
 - `store/`: Zustand global state
   - `useUserStore.js`: Store หลักที่รวม Slices เข้าด้วยกัน
   - `slices/`: 
