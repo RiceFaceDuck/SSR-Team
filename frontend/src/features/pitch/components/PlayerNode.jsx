@@ -17,7 +17,7 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench }) => {
   const cardIcon = player.appliedCardIcon;
 
   return (
-    <div className={`flex flex-col items-center justify-end w-[55px] sm:w-[65px] group relative cursor-pointer active:scale-95 transition-all duration-300 ${isSelected ? '-translate-y-2' : ''}`}>
+    <div className={`flex flex-col items-center justify-end w-[48px] sm:w-[55px] lg:w-[65px] group relative cursor-pointer active:scale-95 transition-all duration-300 ${isSelected ? '-translate-y-2' : ''}`}>
       
       {/* 🌟 Glowing effect when selected */}
       {isSelected && (
@@ -25,12 +25,12 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench }) => {
       )}
 
       {/* Stats Bar */}
-      <PlayerStatsBar stats={player.fullData?.stats} isBench={isBench} />
+      <PlayerStatsBar stats={player.liveStats} isBench={isBench} />
 
       {/* Player Image / Shirt Area (Top part) */}
-      <div className="relative w-full h-12 sm:h-14 flex justify-center items-end mb-[1px]">
+      <div className="relative w-full h-10 sm:h-12 lg:h-14 flex justify-center items-end mb-[1px]">
         {/* Placeholder for player face / shirt */}
-        <div className="w-full h-12 sm:h-14 bg-white rounded-t-md shadow-sm border border-b-0 border-slate-300 overflow-hidden relative flex items-end justify-center">
+        <div className="w-full h-10 sm:h-12 lg:h-14 bg-white rounded-t-md shadow-sm border border-b-0 border-slate-300 overflow-hidden relative flex items-end justify-center">
           <img src={playerImage} alt={player.name} className="w-full h-full object-cover" />
           
           {/* Captain Indicator */}
@@ -43,10 +43,10 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench }) => {
           {/* Gameweek Points Badge */}
           <div className="absolute top-0.5 left-1 flex items-center justify-center z-10">
             <span 
-              className="text-[10px] sm:text-[12px] font-black text-[#fbbf24]"
-              style={{ WebkitTextStroke: '0.75px #0a192f', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}
+              className="text-[10px] sm:text-[12px] font-black text-[#0f284e]"
+              style={{ textShadow: '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0px 2px 3px rgba(0,0,0,0.5)' }}
             >
-              {player.pointsEarned || 0}
+              {player.liveStats?.gwPoints || 0}
             </span>
           </div>
 

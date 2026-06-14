@@ -56,7 +56,7 @@ const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId,
     }
 
     return (
-      <div key={`row-${role}`} className="flex justify-evenly items-end w-full px-2 sm:px-4 py-2">
+      <div key={`row-${role}`} className="flex justify-evenly items-end w-full px-1 sm:px-4 py-0.5 sm:py-2">
         {slots}
       </div>
     );

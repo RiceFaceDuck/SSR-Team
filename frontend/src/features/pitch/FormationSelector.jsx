@@ -8,7 +8,7 @@ const FormationSelector = ({ manager, formation, onChangeFormation }) => {
     : ['4-3-3', '4-4-2', '3-5-2', '3-4-3', '4-5-1', '5-3-2', '5-4-1'];
 
   return (
-    <div className="absolute bottom-[115px] sm:bottom-[130px] right-2 z-30">
+    <div className="absolute bottom-[125px] sm:bottom-[145px] lg:bottom-[160px] right-2 z-30">
       <button 
         onClick={() => setIsFormationOpen(!isFormationOpen)}
         className="bg-[#fbbf24] hover:bg-[#f59e0b] text-[#0a192f] transition-colors rounded-md px-2 py-0.5 flex flex-col items-center shadow-lg active:scale-95 cursor-pointer border border-[#b45309]/30"

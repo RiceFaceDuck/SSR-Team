@@ -9,6 +9,7 @@ import { squadMarketSlice } from './slices/squadMarketSlice';
 import { squadAutoFillSlice } from './slices/squadAutoFillSlice';
 import { squadCardSlice } from './slices/squadCardSlice';
 import { inventorySlice } from './slices/inventorySlice';
+import { liveStatsSlice } from './slices/liveStatsSlice';
 
 export const useUserStore = create(
   persist(
@@ -21,6 +22,7 @@ export const useUserStore = create(
       ...squadAutoFillSlice(set, get),
       ...squadCardSlice(set, get),
       ...inventorySlice(set, get),
+      ...liveStatsSlice(set, get),
     }),
     {
       name: 'fantasy-team-draft', 

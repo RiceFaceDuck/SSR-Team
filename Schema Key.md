@@ -176,6 +176,19 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `secondaryDetail` | String | เช่น 'B. Fernandes Assist 👟' |
 | `timestamp`       | Timestamp | เวลาเกิดเหตุการณ์ |
 
+### 10.2 Live Gameweek Stats
+`public_data/live_gameweek_stats/{playerId}`
+เก็บสถิติและคะแนนเฉพาะในสัปดาห์ปัจจุบัน (Gameweek ปัจจุบัน) แบบ Real-time เพื่อประหยัดโควต้าการอ่าน (Query เพียงนักเตะที่มีในทีมด้วย `in`)
+| Field             | Type   | Description |
+| ----------------- | ------ | ----------- |
+| `goals`           | Number | จำนวนประตูที่ทำได้ในสัปดาห์นี้ |
+| `assists`         | Number | จำนวนแอสซิสต์ในสัปดาห์นี้ |
+| `cleanSheets`     | Number | จำนวนคลีนชีตในสัปดาห์นี้ |
+| `yellowCards`     | Number | จำนวนใบเหลืองในสัปดาห์นี้ |
+| `redCards`        | Number | จำนวนใบแดงในสัปดาห์นี้ |
+| `gwPoints`        | Number | คะแนนรวมที่ทำได้ในสัปดาห์นี้ |
+| `updatedAt`       | Timestamp | เวลาอัปเดตล่าสุด |
+
 ## 11. Inventory Schema (คลังเก็บของรายสัปดาห์)
 `users/{userId}/game_data/inventory`
 

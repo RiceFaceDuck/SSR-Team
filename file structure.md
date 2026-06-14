@@ -93,7 +93,7 @@
     - `SocialScreen.jsx`: หน้าจอหลักของคอมมูนิตี้และลีกส่วนตัว
     - `components/`: `ReferralCard.jsx` (ชวนเพื่อน), `LeagueManager.jsx` (สร้าง/เข้าร่วมลีก), `LeagueList.jsx` (รายการลีก)
 - `services/`: External integrations 
-  - `firebase/`: `squadService.js`, `managerService.js`, `cardService.js`, `chatService.js`, `leagueService.js`, `inventoryService.js` (NEW)
+  - `firebase/`: `squadService.js`, `managerService.js`, `cardService.js`, `chatService.js`, `leagueService.js`, `inventoryService.js`, `liveStatsService.js` (NEW)
   - `api/`: `apiFootballService.js`
 - `store/`: Zustand global state
   - `useUserStore.js`: Store หลักที่รวม Slices เข้าด้วยกัน

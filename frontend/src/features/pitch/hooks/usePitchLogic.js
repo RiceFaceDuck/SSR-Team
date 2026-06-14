@@ -1,8 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useUserStore } from '../../../store/useUserStore';
 import { useMarketStore } from '../../../store/useMarketStore';
+import { useGameStore } from '../../../store/useGameStore';
 import { toast } from '../../../utils/toast';
 import { normalizePosition } from '../../../utils/squadValidator';
+import { enrichSquadData } from '../utils/squadEnrichment';
 
 export const usePitchLogic = () => {
   const { 
@@ -25,10 +27,13 @@ export const usePitchLogic = () => {
     sellPlayer,
     fetchCards,
     isCardsFetched,
-    availableCards
+    availableCards,
+    liveGwStats,
+    fetchLiveStats
   } = useUserStore();
 
   const { players: marketPlayers, fetchMarketPlayers, isDataFetched } = useMarketStore();
+  const { isMarketOpen } = useGameStore();
   
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
@@ -43,37 +48,26 @@ export const usePitchLogic = () => {
     if (!isCardsFetched) {
       fetchCards();
     }
+    // Fetch live stats once component mounts
+    if (mySquad?.length > 0) {
+      fetchLiveStats();
+    }
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 800);
     return () => clearTimeout(timer);
-  }, [isDataFetched, fetchMarketPlayers, isCardsFetched, fetchCards]);
+  }, [isDataFetched, fetchMarketPlayers, isCardsFetched, fetchCards, mySquad?.length]);
 
   const { enrichedStarters, enrichedBench } = useMemo(() => {
-    const enriched = mySquad.map(squadPlayer => {
-      const fullData = marketPlayers.find(p => String(p.sku) === String(squadPlayer.playerId));
-      const appliedCard = availableCards.find(c => c.id === squadPlayer.appliedCardId);
-      return {
-        id: String(squadPlayer.slotIndex), 
-        playerId: squadPlayer.playerId,
-        name: fullData?.name || fullData?.fullName || 'Unknown',
-        team: fullData?.team || 'UNK',
-        position: squadPlayer.position,
-        price: fullData?.price || 0,
-        totalPoints: fullData?.totalPoints || 0,
-        role: captainId === squadPlayer.playerId ? 'C' : null,
-        isStarting: squadPlayer.isStarting,
-        appliedCardId: squadPlayer.appliedCardId,
-        appliedCardIcon: appliedCard?.icon || null,
-        appliedCard: appliedCard || null,
-        fullData: fullData 
-      };
-    });
-    return {
-      enrichedStarters: enriched.filter(p => p.isStarting),
-      enrichedBench: enriched.filter(p => !p.isStarting)
-    };
-  }, [mySquad, marketPlayers, captainId, availableCards]);
+    return enrichSquadData(
+      mySquad, 
+      marketPlayers, 
+      captainId, 
+      availableCards, 
+      liveGwStats, 
+      isMarketOpen
+    );
+  }, [mySquad, marketPlayers, captainId, availableCards, liveGwStats, isMarketOpen]);
 
   const handleClearPitch = () => {
     useUserStore.getState().clearSquad(marketPlayers);

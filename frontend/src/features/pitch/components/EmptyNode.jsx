@@ -12,11 +12,11 @@ const EmptyNode = ({ expectedPosition, isBench }) => {
     : 'border-[#3b82f6]/40';
 
   return (
-    <div className="flex flex-col items-center justify-end w-[55px] sm:w-[65px] cursor-pointer transition-all duration-300 group">
+    <div className="flex flex-col items-center justify-end w-[48px] sm:w-[55px] lg:w-[65px] cursor-pointer transition-all duration-300 group">
       
       {/* Top Part (Shirt Area) matching PlayerNode exactly */}
-      <div className="relative w-full h-12 sm:h-14 flex justify-center items-end mb-[1px]">
-        <div className={`w-full h-12 sm:h-14 bg-gradient-to-br ${topGradient} rounded-t-md border border-b-0 ${borderClass} shadow-inner flex flex-col items-center justify-center overflow-hidden group-hover:border-[#fbbf24] transition-colors relative`}>
+      <div className="relative w-full h-10 sm:h-12 lg:h-14 flex justify-center items-end mb-[1px]">
+        <div className={`w-full h-10 sm:h-12 lg:h-14 bg-gradient-to-br ${topGradient} rounded-t-md border border-b-0 ${borderClass} shadow-inner flex flex-col items-center justify-center overflow-hidden group-hover:border-[#fbbf24] transition-colors relative`}>
           {/* Subtle grid background */}
           <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#fbbf24 1px, transparent 1px)', backgroundSize: '4px 4px' }}></div>
           

@@ -12,7 +12,7 @@ export default function PitchBenchArea({
   onManagerClick 
 }) {
   return (
-    <div className="h-[105px] sm:h-[120px] pb-2 bg-[#0a192f] border-t-2 border-[#fbbf24] flex items-center justify-evenly px-2 sm:px-6 relative z-10 w-full overflow-x-hidden">
+    <div className="h-[100px] sm:h-[120px] lg:h-[135px] py-1 sm:py-2 bg-[#0a192f] border-t-2 border-[#fbbf24] flex items-center justify-evenly px-2 sm:px-6 relative z-10 w-full overflow-x-hidden">
       <div className="absolute top-0 left-0 bg-[#fbbf24] text-[#0a192f] text-[8px] font-bold px-1.5 py-0.5 rounded-br-md z-20">
         BENCH
       </div>
@@ -25,7 +25,7 @@ export default function PitchBenchArea({
         return (
           <div 
             key={`bench-${index}`} 
-            className={`mt-2 scale-95 sm:scale-100 flex-shrink-0 cursor-pointer relative transition-all duration-300 ${highlightClass} ${!player ? 'hover:-translate-y-1' : ''}`}
+            className={`scale-95 sm:scale-100 flex-shrink-0 cursor-pointer relative transition-all duration-300 ${highlightClass} ${!player ? 'hover:-translate-y-1' : ''}`}
             onClick={() => {
               if (!player) handleBenchSlotClick(pos);
               else handlePlayerClick(player);
@@ -45,19 +45,37 @@ export default function PitchBenchArea({
       <div className="h-12 w-px bg-[#1e3a8a] mx-1 sm:mx-2 mt-2 flex-shrink-0"></div>
 
       {/* Manager Slot (Right side) */}
-      <div className="mt-2 scale-95 sm:scale-100 flex-shrink-0 relative cursor-pointer hover:-translate-y-1 transition-all duration-300" onClick={onManagerClick}>
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#3b82f6] text-white text-[6px] font-bold px-1 rounded-sm whitespace-nowrap z-20 shadow-md">
-            MANAGER
-          </div>
+      {/* Manager Slot (Right side) */}
+      <div className="flex-shrink-0 cursor-pointer hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center w-[75px] sm:w-[90px] lg:w-[110px]" onClick={onManagerClick}>
           {manager ? (
-            <div className="w-[45px] h-[60px] sm:w-[50px] sm:h-[65px] bg-[#0a192f] border-2 border-[#3b82f6] rounded-md shadow-[0_0_15px_rgba(59,130,246,0.5)] overflow-hidden flex flex-col items-center justify-center relative">
-               <img src={manager.avatarUrl} alt={manager.name} className="absolute inset-0 w-full h-full object-cover opacity-80" />
-               <div className="absolute bottom-0 w-full bg-gradient-to-t from-black/90 to-transparent p-1 text-center">
-                 <span className="text-[7px] font-bold text-white leading-none line-clamp-1">{manager.name}</span>
-               </div>
+            <div className="w-full flex flex-col items-center justify-center">
+              <div className="w-[48px] sm:w-[55px] lg:w-[65px] flex flex-col items-center justify-center scale-95">
+                {/* Top part: Image */}
+                <div className="relative w-full h-10 sm:h-12 lg:h-14 flex justify-center items-end mb-[1px]">
+                  <div className="w-full h-10 sm:h-12 lg:h-14 bg-[#0a192f] rounded-t-md shadow-sm border border-b-0 border-[#3b82f6] overflow-hidden relative flex items-end justify-center">
+                    <img src={manager.avatarUrl} alt={manager.name} className="w-full h-full object-cover opacity-90" />
+                  </div>
+                </div>
+                {/* Bottom part: Name */}
+                <div className="w-full bg-gradient-to-b from-[#1e3a8a] to-[#0f284e] rounded-b-md shadow-md overflow-hidden flex flex-col z-10 transition-colors border border-[#3b82f6]">
+                  <div className="px-1 py-1 flex flex-col justify-center items-center min-h-[16px] sm:min-h-[20px] w-full overflow-hidden">
+                    <span className="text-[6px] sm:text-[7px] font-bold text-white text-center leading-none line-clamp-1 w-full">
+                      {manager.name}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              {/* Description (Outside Card) */}
+              <div className="mt-1 w-full text-center px-1">
+                <span className="text-white text-[6px] sm:text-[7px] lg:text-[8px] font-medium leading-tight line-clamp-2">
+                  {manager.description || 'เพิ่มความสามารถทีม'}
+                </span>
+              </div>
             </div>
           ) : (
-            <PlayerNode player={undefined} expectedPosition="MGR" isBench={true} />
+            <div className="w-[48px] sm:w-[55px] lg:w-[65px] scale-95">
+              <PlayerNode player={undefined} expectedPosition="MGR" isBench={true} />
+            </div>
           )}
       </div>
     </div>
