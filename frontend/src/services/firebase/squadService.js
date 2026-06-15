@@ -11,30 +11,24 @@ import { participationService } from './participationService';
 import { referralService } from './referralService';
 import { useGameStore } from '../../store/useGameStore';
 
-/**
- * ฟังก์ชันช่วยสร้าง Document Reference สำหรับข้อมูลทีมของผู้เล่น
- * (ปฏิบัติตามกฎความปลอดภัย Private Data ของ Artifacts อย่างเคร่งครัด)
- * Path: artifacts/{appId}/users/{userId}/game_data/squad
- */
+let cachedSquad = null;
+let lastFetchTime = 0;
+let fetchPromise = null;
+const CACHE_TTL = 3 * 60 * 1000; // 3 minutes cache
+const LOCAL_STORAGE_KEY = 'ssr_team_squad_backup';
+
 const getSquadDocRef = (userId) => {
   const appId = typeof __app_id !== 'undefined' ? __app_id : 'ssr-team';
   return doc(db, 'artifacts', appId, 'users', userId, 'game_data', 'squad');
 };
 
 export const squadService = {
-  /**
-   * บันทึกข้อมูลทีมล่าสุดลงบนฐานข้อมูล
-   * @param {string} userId - รหัสผู้ใช้งาน (UID) ของผู้เล่นที่กำลังล็อกอิน
-   * @param {Object} squadPayload - ข้อมูลที่จะบันทึก (mySquad, budgetLeft, formation)
-   * @returns {Promise<boolean>} สถานะการบันทึกสำเร็จหรือไม่
-   */
   saveSquad: async (userId, { mySquad, budgetLeft, formation, manager, captainId }) => {
     if (!userId) throw new Error("เซิร์ฟเวอร์ปฏิเสธการเข้าถึง: ไม่พบรหัสผู้ใช้งาน (UID)");
 
     try {
       const docRef = getSquadDocRef(userId);
 
-      // เซฟข้อมูลการจัดทีม
       const dataToSave = {
         mySquad: mySquad || [],
         budgetLeft: parseFloat(budgetLeft) || 0,
@@ -46,18 +40,20 @@ export const squadService = {
 
       await setDoc(docRef, dataToSave, { merge: true });
       console.log('💾 [SquadService] บันทึกทีมขึ้น Cloud สำเร็จ!');
+      
+      // อัปเดต Cache ทันทีหลังบันทึก
+      cachedSquad = dataToSave;
+      lastFetchTime = Date.now();
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
 
-      // ส่งมอบหน้าที่การนับยอด และประทับตรา ให้ "ศูนย์การเข้าร่วม" (Participation Center)
       const isFullSquad = participationService.isSquadComplete(mySquad, manager);
       
       if (isFullSquad) {
         const hasAlreadyJoined = await participationService.checkUserParticipation(userId);
         
         if (!hasAlreadyJoined) {
-          // ถ้าเพิ่งครบ 16 คนเป็นครั้งแรก ส่งไปลงทะเบียน
           await participationService.registerParticipation(userId);
 
-          // 🌟 เช็คเรื่องการชวนเพื่อน (Referral)
           const userDocSnap = await getDoc(doc(db, 'users', userId));
           if (userDocSnap.exists()) {
             const userData = userDocSnap.data();
@@ -67,7 +63,6 @@ export const squadService = {
             }
           }
         } else {
-          // ถ้าเคยเข้าร่วมแล้ว ส่งไปเช็คระบบเผื่อย้อนกลับไปซ่อมแซมตัวเลขสถิติที่พัง (Fallback)
           await participationService.syncAndRepairCounter(userId);
         }
       }
@@ -80,30 +75,67 @@ export const squadService = {
     }
   },
 
-  /**
-   * โหลดข้อมูลทีมล่าสุดจากฐานข้อมูล (เรียกใช้ตอนผู้เล่นล็อกอินหรือรีเฟรชแอป)
-   * @param {string} userId - รหัสผู้ใช้งาน (UID)
-   * @returns {Promise<Object|null>} ข้อมูลทีม หรือ null ถ้ายังไม่เคยจัดทีม
-   */
-  loadSquad: async (userId) => {
+  loadSquad: async (userId, forceRefresh = false) => {
     if (!userId) return null;
 
-    try {
-      const docRef = getSquadDocRef(userId);
-      const docSnap = await getDoc(docRef);
+    const now = Date.now();
 
-      if (docSnap.exists()) {
-        console.log('☁️ [SquadService] โหลดข้อมูลทีมจาก Cloud สำเร็จ!');
-        return docSnap.data();
-      }
-      
-      // กรณีผู้เล่นใหม่ที่ยังไม่เคยกด "บันทึกทีม" เลย
-      return null; 
-
-    } catch (error) {
-      console.error("❌ [SquadService] เกิดข้อผิดพลาดในการดึงข้อมูลทีม:", error);
-      // หากดึงข้อมูลล้มเหลว คืนค่า null เพื่อให้ Store ใช้ค่าตั้งต้น (ทุน 100M) แทนแอปค้าง
-      return null; 
+    // 1. ตรวจสอบ Cache ใน Memory
+    if (!forceRefresh && cachedSquad && (now - lastFetchTime < CACHE_TTL)) {
+      console.log('%c📦 [SquadService] เสิร์ฟข้อมูลทีมจาก Memory Cache', 'color: #10b981; font-weight: bold;');
+      return cachedSquad;
     }
+
+    // 2. ป้องกัน Race Condition
+    if (fetchPromise && !forceRefresh) {
+      return fetchPromise;
+    }
+
+    // 3. เริ่มกระบวนการดึงข้อมูลใหม่
+    fetchPromise = (async () => {
+      try {
+        const docRef = getSquadDocRef(userId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          console.log('☁️ [SquadService] โหลดข้อมูลทีมจาก Cloud สำเร็จ!');
+          const data = docSnap.data();
+          
+          cachedSquad = data;
+          lastFetchTime = Date.now();
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+          
+          return data;
+        }
+        
+        return null; 
+
+      } catch (error) {
+        console.error("❌ [SquadService] เกิดข้อผิดพลาดในการดึงข้อมูลทีม:", error);
+        
+        try {
+          const backup = localStorage.getItem(LOCAL_STORAGE_KEY);
+          if (backup) {
+            console.log('%c🔄 [SquadService] ใช้งาน Offline Mode', 'color: #f97316; font-weight: bold;');
+            return JSON.parse(backup);
+          }
+        } catch (fallbackError) {
+          console.error('❌ ไม่สามารถกู้ข้อมูลจาก Local Backup ได้');
+        }
+        
+        return null; 
+      } finally {
+        fetchPromise = null;
+      }
+    })();
+
+    return fetchPromise;
+  },
+
+  clearCache: () => {
+    cachedSquad = null;
+    lastFetchTime = 0;
+    fetchPromise = null;
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
   }
 };

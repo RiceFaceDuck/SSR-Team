@@ -7,7 +7,7 @@ const PlayerActionPopup = ({ player, onClose, onAction }) => {
   if (!player) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-4 bg-slate-900/30 backdrop-blur-sm sm:items-center animate-in fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pb-28 bg-slate-900/30 backdrop-blur-sm animate-in fade-in" onClick={onClose}>
       
       {/* 🌟 Light Theme Popup Panel */}
       <div 

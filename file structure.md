@@ -12,17 +12,24 @@
 - `features/`: Domain-driven feature modules
   - `players/`: Player Management Feature
     - `components/`: `PlayerManualForm.jsx`, `PlayerTable.jsx`, `ExcelPreview.jsx`, `PlayerValueFormulaConfig.jsx`, `PlayerValuePreviewTable.jsx`
-    - `hooks/`: `usePlayers.js` (Business logic), `usePlayerSync.js` (API Sync Logic)
+    - `hooks/`: `usePlayers.js` (Business logic), `usePlayerSync.js` (API Sync Logic), `usePlayerSyncActions.js`, `usePlayerValueEngine.js`
     - `utils/`: `excelParser.js`, `templateUtil.js`
-    - `views/`: `PlayerFeature.jsx`, `PlayerList.jsx`, `PlayerDetails.jsx`, `DataOverlapManagement.jsx`, `PlayerValueManager.jsx`
+    - `views/`: `PlayerFeature.jsx`, `PlayerList.jsx`, `PlayerListModals.jsx`, `PlayerDetails.jsx`, `DataOverlapManagement.jsx`, `PlayerValueManager.jsx`
   - `managers/`: Manager Management Feature (New!)
     - `components/`: `ManagerForm.jsx`
+    - `hooks/`: `useManagerFormLogic.js`
     - `views/`: `ManagerList.jsx`
+  - `matches/`: Live Match Management Feature (New!)
+    - `components/`: `MatchConfigPanel.jsx`, `MatchScoreController.jsx`, `MatchEventPublisher.jsx`, `MatchEventHistory.jsx`, `LivePreviewBoard.jsx`
+    - `hooks/`: `useLiveMatchAdmin.js`
+    - `views/`: `MatchDashboard.jsx`
   - `cards/`: Power Card Management Feature
     - `components/`: `CardForm.jsx`, `CardItem.jsx`, `CardListHeader.jsx`
+    - `hooks/`: `useCardFormLogic.js`
     - `views/`: `CardList.jsx`
   - `system/`: System Settings Feature
-    - `components/`: `GameSettings.jsx`, `ThemeSettings.jsx`
+    - `components/`: `GameSettings.jsx`, `ThemeSettings.jsx`, `ThemeUploadField.jsx`, `ThemePromptBox.jsx`
+    - `hooks/`: `useThemeUploadLogic.js`
     - `views/`: `SystemSettings.jsx`, `LogicManual.jsx`
   - `gameRules/`: Game Rules, Scoring, and Conditions Feature (New!)
     - `components/`: `ToggleSwitch.jsx`, `ScoreStatItem.jsx`, `PositionScoreCard.jsx`
@@ -36,14 +43,18 @@
     - `QuestFormModal.jsx`
     - `QuestManager.jsx` (Tab Container)
   - `rewards/`: Reward Management Feature
-    - `components/`: `RewardTable.jsx`, `DeleteConfirmModal.jsx`
+    - `components/`: `RewardTable.jsx`, `DeleteConfirmModal.jsx`, `RewardBasicInfo.jsx`, `RewardEconomy.jsx`
+    - `hooks/`: `useRewardFormLogic.js`
     - `views/`: `RewardManager.jsx`, `RewardFormModal.jsx`
   - `history/`: Historical Data Archive Feature (New!)
     - `components/`: `HistoricalApiConfig.jsx`, `DataFetchMonitor.jsx`
     - `views/`: `HistoryArchive.jsx`
   - `users/`, `verify/`: Other features
+    - `components/`: `UserTable.jsx`, `AdjustBallsModal.jsx`
 - `services/`: External integrations
-  - `firebase/`: `playerDatabase.js`, `managerDatabase.js`, `gameRulesDatabase.js`, `historyDatabase.js` etc.
+  - `firebase/`: 
+    - `player/`: `playerFetchService.js`, `playerUpdateService.js`, `playerBulkService.js`, `playerUtils.js`
+    - `playerDatabase.js` (Facade), `managerDatabase.js`, `gameRulesDatabase.js`, `historyDatabase.js` etc.
   - `engine/`: `gameweekCalculationService.js`, `leaderboardEngine.js` (Game Loop Logic)
   - `api/`: `apiFootballService.js`, `historyApi.js`
 - `store/`: Zustand global state
@@ -52,12 +63,18 @@
 ## Frontend Structure `frontend/src/`
 - `components/`: Shared UI components
 - `features/`: Domain-driven feature modules (`auth/`, `market/`, `pitch/`, etc.)
+  - `auth/`:
+    - `authService.js`: Google Auth SignIn & SignOut logic
+    - `LoginScreen.jsx`: หน้าจอเข้าสู่ระบบเริ่มต้น
+    - `StartGameScreen.jsx`: หน้าจอ Tap to Start Animation (New)
   - `market/`:
     - `MarketScreen.jsx`: หน้าจอหลักของตลาดนักเตะ
     - `MarketHeader.jsx`: คอมโพเนนต์ส่วนหัว และงบประมาณคงเหลือ (Refactored)
     - `MarketFilters.jsx`: UI ค้นหาและกรองตำแหน่ง
     - `MarketPlayerList.jsx`: คอมโพเนนต์แสดงลิสต์รายชื่อ (Refactored)
     - `PlayerRow.jsx`
+    - `hooks/`:
+      - `useMarketFilters.js`: Logic กรองและเรียงลำดับนักเตะ (SRP)
   - `pitch/`:
     - `components/`:
       - `PitchBenchArea.jsx`: แถบนักเตะสำรองและผู้จัดการทีม
@@ -106,23 +123,32 @@
       - `ChatMessageInput.jsx`: กล่องป้อนข้อความพร้อมปุ่ม Normal / Super Chat
   - `social/`:
     - `SocialScreen.jsx`: หน้าจอหลักของคอมมูนิตี้และลีกส่วนตัว
-    - `components/`: `ReferralCard.jsx` (ชวนเพื่อน), `LeagueManager.jsx` (สร้าง/เข้าร่วมลีก), `LeagueList.jsx` (รายการลีก)
+    - `components/`: `ReferralCard.jsx` (ชวนเพื่อน), `LeagueManager.jsx` (สร้าง/เข้าร่วมลีก), `LeagueList.jsx` (รายการลีก), `LeagueDetailsModal.jsx`, `LeagueHeader.jsx`, `LeagueLeaderboard.jsx`, `LeagueSettings.jsx`
+    - `hooks/`: `useLeagueDetailsLogic.js`
   - `services/`: Core logic decoupled from React
     - `api/`: `apiFootballService.js`, `apiStatusService.js`
     - `engine/`: 
       - `squadCalculationService.js`: Engine สำหรับคำนวณคะแนนรวมของทีมตาม Gameweek
       - `gameweekCalculationService.js`: Engine ย่อย
       - `playerValueCalculationService.js`: Engine สำหรับคำนวณและปรับสมดุลราคานักเตะ
-    - `firebase/`: Firestore database wrappers (`playerDatabase.js`, `questDatabase.js`, etc.)
+    - `firebase/`: Firestore database wrappers (`questFetchService.js`, `questClaimService.js`, `questService.js` (facade), `playerDatabase.js`, `chatMessageService.js`, `chatSubscriptionService.js`, `redeemFetchService.js`, `redeemActionService.js`, etc.)
 - `store/`: Zustand global state
   - `useUserStore.js`: Store หลักที่รวม Slices เข้าด้วยกัน
   - `slices/`: 
     - `createAuthSlice.js`: จัดการข้อมูลผู้ใช้
     - `squadCoreSlice.js`: จัดการการจัดทีม แผนการเล่น สถานะพื้นฐานและการเซฟ
-    - `squadActionSlice.js`: จัดการการกระทำในสนาม 
+    - `squadFormationSlice.js`: จัดการแผนการเล่น และการล้างทีม
+    - `squadPlacementSlice.js`: จัดการการซื้อขายและเลือกลงสนาม
+    - `squadPitchSlice.js`: จัดการการกระทำในสนาม เช่น สลับตัวหรือถอดออก
+    - `squadActionSlice.js`: (DEPRECATED) 
     - `squadMarketSlice.js`: จัดการการซื้อขายนักเตะ
     - `squadAutoFillSlice.js`: จัดการการจัดทีมอัตโนมัติ
     - `squadCardSlice.js`: จัดการระบบการ์ดเสริมพลัง
     - `createWalletSlice.js`: จัดการงบและ Balls
     - `inventorySlice.js`: จัดการคลังเก็บการ์ดและผู้จัดการทีม (NEW)
-- `hooks/`, `utils/`: Global app structure
+- `hooks/`: Global app hooks
+  - `useAuthSync.js`: Firebase auth state sync and profile creation (New/Refactored)
+  - `useSessionTimeout.js`: 20-minute session management (New)
+  - `useHapticFeedback.js`: UX enhancement for device vibration
+  - `useActionCooldown.js`: Cooldown and ad handling for action buttons
+- `utils/`: Global app utilities

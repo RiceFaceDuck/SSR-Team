@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { auth, db } from './config/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'; // 🌟 UPDATED: นำเข้า setDoc และ serverTimestamp เผื่อกรณีสร้าง User ใหม่
 import { useUserStore } from './store/useUserStore';
 import { useGameStore } from './store/useGameStore';
 import { logoutUser } from './features/auth/authService';
-import { referralService } from './services/firebase/referralService';
 
+// Custom Hooks
+import { useAuthSync } from './hooks/useAuthSync';
+import { useSessionTimeout } from './hooks/useSessionTimeout';
+
+// Layout & UI
 import MobileLayout from './components/layout/MobileLayout';
 import { STYLES } from './config/theme';
+import Toast from './components/common/Toast';
 
+// Screens
 import LoginScreen from './features/auth/LoginScreen';
+import StartGameScreen from './features/auth/StartGameScreen';
 import PitchScreen from './features/pitch/PitchScreen';
 import MarketScreen from './features/market/MarketScreen';
 import QuestScreen from './features/quests/QuestScreen';
@@ -20,27 +24,23 @@ import LeaderboardScreen from './features/leaderboard/LeaderboardScreen';
 import SocialScreen from './features/social/SocialScreen';
 import LiveScoreScreen from './features/live/LiveScoreScreen';
 
-import Toast from './components/common/Toast';
-
 export default function App() {
-  const { 
-    isAuthenticated, 
-    isAuthLoading, 
-    setUserAuth, 
-    clearAuth, 
-    setAuthReady,
-    loadSquadFromCloud // 🌟 NEW: นำเข้าฟังก์ชันโหลดทีมจาก Cloud
-  } = useUserStore();
-  
+  const { isAuthenticated, isAuthLoading } = useUserStore();
   const { initThemeListener } = useGameStore();
 
   const [currentPath, setCurrentPath] = useState('pitch');
+  const [isGameStarted, setIsGameStarted] = useState(false); // 🌟 State สำหรับคุมหน้า Tap to Start
 
-  // 🌟 เปิดการทำงานของระบบซิงค์สถิติและข้อมูลเกมแบบ Real-time ให้ครอบคลุมทั้งแอป (Global Listener)
+  // 🌟 1. ดึงข้อมูล Auth จาก Firebase แบบอัตโนมัติ (SRP)
+  useAuthSync();
+  
+  // 🌟 2. ระบบเตะออกอัตโนมัติเมื่อครบ 20 นาที
+  useSessionTimeout();
+
   useEffect(() => {
     const unsubscribeTheme = initThemeListener();
 
-    // 🌟 ดักจับ Referral Code จาก URL ก่อน (เผื่อ User เพิ่งเข้าครั้งแรก)
+    // ดักจับ Referral Code
     const urlParams = new URLSearchParams(window.location.search);
     const refCode = urlParams.get('ref');
     if (refCode) {
@@ -50,7 +50,6 @@ export default function App() {
     return () => unsubscribeTheme();
   }, [initThemeListener]);
 
-  // 🌟 เพิ่มระบบ Seamless Navigation รับ Event สลับหน้าจออัตโนมัติจากทุกที่ในแอป
   useEffect(() => {
     const handleSwitchTab = (e) => {
       if (e.detail) {
@@ -61,80 +60,12 @@ export default function App() {
     return () => window.removeEventListener('switchTab', handleSwitchTab);
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const userDocRef = doc(db, 'users', user.uid);
-          const userDocSnap = await getDoc(userDocRef);
-          
-          if (userDocSnap.exists()) {
-            const userData = userDocSnap.data();
-            
-            // 🌟 1. เซ็ตข้อมูลผู้ใช้งานพื้นฐานก่อน (อัปเดตแค่นี้พอ)
-            setUserAuth({
-              uid: user.uid,
-              displayName: userData.displayName || user.displayName,
-              email: user.email,
-              photoURL: userData.photoURL || user.photoURL,
-              role: userData.role || 'player',
-              balls: userData.balls !== undefined ? userData.balls : (userData.energyBottles || 0), // 🌟 รองรับตัวแปร balls
-              userPoints: userData.userPoints || 0,
-            });
-
-            // 🌟 1.5 Fetch latest game rules first so budget is ready
-            await useGameStore.getState().fetchGameRules();
-
-            // 🌟 2. สั่งโหลดทีมจาก Cloud ผ่าน Service ที่ถูกต้อง (แก้บั๊กเซฟทีมหาย!)
-            await loadSquadFromCloud(user.uid);
-
-          } else {
-            // กรณีผู้เล่นใหม่ (อาจจะหลุดมาจากการ Login)
-            const newUserData = {
-              uid: user.uid,
-              displayName: user.displayName || 'ผู้จัดการทีมหน้าใหม่',
-              email: user.email,
-              photoURL: user.photoURL || '',
-              role: 'player',
-              balls: 100, // ทุนเริ่มต้น 100 Balls
-              userPoints: 0,
-              createdAt: serverTimestamp(),
-              lastLoginAt: serverTimestamp(),
-              referredBy: localStorage.getItem('referralCode') || null
-            };
-
-            await setDoc(userDocRef, newUserData);
-
-            setUserAuth(newUserData);
-            // 🌟 1.5 Fetch latest game rules first so budget is ready
-            await useGameStore.getState().fetchGameRules();
-            // 🌟 โหลดทีมเผื่อไว้ (ถึงจะเป็นไอดีใหม่ก็ต้องเรียก เพื่อให้เซ็ตค่าเริ่มต้นที่ถูกต้อง)
-            await loadSquadFromCloud(user.uid);
-          }
-
-          // 🌟 3. ตรวจสอบรางวัลชวนเพื่อนที่ยังไม่ได้เคลม
-          const claimedBalls = await referralService.claimRewards(user.uid);
-          if (claimedBalls > 0) {
-            // อัปเดตใน state ให้แสดงผลทันที
-            useUserStore.getState().addBalls(claimedBalls);
-          }
-
-        } catch (error) {
-          console.error("❌ Auth Fetch Error:", error);
-          clearAuth();
-        }
-      } else {
-        clearAuth();
-        setAuthReady();
-      }
-    });
-    return () => unsubscribe();
-  }, [setUserAuth, clearAuth, setAuthReady, loadSquadFromCloud]); // 🌟 อัปเดต Dependency Array
-
   const handleLogout = async () => {
     await logoutUser();
+    setIsGameStarted(false); // รีเซ็ตสถานะเมื่อล็อกเอาท์
   };
 
+  // กำลังโหลดข้อมูล (Loading State)
   if (isAuthLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#F4F7FE] relative overflow-hidden">
@@ -152,11 +83,27 @@ export default function App() {
     );
   }
 
+  // กรณียังไม่ล็อกอิน -> แสดงหน้า LoginScreen
   if (!isAuthenticated) {
-    return <><Toast /><LoginScreen /></>;
+    return (
+      <>
+        <Toast />
+        <LoginScreen onLogin={() => {}} />
+      </>
+    );
   }
 
-  // เทคนิค Keep-alive DOM
+  // 🌟 กรณีล็อกอินแล้ว แต่ยังไม่ได้กดเริ่มเกม -> แสดงหน้า Tap to Start
+  if (isAuthenticated && !isGameStarted) {
+    return (
+      <>
+        <Toast />
+        <StartGameScreen onStart={() => setIsGameStarted(true)} />
+      </>
+    );
+  }
+
+  // เทคนิค Keep-alive DOM เพื่อให้สลับแท็บเร็วขึ้น
   const getRouteClass = (path) => currentPath === path 
     ? "block h-full w-full animate-in fade-in duration-300" 
     : "fixed -left-[9999px] opacity-0 pointer-events-none";

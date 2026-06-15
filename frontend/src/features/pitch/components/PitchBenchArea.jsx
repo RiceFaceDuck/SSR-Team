@@ -46,7 +46,7 @@ export default function PitchBenchArea({
 
       {/* Manager Slot (Right side) */}
       {/* Manager Slot (Right side) */}
-      <div className="flex-shrink-0 cursor-pointer hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center w-[75px] sm:w-[90px] lg:w-[110px]" onClick={onManagerClick}>
+      <div className="flex-shrink-0 w-[55px] sm:w-[65px] lg:w-[80px] cursor-pointer hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center" onClick={onManagerClick}>
           {manager ? (
             <div className="w-full flex flex-col items-center justify-center">
               <div className="w-[48px] sm:w-[55px] lg:w-[65px] flex flex-col items-center justify-center scale-95">
@@ -66,9 +66,9 @@ export default function PitchBenchArea({
                 </div>
               </div>
               {/* Description (Outside Card) */}
-              <div className="mt-1 w-full text-center px-1">
-                <span className="text-white text-[6px] sm:text-[7px] lg:text-[8px] font-medium leading-tight line-clamp-2">
-                  {manager.description || 'เพิ่มความสามารถทีม'}
+              <div className="mt-1 w-full text-center px-0">
+                <span className="text-yellow-400 text-[9px] sm:text-[10px] lg:text-[11px] font-bold leading-tight line-clamp-2 drop-shadow-md">
+                  {manager.shortDescription || (manager.description && manager.description.includes('คลีนชีต') ? 'DF +2p Clean Sheet' : (manager.description || 'เพิ่มพลังทีม').substring(0, 20))}
                 </span>
               </div>
             </div>

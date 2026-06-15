@@ -16,6 +16,7 @@ import BudgetBar from '../../components/common/BudgetBar';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 import PlayerActionModal from '../../components/player/PlayerActionModal';
 import PlayerBottomSheet from '../../components/player/PlayerBottomSheet'; // 🌟 นำเข้า Bottom Sheet ตัวใหม่
+import { useMarketFilters } from './hooks/useMarketFilters';
 
 import { useMarketStore } from '../../store/useMarketStore';
 import { useUserStore } from '../../store/useUserStore';
@@ -40,12 +41,17 @@ export default function MarketScreen() {
     getEffectiveBudget
   } = useUserStore();
 
-  // 2. Local State สำหรับจัดการ UI ภายในหน้านี้
-  // 🌟 NEW: ตั้งค่าเริ่มต้น Tab จากตำแหน่งที่กดมาจากสนาม (ถ้าไม่มีให้เป็น 'ALL')
-  const [activeTab, setActiveTab] = useState(marketFilterPos || 'ALL');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('price-desc'); // price-desc, price-asc, points-desc
-  
+  // 2. Local State และ Logic การกรองข้อมูล (Refactored to Custom Hook - SRP)
+  const {
+    activeTab,
+    setActiveTab,
+    searchQuery,
+    setSearchQuery,
+    sortBy,
+    setSortBy,
+    displayPlayers
+  } = useMarketFilters(players, mySquad, marketFilterPos);
+
   // State สำหรับ Modal เดิม (ใช้สำหรับการขาย)
   const [modalConfig, setModalConfig] = useState({ isOpen: false, player: null, actionType: 'buy' });
   
@@ -56,59 +62,6 @@ export default function MarketScreen() {
   useEffect(() => {
     fetchMarketPlayers();
   }, [fetchMarketPlayers]);
-
-  // 🌟 NEW: ดักจับและซิงค์ Tab อัตโนมัติเมื่อค่า marketFilterPos ถูกเปลี่ยนจากนอก Component (เช่นกดมาจากสนาม)
-  useEffect(() => {
-    if (marketFilterPos && marketFilterPos !== activeTab) {
-      setActiveTab(marketFilterPos);
-    }
-    // ไม่ต้องใส่ activeTab เป็น dependency เพื่อป้องกัน Infinite Loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [marketFilterPos]);
-
-  // 4. (Moved tabs array to MarketFilters.jsx)
-
-  // 5. กรองและเรียงลำดับข้อมูลนักเตะ
-  const displayPlayers = useMemo(() => {
-    let filtered = [...players];
-
-    if (activeTab === 'MY_TEAM') {
-      // 🌟 กรองแสดงเฉพาะนักเตะที่เราซื้อมาแล้ว (มีใน mySquad)
-      filtered = filtered.filter(p => mySquad.some(sq => String(sq.playerId) === String(p.sku)));
-    } else if (activeTab !== 'ALL') {
-      filtered = filtered.filter(p => p.position?.toUpperCase() === activeTab);
-    }
-
-    if (searchQuery.trim() !== '') {
-      const q = searchQuery.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.name?.toLowerCase().includes(q) || 
-        p.fullName?.toLowerCase().includes(q) ||
-        p.team?.toLowerCase().includes(q)
-      );
-    }
-
-    filtered.sort((a, b) => {
-      // 🌟 นำนักเตะที่มีอยู่ในทีมแล้ว (isInSquad) ไปไว้ล่างสุดเสมอ
-      const isOwnedA = mySquad.some(sq => String(sq.playerId) === String(a.sku));
-      const isOwnedB = mySquad.some(sq => String(sq.playerId) === String(b.sku));
-
-      if (isOwnedA && !isOwnedB) return 1;
-      if (!isOwnedA && isOwnedB) return -1;
-
-      const priceA = parseFloat(a.price) || 0;
-      const priceB = parseFloat(b.price) || 0;
-      const pointsA = parseInt(a.totalPoints) || 0;
-      const pointsB = parseInt(b.totalPoints) || 0;
-
-      if (sortBy === 'price-desc') return priceB - priceA;
-      if (sortBy === 'price-asc') return priceA - priceB;
-      if (sortBy === 'points-desc') return pointsB - pointsA;
-      return 0;
-    });
-
-    return filtered;
-  }, [players, activeTab, searchQuery, sortBy, mySquad]);
 
   // 6. ฟังก์ชันเมื่อกดที่แถวนักเตะ (Tap Row) -> เปิด Bottom Sheet
   const handleRowClick = (player) => {

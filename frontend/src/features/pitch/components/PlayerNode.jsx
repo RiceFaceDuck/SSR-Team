@@ -18,7 +18,7 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench }) => {
   const cardIcon = player.appliedCardIcon;
 
   return (
-    <div className={`flex flex-col items-center justify-end w-[48px] sm:w-[55px] lg:w-[65px] group relative cursor-pointer active:scale-95 transition-all duration-300 ${isSelected ? '-translate-y-2' : ''}`}>
+    <div className={`flex flex-col items-center justify-end w-[48px] sm:w-[55px] lg:w-[65px] group relative cursor-pointer active-press hover-lift transition-all duration-300 ${isSelected ? '-translate-y-2' : ''}`}>
       
       {/* 🌟 Glowing effect when selected */}
       {isSelected && (

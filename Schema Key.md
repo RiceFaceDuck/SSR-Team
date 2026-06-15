@@ -103,6 +103,19 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `points`    | Number | คะแนนที่ได้ในสัปดาห์นี้ |
 | `createdAt` | Timestamp | วันที่บันทึก |
 
+### 4.2 Transactions Sub-collection
+`users/{userId}/transactions/{transactionId}`
+เก็บประวัติการได้รับหรือใช้จ่าย Balls ของผู้เล่น
+
+| Field       | Type   | Description |
+| ----------- | ------ | ----------- |
+| `amount`    | Number | ยอดเงินที่ทำรายการ (บวก/ลบ) |
+| `type`      | String | 'earn' หรือ 'spend' |
+| `source`    | String | แหล่งที่มา (เช่น 'daily_login', 'sponsor_ad') |
+| `description`| String | คำอธิบายรายการสำหรับ UI |
+| `timestamp` | Timestamp | วันเวลาที่ทำรายการ |
+| `status`    | String | สถานะ (เช่น 'success') |
+
 ## 6. System Config Schema (การตั้งค่าระบบ)
 `public_data/system_config`
 
@@ -113,7 +126,7 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `totalJoinedTeams` | Number  | จำนวนทีมที่เข้าร่วมแล้ว (16 คนครบ) |
 | `isNoAdsMode`      | Boolean | โหมดปิดโฆษณา |
 | `themeConfig`      | Object  | `{"loginBackgroundUrl":"", "floatingObjectUrl":"", "marketBackgroundUrl":""}` |
-| `autoPickConfig`   | Object  | `{"cooldownSeconds": 15, "adLinkUrl": ""}` |
+| `buttonAdsConfig`  | Object  | `{ "autoPick": {cooldownSeconds: 15, adLinkUrl: ""}, "reset": {...} }` |
 | `chatConfig`       | Object  | `{"normalChatCost":2, "superChatCost":15, "superChatDuration":30, "superChatCostIncrement":5, "superChatResetTime":60, "normalChatFreeInterval":300}` |
 | `latestSuperChatEndTime` | Timestamp | เวลาสิ้นสุดของ Super Chat ตัวสุดท้าย (ใช้คำนวณคิว) |
 

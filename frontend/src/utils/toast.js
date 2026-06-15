@@ -16,7 +16,14 @@ export const showToast = (message, type = 'info', duration = 3000) => {
     detail: { message, type, duration },
   });
   
-  // กระจาย Event ออกไปให้ทั่วทั้งแอป (ใครที่ดักฟังอยู่ก็จะทำงานทันที)
+  // ให้ Haptic Feedback เพื่อความพรีเมียมบนมือถือ (สั่นแบบแตกต่างกันตามประเภท)
+  if (window.navigator && window.navigator.vibrate) {
+    if (type === 'success') window.navigator.vibrate([10, 30, 10]);
+    else if (type === 'error') window.navigator.vibrate([50, 50, 50]);
+    else window.navigator.vibrate(10);
+  }
+
+  // กระจาย Event ออกไปให้ทั่วทั้งแอป
   window.dispatchEvent(event);
 };
 

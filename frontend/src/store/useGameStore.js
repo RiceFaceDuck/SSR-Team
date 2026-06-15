@@ -27,7 +27,7 @@ export const useGameStore = create((set, get) => ({
   isMarketOpen: true,
   totalJoinedTeams: 0,
   referralRewardBalls: 50,
-  autoPickConfig: { cooldownSeconds: 15, adLinkUrl: '' },
+  buttonAdsConfig: {},
   chatConfig: { 
     normalChatCost: 2, 
     superChatCost: 15, 
@@ -61,7 +61,7 @@ export const useGameStore = create((set, get) => ({
           isMarketOpen: data.isMarketOpen !== undefined ? data.isMarketOpen : true,
           totalJoinedTeams: data.totalJoinedTeams || 0, // กลับมาใช้จากเอกสารกลางเพื่อเลี่ยงบั๊ค Query
           referralRewardBalls: data.referralRewardBalls !== undefined ? data.referralRewardBalls : 50,
-          autoPickConfig: data.autoPickConfig || { cooldownSeconds: 15, adLinkUrl: '' },
+          buttonAdsConfig: data.buttonAdsConfig || {},
           chatConfig: data.chatConfig || { 
             normalChatCost: 2, 
             superChatCost: 15, 

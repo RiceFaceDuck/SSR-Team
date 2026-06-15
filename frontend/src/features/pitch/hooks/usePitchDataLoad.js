@@ -4,10 +4,13 @@ import { useMarketStore } from '../../../store/useMarketStore';
 
 export const usePitchDataLoad = () => {
   const { 
+    userData,
     mySquad, 
     fetchCards,
     isCardsFetched,
-    fetchLiveStats
+    fetchLiveStats,
+    loadInventory,
+    isInventoryLoaded
   } = useUserStore();
 
   const { fetchMarketPlayers, isDataFetched } = useMarketStore();
@@ -19,6 +22,9 @@ export const usePitchDataLoad = () => {
     }
     if (!isCardsFetched) {
       fetchCards();
+    }
+    if (!isInventoryLoaded && userData?.uid) {
+      loadInventory(userData.uid);
     }
     // Fetch live stats once component mounts
     if (mySquad?.length > 0) {

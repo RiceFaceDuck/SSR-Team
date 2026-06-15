@@ -25,19 +25,19 @@ export default function SkeletonLoader({ type = 'row', count = 3 }) {
           >
             <div className="flex items-center gap-4">
               {/* รูปโปรไฟล์จำลอง (Avatar) */}
-              <div className="w-10 h-10 bg-slate-200/70 rounded-full animate-pulse shrink-0"></div>
+              <div className="w-10 h-10 rounded-full animate-shimmer shrink-0"></div>
               
               {/* ชื่อและตำแหน่งจำลอง (Text) */}
               <div className="space-y-2.5">
-                <div className="h-3.5 bg-slate-200/80 rounded-md animate-pulse w-28"></div>
-                <div className="h-2.5 bg-slate-100 rounded-md animate-pulse w-16"></div>
+                <div className="h-3.5 rounded-md animate-shimmer w-28"></div>
+                <div className="h-2.5 rounded-md animate-shimmer w-16"></div>
               </div>
             </div>
             
             {/* ราคาและปุ่มจำลอง (Price & Button) */}
             <div className="flex flex-col items-end gap-2.5">
-              <div className="h-4 bg-slate-200/80 rounded-md animate-pulse w-14"></div>
-              <div className="h-5 bg-slate-100 rounded-full animate-pulse w-12"></div>
+              <div className="h-4 rounded-md animate-shimmer w-14"></div>
+              <div className="h-5 rounded-full animate-shimmer w-12"></div>
             </div>
           </div>
         ))}

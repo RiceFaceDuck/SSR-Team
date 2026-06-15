@@ -4,7 +4,9 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { createAuthSlice } from './slices/createAuthSlice';
 import { createWalletSlice } from './slices/createWalletSlice';
 import { squadCoreSlice } from './slices/squadCoreSlice';
-import { squadActionSlice } from './slices/squadActionSlice';
+import { squadFormationSlice } from './slices/squadFormationSlice';
+import { squadPlacementSlice } from './slices/squadPlacementSlice';
+import { squadPitchSlice } from './slices/squadPitchSlice';
 import { squadMarketSlice } from './slices/squadMarketSlice';
 import { squadAutoFillSlice } from './slices/squadAutoFillSlice';
 import { squadCardSlice } from './slices/squadCardSlice';
@@ -18,7 +20,9 @@ export const useUserStore = create(
       ...createAuthSlice(set, get),
       ...createWalletSlice(set, get),
       ...squadCoreSlice(set, get),
-      ...squadActionSlice(set, get),
+      ...squadFormationSlice(set, get),
+      ...squadPlacementSlice(set, get),
+      ...squadPitchSlice(set, get),
       ...squadMarketSlice(set, get),
       ...squadAutoFillSlice(set, get),
       ...squadCardSlice(set, get),

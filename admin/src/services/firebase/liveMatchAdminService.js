@@ -1,10 +1,44 @@
 import { db } from '../../config/firebase';
-import { doc, setDoc, collection, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { doc, setDoc, collection, serverTimestamp, writeBatch, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 
 const LIVE_MATCH_DOC_ID = 'live_match';
 const ADMIN_SECRET = 'super_secret_admin_key_2026';
 
 export const liveMatchAdminService = {
+  /**
+   * สมัครรับข้อมูล Live Match (เรียลไทม์)
+   */
+  subscribeToLiveMatch(callback) {
+    const docRef = doc(db, 'public_data', LIVE_MATCH_DOC_ID);
+    return onSnapshot(docRef, (snapshot) => {
+      if (snapshot.exists()) {
+        callback({ id: snapshot.id, ...snapshot.data() });
+      } else {
+        callback(null);
+      }
+    }, (error) => {
+      console.error("Error subscribing to live match:", error);
+    });
+  },
+
+  /**
+   * สมัครรับข้อมูลเหตุการณ์ (Events) ล่าสุดแบบจำกัดจำนวน (ประหยัด Reads)
+   */
+  subscribeToLiveEvents(callback, limitCount = 20) {
+    const eventsRef = collection(db, 'public_data', LIVE_MATCH_DOC_ID, 'events');
+    const q = query(eventsRef, orderBy('timestamp', 'desc'), limit(limitCount));
+    
+    return onSnapshot(q, (snapshot) => {
+      const events = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      callback(events);
+    }, (error) => {
+      console.error("Error subscribing to live events:", error);
+    });
+  },
+
   /**
    * เริ่มต้นแมตช์ใหม่ หรือ อัปเดตข้อมูลแมตช์พื้นฐาน
    */
@@ -63,7 +97,7 @@ export const liveMatchAdminService = {
       latestEvent: {
         primaryDetail: data.primaryDetail,
         secondaryDetail: data.secondaryDetail || '',
-        timestamp: new Date().getTime() // Since serverTimestamp is a sentinel value, it can't be safely retrieved on the client immediately in some cached structures, we can just use local time for the frontend sort or let Firestore handle it. Better to use serverTimestamp if we don't strictly need precise client-side merging.
+        timestamp: serverTimestamp() // ใช้ serverTimestamp เพื่อให้สอดคล้องกับ Schema และป้องกันปัญหาเรื่องเวลาเหลื่อม
       },
       updatedAt: serverTimestamp(),
       _adminSecret: ADMIN_SECRET

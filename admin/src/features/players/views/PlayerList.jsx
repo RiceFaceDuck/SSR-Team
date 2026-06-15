@@ -1,29 +1,18 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { usePlayers } from '../hooks/usePlayers';
-import { usePlayerSync } from '../hooks/usePlayerSync';
+import { usePlayerSyncActions } from '../hooks/usePlayerSyncActions';
 
 import PlayerToolbar from '../components/PlayerToolbar';
 import PlayerTable from '../components/PlayerTable';
-import SyncPreviewModal from '../components/SyncPreviewModal';
-import PlayerDetails from './PlayerDetails';
-import ApiSettingsModal from '../../settings/components/ApiSettingsModal';
+import PlayerListModals from './PlayerListModals';
 
 const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
-  const { players, isLoading, fetchPlayers, removePlayer, saveManualPlayer, addMultiplePlayers } = usePlayers();
-  const { isSyncing, checkPlayerUpdate, checkBulkUpdates } = usePlayerSync();
+  const { players, isLoading, fetchPlayers, removePlayer } = usePlayers();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTeam, setSelectedTeam] = useState('All');
   
-  // States สำหรับระบบ Sync Preview (Row level & Bulk)
-  const [syncModal, setSyncModal] = useState({ isOpen: false, player: null, apiData: null, updates: {} });
-  const [isCheckingRow, setIsCheckingRow] = useState(null);
-  
   const [detailModalPlayer, setDetailModalPlayer] = useState(null);
-  
-  // Bulk Sync States
-  const [bulkUpdatesList, setBulkUpdatesList] = useState([]);
-  const [isCheckingBulk, setIsCheckingBulk] = useState(false);
   
   // States สำหรับ Settings & Auto-sync
   const [isApiSettingsOpen, setIsApiSettingsOpen] = useState(false);
@@ -37,101 +26,6 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
     if (window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบ ${player.name} ออกจากระบบ?`)) {
       const result = await removePlayer(player.id);
       if (!result.success) alert(result.error?.message || 'เกิดข้อผิดพลาดในการลบข้อมูล');
-    }
-  };
-
-  const handleDeleteAll = async () => {
-    const isAll = selectedTeam === 'All' && !searchTerm;
-    const msg = isAll 
-      ? `🚨 คำเตือน: คุณแน่ใจหรือไม่ว่าต้องการ "ลบนักเตะทั้งหมดในระบบ" (${filteredPlayers.length} คน)?\nการกระทำนี้ไม่สามารถกู้คืนได้!`
-      : `คุณแน่ใจหรือไม่ว่าต้องการ "ลบนักเตะที่กำลังแสดงผลอยู่ (${filteredPlayers.length} คน)"?`;
-
-    if (window.confirm(msg)) {
-      if (window.confirm(`โปรดยืนยันการลบ ${filteredPlayers.length} รายการอีกครั้ง?`)) {
-        let successCount = 0;
-        let failCount = 0;
-        for (const p of filteredPlayers) {
-          const res = await removePlayer(p.id);
-          if (res.success) successCount++;
-          else failCount++;
-        }
-        alert(`✅ ลบสำเร็จ ${successCount} รายการ\n❌ ล้มเหลว ${failCount} รายการ`);
-        fetchPlayers();
-      }
-    }
-  };
-
-  // 🔥 จัดการ Row-level Sync
-  const handleRowSync = async (player) => {
-    setIsCheckingRow(player.id);
-    const result = await checkPlayerUpdate(player);
-    setIsCheckingRow(null);
-
-    if (result.success) {
-      if (result.hasChanges) {
-        setSyncModal({ isOpen: true, player, apiData: result.data, updates: result.updates });
-      } else {
-        alert('ข้อมูลเป็นปัจจุบันแล้ว ไม่มีอะไรต้องอัปเดต');
-      }
-    } else {
-      alert(`ดึงข้อมูลล้มเหลว: ${result.error.message}`);
-    }
-  };
-
-  // ยืนยันการอัปเดตจากหน้าต่าง Preview
-  const handleConfirmSync = async (payload) => {
-    if (syncModal.isBulk) {
-      // กรณีอัปเดตกลุ่มทั้งหมด
-      const playersToSave = payload.map(item => {
-        // ให้ความสำคัญกับ API SKU เป็นอันดับแรก
-        const finalSku = item.apiData.sku || item.player.sku;
-        const dataToSave = { 
-          ...item.player, 
-          ...item.apiData, 
-          id: item.player.isNew ? undefined : item.player.id, 
-          sku: finalSku 
-        };
-        delete dataToSave.isNew;
-        return dataToSave;
-      });
-      
-      // ลบตัวเก่าที่มี SKU ไม่ตรงกับ API (ถ้ามี)
-      for (const item of payload) {
-        const finalSku = item.apiData.sku || item.player.sku;
-        if (!item.player.isNew && item.player.id && item.player.id !== finalSku) {
-           await removePlayer(item.player.id);
-        }
-      }
-
-      await addMultiplePlayers(playersToSave);
-      setBulkUpdatesList([]);
-      setSyncModal({ isOpen: false, isBulk: false, player: null, apiData: null, updates: {}, updatesList: [] });
-      fetchPlayers();
-    } else {
-      // กรณีอัปเดตคนเดียว
-      const apiData = payload;
-      const originalPlayer = syncModal.player;
-      // ให้ความสำคัญกับ API SKU เป็นอันดับแรก
-      const finalSku = apiData.sku || originalPlayer.sku;
-      
-      const dataToSave = { 
-        ...originalPlayer, 
-        ...apiData, 
-        id: originalPlayer.isNew ? undefined : originalPlayer.id, 
-        sku: finalSku 
-      };
-      delete dataToSave.isNew;
-      
-      // ลบตัวเก่าที่มี SKU ไม่ตรงกับ API
-      if (!originalPlayer.isNew && originalPlayer.id && originalPlayer.id !== finalSku) {
-        await removePlayer(originalPlayer.id);
-      }
-
-      await saveManualPlayer(dataToSave);
-      setSyncModal({ isOpen: false, isBulk: false, player: null, apiData: null, updates: {}, updatesList: [] });
-      fetchPlayers();
-      
-      setBulkUpdatesList(prev => prev.filter(item => item.player.id !== originalPlayer.id));
     }
   };
 
@@ -157,41 +51,38 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
     return result;
   }, [players, searchTerm, selectedTeam]);
 
-  // 🔥 Bulk Check สำหรับข้อมูลทั้งหมด (หรือตามทีมที่กรอง)
-  const handleBulkCheck = async () => {
-    if (bulkUpdatesList.length > 0) {
-      setSyncModal({ 
-        isOpen: true, 
-        isBulk: true,
-        updatesList: bulkUpdatesList 
-      });
-      return;
-    }
+  const handleDeleteAll = async () => {
+    const isAll = selectedTeam === 'All' && !searchTerm;
+    const msg = isAll 
+      ? `🚨 คำเตือน: คุณแน่ใจหรือไม่ว่าต้องการ "ลบนักเตะทั้งหมดในระบบ" (${filteredPlayers.length} คน)?\nการกระทำนี้ไม่สามารถกู้คืนได้!`
+      : `คุณแน่ใจหรือไม่ว่าต้องการ "ลบนักเตะที่กำลังแสดงผลอยู่ (${filteredPlayers.length} คน)"?`;
 
-    if (players.length === 0 && selectedTeam === 'All') {
-      alert("เนื่องจากยังไม่มีข้อมูลในระบบเลย กรุณาเลือกสโมสรที่แท็บด้านบนก่อน เพื่อดึงข้อมูลตั้งต้นจาก API ครับ!");
-      return;
-    }
-
-    setIsCheckingBulk(true);
-    const result = await checkBulkUpdates(filteredPlayers, selectedTeam);
-    setIsCheckingBulk(false);
-
-    if (result.success) {
-      if (result.count > 0) {
-        setBulkUpdatesList(result.updates);
-        setSyncModal({ 
-          isOpen: true, 
-          isBulk: true,
-          updatesList: result.updates 
-        });
-      } else {
-        alert('ข้อมูลทั้งหมดเป็นปัจจุบันแล้ว!');
+    if (window.confirm(msg)) {
+      if (window.confirm(`โปรดยืนยันการลบ ${filteredPlayers.length} รายการอีกครั้ง?`)) {
+        let successCount = 0;
+        let failCount = 0;
+        for (const p of filteredPlayers) {
+          const res = await removePlayer(p.id);
+          if (res.success) successCount++;
+          else failCount++;
+        }
+        alert(`✅ ลบสำเร็จ ${successCount} รายการ\n❌ ล้มเหลว ${failCount} รายการ`);
+        fetchPlayers();
       }
-    } else {
-      alert(`ดึงข้อมูลล้มเหลว: ${result.error?.message}`);
     }
   };
+
+  // 🌟 ดึง Actions จาก Custom Hook ที่ Refactor ออกไป (SRP)
+  const {
+    syncModal,
+    setSyncModal,
+    isCheckingRow,
+    bulkUpdatesList,
+    isCheckingBulk,
+    handleRowSync,
+    handleConfirmSync,
+    handleBulkCheck
+  } = usePlayerSyncActions(players, filteredPlayers, selectedTeam);
 
   return (
     <div className="space-y-4">
@@ -225,43 +116,17 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
         onRowClick={(player) => setDetailModalPlayer(player)}
       />
 
-      {/* 🌟 Modal พรีวิวเมื่อกด Sync */}
-      {syncModal.isOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setSyncModal({ ...syncModal, isOpen: false })}></div>
-          <div className="relative z-10 w-full flex justify-center">
-            <SyncPreviewModal 
-              isBulk={syncModal.isBulk}
-              updatesList={syncModal.updatesList}
-              player={syncModal.player}
-              apiData={syncModal.apiData}
-              updates={syncModal.updates}
-              onConfirm={handleConfirmSync}
-              onCancel={() => setSyncModal({ ...syncModal, isOpen: false })}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* 🌟 Modal แสดงรายละเอียดนักเตะ */}
-      {detailModalPlayer && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setDetailModalPlayer(null)}></div>
-          <div className="relative z-10 w-full flex justify-center">
-            <PlayerDetails 
-              player={detailModalPlayer} 
-              onClose={() => setDetailModalPlayer(null)} 
-              onEdit={(p) => {
-                setDetailModalPlayer(null);
-                onEditPlayer(p);
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* 🌟 Modal ตั้งค่า API */}
-      <ApiSettingsModal isOpen={isApiSettingsOpen} onClose={() => setIsApiSettingsOpen(false)} />
+      {/* 🌟 แสดง Modals ทั้งหมดที่ถูก Refactor ออกไป (แยกเป็นอีก Component) */}
+      <PlayerListModals 
+        syncModal={syncModal}
+        setSyncModal={setSyncModal}
+        handleConfirmSync={handleConfirmSync}
+        detailModalPlayer={detailModalPlayer}
+        setDetailModalPlayer={setDetailModalPlayer}
+        onEditPlayer={onEditPlayer}
+        isApiSettingsOpen={isApiSettingsOpen}
+        setIsApiSettingsOpen={setIsApiSettingsOpen}
+      />
     </div>
   );
 };

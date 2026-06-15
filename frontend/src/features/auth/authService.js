@@ -14,49 +14,12 @@ export const signInWithGoogle = async () => {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
 
-        // ดึงข้อมูลพื้นฐานจากบัญชี Google
-        const { uid, displayName, email, photoURL } = user;
+        // ไม่ต้องดึงและเขียน Firestore ที่นี่ ปล่อยให้ onAuthStateChanged ใน useAuthSync จัดการ
+        // เพื่อป้องกันการซ้ำซ้อนของ Read/Write โควต้า Firebase
 
-        // อ้างอิงไปที่เอกสารผู้ใช้ใน Firestore
-        const userDocRef = doc(db, 'users', uid);
-        const userDocSnap = await getDoc(userDocRef);
-
-        let userData = {};
-
-        // ตรวจสอบว่าเป็นการล็อกอินครั้งแรกหรือไม่?
-        if (!userDocSnap.exists()) {
-            // -- ล็อกอินครั้งแรก: สร้าง Profile ใหม่ --
-            userData = {
-                uid: uid,
-                displayName: displayName || 'ผู้จัดการทีมหน้าใหม่',
-                email: email,
-                photoURL: photoURL || '',
-                role: 'player', 
-                energyBottles: 100, // 🧪 แจกทุนตั้งต้น 100 ขวด
-                createdAt: serverTimestamp(),
-                lastLoginAt: serverTimestamp()
-            };
-            
-            // บันทึกลง Firestore
-            await setDoc(userDocRef, userData);
-            console.log("สร้าง Profile ใหม่เรียบร้อย พร้อม 100 Energy Bottles!");
-            
-        } else {
-            // -- เคยล็อกอินแล้ว: ดึงข้อมูลเดิมมาใช้ --
-            userData = userDocSnap.data();
-            
-            // อัปเดตเวลาล็อกอินล่าสุด (ไม่ต้องอัปเดตขวด)
-            await setDoc(userDocRef, { 
-                lastLoginAt: serverTimestamp() 
-            }, { merge: true });
-            
-            console.log("ยินดีต้อนรับกลับมาครับโค้ช!");
-        }
-
-        // คืนค่าข้อมูล User กลับไปให้ฝั่ง UI ใช้งานต่อ
         return {
             success: true,
-            user: userData
+            user: { uid: user.uid } // ส่งกลับแค่ status พอ เพราะ App จะหมุนไปตาม state
         };
 
     } catch (error) {

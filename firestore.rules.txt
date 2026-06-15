@@ -55,7 +55,7 @@ service cloud.firestore {
     
     // 💳 ระบบประวัติการทำรายการ Statement
     match /transactions/{document=**} {
-      allow read, write: if request.auth != null; // ควรใช้ Cloud Function จัดการ แต่เปิดไว้ก่อน
+      allow read, write: if false; // Should not be accessible from root. Transactions are inside users/{userId}
     }
 
     // ⚙️ ระบบตั้งค่า

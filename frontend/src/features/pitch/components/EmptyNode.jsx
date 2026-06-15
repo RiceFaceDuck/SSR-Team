@@ -36,7 +36,7 @@ const EmptyNode = ({ expectedPosition, isBench }) => {
           </div>
           <div className="flex flex-col items-start justify-center flex-1 overflow-hidden">
             <span className="text-[7px] sm:text-[8px] font-bold text-[#60a5fa] tracking-wider group-hover:text-white transition-colors leading-none truncate w-full text-left">
-              ADD PLAYER
+              {expectedPosition === 'MGR' ? 'ADD MANAGER' : 'ADD PLAYER'}
             </span>
           </div>
         </div>

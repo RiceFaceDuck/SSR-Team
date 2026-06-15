@@ -1,89 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useRewardStore } from '../../store/rewardStore';
-import { X, Image as ImageIcon, Box, Tag, Zap, Clock, Info } from 'lucide-react';
+import React from 'react';
+import { X, Box, Tag, Info } from 'lucide-react';
+import { useRewardFormLogic } from './hooks/useRewardFormLogic';
+import RewardBasicInfo from './components/RewardBasicInfo';
+import RewardEconomy from './components/RewardEconomy';
 
 const RewardFormModal = ({ isOpen, onClose, rewardToEdit = null }) => {
-  // ดึงฟังก์ชันจัดการข้อมูลจาก Store
-  const { addReward, updateReward } = useRewardStore();
+  const {
+    formData,
+    isSubmitting,
+    errorMsg,
+    handleChange,
+    handleSubmit
+  } = useRewardFormLogic(isOpen, onClose, rewardToEdit);
 
-  // ค่าเริ่มต้นของฟอร์ม
-  const defaultForm = {
-    name: '',
-    description: '',
-    imageUrl: '',
-    price: 0,
-    stock: 0,
-    type: 'normal',
-    isActive: true,
-    isFlashSale: false,
-    flashSaleEndTime: ''
-  };
-
-  const [formData, setFormData] = useState(defaultForm);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState(null);
-
-  // ถ้ามีการส่งข้อมูล rewardToEdit เข้ามา ให้เอามาใส่ฟอร์ม (โหมดแก้ไข)
-  useEffect(() => {
-    if (isOpen) {
-      if (rewardToEdit) {
-        // จัดการเรื่องเวลา format สำหรับ input type="datetime-local"
-        let formattedTime = '';
-        if (rewardToEdit.flashSaleEndTime) {
-          const date = new Date(rewardToEdit.flashSaleEndTime);
-          if (!isNaN(date)) {
-             // ตัดทอนเป็นรูปแบบ YYYY-MM-DDTHH:mm
-            formattedTime = date.toISOString().slice(0, 16);
-          }
-        }
-        
-        setFormData({
-          ...rewardToEdit,
-          flashSaleEndTime: formattedTime
-        });
-      } else {
-        setFormData(defaultForm);
-      }
-      setErrorMsg(null);
-    }
-  }, [isOpen, rewardToEdit]);
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMsg(null);
-
-    // Validate เบื้องต้น
-    if (!formData.name.trim()) return setErrorMsg('กรุณากรอกชื่อของรางวัล');
-    if (formData.price < 0) return setErrorMsg('ราคาห้ามติดลบ');
-    if (formData.stock < 0) return setErrorMsg('สต็อกห้ามติดลบ');
-    if (formData.isFlashSale && !formData.flashSaleEndTime) {
-      return setErrorMsg('กรุณาระบุเวลาสิ้นสุด Flash Sale');
-    }
-
-    setIsSubmitting(true);
-    try {
-      if (rewardToEdit) {
-        await updateReward(rewardToEdit.id, formData);
-      } else {
-        await addReward(formData);
-      }
-      onClose(); // ปิด Modal เมื่อสำเร็จ
-    } catch (error) {
-      setErrorMsg(error.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // ถ้าไม่ได้เปิด Modal อยู่ ไม่ต้อง Render อะไร
   if (!isOpen) return null;
 
   return (
@@ -114,150 +43,9 @@ const RewardFormModal = ({ isOpen, onClose, rewardToEdit = null }) => {
           )}
 
           <form id="reward-form" onSubmit={handleSubmit} className="space-y-6">
-            
-            {/* โซนข้อมูลทั่วไป */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">ข้อมูลพื้นฐาน (Basic Info)</h3>
-              
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">ชื่อของรางวัล <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="เช่น บัตรเติมเกม 300 บาท, กล่องสุ่มระดับ Epic..."
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">รายละเอียด</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  placeholder="อธิบายรายละเอียดของรางวัล เงื่อนไขการรับ..."
-                  rows="3"
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none"
-                ></textarea>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">URL รูปภาพ</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <ImageIcon size={18} className="text-slate-400" />
-                  </div>
-                  <input
-                    type="url"
-                    name="imageUrl"
-                    value={formData.imageUrl}
-                    onChange={handleChange}
-                    placeholder="https://example.com/image.png"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                  />
-                </div>
-              </div>
-            </div>
-
+            <RewardBasicInfo formData={formData} handleChange={handleChange} />
             <div className="border-t border-slate-200 dark:border-slate-800 my-6"></div>
-
-            {/* โซนราคาและคลังสินค้า */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">มูลค่าและสต็อก (Economy)</h3>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">ราคา (Balls ⚽) <span className="text-red-500">*</span></label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    min="0"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all font-mono"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">จำนวนคงเหลือ (Stock) <span className="text-red-500">*</span></label>
-                  <input
-                    type="number"
-                    name="stock"
-                    value={formData.stock}
-                    onChange={handleChange}
-                    min="0"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-mono"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">การตั้งค่าพิเศษ (Gamification)</h3>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">ประเภทไอเทม</label>
-                  <select
-                    name="type"
-                    value={formData.type}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all cursor-pointer"
-                  >
-                    <option value="normal">แลกเปลี่ยนปกติ (Normal)</option>
-                    <option value="gacha">กล่องสุ่ม (Mystery Gacha)</option>
-                  </select>
-                </div>
-
-                <div className="p-4 rounded-xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-900/30 space-y-3">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="isFlashSale"
-                      checked={formData.isFlashSale}
-                      onChange={handleChange}
-                      className="w-5 h-5 text-amber-500 bg-white border-slate-300 rounded focus:ring-amber-500 dark:focus:ring-amber-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
-                    />
-                    <span className="flex items-center gap-2 text-sm font-medium text-amber-700 dark:text-amber-400">
-                      <Zap size={16} /> เปิดโหมดจำกัดเวลา (Flash Sale)
-                    </span>
-                  </label>
-
-                  {formData.isFlashSale && (
-                    <div className="pt-2 animate-in slide-in-from-top-2 duration-200">
-                      <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 flex items-center gap-1">
-                        <Clock size={12} /> สิ้นสุดวันที่และเวลา
-                      </label>
-                      <input
-                        type="datetime-local"
-                        name="flashSaleEndTime"
-                        value={formData.flashSaleEndTime}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 rounded-lg border border-amber-300 dark:border-amber-700/50 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all text-sm"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* สถานะการมองเห็น */}
-                <label className="flex items-center gap-3 cursor-pointer pt-2">
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      name="isActive"
-                      checked={formData.isActive}
-                      onChange={handleChange}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-blue-600"></div>
-                  </div>
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">เปิดใช้งาน (ให้ผู้เล่นเห็น)</span>
-                </label>
-              </div>
-            </div>
+            <RewardEconomy formData={formData} handleChange={handleChange} />
           </form>
         </div>
 

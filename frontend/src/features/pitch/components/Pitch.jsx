@@ -4,6 +4,7 @@ import { getFormationData } from '../../../utils/formationUtils';
 import { useUserStore } from '../../../store/useUserStore';
 import { toast } from '../../../utils/toast';
 import { normalizePosition } from '../../../utils/squadValidator';
+import FullscreenToggle from './FullscreenToggle';
 
 const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId, pendingPlacement }) => {
   const { setMarketFilterPos } = useUserStore();
@@ -72,7 +73,7 @@ const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId,
 
   return (
     <div className="relative flex-1 w-full h-full flex flex-col justify-evenly overflow-hidden bg-[#228B22] shadow-[inset_0_0_80px_rgba(0,0,0,0.4)]">
-      
+      <FullscreenToggle />
       {/* CSS Gradient Pitch Pattern (Underlay) - Horizontal Stripes */}
       <div 
         className="absolute inset-0 z-0 pointer-events-none"

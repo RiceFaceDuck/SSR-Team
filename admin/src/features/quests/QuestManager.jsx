@@ -20,7 +20,7 @@ export default function QuestManager() {
     { id: 'quests', label: 'ภารกิจสปอนเซอร์', icon: Target },
     { id: 'adlinks', label: 'ติดตั้ง ลิงก์โฆษณา', icon: LinkIcon },
     { id: 'adsense', label: 'จัดการ Google AdSense', icon: Chrome },
-    { id: 'autopick', label: 'โฆษณา Auto Pick', icon: Activity }
+    { id: 'autopick', label: 'ฝังโฆษณาตามปุ่ม', icon: Activity }
   ];
 
   return (

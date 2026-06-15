@@ -56,11 +56,6 @@ export default function SaveSquadManager({ isOpen, onClose, onConfirmSave }) {
   };
 
   const handleSaveClick = async () => {
-    if (startersCount === 0) {
-      toast.error("ไม่มีนักเตะบนสนาม กรุณาจัดทีมก่อนเซฟ");
-      return;
-    }
-
     setIsSaving(true);
     try {
       if (onConfirmSave) {

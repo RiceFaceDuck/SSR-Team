@@ -123,7 +123,8 @@ export const gameweekCalculationService = {
                   pointsEarned *= 2;
                 }
 
-                // TODO: Manager Effects & Card Effects สามารถ Apply แทรกตรงนี้ได้ถ้ามี Logic เพิ่มเติม
+                // TODO: Card Effects (e.g. Immune Yellow, Double Points)
+                // สามารถนำ playerItem.appliedCardId มาเช็คและเพิ่ม/ลดคะแนน pointsEarned ได้ตรงนี้
               }
             }
             
@@ -133,6 +134,11 @@ export const gameweekCalculationService = {
               pointsEarned
             });
           }
+        }
+
+        // 4.5 Apply Manager Score Multiplier Effect
+        if (manager && manager.effectLogic?.type === 'SCORE_MULTIPLIER') {
+          totalGwPoints = Math.round(totalGwPoints * (manager.effectLogic.value || 1));
         }
 
         // 5. เตรียมคำสั่ง Batch Writes
