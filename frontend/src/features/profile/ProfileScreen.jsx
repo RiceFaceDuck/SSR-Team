@@ -12,6 +12,7 @@ import GameweekHistory from './components/GameweekHistory';
 import ProfileHeaderCard from './components/ProfileHeaderCard';
 import WalletSummaryView from './components/WalletSummaryView';
 import TransactionHistoryPreview from './components/TransactionHistoryPreview';
+import ClubManagerView from './components/ClubManagerView';
 
 
 // 🎨 Mock STYLES and Theme
@@ -36,6 +37,7 @@ export default function ProfileScreen() {
   
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isClubManagerOpen, setIsClubManagerOpen] = useState(false);
 
   // 🌟 NEW: ให้โหลดประวัติรายการอัตโนมัติเมื่อเข้ามาหน้า Profile
   useEffect(() => {
@@ -92,6 +94,29 @@ export default function ProfileScreen() {
         playSound={playSound} 
       />
 
+      {/* 🏟️ My Club Banner Button */}
+      <button 
+        onClick={() => {
+          playSound('click');
+          setIsClubManagerOpen(true);
+        }}
+        className="w-full my-4 relative overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 p-5 rounded-2xl border border-indigo-500/30 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-indigo-500/20 active:scale-[0.98] transition-all group"
+      >
+        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl group-hover:bg-indigo-500/30 transition-colors" />
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 flex items-center justify-center shadow-inner">
+              <span className="text-xl">🏰</span>
+            </div>
+            <div className="text-left">
+              <h3 className="font-black text-white text-lg tracking-tight leading-tight">MY CLUB</h3>
+              <p className="text-indigo-200 text-xs font-medium">Manage Facilities & Upgrades</p>
+            </div>
+          </div>
+          <ChevronRight size={24} className="text-indigo-300 group-hover:translate-x-1 transition-transform" />
+        </div>
+      </button>
+
       {/* 🏆 Gameweek History Slider */}
       <GameweekHistory />
 
@@ -133,6 +158,12 @@ export default function ProfileScreen() {
       <ProfileSettingsModal 
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
+      />
+
+      {/* 🏰 Club Manager Modal */}
+      <ClubManagerView 
+        isOpen={isClubManagerOpen}
+        onClose={() => setIsClubManagerOpen(false)}
       />
 
       </div>

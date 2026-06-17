@@ -12,7 +12,9 @@ export const adsConfigDatabase = {
       }
       return null;
     } catch (error) {
-      console.error("Error fetching Ads Config:", error);
+      if (error.code !== 'permission-denied') {
+        console.error("Error fetching Ads Config:", error);
+      }
       return null; // Return null gracefully so app doesn't break
     }
   }

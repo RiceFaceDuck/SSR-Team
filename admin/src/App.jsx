@@ -13,17 +13,12 @@ import CardList from './features/cards/views/CardList';
 import LogicManual from './features/system/views/LogicManual';
 import SystemSettings from './features/system/views/SystemSettings';
 import GameweekDashboard from './features/gameweek/views/GameweekDashboard';
+import DashboardScreen from './features/dashboard/views/Dashboard';
 import GameRulesDashboard from './features/gameRules/views/GameRulesDashboard';
 import HistoryArchive from './features/history/views/HistoryArchive';
 import MatchDashboard from './features/matches/views/MatchDashboard';
 
-// MOCK COMPONENTS สำหรับหน้าอื่นๆ ที่ยังไม่ได้ทำ
-const DashboardScreen = () => (
-  <div className="p-8 bg-white rounded-3xl shadow-sm border border-slate-100">
-    <h2 className="text-2xl font-bold text-slate-800 mb-2">แดชบอร์ดสรุปผล</h2>
-    <p className="text-slate-500">ยินดีต้อนรับสู่ระบบจัดการหลังบ้าน</p>
-  </div>
-);
+// 🌟 Removed placeholder DashboardScreen
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

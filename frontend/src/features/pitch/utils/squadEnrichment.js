@@ -23,11 +23,23 @@ export const enrichSquadData = (
     const fullData = marketPlayers.find(p => String(p.sku) === String(squadPlayer.playerId));
     const appliedCard = availableCards.find(c => c.id === squadPlayer.appliedCardId);
     
-    // หากตลาดยังเปิดอยู่ (isMarketOpen = true) แปลว่ายังไม่เริ่มเกม ให้แสดงสถิติเป็น 0 หมด
-    // ถ้าตลาดปิดแล้ว (เริ่มเกมแล้ว) ให้เอาข้อมูลสถิติ Live มาโชว์
+    // ช่วง "เปิดลงทะเบียนเข้าแข่งขัน" (isMarketOpen = true): ใช้สถิติฤดูกาลล่าสุด (totalPoints) หรือผลงานเดิม
+    // ช่วง ปิด "เปิดลงทะเบียนเข้าแข่งขัน" (isMarketOpen = false): ใช้สถิติ Live ของสัปดาห์นี้ที่กำลังเข้ามาใหม่ (liveGwStats)
     let liveStats = null;
     if (!isMarketOpen && liveGwStats && liveGwStats[squadPlayer.playerId]) {
       liveStats = liveGwStats[squadPlayer.playerId];
+    }
+
+    const basePoints = liveStats ? (liveStats.gwPoints || 0) : (fullData?.totalPoints || 0);
+    let displayPoints = basePoints;
+
+    // กติกา 2 แบบ: ตัวจริง vs ม้านั่งสำรอง
+    if (!squadPlayer.isStarting) {
+      displayPoints = basePoints; // แสดงคะแนนของตัวสำรองบนการ์ด แต่จะไม่ถูกนำไปรวมกับคะแนนรวมของทีม
+    } else {
+      if (captainId === squadPlayer.playerId) {
+        displayPoints = basePoints * 2; // กัปตัน x2
+      }
     }
 
     return {
@@ -38,13 +50,15 @@ export const enrichSquadData = (
       position: squadPlayer.position,
       price: fullData?.price || 0,
       imageUrl: fullData?.imageUrl || null,
-      totalPoints: fullData?.totalPoints || 0,
+      totalPoints: basePoints,
+      displayPoints: displayPoints,
       role: captainId === squadPlayer.playerId ? 'C' : (viceCaptainId === squadPlayer.playerId ? 'VC' : null),
       isStarting: squadPlayer.isStarting,
       appliedCardId: squadPlayer.appliedCardId,
       appliedCardIcon: appliedCard?.icon || null,
       appliedCard: appliedCard || null,
       fullData: fullData,
+      stats: fullData?.stats || null,
       liveStats: liveStats // เก็บสถิติ Live เข้าไปใน Object เพื่อให้ PlayerNode เอาไปใช้งาน
     };
   });

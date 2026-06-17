@@ -3,6 +3,7 @@ import { Target, Save, AlertCircle } from 'lucide-react';
 import ToggleSwitch from '../components/ToggleSwitch';
 import ScoreStatItem from '../components/ScoreStatItem';
 import PositionScoreCard from '../components/PositionScoreCard';
+import ScoreCalculatorPreview from '../components/ScoreCalculatorPreview';
 import { getScoringRules, updateScoringRules } from '../../../services/firebase/gameRulesDatabase';
 
 export default function ScoreRulesManager({ isEmbedded = false }) {
@@ -11,32 +12,32 @@ export default function ScoreRulesManager({ isEmbedded = false }) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 
-  // Default values structure based on API-Football Pro
+  // Default values structure based on 10k Scale
   const defaultRules = {
     // Basic Stats
-    playUnder60: { value: 1, isActive: true },
-    playOver60: { value: 2, isActive: true },
-    goal: { FWD: 4, MID: 5, DEF: 6, GK: 6, isActive: true },
-    assist: { value: 3, isActive: true },
-    cleanSheet: { DEF: 4, GK: 4, MID: 1, FWD: 0, isActive: true },
+    playUnder60: { value: 100, isActive: true },
+    playOver60: { value: 200, isActive: true },
+    goal: { FWD: 800, MID: 1000, DEF: 1200, GK: 1500, isActive: true },
+    assist: { value: 600, isActive: true },
+    cleanSheet: { DEF: 500, GK: 500, MID: 200, FWD: 0, isActive: true },
     
     // Defensive
-    tackles: { value: 1, per: 3, isActive: true, desc: "ทุกๆ 3 แทคเกิล" },
-    blocks: { value: 1, per: 2, isActive: true, desc: "ทุกๆ 2 บล็อค" },
-    saves: { value: 1, per: 3, isActive: true, desc: "GK ทุกๆ 3 เซฟ" },
+    tackles: { value: 100, per: 3, isActive: true, desc: "ทุกๆ 3 แทคเกิล" },
+    blocks: { value: 100, per: 2, isActive: true, desc: "ทุกๆ 2 บล็อค" },
+    saves: { value: 50, per: 1, isActive: true, desc: "GK ทุกๆ 1 เซฟ" },
     
     // Offensive
-    keyPasses: { value: 1, per: 3, isActive: true, desc: "ทุกๆ 3 Key Passes" },
-    dribbles: { value: 1, per: 3, isActive: true, desc: "ทุกๆ 3 Dribbles" },
+    keyPasses: { value: 100, per: 3, isActive: true, desc: "ทุกๆ 3 Key Passes" },
+    dribbles: { value: 100, per: 3, isActive: true, desc: "ทุกๆ 3 Dribbles" },
     
     // Special/Negative
-    penaltySaved: { value: 5, isActive: true },
-    penaltyMissed: { value: -2, isActive: true },
-    penaltyWon: { value: 2, isActive: true },
-    penaltyCommitted: { value: -2, isActive: true },
-    yellowCard: { value: -1, isActive: true },
-    redCard: { value: -3, isActive: true },
-    ownGoal: { value: -2, isActive: true }
+    penaltySaved: { value: 1000, isActive: true },
+    penaltyMissed: { value: -500, isActive: true },
+    penaltyWon: { value: 400, isActive: true },
+    penaltyCommitted: { value: -400, isActive: true },
+    yellowCard: { value: -200, isActive: true },
+    redCard: { value: -600, isActive: true },
+    ownGoal: { value: -800, isActive: true }
   };
 
   useEffect(() => {
@@ -125,6 +126,8 @@ export default function ScoreRulesManager({ isEmbedded = false }) {
 
       {rules && (
         <>
+          <ScoreCalculatorPreview rules={rules} />
+
           {/* Basic Stats */}
           <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
             <h2 className="text-lg font-bold text-slate-800 border-b pb-3 mb-4">คะแนนพื้นฐาน (Basic Stats)</h2>

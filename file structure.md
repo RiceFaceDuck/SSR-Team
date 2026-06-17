@@ -32,7 +32,7 @@
     - `hooks/`: `useThemeUploadLogic.js`
     - `views/`: `SystemSettings.jsx`, `LogicManual.jsx`
   - `gameRules/`: Game Rules, Scoring, and Conditions Feature (New!)
-    - `components/`: `ToggleSwitch.jsx`, `ScoreStatItem.jsx`, `PositionScoreCard.jsx`
+    - `components/`: `ToggleSwitch.jsx`, `ScoreStatItem.jsx`, `PositionScoreCard.jsx`, `RuleSettingItem.jsx`
     - `views/`: `GameRulesManager.jsx`, `ScoreRulesManager.jsx`, `GameConditionsManager.jsx`
   - `gameweek/`: Gameweek Management Feature
     - `components/`: `PlayerStatsEntry.jsx`, `PlayerStatsTable.jsx`, `PlayerStatsToolbar.jsx`, `GameweekFixtures.jsx`, `ApiSettingsPanel.jsx`
@@ -55,9 +55,11 @@
   - `firebase/`: 
     - `player/`: `playerFetchService.js`, `playerUpdateService.js`, `playerBulkService.js`, `playerUtils.js`
     - `playerDatabase.js` (Facade), `managerDatabase.js`, `gameRulesDatabase.js`, `historyDatabase.js` etc.
-  - `engine/`: `gameweekCalculationService.js`, `leaderboardEngine.js` (Game Loop Logic)
-  - `api/`: `apiFootballService.js`, `historyApi.js`
-- `store/`: Zustand global state
+  - `engine/`: 
+    - `gameweekCalculationService.js` (Refactored)
+    - `utils/`: `pointCalculator.js` (NEW), `squadModifiers.js` (NEW)
+    - `leaderboardEngine.js` (Game Loop Logic)
+    - `playerValueCalculationService.js`
 - `utils/`: Global utilities
 
 ## Frontend Structure `frontend/src/`
@@ -111,6 +113,8 @@
       - `TransactionHistoryPreview.jsx`: ประวัติการทำรายการล่าสุดแบบย่อ
       - `ProfileSettingsModal.jsx`: ป็อปอัปสำหรับตั้งค่าบัญชีและชื่อทีม
       - `GameweekHistory.jsx`: สรุปคะแนนการจัดทีมย้อนหลังรายสัปดาห์
+      - `ClubManagerView.jsx`: หน้าต่างจัดการอัพเกรดสโมสร
+      - `FacilityCard.jsx`: การ์ดสิ่งก่อสร้างสำหรับอัพเกรดสโมสร
   - `live/`:
     - `LiveScoreScreen.jsx`: หน้าจอหลักของ Live Match และ Global Chat
     - `components/`:
@@ -131,7 +135,7 @@
       - `squadCalculationService.js`: Engine สำหรับคำนวณคะแนนรวมของทีมตาม Gameweek
       - `gameweekCalculationService.js`: Engine ย่อย
       - `playerValueCalculationService.js`: Engine สำหรับคำนวณและปรับสมดุลราคานักเตะ
-    - `firebase/`: Firestore database wrappers (`questFetchService.js`, `questClaimService.js`, `questService.js` (facade), `playerDatabase.js`, `chatMessageService.js`, `chatSubscriptionService.js`, `redeemFetchService.js`, `redeemActionService.js`, etc.)
+    - `firebase/`: Firestore database wrappers (`clubService.js`, `questService.js`, `chatService.js`, `redeemService.js`, `playerDatabase.js`, etc. - Refactored for SRP)
 - `store/`: Zustand global state
   - `useUserStore.js`: Store หลักที่รวม Slices เข้าด้วยกัน
   - `slices/`: 
@@ -146,6 +150,7 @@
     - `squadCardSlice.js`: จัดการระบบการ์ดเสริมพลัง
     - `createWalletSlice.js`: จัดการงบและ Balls
     - `inventorySlice.js`: จัดการคลังเก็บการ์ดและผู้จัดการทีม (NEW)
+    - `createClubSlice.js`: จัดการข้อมูลและระบบอัพเกรดสโมสร
 - `hooks/`: Global app hooks
   - `useAuthSync.js`: Firebase auth state sync and profile creation (New/Refactored)
   - `useSessionTimeout.js`: 20-minute session management (New)

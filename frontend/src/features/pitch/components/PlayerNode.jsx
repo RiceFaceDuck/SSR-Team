@@ -27,7 +27,7 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench }) => {
       )}
 
       {/* Stats Bar */}
-      <PlayerStatsBar stats={player.liveStats} isBench={isBench} />
+      <PlayerStatsBar stats={player.liveStats || player.stats} isBench={isBench} />
 
       {/* Player Image / Shirt Area (Top part) */}
       <div className="relative w-full h-10 sm:h-12 lg:h-14 flex justify-center items-end mb-[1px]">
@@ -57,7 +57,7 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench }) => {
               className="text-[10px] sm:text-[12px] font-black text-[#0f284e]"
               style={{ textShadow: '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0px 2px 3px rgba(0,0,0,0.5)' }}
             >
-              {player.liveStats?.gwPoints || 0}
+              {player.displayPoints ?? (player.liveStats?.gwPoints || player.totalPoints || 0)}
             </span>
           </div>
 

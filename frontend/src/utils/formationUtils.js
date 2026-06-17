@@ -86,56 +86,8 @@ export const FORMATION_REGISTRY = {
       { role: 'DF', category: 'DF', count: 5 }
     ]
   },
-
-  // --- 2. Modern 4-Layers (แยกกลางรุก/รับ) ---
-  '4-2-3-1': {
-    id: '4-2-3-1',
-    name: '4-2-3-1 Modern',
-    style: 'Tactical (แท็คติก)',
-    description: 'แผนยอดฮิตยุคใหม่ มีกลางรับคู่กันแผงหลัง และ 3 แนวรุกสนับสนุนหน้าเป้า',
-    rows: [
-      { role: 'FW', category: 'FW', count: 1 },
-      { role: 'AM', category: 'MF', count: 3 }, // กลางรุก (Attacking Mid)
-      { role: 'DM', category: 'MF', count: 2 }, // กลางรับ (Defensive Mid)
-      { role: 'DF', category: 'DF', count: 4 }
-    ]
-  },
-  '4-1-4-1': {
-    id: '4-1-4-1',
-    name: '4-1-4-1 Wide Control',
-    style: 'Flexible (ยืดหยุ่น)',
-    description: 'มีตัวตัดเกม 1 ตัว ปล่อยให้กองกลาง 4 คนเติมเกมรุกได้อิสระ',
-    rows: [
-      { role: 'FW', category: 'FW', count: 1 },
-      { role: 'MF', category: 'MF', count: 4 },
-      { role: 'DM', category: 'MF', count: 1 },
-      { role: 'DF', category: 'DF', count: 4 }
-    ]
-  },
-  '4-2-2-2': {
-    id: '4-2-2-2',
-    name: '4-2-2-2 Magic Box',
-    style: 'Narrow (ทะลวงตรงกลาง)',
-    description: 'ไม่มีปีกอาชีพ อาศัยการทำชิ่งเจาะตรงกลาง (คล้าย 4-4-2 Diamond)',
-    rows: [
-      { role: 'FW', category: 'FW', count: 2 },
-      { role: 'AM', category: 'MF', count: 2 },
-      { role: 'DM', category: 'MF', count: 2 },
-      { role: 'DF', category: 'DF', count: 4 }
-    ]
-  },
-  '4-3-2-1': {
-    id: '4-3-2-1',
-    name: '4-3-2-1 Christmas Tree',
-    style: 'Central Control (คุมไข่แดง)',
-    description: 'แผนต้นคริสต์มาส อัดแน่นตรงกลางด้วยกลาง 3 และหน้าต่ำ 2',
-    rows: [
-      { role: 'FW', category: 'FW', count: 1 },
-      { role: 'AM', category: 'MF', count: 2 },
-      { role: 'MF', category: 'MF', count: 3 },
-      { role: 'DF', category: 'DF', count: 4 }
-    ]
-  }
+  // --- 2. Modern 4-Layers (Removed to match UI options) ---
+  // 4-2-3-1, 4-1-4-1, 4-2-2-2, 4-3-2-1 have been removed.
 };
 
 // ==========================================

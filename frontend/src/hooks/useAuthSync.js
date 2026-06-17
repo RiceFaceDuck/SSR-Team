@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { auth, db } from '../config/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { useUserStore } from '../store/useUserStore';
 import { useGameStore } from '../store/useGameStore';
 import { referralService } from '../services/firebase/referralService';
@@ -18,29 +18,25 @@ export const useAuthSync = () => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
+          let unsubscribeSnapshot = null;
+
+          // 1. ตรวจสอบการมีอยู่ของเอกสารก่อน หรือสร้างใหม่
           const userDocRef = doc(db, 'users', user.uid);
           const userDocSnap = await getDoc(userDocRef);
           
-          if (userDocSnap.exists()) {
-            const userData = userDocSnap.data();
+          if (!userDocSnap.exists()) {
+            // Check if registration is open
+            const sysConfigSnap = await getDoc(doc(db, 'public_data', 'system_config'));
+            const isRegOpen = sysConfigSnap.exists() && sysConfigSnap.data().isRegistrationOpen !== undefined ? sysConfigSnap.data().isRegistrationOpen : true;
             
-            // อัปเดตเวลาล็อกอินล่าสุด
-            await setDoc(userDocRef, { lastLoginAt: serverTimestamp() }, { merge: true });
-            
-            setUserAuth({
-              uid: user.uid,
-              displayName: userData.displayName || user.displayName,
-              email: user.email,
-              photoURL: userData.photoURL || user.photoURL,
-              role: userData.role || 'player',
-              balls: userData.balls !== undefined ? userData.balls : (userData.energyBottles || 0),
-              userPoints: userData.userPoints || 0,
-            });
+            if (!isRegOpen) {
+                await auth.signOut();
+                clearAuth();
+                setAuthReady();
+                alert("ขณะนี้ระบบปิดรับสมัครผู้เข้าแข่งขันใหม่แล้ว (Registration Closed)");
+                return;
+            }
 
-            await useGameStore.getState().fetchGameRules();
-            await loadSquadFromCloud(user.uid);
-
-          } else {
             // สร้าง Profile ใหม่
             const newUserData = {
               uid: user.uid,
@@ -54,12 +50,34 @@ export const useAuthSync = () => {
               lastLoginAt: serverTimestamp(),
               referredBy: localStorage.getItem('referralCode') || null
             };
-
             await setDoc(userDocRef, newUserData);
-            setUserAuth(newUserData);
-            await useGameStore.getState().fetchGameRules();
-            await loadSquadFromCloud(user.uid);
+          } else {
+            // อัปเดตเวลาล็อกอินล่าสุด
+            await setDoc(userDocRef, { lastLoginAt: serverTimestamp() }, { merge: true });
           }
+
+          // 2. ใช้ onSnapshot เพื่อดึงข้อมูลแบบ Realtime (รวมยอด Balls และ ภารกิจ)
+          unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+              const userData = docSnap.data();
+              setUserAuth({
+                uid: user.uid,
+                displayName: userData.displayName || user.displayName,
+                email: user.email,
+                photoURL: userData.photoURL || user.photoURL,
+                role: userData.role || 'player',
+                balls: userData.balls !== undefined ? userData.balls : (userData.energyBottles || 0),
+                userPoints: userData.userPoints || 0,
+                dailyQuests: userData.dailyQuests || {} // 🌟 NEW: เก็บข้อมูลภารกิจเข้า Store
+              });
+            }
+          });
+
+          // เก็บ unsubscribe ไว้เคลียร์ตอน logout
+          window.__userSnapshotUnsubscribe = unsubscribeSnapshot;
+
+          await useGameStore.getState().fetchGameRules();
+          await loadSquadFromCloud(user.uid);
 
           // ตรวจสอบรางวัลชวนเพื่อน
           const claimedBalls = await referralService.claimRewards(user.uid);
@@ -75,12 +93,22 @@ export const useAuthSync = () => {
           clearAuth();
         }
       } else {
+        if (window.__userSnapshotUnsubscribe) {
+          window.__userSnapshotUnsubscribe();
+          window.__userSnapshotUnsubscribe = null;
+        }
         clearAuth();
         setAuthReady();
         localStorage.removeItem('lastActivity');
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (window.__userSnapshotUnsubscribe) {
+        window.__userSnapshotUnsubscribe();
+        window.__userSnapshotUnsubscribe = null;
+      }
+    };
   }, [setUserAuth, clearAuth, setAuthReady, loadSquadFromCloud]);
 };

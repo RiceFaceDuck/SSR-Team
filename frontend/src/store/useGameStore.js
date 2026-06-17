@@ -25,6 +25,7 @@ export const useGameStore = create((set, get) => ({
   
   currentGameweek: 'WEEK 1',
   isMarketOpen: true,
+  isRegistrationOpen: true,
   totalJoinedTeams: 0,
   referralRewardBalls: 50,
   buttonAdsConfig: {},
@@ -59,6 +60,7 @@ export const useGameStore = create((set, get) => ({
           isNoAdsMode: data.isNoAdsMode || false,
           currentGameweek: data.currentGameweek || 'WEEK 1',
           isMarketOpen: data.isMarketOpen !== undefined ? data.isMarketOpen : true,
+          isRegistrationOpen: data.isRegistrationOpen !== undefined ? data.isRegistrationOpen : true,
           totalJoinedTeams: data.totalJoinedTeams || 0, // กลับมาใช้จากเอกสารกลางเพื่อเลี่ยงบั๊ค Query
           referralRewardBalls: data.referralRewardBalls !== undefined ? data.referralRewardBalls : 50,
           buttonAdsConfig: data.buttonAdsConfig || {},

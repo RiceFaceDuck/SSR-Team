@@ -16,7 +16,8 @@ export const createAuthSlice = (set, get) => ({
       displayName: userPayload.displayName,
       email: userPayload.email,
       photoURL: userPayload.photoURL,
-      role: userPayload.role || 'player'
+      role: userPayload.role || 'player',
+      dailyQuests: userPayload.dailyQuests || {} // 🌟 Added dailyQuests
     },
     balls: Number(userPayload.balls !== undefined ? userPayload.balls : (userPayload.energyBottles || 0)),
     userPoints: Number(userPayload.userPoints) || 0,

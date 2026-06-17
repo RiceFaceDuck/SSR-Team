@@ -33,7 +33,7 @@ export const usePlayerSync = () => {
       if (mappedData.stats.cleanSheets !== player.stats?.cleanSheets) { updates.cleanSheets = mappedData.stats.cleanSheets; hasChanges = true; }
       if (mappedData.team && mappedData.team !== player.team) { updates.team = mappedData.team; hasChanges = true; }
       if (mappedData.status !== player.status) { updates.status = mappedData.status; hasChanges = true; }
-      if (mappedData.sku && String(mappedData.sku) !== String(player.sku)) { updates.sku = mappedData.sku; hasChanges = true; }
+      // 🌟 นำการอัปเดต SKU ออก เพื่อไม่ให้กระทบ Document ID (Immutable)
 
       return { success: true, data: mappedData, updates, hasChanges };
     } catch (err) {
@@ -92,7 +92,15 @@ export const usePlayerSync = () => {
                 }
 
                 if (mappedData.status !== existingPlayer.status) { updates.status = mappedData.status; hasChanges = true; }
-                if (mappedData.sku && String(mappedData.sku) !== String(existingPlayer.sku)) { updates.sku = mappedData.sku; hasChanges = true; }
+                
+                // 🌟 Force update if totalPoints is missing or 0 (and the player has some stats to calculate)
+                const hasPlayed = mappedData.stats?.minutes > 0 || mappedData.stats?.played > 0;
+                if (hasPlayed && (existingPlayer.totalPoints === undefined || existingPlayer.totalPoints === 0)) {
+                  updates.totalPoints = "Need Recalculation";
+                  hasChanges = true;
+                }
+                
+                // 🌟 นำการอัปเดต SKU ออก เพื่อไม่ให้กระทบ Document ID
 
                 if (hasChanges) {
                   newUpdatesCount++;
@@ -138,7 +146,15 @@ export const usePlayerSync = () => {
               if (mappedData.stats.cleanSheets !== player.stats?.cleanSheets) { updates.cleanSheets = mappedData.stats.cleanSheets; hasChanges = true; }
               if (mappedData.team && mappedData.team !== player.team) { updates.team = mappedData.team; hasChanges = true; }
               if (mappedData.status !== player.status) { updates.status = mappedData.status; hasChanges = true; }
-              if (mappedData.sku && String(mappedData.sku) !== String(player.sku)) { updates.sku = mappedData.sku; hasChanges = true; }
+              
+              // 🌟 Force update if totalPoints is missing or 0
+              const hasPlayed = mappedData.stats?.minutes > 0 || mappedData.stats?.played > 0;
+              if (hasPlayed && (player.totalPoints === undefined || player.totalPoints === 0)) {
+                updates.totalPoints = "Need Recalculation";
+                hasChanges = true;
+              }
+              
+              // 🌟 นำการอัปเดต SKU ออก เพื่อไม่ให้กระทบ Document ID
 
               if (hasChanges) {
                 newUpdatesCount++;

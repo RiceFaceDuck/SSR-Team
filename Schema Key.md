@@ -7,7 +7,7 @@ This document outlines the standard data structures used across the SSR Team Fan
 
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
-| `sku`       | String | Unique identifier directly from API-Football (e.g. 'API-1234') |
+| `sku`       | String | Unique identifier (e.g. 'API-1234' or 'EXCEL-...'). **[IMMUTABLE]** ห้ามเปลี่ยนค่าเด็ดขาดเพราะเป็น Document ID |
 | `name`      | String | Short name used in game UI (e.g. 'Saka') |
 | `fullName`  | String | Full name of the player |
 | `imageUrl`  | String | URL to the player's photo |
@@ -103,7 +103,8 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `squad`     | Array  | Snapshot ทีมในสัปดาห์นั้น `[{ playerId, position, isStarting, pointsEarned }]` |
 | `managerId` | String | ผู้จัดการทีมที่ใช้ |
 | `captainId` | String | กัปตันทีม |
-| `points`    | Number | คะแนนที่ได้ในสัปดาห์นี้ |
+| `mvpId`     | String | ผู้เล่นที่ได้ MVP ประจำสัปดาห์ |
+| `points`    | Number | คะแนนรวมที่ได้ในสัปดาห์นี้ |
 | `createdAt` | Timestamp | วันที่บันทึก |
 
 ### 4.2 Transactions Sub-collection
@@ -118,6 +119,20 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `description`| String | คำอธิบายรายการสำหรับ UI |
 | `timestamp` | Timestamp | วันเวลาที่ทำรายการ |
 | `status`    | String | สถานะ (เช่น 'success') |
+
+### 4.3 Club Upgrades Sub-collection
+`users/{userId}/game_data/club`
+เก็บข้อมูลระดับการอัพเกรดสโมสรของผู้เล่น
+
+| Field                 | Type   | Description |
+| --------------------- | ------ | ----------- |
+| `stadiumLevel`        | Number | เลเวลของสนามแข่ง (1-10) |
+| `trainingGroundLevel` | Number | เลเวลของสนามฝึกซ้อม (1-10) |
+| `hospitalLevel`       | Number | เลเวลของโรงพยาบาล (1-10) |
+| `gymLevel`            | Number | เลเวลของยิม (1-10) |
+| `youthAcademyLevel`   | Number | เลเวลของศูนย์ฝึกเยาวชน (1-10) |
+| `spentExp`            | Number | แต้มสะสมรวมที่ถูกใช้ไปเพื่ออัพเกรด |
+| `updatedAt`           | Timestamp | เวลาอัปเดตล่าสุด |
 
 ## 6. System Config Schema (การตั้งค่าระบบ)
 `public_data/system_config`
@@ -232,16 +247,18 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `synergyBonus` | Object | `{"sameTeamThreshold": 3, "sameNationThreshold": 4, "bonusPercent": 5, "isActive": true}` เปิดใช้งานโบนัสทีม/ชาติเดียวกัน |
 | `playStreaks` | Object | `{"streakTarget": 3, "rewardType": "budget", "rewardValue": 5, "isActive": true}` เปิดใช้งานแจกรางวัลคนส่งทีมต่อเนื่อง |
 
-### 12.2 Scoring Rules
+### 12.2 Scoring Rules (The 10k Scale)
 `public_data/scoring_rules`
 เก็บกติกาการให้คะแนนสำหรับแต่ละเหตุการณ์ โดยอ้างอิงข้อมูลจาก API-Football Pro
 | Field | Type | Description |
 | --- | --- | --- |
-| `goal` | Object | `{"FWD": 4, "MID": 5, "DEF": 6, "GK": 6, "isActive": true}` |
-| `assist` | Object | `{"value": 3, "isActive": true}` |
-| `cleanSheet` | Object | `{"DEF": 4, "GK": 4, "MID": 1, "isActive": true}` |
-| `tackles` | Object | `{"value": 1, "per": 3, "isActive": true}` |
-| ... | Object | และสถิติอื่นๆ เช่น `saves`, `keyPasses`, `yellowCard`, etc. |
+| `playBase` | Object | `{"value": 200, "isActive": true}` |
+| `goal` | Object | `{"FWD": 800, "MID": 1000, "DEF": 1200, "GK": 1500, "isActive": true}` |
+| `assist` | Object | `{"value": 600, "isActive": true}` |
+| `cleanSheet` | Object | `{"DEF": 500, "GK": 500, "MID": 200, "FWD": 0, "isActive": true}` |
+| `yellowCard` | Object | `{"value": -200, "isActive": true}` |
+| `redCard` | Object | `{"value": -600, "isActive": true}` |
+| `saves` | Object | `{"value": 50, "per": 1, "isActive": true}` |
 
 ### 12.3 Game Conditions
 `public_data/game_conditions`

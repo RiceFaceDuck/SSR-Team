@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Trophy, Sparkles } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { useQuestStore } from '../../store/useQuestStore';
 import { useUserStore } from '../../store/useUserStore';
 import { useGameStore } from '../../store/useGameStore';
@@ -15,23 +16,21 @@ export default function QuestScreen() {
   // ดึง State และ Functions สำหรับระบบภารกิจ
   const { 
     quests, 
-    userQuestRecords, 
     isLoading, 
     fetchActiveQuests, 
-    fetchUserQuestRecords, 
     claimReward 
   } = useQuestStore();
+
+  // ดึงประวัติการทำภารกิจจาก Profile แบบ Realtime (ผ่าน useAuthSync onSnapshot)
+  const userQuestRecords = userData?.dailyQuests || {};
 
   // State เก็บ ID โฆษณาที่กำลังกด เพื่อแสดง Loading แบบแยกเฉพาะป้าย
   const [claimingId, setClaimingId] = useState(null);
 
-  // โหลดข้อมูลเมื่อเข้ามาหน้านี้
+  // โหลดข้อมูลภารกิจเมื่อเข้ามาหน้านี้ (ไม่ต้องดึง Profile ใหม่แล้ว)
   useEffect(() => {
     fetchActiveQuests();
-    if (userData?.uid) {
-      fetchUserQuestRecords(userData.uid);
-    }
-  }, [userData?.uid, fetchActiveQuests, fetchUserQuestRecords]);
+  }, [fetchActiveQuests]);
 
   // ฟังก์ชันจัดการเมื่อผู้เล่นกดรับรางวัล
   const handleClaim = async (quest) => {
@@ -47,6 +46,14 @@ export default function QuestScreen() {
     const res = await claimReward(userData.uid, quest);
     
     if (res.success) {
+      // แสดง Confetti effect เพื่อความตื่นเต้น
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#F59E0B', '#FCD34D', '#3B82F6']
+      });
+
       // อัปเดตจำนวนบอลที่หน้าปัด (ระบบจะจัดการ Haptic Vibrate ให้เองใน useUserStore)
       addBalls(quest.rewardBalls); 
       showToast('success', `รับ ${quest.rewardBalls} ⚽ สำเร็จ!`);

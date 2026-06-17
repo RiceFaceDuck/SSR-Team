@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, History } from 'lucide-react';
+import { Target, History } from 'lucide-react';
 
 export default function WalletSummaryView({ balls, onOpenHistory, playSound }) {
   return (
@@ -21,10 +21,14 @@ export default function WalletSummaryView({ balls, onOpenHistory, playSound }) {
         </div>
         
         <button 
-          onClick={() => playSound('click')}
-          className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-white rounded-2xl flex items-center justify-center shadow-[0_5px_15px_rgba(245,158,11,0.3)] transition-all hover:scale-105 active:scale-95 border border-amber-300/50"
+          onClick={() => {
+            playSound('click');
+            window.dispatchEvent(new CustomEvent('switchTab', { detail: 'quest' }));
+          }}
+          className="h-10 px-4 bg-gradient-to-br from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-[0_5px_15px_rgba(245,158,11,0.3)] transition-all hover:scale-105 active:scale-95 border border-amber-300/50"
         >
-          <Plus size={24} />
+          <Target size={18} />
+          <span className="text-sm">รับ Balls ฟรี</span>
         </button>
       </div>
 
@@ -41,7 +45,7 @@ export default function WalletSummaryView({ balls, onOpenHistory, playSound }) {
           className="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 hover:text-slate-800 px-3 py-2 rounded-xl border border-slate-200 transition-all active:scale-95 shadow-sm"
         >
           <History size={14} className="text-amber-500" />
-          <span>ประวัติเต็ม</span>
+          <span>ประวัติรายการ</span>
         </button>
       </div>
     </div>

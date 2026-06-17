@@ -58,6 +58,16 @@ export default function PitchScreen() {
     .filter(([team, count]) => count >= 3)
     .map(([team, count]) => ({ team, count }));
 
+  // Calculate current effective points to display on the Pitch View
+  let currentSquadPoints = enrichedStarters.reduce((sum, p) => sum + (p.displayPoints || 0), 0);
+  
+  // Apply Manager Score Multiplier Effect
+  if (manager && manager.effectLogic?.type === 'SCORE_MULTIPLIER') {
+    const multiplier = manager.effectLogic.value || 1;
+    const managerBonus = Math.round(currentSquadPoints * multiplier) - currentSquadPoints;
+    currentSquadPoints += managerBonus;
+  }
+
   const handleConfirmSave = async () => {
     await new Promise(resolve => setTimeout(resolve, 800));
     const result = await saveSquadToCloud(userData?.uid);
@@ -87,7 +97,7 @@ export default function PitchScreen() {
     <div className="w-full h-full bg-[#040f1d] flex flex-col overflow-hidden animate-in fade-in duration-500">
       
       {/* Header Area */}
-      <SquadHeader totalPoints={userData?.userPoints || 0} />
+      <SquadHeader totalPoints={currentSquadPoints} />
 
       {/* Pitch Area */}
       <div className="flex-1 min-h-0 overflow-hidden relative flex flex-col">
@@ -101,18 +111,16 @@ export default function PitchScreen() {
 
          {/* Active Synergies Indicator */}
          {activeSynergies.length > 0 && (
-           <div className="absolute top-16 left-0 right-0 z-20 flex justify-center pointer-events-none">
-             <div className="flex gap-2">
-               {activeSynergies.map(syn => (
-                 <div key={syn.team} className="bg-emerald-500/90 backdrop-blur border border-emerald-400 text-white px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg pointer-events-auto">
-                   <span className="text-[10px]">✨</span>
-                   <span className="text-[10px] font-bold">{syn.team} Synergy</span>
-                   <span className="bg-emerald-700/50 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">
-                     {syn.count}
-                   </span>
-                 </div>
-               ))}
-             </div>
+           <div className="absolute top-2 left-2 z-20 flex flex-col items-start gap-1 pointer-events-none opacity-75 transition-opacity hover:opacity-20">
+             {activeSynergies.map(syn => (
+               <div key={syn.team} className="bg-emerald-500/80 backdrop-blur-sm border border-emerald-400/50 text-white px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm pointer-events-none transform scale-90 origin-top-left">
+                 <span className="text-[10px]">✨</span>
+                 <span className="text-[10px] font-bold">{syn.team.substring(0, 3).toUpperCase()}</span>
+                 <span className="bg-emerald-700/60 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">
+                   {syn.count}
+                 </span>
+               </div>
+             ))}
            </div>
          )}
 

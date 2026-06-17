@@ -7,15 +7,7 @@ export default function GameSettings({ config, handleInputChange }) {
     <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-5">
       <h2 className="text-lg font-bold text-slate-800 border-b pb-3">การตั้งค่าเกมทั่วไป</h2>
       
-      <div>
-        <label className="block text-sm font-bold text-slate-700 mb-2">สัปดาห์ปัจจุบัน (Gameweek)</label>
-        <input
-          type="text"
-          value={config.currentGameweek || ''}
-          onChange={(e) => handleInputChange('currentGameweek', e.target.value)}
-          className="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
-        />
-      </div>
+
 
       <div>
         <label className="block text-sm font-bold text-slate-700 mb-2">จำนวนทีมที่เข้าร่วมแล้ว</label>
@@ -98,21 +90,7 @@ export default function GameSettings({ config, handleInputChange }) {
       </div>
 
 
-      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-        <div>
-          <p className="font-bold text-slate-800">ตลาดซื้อขาย (Market)</p>
-          <p className="text-xs text-slate-500">เปิด/ปิด ให้ผู้เล่นซื้อขายนักเตะ</p>
-        </div>
-        <label className="relative inline-flex items-center cursor-pointer">
-          <input 
-            type="checkbox" 
-            className="sr-only peer"
-            checked={config.isMarketOpen || false}
-            onChange={(e) => handleInputChange('isMarketOpen', e.target.checked)}
-          />
-          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-        </label>
-      </div>
+
 
       <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
         <div>

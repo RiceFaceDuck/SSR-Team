@@ -5,11 +5,17 @@
 
 const BASE_URL = "https://v3.football.api-sports.io";
 
-// ค่า Default (ดึงจาก LocalStorage ถ้ามี ไม่งั้นใช้ค่า Hardcode ป้องกันพัง)
+const safeGetItem = (key) => typeof window !== 'undefined' && window.localStorage ? localStorage.getItem(key) : null;
+const safeGetEnv = (key) => {
+  if (typeof process !== 'undefined' && process.env && process.env[key]) return process.env[key];
+  try { return import.meta.env[key]; } catch(e) { return null; }
+};
+
+// ค่า Default (ดึงจาก LocalStorage -> Environment Variable -> Hardcode Fallback)
 let currentConfig = {
-  apiKey: localStorage.getItem('apiFootballKey') || "73f575c169c87a030e5412387f2d3239",
-  leagueId: localStorage.getItem('apiFootballLeague') || "39", // 39 = Premier League
-  season: localStorage.getItem('apiFootballSeason') || "2023"
+  apiKey: safeGetItem('apiFootballKey') || safeGetEnv('VITE_API_FOOTBALL_KEY') || "73f575c169c87a030e5412387f2d3239",
+  leagueId: safeGetItem('apiFootballLeague') || safeGetEnv('VITE_API_FOOTBALL_LEAGUE') || "39", // 39 = Premier League
+  season: safeGetItem('apiFootballSeason') || safeGetEnv('VITE_API_FOOTBALL_SEASON') || "2024" // Free plan supports up to 2024
 };
 
 export const apiFootballService = {
@@ -32,6 +38,30 @@ export const apiFootballService = {
     "x-apisports-key": currentConfig.apiKey,
     "x-rapidapi-host": "v3.football.api-sports.io"
   }),
+
+  /**
+   * ดึงรายการรอบการแข่งขัน (Gameweeks) ที่มีทั้งหมด
+   */
+  fetchAvailableGameweeks: async () => {
+    try {
+      const { leagueId, season } = currentConfig;
+      const response = await fetch(`${BASE_URL}/fixtures/rounds?league=${leagueId}&season=${season}`, {
+        method: "GET",
+        headers: apiFootballService.getHeaders()
+      });
+
+      const result = await response.json();
+      
+      if (result.errors && Object.keys(result.errors).length > 0) {
+        throw new Error(Object.values(result.errors)[0]);
+      }
+
+      return result.response || [];
+    } catch (error) {
+      console.error("API-Football Fetch Rounds Error:", error);
+      throw error;
+    }
+  },
 
   /**
    * ดึงโปรแกรมการแข่งขัน (Fixtures) สำหรับสัปดาห์นั้น
@@ -142,6 +172,11 @@ export const apiFootballService = {
     const p = apiData.player;
     const stat = apiData.statistics?.[0]; // เอาสถิติลีคหลัก
 
+    // คำนวณ Clean Sheet: ลงเล่นมากกว่า 60 นาทีและไม่เสียประตู
+    const minutes = stat?.games?.minutes || 0;
+    const conceded = stat?.goals?.conceded || 0;
+    const isCleanSheet = minutes >= 60 && conceded === 0 ? 1 : 0;
+
     return {
       sku: `API-${p.id}`,
       fullName: `${p.firstname} ${p.lastname}`,
@@ -151,8 +186,21 @@ export const apiFootballService = {
       team: stat?.team?.name || 'Unknown',
       status: p.injured ? 'injured' : 'active',
       stats: {
+        minutes: minutes,
+        played: stat?.games?.appearences || 0,
         goals: stat?.goals?.total || 0,
         assists: stat?.goals?.assists || 0,
+        cleanSheets: isCleanSheet,
+        saves: stat?.goals?.saves || 0,
+        tackles: stat?.tackles?.total || 0,
+        blocks: stat?.tackles?.blocks || 0,
+        keyPasses: stat?.passes?.key || 0,
+        dribbles: stat?.dribbles?.success || 0,
+        penaltySaved: stat?.penalty?.saved || 0,
+        penaltyMissed: stat?.penalty?.missed || 0,
+        penaltyWon: stat?.penalty?.won || 0,
+        penaltyCommitted: stat?.penalty?.commited || 0,
+        ownGoal: 0, // API doesn't provide own goals directly in this endpoint
         yellowCards: stat?.cards?.yellow || 0,
         redCards: stat?.cards?.red || 0,
       },

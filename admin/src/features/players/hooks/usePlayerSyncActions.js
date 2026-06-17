@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { usePlayerSync } from './usePlayerSync';
 import { usePlayers } from './usePlayers';
+import { getScoringRules } from '../../../services/firebase/gameRulesDatabase';
+import { calculatePlayerPoints } from '../../../services/engine/utils/pointCalculator';
 
 export const usePlayerSyncActions = (players, filteredPlayers, selectedTeam) => {
   const { checkPlayerUpdate, checkBulkUpdates } = usePlayerSync();
@@ -30,13 +32,19 @@ export const usePlayerSyncActions = (players, filteredPlayers, selectedTeam) => 
 
   const handleConfirmSync = async (payload) => {
     if (syncModal.isBulk) {
+      const rules = await getScoringRules();
       const playersToSave = payload.map(item => {
         const finalSku = item.apiData.sku || item.player.sku;
+        const stats = item.apiData.stats || item.player.stats || {};
+        const pos = item.apiData.position || item.player.position || 'MF';
+        const points = calculatePlayerPoints(stats, pos, rules);
+        
         const dataToSave = { 
           ...item.player, 
           ...item.apiData, 
           id: item.player.isNew ? undefined : item.player.id, 
-          sku: finalSku 
+          sku: finalSku,
+          totalPoints: points
         };
         delete dataToSave.isNew;
         return dataToSave;
@@ -58,11 +66,17 @@ export const usePlayerSyncActions = (players, filteredPlayers, selectedTeam) => 
       const originalPlayer = syncModal.player;
       const finalSku = apiData.sku || originalPlayer.sku;
       
+      const rules = await getScoringRules();
+      const stats = apiData.stats || originalPlayer.stats || {};
+      const pos = apiData.position || originalPlayer.position || 'MF';
+      const points = calculatePlayerPoints(stats, pos, rules);
+      
       const dataToSave = { 
         ...originalPlayer, 
         ...apiData, 
         id: originalPlayer.isNew ? undefined : originalPlayer.id, 
-        sku: finalSku 
+        sku: finalSku,
+        totalPoints: points
       };
       delete dataToSave.isNew;
       

@@ -3,8 +3,8 @@ import { useUserStore } from '../../../store/useUserStore';
 import { useGameStore } from '../../../store/useGameStore';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
-const SquadHeader = () => {
-  const { userData, userPoints, rank, mySquad, currentStreak } = useUserStore();
+const SquadHeader = ({ totalPoints }) => {
+  const { userData, userPoints, rank, mySquad, currentStreak, manager } = useUserStore();
   const { currentGameweek, isMarketOpen, totalJoinedTeams } = useGameStore();
 
   const teamName = userData?.displayName || 'My Dream Team';
@@ -29,10 +29,15 @@ const SquadHeader = () => {
           )}
         </div>
 
-        <div className="flex items-baseline gap-1.5 flex-shrink-0">
+        <div className="flex items-baseline gap-1.5 flex-shrink-0 relative">
+          {manager?.effectLogic?.type === 'SCORE_MULTIPLIER' && (
+            <div className="absolute -top-4 -right-1 flex items-center bg-fuchsia-600/90 border border-fuchsia-400 text-[8px] text-white px-1 py-0.5 rounded shadow-[0_0_5px_rgba(192,38,211,0.6)] animate-pulse">
+              <span>👑 x{manager.effectLogic.value}</span>
+            </div>
+          )}
           <span className="text-[9px] text-amber-400/90 font-black tracking-widest">PTS</span>
           <span className="font-black text-2xl text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] tabular-nums leading-none">
-            {userPoints?.toLocaleString() || 0}
+            {totalPoints?.toLocaleString() || 0}
           </span>
         </div>
       </div>

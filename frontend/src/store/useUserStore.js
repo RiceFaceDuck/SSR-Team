@@ -13,6 +13,7 @@ import { squadCardSlice } from './slices/squadCardSlice';
 import { inventorySlice } from './slices/inventorySlice';
 import { liveStatsSlice } from './slices/liveStatsSlice';
 import { createAdsConfigSlice } from './slices/adsConfigSlice';
+import { createClubSlice } from './slices/createClubSlice';
 
 export const useUserStore = create(
   persist(
@@ -29,6 +30,7 @@ export const useUserStore = create(
       ...inventorySlice(set, get),
       ...liveStatsSlice(set, get),
       ...createAdsConfigSlice(set, get),
+      ...createClubSlice(set, get),
     }),
     {
       name: 'fantasy-team-draft', 
