@@ -9,6 +9,9 @@ export const squadCoreSlice = (set, get) => ({
   myCards: [],            
   manager: null,          // 🌟 NEW: เก็บ Object ของผู้จัดการทีมที่เลือก
   captainId: null,        // 🌟 NEW: กัปตันทีม
+  viceCaptainId: null,    // 🌟 NEW: รองกัปตันทีม
+  carriedOverBudget: 0,   // 🌟 NEW: งบประมาณทบยอด
+  currentStreak: 0,       // 🌟 NEW: สะสมสัปดาห์ที่ส่งทีม
 
   marketFilterPos: 'ALL',   
   pendingTargetSlot: null,  
@@ -16,6 +19,7 @@ export const squadCoreSlice = (set, get) => ({
   setPendingTargetSlot: (slotId) => set({ pendingTargetSlot: slotId }), 
   setManager: (managerObj) => set({ manager: managerObj, hasUnsavedChanges: true }), // 🌟 NEW: เปลี่ยน Manager
   setCaptain: (playerId) => set({ captainId: playerId, hasUnsavedChanges: true }), // 🌟 NEW: ตั้งกัปตันทีม
+  setViceCaptain: (playerId) => set({ viceCaptainId: playerId, hasUnsavedChanges: true }), // 🌟 NEW: ตั้งรองกัปตันทีม
   togglePlayerLock: (playerId) => set((state) => {
     const updatedSquad = state.mySquad.map(p => 
       String(p.playerId) === String(playerId) 
@@ -26,11 +30,12 @@ export const squadCoreSlice = (set, get) => ({
   }),
   
   getEffectiveBudget: () => {
-    const { budgetLeft, manager } = get();
+    const { budgetLeft, manager, carriedOverBudget } = get();
+    let total = budgetLeft + (carriedOverBudget || 0);
     if (manager?.effectLogic?.type === 'BUDGET_BONUS') {
-      return Math.round((budgetLeft + (manager.effectLogic.value || 0)) * 10) / 10;
+      total += (manager.effectLogic.value || 0);
     }
-    return budgetLeft;
+    return Math.round(total * 10) / 10;
   },
 
   syncBudget: () => set((state) => {
@@ -52,11 +57,11 @@ export const squadCoreSlice = (set, get) => ({
   markAsSaved: () => set({ hasUnsavedChanges: false, isSaveUnlocked: false }), 
 
   saveSquadToCloud: async (userId) => {
-    const { mySquad, budgetLeft, formation, manager, captainId, markAsSaved } = get();
+    const { mySquad, budgetLeft, formation, manager, captainId, viceCaptainId, markAsSaved } = get();
     if (!userId) return { success: false, message: 'ไม่พบ ID ผู้ใช้งาน กรุณาล็อกอินใหม่' };
 
     try {
-      await squadService.saveSquad(userId, { mySquad, budgetLeft, formation, manager, captainId });
+      await squadService.saveSquad(userId, { mySquad, budgetLeft, formation, manager, captainId, viceCaptainId });
       markAsSaved(); 
       return { success: true, message: 'บันทึกทีมลงระบบคลาวด์สำเร็จ!' };
     } catch (error) {
@@ -76,6 +81,9 @@ export const squadCoreSlice = (set, get) => ({
           formation: squadData.formation || '4-4-2',
           manager: squadData.manager || null, // Will need to fetch manager detail later, or just store ID and fetch on load
           captainId: squadData.captainId || null,
+          viceCaptainId: squadData.viceCaptainId || null,
+          carriedOverBudget: squadData.carriedOverBudget || 0,
+          currentStreak: squadData.currentStreak || 0,
           hasUnsavedChanges: false 
         });
       }

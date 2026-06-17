@@ -13,6 +13,7 @@ import { useUserStore } from '../../store/useUserStore';
 export default function BudgetBar() {
   // ดึงค่าเงินที่เหลือจาก Store ส่วนกลาง
   const getEffectiveBudget = useUserStore((state) => state.getEffectiveBudget);
+  const carriedOverBudget = useUserStore((state) => state.carriedOverBudget) || 0;
   const budgetLeft = getEffectiveBudget();
   
   // สมมติว่าทุนเริ่มต้นคือ 100.0M เพื่อนำมาหาเปอร์เซ็นต์ความยาวของหลอด
@@ -50,8 +51,13 @@ export default function BudgetBar() {
             <span className="text-xs font-bold text-[#8b9bb4] uppercase tracking-wider block mb-0.5">
               งบประมาณคงเหลือ
             </span>
-            <span className={`text-xl font-black ${textColor} leading-none transition-colors duration-500`}>
+            <span className={`text-xl font-black ${textColor} leading-none transition-colors duration-500 flex items-center gap-1`}>
               {budgetLeft.toFixed(1)}m
+              {carriedOverBudget > 0 && (
+                <span className="text-[10px] text-emerald-400 font-bold ml-1 px-1.5 py-0.5 bg-emerald-500/10 rounded border border-emerald-500/20">
+                  +{carriedOverBudget.toFixed(1)}m ยกยอด
+                </span>
+              )}
             </span>
           </div>
         </div>

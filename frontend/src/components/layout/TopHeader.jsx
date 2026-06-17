@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogOut, User, Trophy, Users, Activity } from 'lucide-react';
+import { LogOut, User, Trophy, Users, Activity, BookOpen } from 'lucide-react';
 import { STYLES, playSound } from '../../config/theme';
 import { useUserStore } from '../../store/useUserStore';
 import CountUp from 'react-countup';
@@ -42,6 +42,9 @@ export default function TopHeader({ onLogout, onNavigate }) {
         </div>
         
         {/* ไอคอนเมนูด้านบน */}
+        <button onClick={() => handleNav('rules')} className="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center text-teal-500 hover:bg-slate-100 transition-colors shadow-sm border border-slate-200">
+          <BookOpen size={14} />
+        </button>
         <button onClick={() => handleNav('live')} className="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center text-red-500 hover:bg-slate-100 transition-colors shadow-sm border border-slate-200 relative group">
           <Activity size={14} />
           {/* จุดแดงแจ้งเตือนว่ามี Live */}

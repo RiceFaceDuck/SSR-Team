@@ -46,6 +46,18 @@ export default function PitchScreen() {
   // Fix: Move hook call above any early returns
   const totalBudget = useGameStore(state => state.startingBudget);
 
+  // Calculate Active Synergies (assuming threshold = 3 for now, visual only)
+  const teamCounts = enrichedStarters.reduce((acc, p) => {
+    if (p.team && p.team !== 'UNK') {
+      acc[p.team] = (acc[p.team] || 0) + 1;
+    }
+    return acc;
+  }, {});
+
+  const activeSynergies = Object.entries(teamCounts)
+    .filter(([team, count]) => count >= 3)
+    .map(([team, count]) => ({ team, count }));
+
   const handleConfirmSave = async () => {
     await new Promise(resolve => setTimeout(resolve, 800));
     const result = await saveSquadToCloud(userData?.uid);
@@ -86,6 +98,23 @@ export default function PitchScreen() {
            formation={formation}
            onChangeFormation={actions.changeFormation}
          />
+
+         {/* Active Synergies Indicator */}
+         {activeSynergies.length > 0 && (
+           <div className="absolute top-16 left-0 right-0 z-20 flex justify-center pointer-events-none">
+             <div className="flex gap-2">
+               {activeSynergies.map(syn => (
+                 <div key={syn.team} className="bg-emerald-500/90 backdrop-blur border border-emerald-400 text-white px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg pointer-events-auto">
+                   <span className="text-[10px]">✨</span>
+                   <span className="text-[10px] font-bold">{syn.team} Synergy</span>
+                   <span className="bg-emerald-700/50 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">
+                     {syn.count}
+                   </span>
+                 </div>
+               ))}
+             </div>
+           </div>
+         )}
 
          <Pitch 
            squad={enrichedStarters} 

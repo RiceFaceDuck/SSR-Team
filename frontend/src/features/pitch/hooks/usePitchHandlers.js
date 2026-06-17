@@ -11,8 +11,9 @@ export const usePitchHandlers = ({
   setPopupPlayer,
   setPowerCardPlayer
 }) => {
-  const { confirmPlacement, assignPlayerToSlot, swapPlayer, setCaptain, sellPlayer, resetSquad } = useUserStore.getState();
+  const { confirmPlacement, assignPlayerToSlot, swapPlayer, setCaptain, setViceCaptain, sellPlayer, resetSquad } = useUserStore.getState();
   const captainId = useUserStore.getState().captainId;
+  const viceCaptainId = useUserStore.getState().viceCaptainId;
 
   const handleSlotClick = (slotId, category) => {
     if (pendingPlacement) {
@@ -98,6 +99,11 @@ export const usePitchHandlers = ({
         toast.success(`ตั้ง ${popupPlayer.name} เป็นกัปตันทีมแล้ว!`);
         setPopupPlayer(null);
         break;
+      case 'VICE_CAPTAIN':
+        setViceCaptain(popupPlayer.playerId);
+        toast.success(`ตั้ง ${popupPlayer.name} เป็นรองกัปตันทีมแล้ว!`);
+        setPopupPlayer(null);
+        break;
       case 'SWAP':
         setSelectedPlayer({ playerId: popupPlayer.playerId });
         setPopupPlayer(null);
@@ -112,6 +118,7 @@ export const usePitchHandlers = ({
         break;
       case 'REMOVE':
         if (captainId === popupPlayer.playerId) setCaptain(null);
+        if (viceCaptainId === popupPlayer.playerId) setViceCaptain(null);
         sellPlayer(popupPlayer.fullData);
         setPopupPlayer(null);
         toast.success(`ลบ ${popupPlayer.name} ออกจากทีมและคืนงบประมาณแล้ว`);

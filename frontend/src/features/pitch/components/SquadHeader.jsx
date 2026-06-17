@@ -4,7 +4,7 @@ import { useGameStore } from '../../../store/useGameStore';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const SquadHeader = () => {
-  const { userData, userPoints, rank, mySquad } = useUserStore();
+  const { userData, userPoints, rank, mySquad, currentStreak } = useUserStore();
   const { currentGameweek, isMarketOpen, totalJoinedTeams } = useGameStore();
 
   const teamName = userData?.displayName || 'My Dream Team';
@@ -21,6 +21,12 @@ const SquadHeader = () => {
           <span className="text-[10px] text-blue-300 font-semibold whitespace-nowrap">
             อันดับ <span className="text-white font-black drop-shadow-[0_0_2px_rgba(59,130,246,0.8)]">{rank?.toLocaleString() || '-'}</span>
           </span>
+          {currentStreak > 0 && (
+            <div className="flex items-center gap-0.5 ml-1 bg-orange-500/20 border border-orange-500/30 px-1.5 py-0.5 rounded-md">
+              <span className="text-[10px]">🔥</span>
+              <span className="text-[10px] text-orange-400 font-bold">{currentStreak}</span>
+            </div>
+          )}
         </div>
 
         <div className="flex items-baseline gap-1.5 flex-shrink-0">

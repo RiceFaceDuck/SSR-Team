@@ -1,5 +1,5 @@
 import React from 'react';
-import { Crown, Replace, Search, Trash2, Zap, Lock, Unlock } from 'lucide-react';
+import { Crown, Star, Replace, Search, Trash2, Zap, Lock, Unlock } from 'lucide-react';
 
 const PopupActions = ({ player, onAction }) => {
   return (
@@ -12,6 +12,16 @@ const PopupActions = ({ player, onAction }) => {
           <Crown size={16} />
         </div>
         <span className="text-[13px] font-bold text-slate-700 tracking-wide">ตั้งเป็นกัปตัน</span>
+      </button>
+
+      <button 
+        onClick={() => onAction('VICE_CAPTAIN')}
+        className="w-full flex items-center gap-2.5 p-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 transition-all group"
+      >
+        <div className="bg-orange-100 p-1.5 rounded-lg text-orange-500 group-hover:scale-110 transition-transform">
+          <Star size={16} />
+        </div>
+        <span className="text-[13px] font-bold text-slate-700 tracking-wide">ตั้งเป็นรองกัปตัน</span>
       </button>
 
       <button 

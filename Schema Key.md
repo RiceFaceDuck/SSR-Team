@@ -56,10 +56,13 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
 | `mySquad`   | Array  | เก็บนักเตะ `[{ playerId, position, isStarting, slotIndex, appliedCardId, isLocked }]` |
-| `budgetLeft`| Number | งบประมาณที่เหลืออยู่ |
+| `budgetLeft`| Number | งบประมาณที่เหลืออยู่ (Base + Carried Over) |
+| `carriedOverBudget`| Number | งบประมาณโบนัสที่ยกยอดมาจากสัปดาห์ก่อนหน้า (ถ้ามี) |
 | `formation` | String | แผนการเล่นปัจจุบัน (เช่น '4-4-2') |
 | `managerId` | String | รหัสผู้จัดการทีมที่เลือกใช้งาน |
 | `captainId` | String | รหัสผู้เล่น (playerId) ที่เป็นกัปตันทีม |
+| `viceCaptainId`| String | รหัสผู้เล่น (playerId) ที่เป็นรองกัปตันทีม (สำรองกรณีกัปตันไม่ได้ลง) |
+| `currentStreak`| Number | จำนวนสัปดาห์ที่ส่งทีมติดต่อกัน (Streak) |
 | `updatedAt` | Timestamp | Firestore server timestamp |
 
 ## 3. Manager Schema (ผู้จัดการทีม)
@@ -224,6 +227,10 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `maxPlayersPerTeam` | Object | `{"value": 3, "isActive": true}` |
 | `freeTransfers` | Object | `{"value": 1, "isActive": true}` |
 | `captainMultiplier` | Object | `{"value": 2, "isActive": true}` |
+| `viceCaptainSystem` | Object | `{"isActive": true}` เปิดใช้งานระบบรองกัปตัน |
+| `budgetCarryOver` | Object | `{"percent": 50, "isActive": true}` หักเปอรเซ็นต์เงินคงเหลือยกยอดไปสัปดาห์หน้า |
+| `synergyBonus` | Object | `{"sameTeamThreshold": 3, "sameNationThreshold": 4, "bonusPercent": 5, "isActive": true}` เปิดใช้งานโบนัสทีม/ชาติเดียวกัน |
+| `playStreaks` | Object | `{"streakTarget": 3, "rewardType": "budget", "rewardValue": 5, "isActive": true}` เปิดใช้งานแจกรางวัลคนส่งทีมต่อเนื่อง |
 
 ### 12.2 Scoring Rules
 `public_data/scoring_rules`

@@ -13,8 +13,9 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench }) => {
   // Mocks for image and team abbreviation
   const playerImage = player.imageUrl || player.fullData?.imageUrl || player.fullData?.image || ('https://ui-avatars.com/api/?background=random&color=fff&name=' + player.name);
   const teamAbbr = player.team || 'UNK';
-  const role = player.role || ''; // e.g. (C)
+  const role = player.role || ''; // e.g. (C) or (VC)
   const isCaptain = role === 'C';
+  const isViceCaptain = role === 'VC';
   const cardIcon = player.appliedCardIcon;
 
   return (
@@ -34,10 +35,12 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench }) => {
         <div className="w-full h-10 sm:h-12 lg:h-14 bg-white rounded-t-md shadow-sm border border-b-0 border-slate-300 overflow-hidden relative flex items-end justify-center">
           <img src={playerImage} alt={player.name} className="w-full h-full object-cover" />
           
-          {/* Captain Indicator */}
-          {isCaptain && (
+          {/* Captain / Vice Captain Indicator */}
+          {(isCaptain || isViceCaptain) && (
             <div className="absolute bottom-0 left-0 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-white/80 backdrop-blur-sm rounded-tr-lg flex items-center justify-center shadow-sm z-10 border-t border-r border-slate-200">
-              <span className="text-[9px] sm:text-[10px] font-black text-slate-800">C</span>
+              <span className={`text-[8px] sm:text-[9px] font-black ${isViceCaptain ? 'text-orange-500' : 'text-slate-800'}`}>
+                {role}
+              </span>
             </div>
           )}
 

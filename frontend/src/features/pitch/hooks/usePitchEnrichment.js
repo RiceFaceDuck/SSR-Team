@@ -8,6 +8,7 @@ export const usePitchEnrichment = () => {
   const { 
     mySquad, 
     captainId,
+    viceCaptainId,
     availableCards,
     liveGwStats
   } = useUserStore();
@@ -27,11 +28,12 @@ export const usePitchEnrichment = () => {
       mySquad, 
       marketPlayers, 
       captainId, 
+      viceCaptainId,
       availableCards, 
       liveGwStats, 
       isMarketOpen
     );
-  }, [mySquad, marketPlayers, captainId, availableCards, liveGwStats, isMarketOpen]);
+  }, [mySquad, marketPlayers, captainId, viceCaptainId, availableCards, liveGwStats, isMarketOpen]);
 
   return { enrichedStarters, enrichedBench, marketPlayers };
 };

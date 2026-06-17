@@ -7,6 +7,7 @@ export const enrichSquadData = (
   mySquad,
   marketPlayers,
   captainId,
+  viceCaptainId,
   availableCards,
   liveGwStats,
   isMarketOpen
@@ -38,7 +39,7 @@ export const enrichSquadData = (
       price: fullData?.price || 0,
       imageUrl: fullData?.imageUrl || null,
       totalPoints: fullData?.totalPoints || 0,
-      role: captainId === squadPlayer.playerId ? 'C' : null,
+      role: captainId === squadPlayer.playerId ? 'C' : (viceCaptainId === squadPlayer.playerId ? 'VC' : null),
       isStarting: squadPlayer.isStarting,
       appliedCardId: squadPlayer.appliedCardId,
       appliedCardIcon: appliedCard?.icon || null,

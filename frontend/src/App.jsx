@@ -23,6 +23,7 @@ import ProfileScreen from './features/profile/ProfileScreen';
 import LeaderboardScreen from './features/leaderboard/LeaderboardScreen';
 import SocialScreen from './features/social/SocialScreen';
 import LiveScoreScreen from './features/live/LiveScoreScreen';
+import RulesScreen from './features/profile/RulesScreen';
 
 export default function App() {
   const { isAuthenticated, isAuthLoading } = useUserStore();
@@ -121,6 +122,7 @@ export default function App() {
         <div className={getRouteClass('leaderboard')}><LeaderboardScreen /></div>
         <div className={getRouteClass('social')}><SocialScreen /></div>
         <div className={getRouteClass('live')}><LiveScoreScreen /></div>
+        <div className={getRouteClass('rules')}><RulesScreen /></div>
       </MobileLayout>
     </>
   );
