@@ -1,7 +1,7 @@
-import React from 'react';
-import { Edit3, Trash2, LogOut } from 'lucide-react';
+import { Edit3, Trash2, LogOut, Settings2, Trophy } from 'lucide-react';
 
 export default function LeagueSettings({ 
+  league,
   isCreator, 
   setIsEditing, 
   setShowSettings, 
@@ -11,6 +11,36 @@ export default function LeagueSettings({
 }) {
   return (
     <div className="space-y-4 py-2">
+      <div className="bg-white border border-slate-200 rounded-xl p-4">
+        <h4 className="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+          <Settings2 size={16} className="text-indigo-500" /> ข้อมูลลีกและกติกา
+        </h4>
+        <div className="space-y-2 text-xs">
+          <div className="flex justify-between items-center bg-slate-50 p-2 rounded">
+            <span className="text-slate-500 font-bold">โหมดการแข่งขัน</span>
+            <span className={`font-black uppercase ${league?.mode === 'duel' ? 'text-amber-500' : 'text-indigo-600'}`}>
+              {league?.mode === 'duel' ? 'Duel (ดวล)' : 'Classic'}
+            </span>
+          </div>
+          {league?.customRules && Object.keys(league.customRules).length > 0 && (
+            <>
+              <div className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                <span className="text-slate-500 font-bold">กัปตันคูณ</span>
+                <span className="text-slate-800 font-bold">x{league.customRules.captainMultiplier || 2}</span>
+              </div>
+              <div className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                <span className="text-slate-500 font-bold">คะแนนประตู</span>
+                <span className="text-slate-800 font-bold">{league.customRules.goal || 800} Pts</span>
+              </div>
+              <div className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                <span className="text-slate-500 font-bold">คะแนนแอสซิสต์</span>
+                <span className="text-slate-800 font-bold">{league.customRules.assist || 600} Pts</span>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
       {isCreator ? (
         <>
           <div className="bg-white border border-slate-200 rounded-xl p-4">

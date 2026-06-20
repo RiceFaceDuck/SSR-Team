@@ -5,7 +5,7 @@
  */
 
 import { create } from 'zustand';
-import { marketService } from '../services/firebase/marketService';
+import { marketFetchService } from '../services/firebase/market/marketFetchService';
 
 export const useMarketStore = create((set, get) => ({
   // ==========================================
@@ -33,7 +33,7 @@ export const useMarketStore = create((set, get) => ({
 
     try {
       // 3. เรียกใช้งาน Service ขั้นเทพที่เราเพิ่งอัปเกรด (มันจะจัดการ Cache & Dedupe ให้เอง)
-      const fetchedPlayers = await marketService.getPlayers(forceRefresh);
+      const fetchedPlayers = await marketFetchService.getPlayers(forceRefresh);
 
       // 4. บันทึกข้อมูลลง Store สำเร็จ พร้อมล็อก Flag ว่ามีข้อมูลแล้ว
       set({ 
@@ -56,7 +56,7 @@ export const useMarketStore = create((set, get) => ({
    * (มักใช้ตอนกด Logout)
    */
   clearMarketData: () => {
-    marketService.clearCache();
+    marketFetchService.clearCache();
     set({
       players: [],
       isLoading: false,

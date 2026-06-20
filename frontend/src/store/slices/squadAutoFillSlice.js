@@ -1,4 +1,4 @@
-import { runAutoFillEngine } from '../../features/pitch/utils/autoFillEngine';
+import { runAutoFillEngine } from '../../features/pitch/utils/autofill/AutoFillOrchestrator';
 import { getAllFormations } from '../../utils/formationUtils';
 
 export const squadAutoFillSlice = (set, get) => ({

@@ -1,48 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { STYLES } from '../../config/theme';
-import { Trophy, Star, Medal } from 'lucide-react';
+import { Trophy, Download } from 'lucide-react';
 import { useGameStore } from '../../store/useGameStore';
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import { useLeaderboardData } from './hooks/useLeaderboardData';
+import LeaderboardTabs from './components/LeaderboardTabs';
+import LeaderboardList from './components/LeaderboardList';
+import SponsorBanner from './components/SponsorBanner';
 
 export default function LeaderboardScreen() {
   const themeConfig = useGameStore(state => state.themeConfig);
   const user = useGameStore(state => state.user);
-  const [leaders, setLeaders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  
+  // Custom hook for SRP
+  const { activeTab, setActiveTab, leaders, loading, exportCompetitorData, isExporting } = useLeaderboardData();
 
-  useEffect(() => {
-    const fetchLeaderboard = async () => {
-      try {
-        const q = query(
-          collection(db, 'users'),
-          orderBy('rank', 'asc'),
-          limit(50)
-        );
-        const snap = await getDocs(q);
-        const list = [];
-        snap.forEach(doc => {
-          const data = doc.data();
-          if (data.hasJoinedGame) {
-            list.push({ id: doc.id, ...data });
-          }
-        });
-        setLeaders(list);
-      } catch (error) {
-        console.error("Error fetching leaderboard:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchLeaderboard();
-  }, []);
-
-  const getRankColor = (rank) => {
-    if (rank === 1) return 'text-amber-500 bg-amber-50 border-amber-200';
-    if (rank === 2) return 'text-slate-400 bg-slate-100 border-slate-300';
-    if (rank === 3) return 'text-orange-700 bg-orange-50 border-orange-200';
-    return 'text-slate-600 bg-slate-50 border-slate-100';
+  const getSubTitle = () => {
+    if (activeTab === 'weekly') return 'WEEKLY';
+    if (activeTab === 'season') return 'GLOBAL';
+    return 'CLUB';
   };
 
   return (
@@ -60,85 +35,50 @@ export default function LeaderboardScreen() {
               <Trophy className="text-amber-500" size={32} /> RANK.
             </h2>
             <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-300 shadow-md px-3 py-1.5 rounded-lg flex flex-col items-end">
-              <span className="text-[10px] text-slate-500 font-bold leading-none uppercase">ซีซั่นนี้</span>
-              <span className="text-sm font-black text-indigo-600 leading-none mt-1">GLOBAL</span>
+              <span className="text-[10px] text-slate-500 font-bold leading-none uppercase">
+                {activeTab === 'weekly' ? 'สัปดาห์ล่าสุด' : activeTab === 'season' ? 'ซีซั่นนี้' : 'การจัดอันดับ'}
+              </span>
+              <span className="text-sm font-black text-indigo-600 leading-none mt-1">{getSubTitle()}</span>
             </div>
           </div>
         </div>
 
         {/* Sponsor Banner */}
-        <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-4 rounded-xl text-white mb-6 shadow-lg shadow-amber-500/30 flex justify-between items-center cursor-pointer hover:scale-[1.02] transition-transform">
-          <div>
-            <h4 className="font-bold flex items-center gap-1"><Star size={16} /> Shopee Super League</h4>
-            <p className="text-xs text-orange-100">เข้าร่วมลุ้นรับรางวัลพิเศษ!</p>
-          </div>
-          <span className="bg-white text-amber-500 px-3 py-1 rounded-full text-xs font-bold shadow-sm border border-white">เข้าร่วมเลย</span>
+        <SponsorBanner />
+
+        {/* Download Data Button - Available to everyone before matches */}
+        <div className="flex justify-end mb-3">
+          <button 
+            onClick={exportCompetitorData}
+            disabled={isExporting}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-md transition-colors disabled:opacity-50"
+          >
+            {isExporting ? (
+              <span className="animate-pulse">กำลังดาวน์โหลด...</span>
+            ) : (
+              <>
+                <Download size={16} /> โหลดข้อมูลทีมคู่แข่ง (.txt)
+              </>
+            )}
+          </button>
         </div>
 
-        {/* Leaderboard List */}
+        {/* Leaderboard Section */}
         <div className={STYLES.card}>
+          <LeaderboardTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+
           <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
             <span className="text-xs font-bold text-slate-500 w-12 text-center">อันดับ</span>
             <span className="text-xs font-bold text-slate-500 flex-1 px-2">ชื่อทีม / ผู้จัดการ</span>
-            <span className="text-xs font-bold text-slate-500 text-right">คะแนน</span>
+            <span className="text-xs font-bold text-slate-500 text-right">{activeTab === 'club' ? 'EXP สะสม' : 'คะแนน'}</span>
           </div>
           
-          <div className="space-y-2 max-h-[60vh] overflow-y-auto custom-scrollbar pr-1">
-            {loading ? (
-              <div className="text-center py-8 text-slate-400 font-medium animate-pulse">กำลังโหลดข้อมูลกระดานผู้นำ...</div>
-            ) : leaders.length === 0 ? (
-              <div className="text-center py-8 text-slate-400 font-medium">ยังไม่มีผู้เข้าร่วมจัดอันดับ</div>
-            ) : (
-              leaders.map((player) => {
-                const isCurrentUser = user && user.uid === player.id;
-                const rankColorClass = getRankColor(player.rank);
-                
-                return (
-                  <div key={player.id} 
-                    className={`flex items-center p-3 rounded-xl border transition-all ${
-                      isCurrentUser 
-                        ? 'border-indigo-400 bg-indigo-50 shadow-md shadow-indigo-100/50 scale-[1.02] z-10 relative' 
-                        : rankColorClass
-                    }`}
-                  >
-                    <div className="w-12 flex justify-center items-center">
-                      {player.rank <= 3 ? (
-                        <Medal size={24} className={
-                          player.rank === 1 ? 'text-amber-500' : 
-                          player.rank === 2 ? 'text-slate-400' : 'text-orange-700'
-                        } />
-                      ) : (
-                        <span className={`font-black text-lg ${isCurrentUser ? 'text-indigo-600' : 'text-slate-400'}`}>
-                          {player.rank || '-'}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 px-3 overflow-hidden">
-                      <div className="flex items-center gap-2">
-                        {player.photoURL && (
-                          <img src={player.photoURL} alt="" className="w-6 h-6 rounded-full object-cover border border-white shadow-sm" />
-                        )}
-                        <span className={`font-bold text-sm truncate ${isCurrentUser ? 'text-indigo-900' : 'text-slate-800'}`}>
-                          {player.teamName || player.displayName || 'ผู้จัดการทีมปริศนา'}
-                        </span>
-                        {isCurrentUser && (
-                          <span className="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold ml-1">คุณ</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <span className={`font-black text-lg ${isCurrentUser ? 'text-indigo-600' : 'text-slate-700'}`}>
-                        {player.userPoints || 0}
-                      </span>
-                      <span className="text-[10px] font-bold text-slate-400 ml-1">Pts</span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
+          <LeaderboardList 
+            leaders={leaders} 
+            loading={loading} 
+            user={user} 
+            activeTab={activeTab}
+          />
         </div>
       </div>
     </div>

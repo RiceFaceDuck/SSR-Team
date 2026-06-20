@@ -9,15 +9,18 @@ export const usePitchActions = () => {
 
   const handleAutoFill = async (marketPlayers, setIsAutoFilling) => {
     setIsAutoFilling(true);
-    toast.info("🧠 AI กำลังวิเคราะห์ฟอร์มนักเตะเพื่อจัดทีมที่ดีที่สุด...", { duration: 1500 });
+    toast.info("🧠 AI 2.0 กำลังวิเคราะห์สถิติและ Synergy...", { duration: 1500 });
     
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    toast.info("💸 กำลังจัดสรรงบประมาณให้คุ้มค่าที่สุด...", { duration: 1500 });
+    
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     const result = useUserStore.getState().autoFillTeam(marketPlayers);
     if (result.success) {
-      toast.success(result.message);
+      toast.success("✅ " + result.message);
     } else {
-      toast.error(result.message);
+      toast.error("❌ " + result.message);
     }
     setIsAutoFilling(false);
   };

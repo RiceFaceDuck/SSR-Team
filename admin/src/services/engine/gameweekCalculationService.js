@@ -7,13 +7,7 @@ import { collection, getDocs, doc, writeBatch, serverTimestamp, getDoc } from 'f
 import { db } from '../../config/firebase';
 import { getScoringRules, getGameRules } from '../firebase/gameRulesDatabase';
 import { calculatePlayerPoints, determineSquadMVP } from './utils/pointCalculator';
-import { 
-  applyCaptainMultiplier, 
-  calculateSynergyBonus, 
-  calculateManagerBonus,
-  calculateUnderdogBoost,
-  applyMVPBonus
-} from './utils/squadModifiers';
+import { ModifierPipeline } from './modifiers/ModifierPipeline';
 
 const APP_ID = 'ssr-team';
 
@@ -51,135 +45,138 @@ export const gameweekCalculationService = {
 
       // 2. ดึง Users ทั้งหมดที่เข้าร่วมเล่นเกม
       const usersSnap = await getDocs(collection(db, 'users'));
+      const activeUsers = usersSnap.docs.filter(doc => doc.data().hasJoinedGame);
+      
       let batch = writeBatch(db);
       let batchCount = 0;
-
-      for (const userDoc of usersSnap.docs) {
-        const userData = userDoc.data();
-        if (!userData.hasJoinedGame) continue;
-
-        const userId = userDoc.id;
+      
+      // Process in chunks to avoid overwhelming memory/network and optimize N+1 delays
+      const CHUNK_SIZE = 50;
+      for (let i = 0; i < activeUsers.length; i += CHUNK_SIZE) {
+        const userChunk = activeUsers.slice(i, i + CHUNK_SIZE);
         
-        // 3. ดึง Squad ปัจจุบันของผู้ใช้
-        const squadRef = doc(db, 'artifacts', APP_ID, 'users', userId, 'game_data', 'squad');
-        const squadSnap = await getDoc(squadRef);
+        // 3. Fetch Squads concurrently for the chunk
+        const squadPromises = userChunk.map(userDoc => {
+          const squadRef = doc(db, 'artifacts', APP_ID, 'users', userDoc.id, 'game_data', 'squad');
+          return getDoc(squadRef).then(snap => ({ userDoc, squadSnap: snap }));
+        });
         
-        if (!squadSnap.exists()) continue;
+        const chunkResults = await Promise.all(squadPromises);
 
-        const squadData = squadSnap.data();
-        const { mySquad, captainId, viceCaptainId, manager, budgetLeft, currentStreak = 0 } = squadData;
-        
-        let processedSquad = [];
-        const teamCounts = {};
+        for (const { userDoc, squadSnap } of chunkResults) {
+          if (!squadSnap.exists()) continue;
 
-        // 4. คำนวณคะแนนพื้นฐานนักเตะในทีม
-        if (mySquad && Array.isArray(mySquad)) {
-          for (const playerItem of mySquad) {
-            let pointsEarned = 0;
-            let hasPlayed = false;
-            
-            if (playerItem.isStarting) {
-              const pData = playerStatsMap[playerItem.playerId];
-              if (pData) {
-                pointsEarned = calculatePlayerPoints(pData.stats, pData.position, scoringRules);
-                hasPlayed = pData.stats?.minutes > 0 || pData.stats?.played > 0 || pointsEarned > 0;
-                
-                if (synergyActive) {
-                   const team = pData.team || 'UNK';
-                   teamCounts[team] = (teamCounts[team] || 0) + 1;
+          const userData = userDoc.data();
+          const userId = userDoc.id;
+          const squadData = squadSnap.data();
+          const { mySquad, captainId, viceCaptainId, manager, budgetLeft, currentStreak = 0 } = squadData;
+          
+          let processedSquad = [];
+          // 4. คำนวณคะแนนพื้นฐานนักเตะในทีม
+          if (mySquad && Array.isArray(mySquad)) {
+            for (const playerItem of mySquad) {
+              let pointsEarned = 0;
+              let hasPlayed = false;
+              
+              // BENCH_BOOST สามารถทำคะแนนได้แม้ไม่ใช่ตัวจริง
+              const isPlaying = playerItem.isStarting || (playerItem.appliedCard?.effectLogic?.type === 'BENCH_BOOST');
+              
+              if (isPlaying) {
+                const pData = playerStatsMap[playerItem.playerId];
+                if (pData) {
+                  pointsEarned = calculatePlayerPoints(pData.stats, pData.position, scoringRules);
+                  hasPlayed = pData.stats?.minutes > 0 || pData.stats?.played > 0 || pointsEarned > 0;
                 }
               }
+              
+              processedSquad.push({
+                ...playerItem,
+                basePoints: pointsEarned,
+                pointsEarned: pointsEarned,
+                hasPlayed
+              });
             }
-            
-            processedSquad.push({
-              ...playerItem,
-              basePoints: pointsEarned,
-              pointsEarned: pointsEarned, // Will be modified below
-              hasPlayed
-            });
           }
-        }
 
-        // 5. Apply Modifiers
-        processedSquad = applyCaptainMultiplier(processedSquad, captainId, viceCaptainId, captainMultiplier, vcSystemActive);
-        
-        let totalGwPoints = 0;
-        processedSquad.forEach(p => {
-          if (p.isStarting) totalGwPoints += p.pointsEarned;
-        });
+          // 5. Apply Modifiers via Centralized Pipeline
+          const modifierContext = {
+            scoringRules,
+            gameRules,
+            captainMultiplier,
+            vcSystemActive,
+            synergyActive
+          };
+          
+          const pipeline = new ModifierPipeline(modifierContext);
+          const pipelineResult = pipeline.run(processedSquad, squadData);
+          processedSquad = pipelineResult.processedSquad;
+          let totalGwPoints = pipelineResult.totalGwPoints;
 
-        // 🌟 Apply MVP Bonus (Man of the Match)
-        const mvpId = determineSquadMVP(processedSquad);
-        if (mvpId) {
-          const mvpBonus = applyMVPBonus(processedSquad, mvpId);
-          totalGwPoints += mvpBonus;
-        }
+          // Calculate Carry-over Budget
+          let carriedOverBudget = 0;
+          if (carryOverActive && budgetLeft > 0) {
+             const percent = gameRules.budgetCarryOver?.percent || 50;
+             carriedOverBudget = Math.round(budgetLeft * (percent / 100) * 10) / 10;
+          }
 
-        // Apply Synergy Bonus
-        totalGwPoints += calculateSynergyBonus(teamCounts, totalGwPoints, gameRules.synergyBonus);
+          // Update Play Streaks
+          let newStreak = currentStreak + 1;
+          let streakReward = 0;
+          if (streaksActive) {
+             const target = gameRules.playStreaks?.streakTarget || 3;
+             if (newStreak >= target) {
+                if (gameRules.playStreaks?.rewardType === 'budget') {
+                   streakReward = gameRules.playStreaks?.rewardValue || 5;
+                }
+                newStreak = 0;
+             }
+          }
 
-        // Apply Manager Score Multiplier Effect
-        totalGwPoints += calculateManagerBonus(manager, totalGwPoints);
+          // 6. เตรียมคำสั่ง Batch Writes
+          const gwHistoryRef = doc(db, 'users', userId, 'gameweek_history', gameweekId);
+          
+          // เคลียร์ appliedCard จาก squad หลังจากคิดคะแนนแล้ว (One-time use)
+          const squadForSave = processedSquad.map(p => {
+            const copy = { ...p };
+            delete copy.appliedCard;
+            delete copy.appliedCardId;
+            return copy;
+          });
 
-        // 🌟 Apply Underdog Boost (ถ้าใช้งบน้อยกว่า 50% ของงบเริ่มต้น ถือว่าเป็นทีมเล็กสู้ชีวิต)
-        const budgetSpent = startingBudget - (budgetLeft || 0);
-        const isUnderdog = budgetSpent < (startingBudget * 0.5);
-        totalGwPoints += calculateUnderdogBoost(isUnderdog, totalGwPoints);
+          batch.set(gwHistoryRef, {
+            gameweekId,
+            squad: squadForSave,
+            managerId: manager?.id || null,
+            captainId: captainId || null,
+            viceCaptainId: viceCaptainId || null,
+            mvpId: pipelineResult.processedSquad.find(p => p.isMvp)?.playerId || null,
+            points: totalGwPoints,
+            createdAt: serverTimestamp()
+          });
 
-        // Calculate Carry-over Budget
-        let carriedOverBudget = 0;
-        if (carryOverActive && budgetLeft > 0) {
-           const percent = gameRules.budgetCarryOver?.percent || 50;
-           carriedOverBudget = Math.round(budgetLeft * (percent / 100) * 10) / 10;
-        }
+          // Update User Profile Stats
+          const currentUserPoints = userData.userPoints || 0;
+          batch.update(userDoc.ref, {
+            userPoints: currentUserPoints + totalGwPoints,
+            lastGameweekPoints: totalGwPoints
+          });
 
-        // Update Play Streaks
-        let newStreak = currentStreak + 1;
-        let streakReward = 0;
-        if (streaksActive) {
-           const target = gameRules.playStreaks?.streakTarget || 3;
-           if (newStreak >= target) {
-              if (gameRules.playStreaks?.rewardType === 'budget') {
-                 streakReward = gameRules.playStreaks?.rewardValue || 5;
-              }
-              newStreak = 0;
-           }
-        }
+          // Update Squad Document (Carry-over, Streak, and Clear Cards)
+          batch.update(squadSnap.ref, {
+            mySquad: squadForSave, // Clear cards from active squad for next week
+            carriedOverBudget: carriedOverBudget + streakReward,
+            currentStreak: newStreak,
+            updatedAt: serverTimestamp()
+          });
 
-        // 6. เตรียมคำสั่ง Batch Writes
-        const gwHistoryRef = doc(db, 'users', userId, 'gameweek_history', gameweekId);
-        batch.set(gwHistoryRef, {
-          gameweekId,
-          squad: processedSquad,
-          managerId: manager?.id || null,
-          captainId: captainId || null,
-          viceCaptainId: viceCaptainId || null,
-          mvpId: mvpId, // เก็บประวัติ MVP
-          points: totalGwPoints,
-          createdAt: serverTimestamp()
-        });
+          batchCount += 3;
 
-        // Update User Profile Stats
-        const currentUserPoints = userData.userPoints || 0;
-        batch.update(userDoc.ref, {
-          userPoints: currentUserPoints + totalGwPoints
-        });
-
-        // Update Squad Document (Carry-over, Streak)
-        batch.update(squadRef, {
-          carriedOverBudget: carriedOverBudget + streakReward,
-          currentStreak: newStreak,
-          updatedAt: serverTimestamp()
-        });
-
-        batchCount += 3;
-
-        // 🚨 CRITICAL FIX: Firebase batch รองรับสูงสุด 500 operations
-        if (batchCount >= 490) {
-          await batch.commit();
-          console.log('[GW Engine] Commit batch กลางคัน (ป้องกันลิมิต 500)');
-          batchCount = 0;
-          batch = writeBatch(db); // 🔥 Fix: Re-initialize batch
+          if (batchCount >= 490) {
+            await batch.commit();
+            console.log('[GW Engine] Commit batch กลางคัน (ป้องกันลิมิต 500)');
+            batchCount = 0;
+            batch = writeBatch(db);
+          }
         }
       }
 

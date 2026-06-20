@@ -17,24 +17,20 @@ export const usePitchDataLoad = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!isDataFetched) {
-      fetchMarketPlayers();
-    }
-    if (!isCardsFetched) {
-      fetchCards();
-    }
-    if (!isInventoryLoaded && userData?.uid) {
-      loadInventory(userData.uid);
-    }
-    // Fetch live stats once component mounts
+    if (!isDataFetched) fetchMarketPlayers();
+    if (!isCardsFetched) fetchCards();
+    if (!isInventoryLoaded && userData?.uid) loadInventory(userData.uid);
+    
+    // Fetch live stats only once when pitch loads, if there's a squad
     if (mySquad?.length > 0) {
       fetchLiveStats();
     }
+
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 800);
     return () => clearTimeout(timer);
-  }, [isDataFetched, fetchMarketPlayers, isCardsFetched, fetchCards, mySquad?.length]);
+  }, [userData?.uid]); // Run once per user session/mount
 
   return { isLoading };
 };

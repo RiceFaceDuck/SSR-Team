@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useUserStore } from '../../../store/useUserStore';
+import NormalMessageItem from './chat/NormalMessageItem';
 
 export default function ChatMessageList({ messages }) {
   const { userData } = useUserStore();
@@ -107,35 +108,7 @@ export default function ChatMessageList({ messages }) {
             );
           }
 
-          // ถ้าเป็น Super Chat ในลิสต์ปกติ ก็ให้ดูโดดเด่นนิดนึง
-          const isSuper = msg.isSuperChat;
-
-          return (
-            <div key={msg.id} className={`flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} animate-in slide-in-from-bottom-2 duration-300`}>
-              <img 
-                src={msg.userPhoto || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + msg.userId} 
-                alt="avatar" 
-                className={`w-8 h-8 rounded-full object-cover shrink-0 ${isSuper ? 'border-2 border-yellow-400' : 'bg-slate-100 border border-slate-200'}`} 
-              />
-              
-              <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[75%]`}>
-                <span className={`text-[10px] font-medium mb-0.5 px-1 ${isSuper ? 'text-amber-500 font-bold' : 'text-slate-400'}`}>
-                  {msg.userName}
-                </span>
-                <div className={`px-3 py-2 text-sm ${
-                  isSuper 
-                    ? 'bg-gradient-to-r from-amber-200 to-yellow-300 text-amber-950 font-bold border border-yellow-400 shadow-sm'
-                    : isMe 
-                      ? 'bg-indigo-600 text-white' 
-                      : 'bg-slate-100 text-slate-800'
-                } ${
-                  isMe ? 'rounded-2xl rounded-tr-sm' : 'rounded-2xl rounded-tl-sm'
-                }`}>
-                  {msg.text}
-                </div>
-              </div>
-            </div>
-          );
+          return <NormalMessageItem key={msg.id} msg={msg} isMe={isMe} />;
         })
       )}
       <div ref={messagesEndRef} />

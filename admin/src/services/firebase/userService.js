@@ -62,8 +62,7 @@ export const adjustUserBalls = async (userId, amount, reason = "Admin adjustment
     // 3. สั่งอัปเดตยอด Balls ⚽ ทันทีด้วย increment (ประหยัด Reads 100%)
     batch.update(userRef, {
       balls: increment(amount),
-      lastUpdated: serverTimestamp(),
-      _adminSecret: "super_secret_admin_key_2026"
+      lastUpdated: serverTimestamp()
     });
 
     // 4. สั่งบันทึกประวัติ (Audit Log) กันเหนียว
@@ -73,8 +72,7 @@ export const adjustUserBalls = async (userId, amount, reason = "Admin adjustment
       reason: reason,
       adminId: adminId,
       timestamp: serverTimestamp(),
-      status: 'success',
-      _adminSecret: "super_secret_admin_key_2026"
+      status: 'success'
     });
 
     // 5. Commit ยิงขึ้น Firebase รวดเดียว!

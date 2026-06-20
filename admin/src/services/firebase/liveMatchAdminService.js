@@ -2,7 +2,6 @@ import { db } from '../../config/firebase';
 import { doc, setDoc, collection, serverTimestamp, writeBatch, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 
 const LIVE_MATCH_DOC_ID = 'live_match';
-const ADMIN_SECRET = 'super_secret_admin_key_2026';
 
 export const liveMatchAdminService = {
   /**
@@ -59,8 +58,7 @@ export const liveMatchAdminService = {
       awayScore: Number(data.awayScore) || 0,
       minute: data.minute || '0',
       status: data.status || 'upcoming',
-      updatedAt: serverTimestamp(),
-      _adminSecret: ADMIN_SECRET
+      updatedAt: serverTimestamp()
     }, { merge: true });
   },
 
@@ -82,8 +80,7 @@ export const liveMatchAdminService = {
       minute: data.minute,
       primaryDetail: data.primaryDetail,
       secondaryDetail: data.secondaryDetail || '',
-      timestamp: serverTimestamp(),
-      _adminSecret: ADMIN_SECRET
+      timestamp: serverTimestamp()
     };
 
     // 3. Set event to subcollection
@@ -99,8 +96,7 @@ export const liveMatchAdminService = {
         secondaryDetail: data.secondaryDetail || '',
         timestamp: serverTimestamp() // ใช้ serverTimestamp เพื่อให้สอดคล้องกับ Schema และป้องกันปัญหาเรื่องเวลาเหลื่อม
       },
-      updatedAt: serverTimestamp(),
-      _adminSecret: ADMIN_SECRET
+      updatedAt: serverTimestamp()
     });
 
     await batch.commit();

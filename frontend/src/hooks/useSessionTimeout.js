@@ -3,7 +3,7 @@ import { logoutUser } from '../features/auth/authService';
 import { useUserStore } from '../store/useUserStore';
 import { toast } from '../utils/toast';
 
-const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 นาที
+const SESSION_TIMEOUT_MS = 30 * 24 * 60 * 60 * 1000; // 30 วัน (ไม่ต้อง login บ่อย)
 const THROTTLE_MS = 60 * 1000; // 1 นาที สำหรับจำกัดความถี่ในการอัปเดต localStorage
 
 export const useSessionTimeout = () => {
@@ -34,7 +34,7 @@ export const useSessionTimeout = () => {
         const elapsed = Date.now() - parseInt(lastActivity, 10);
         if (elapsed > SESSION_TIMEOUT_MS) {
           console.warn('Session expired due to inactivity. Logging out automatically.');
-          toast.error('เซสชันของคุณหมดอายุเนื่องจากไม่มีการใช้งานเป็นเวลา 15 นาที', 5000);
+          toast.error('เซสชันของคุณหมดอายุเนื่องจากไม่มีการใช้งานเป็นเวลา 30 วัน', 5000);
           
           logoutUser().then(() => {
             clearAuth();

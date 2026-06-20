@@ -1,67 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { ScrollText, Save, AlertCircle } from 'lucide-react';
-import ToggleSwitch from '../components/ToggleSwitch';
 import RuleSettingItem from '../components/RuleSettingItem';
-import { getGameRules, updateGameRules } from '../../../services/firebase/gameRulesDatabase';
+import { useGameRulesManager } from '../hooks/useGameRulesManager';
 
 export default function GameRulesManager({ isEmbedded = false }) {
-  const [rules, setRules] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  const defaultRules = {
-    startingBudget: { value: 100, isActive: true },
-    maxPlayersPerTeam: { value: 3, isActive: true },
-    freeTransfers: { value: 1, isActive: true },
-    captainMultiplier: { value: 2, isActive: true },
-    viceCaptainSystem: { isActive: true },
-    budgetCarryOver: { percent: 50, isActive: true },
-    synergyBonus: { sameTeamThreshold: 3, sameNationThreshold: 4, bonusPercent: 5, isActive: true },
-    playStreaks: { streakTarget: 3, rewardType: "budget", rewardValue: 5, isActive: true }
-  };
-
-  useEffect(() => {
-    fetchRules();
-  }, []);
-
-  const fetchRules = async () => {
-    try {
-      const data = await getGameRules();
-      if (data) {
-        setRules(data);
-      } else {
-        setRules(defaultRules);
-      }
-    } catch (err) {
-      setError('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    setError('');
-    try {
-      await updateGameRules(rules);
-      alert('บันทึกกติกาเกมเรียบร้อยแล้ว');
-    } catch (err) {
-      setError('เกิดข้อผิดพลาดในการบันทึก: ' + err.message);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const updateRule = (key, field, value) => {
-    setRules(prev => ({
-      ...prev,
-      [key]: {
-        ...prev[key],
-        [field]: value
-      }
-    }));
-  };
+  const { rules, isLoading, isSaving, error, handleSave, updateRule } = useGameRulesManager();
 
   if (isLoading) {
     return (
@@ -199,6 +142,14 @@ export default function GameRulesManager({ isEmbedded = false }) {
             inputLabel="สัปดาห์ต่อเนื่อง"
             inputValue={rules.playStreaks?.streakTarget}
             onInputChange={(val) => updateRule('playStreaks', 'streakTarget', val)}
+          />
+
+          <RuleSettingItem
+            label="กฎวัดผลคะแนนเท่ากัน (Tie-breaker งบประมาณ)"
+            description="หากคะแนน Pts เท่ากัน ให้ดูว่าใครใช้งบประมาณน้อยกว่า"
+            info="หากเปิดใช้งาน เมื่อคะแนนเท่ากัน คนที่ใช้งบประมาณจัดทีมน้อยกว่าจะชนะ หากงบยังเท่ากันอีก จึงจะดูเวลาที่เซฟทีมล่าสุด"
+            isActive={rules.budgetTieBreaker?.isActive}
+            onToggle={(val) => updateRule('budgetTieBreaker', 'isActive', val)}
           />
 
           <div className="flex justify-center md:justify-end mt-8">

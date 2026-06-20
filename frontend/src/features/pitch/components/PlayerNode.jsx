@@ -7,7 +7,7 @@ import PlayerStatsBar from './PlayerStatsBar';
  * PlayerNode - Displays an individual player on the pitch.
  * Matches the reference design: White card, player image, name, price, and + button.
  */
-const PlayerNode = ({ player, expectedPosition, isSelected, isBench }) => {
+const PlayerNode = ({ player, expectedPosition, isSelected, isBench, isSynergyHighlighted }) => {
   if (!player) return <EmptyNode expectedPosition={expectedPosition} isBench={isBench} />;
 
   // Mocks for image and team abbreviation
@@ -24,6 +24,11 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench }) => {
       {/* 🌟 Glowing effect when selected */}
       {isSelected && (
         <div className="absolute inset-0 blur-md rounded-md opacity-60 animate-pulse z-[-1] bg-[#fbbf24]" />
+      )}
+
+      {/* 🔥 Synergy Aura effect when highlighted */}
+      {isSynergyHighlighted && (
+        <div className="absolute -inset-1 blur-lg rounded-xl opacity-80 animate-pulse z-[-1] bg-gradient-to-t from-amber-400 via-amber-200 to-transparent shadow-[0_0_30px_rgba(251,191,36,0.8)]" />
       )}
 
       {/* Stats Bar */}

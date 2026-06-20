@@ -58,6 +58,29 @@ export const processTransaction = async (userId, amount, type, source, descripti
 };
 
 /**
+ * ฟังก์ชันช่วยเหลือ (Helper) สำหรับเขียน Log ประวัติการทำรายการผ่าน runTransaction
+ * ใช้ในกรณีที่ต้องมีการตรวจสอบเงื่อนไข (Atomic Read-Modify-Write)
+ * @param {import('firebase/firestore').Transaction} transaction - Firestore Transaction object
+ * @param {string} userId - ไอดีผู้เล่น (UID)
+ * @param {number} amount - จำนวน Balls (บวก/ลบ)
+ * @param {string} type - 'earn' หรือ 'spend'
+ * @param {string} source - แหล่งที่มา
+ * @param {string} description - คำอธิบายรายการ
+ */
+export const appendTransactionLog = (transaction, userId, amount, type, source, description = "") => {
+  if (amount === 0) return;
+  const txRef = doc(collection(db, 'users', userId, 'transactions'));
+  transaction.set(txRef, {
+    amount: amount,
+    type: type,
+    source: source,
+    description: description,
+    timestamp: serverTimestamp(),
+    status: 'success'
+  });
+};
+
+/**
  * ดึงประวัติการทำรายการของผู้เล่น (สำหรับนำไปแสดงในหน้า Profile UI)
  * * @param {string} userId - ไอดีผู้เล่น
  * @param {number} maxResults - จำนวนรายการสูงสุดที่ต้องการดึง (ค่าเริ่มต้น 20 รายการล่าสุด)

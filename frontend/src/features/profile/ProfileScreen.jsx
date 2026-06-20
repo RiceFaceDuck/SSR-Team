@@ -13,7 +13,7 @@ import ProfileHeaderCard from './components/ProfileHeaderCard';
 import WalletSummaryView from './components/WalletSummaryView';
 import TransactionHistoryPreview from './components/TransactionHistoryPreview';
 import ClubManagerView from './components/ClubManagerView';
-
+import AchievementManager from './components/AchievementManager';
 
 // 🎨 Mock STYLES and Theme
 const playSound = (type) => {
@@ -38,6 +38,7 @@ export default function ProfileScreen() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isClubManagerOpen, setIsClubManagerOpen] = useState(false);
+  const [isAchievementOpen, setIsAchievementOpen] = useState(false);
 
   // 🌟 NEW: ให้โหลดประวัติรายการอัตโนมัติเมื่อเข้ามาหน้า Profile
   useEffect(() => {
@@ -130,6 +131,20 @@ export default function ProfileScreen() {
 
       {/* ⚙️ เมนูอื่นๆ และปุ่ม Logout */}
       <div className="space-y-3">
+        <button 
+          onClick={() => { playSound('click'); setIsAchievementOpen(true); }}
+          className="w-full bg-white p-4 rounded-xl flex items-center justify-between border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:bg-slate-50 active:scale-[0.98] transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-amber-100 text-amber-600 rounded-lg"><span className="text-lg leading-none">🏆</span></div>
+            <div className="text-left">
+              <span className="font-bold text-slate-800 text-sm block">ความสำเร็จ & ฉายา</span>
+              <span className="text-xs text-slate-500 font-medium">ดูและตั้งค่าฉายาของคุณ</span>
+            </div>
+          </div>
+          <ChevronRight size={18} className="text-slate-400" />
+        </button>
+
         <button className="w-full bg-white p-4 rounded-xl flex items-center justify-between border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:bg-slate-50 active:scale-[0.98] transition-all">
           <span className="font-semibold text-slate-800 text-sm">คู่มือการใช้งานระบบ</span>
           <ChevronRight size={18} className="text-slate-400" />
@@ -164,6 +179,12 @@ export default function ProfileScreen() {
       <ClubManagerView 
         isOpen={isClubManagerOpen}
         onClose={() => setIsClubManagerOpen(false)}
+      />
+
+      {/* 🏆 Achievement Manager Modal */}
+      <AchievementManager 
+        isOpen={isAchievementOpen}
+        onClose={() => setIsAchievementOpen(false)}
       />
 
       </div>

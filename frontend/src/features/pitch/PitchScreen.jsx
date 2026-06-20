@@ -3,16 +3,13 @@ import { Loader2 } from 'lucide-react';
 import SquadHeader from './components/SquadHeader';
 import Pitch from './components/Pitch';
 import SquadActions from './components/SquadActions';
-import SaveSquadManager from './components/save/SaveSquadManager'; 
 import PitchBenchArea from './components/PitchBenchArea';
 import FloatingActionBar from './components/FloatingActionBar';
-import ManagerSelectionModal from './ManagerSelectionModal';
-import PlayerActionPopup from './components/PlayerActionPopup';
-import PowerCardPopup from './PowerCardPopup';
+import PitchModals from './components/PitchModals';
 import FormationSelector from './FormationSelector';
+import SynergyIndicator from './components/SynergyIndicator';
 import { usePitchLogic } from './hooks/usePitchLogic';
 import { toast } from '../../utils/toast';
-import ConfettiEffect from '../../components/common/ConfettiEffect';
 import { useGameStore } from '../../store/useGameStore';
 
 export default function PitchScreen() {
@@ -42,6 +39,14 @@ export default function PitchScreen() {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isManagerModalOpen, setIsManagerModalOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [highlightedTeam, setHighlightedTeam] = useState(null);
+
+  const handleTeamClick = (team) => {
+    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate([20, 30, 20]);
+    }
+    setHighlightedTeam(prev => (prev === team ? null : team));
+  };
 
   // Fix: Move hook call above any early returns
   const totalBudget = useGameStore(state => state.startingBudget);
@@ -110,19 +115,11 @@ export default function PitchScreen() {
          />
 
          {/* Active Synergies Indicator */}
-         {activeSynergies.length > 0 && (
-           <div className="absolute top-2 left-2 z-20 flex flex-col items-start gap-1 pointer-events-none opacity-75 transition-opacity hover:opacity-20">
-             {activeSynergies.map(syn => (
-               <div key={syn.team} className="bg-emerald-500/80 backdrop-blur-sm border border-emerald-400/50 text-white px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm pointer-events-none transform scale-90 origin-top-left">
-                 <span className="text-[10px]">✨</span>
-                 <span className="text-[10px] font-bold">{syn.team.substring(0, 3).toUpperCase()}</span>
-                 <span className="bg-emerald-700/60 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">
-                   {syn.count}
-                 </span>
-               </div>
-             ))}
-           </div>
-         )}
+         <SynergyIndicator 
+           activeSynergies={activeSynergies}
+           highlightedTeam={highlightedTeam}
+           onTeamClick={handleTeamClick}
+         />
 
          <Pitch 
            squad={enrichedStarters} 
@@ -131,6 +128,7 @@ export default function PitchScreen() {
            onPlayerClick={handlers.handlePlayerClick}
            selectedPlayerId={selectedPlayer?.playerId}
            pendingPlacement={pendingPlacement}
+           highlightedTeam={highlightedTeam}
          />
          
          <PitchBenchArea 
@@ -160,37 +158,19 @@ export default function PitchScreen() {
         isAutoFilling={isAutoFilling}
       />
 
-      <SaveSquadManager 
-        isOpen={isSaveModalOpen} 
-        onClose={() => setIsSaveModalOpen(false)} 
-        onConfirmSave={handleConfirmSave}
-      />
-      <ManagerSelectionModal
-        isOpen={isManagerModalOpen}
-        onClose={() => setIsManagerModalOpen(false)}
-      />
-
-      {/* Player Action Popup */}
-      {popupPlayer && (
-        <PlayerActionPopup 
-          player={popupPlayer} 
-          onClose={() => setPopupPlayer(null)}
-          onAction={actions.handlePopupAction}
-        />
-      )}
-
-      {/* Power Card Popup */}
-      <PowerCardPopup 
-        isOpen={!!powerCardPlayer}
-        onClose={() => setPowerCardPlayer(null)}
-        player={powerCardPlayer}
-      />
-      
-      {/* Celebration Effect */}
-      <ConfettiEffect 
-        isActive={showConfetti} 
-        onComplete={() => setShowConfetti(false)} 
-        type="burst" 
+      <PitchModals 
+        isSaveModalOpen={isSaveModalOpen}
+        setIsSaveModalOpen={setIsSaveModalOpen}
+        handleConfirmSave={handleConfirmSave}
+        isManagerModalOpen={isManagerModalOpen}
+        setIsManagerModalOpen={setIsManagerModalOpen}
+        popupPlayer={popupPlayer}
+        setPopupPlayer={setPopupPlayer}
+        handlePopupAction={actions.handlePopupAction}
+        powerCardPlayer={powerCardPlayer}
+        setPowerCardPlayer={setPowerCardPlayer}
+        showConfetti={showConfetti}
+        setShowConfetti={setShowConfetti}
       />
       
     </div>

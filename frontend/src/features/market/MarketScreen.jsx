@@ -16,6 +16,7 @@ import BudgetBar from '../../components/common/BudgetBar';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 import PlayerActionModal from '../../components/player/PlayerActionModal';
 import PlayerBottomSheet from '../../components/player/PlayerBottomSheet'; // 🌟 นำเข้า Bottom Sheet ตัวใหม่
+import TutorialOverlay from '../../components/tutorial/TutorialOverlay'; // 🌟 NEW: ระบบ Tutorial
 import { useMarketFilters } from './hooks/useMarketFilters';
 
 import { useMarketStore } from '../../store/useMarketStore';
@@ -38,7 +39,9 @@ export default function MarketScreen() {
     marketFilterPos,     // 🌟 NEW: รับค่าตำแหน่งเป้าหมายที่ถูกส่งมาจาก PitchBoard
     setMarketFilterPos,  // 🌟 NEW: ฟังก์ชันอัปเดตสถานะกลับเข้า Store
     setPendingTargetSlot, // 🌟 NEW: เคลียร์ช่องเป้าหมายเมื่อเปลี่ยน Tab เอง
-    getEffectiveBudget
+    getEffectiveBudget,
+    userData,            // 🌟 NEW: รับค่า userData มาเช็ค Tutorial
+    startTutorial        // 🌟 NEW: ฟังก์ชันเริ่ม Tutorial
   } = useUserStore();
 
   // 2. Local State และ Logic การกรองข้อมูล (Refactored to Custom Hook - SRP)
@@ -79,8 +82,16 @@ export default function MarketScreen() {
     }
   };
 
-  // 8. 🌟 ฟังก์ชันเมื่อกด "นำเข้าทีม" จาก Bottom Sheet
-  const handlePlacePlayer = (player) => {
+  // 🌟 Trigger Tutorial เมื่อเข้าหน้า Market (ดีเลย์นิดหน่อยรอ render เสร็จ)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      startTutorial('market', userData);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [startTutorial, userData]);
+
+  // 4. Handlers (Refactored to keep UI component clean)
+  const handlePlayerClick = (player) => {
     // โยนเข้าสู่ระบบเตรียมจัดวาง (ยังไม่หักเงินจริง)
     const result = startPlacement(player);
     
@@ -155,7 +166,16 @@ export default function MarketScreen() {
         isOpen={bottomSheetConfig.isOpen}
         player={bottomSheetConfig.player}
         onClose={() => setBottomSheetConfig({ isOpen: false, player: null })}
-        onPlace={handlePlacePlayer}
+        onPlace={handlePlayerClick}
+      />
+
+      <TutorialOverlay 
+        screenName="market" 
+        steps={[
+          { title: "ยินดีต้อนรับสู่ตลาดนักเตะ!", content: "ที่นี่คุณสามารถหานักเตะเข้าทีมได้ งบประมาณของคุณจะแสดงอยู่ด้านบน", targetId: "market-header-budget" },
+          { title: "ระบบค้นหาและกรอง", content: "คุณสามารถพิมพ์ชื่อนักเตะ หรือเลือกตำแหน่งที่ต้องการจากแท็บด้านล่างได้", targetId: "market-filter-tabs" },
+          { title: "เลือกนักเตะ", content: "แตะที่แถวนักเตะเพื่อดูรายละเอียดและกด 'นำเข้าทีม' เมื่อคุณพร้อม", targetId: "market-player-list" }
+        ]} 
       />
 
       {/* Modal เดิม (ยังคงไว้สำหรับฟังก์ชัน "ขาย" นักเตะ) */}

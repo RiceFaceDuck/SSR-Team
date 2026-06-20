@@ -48,7 +48,8 @@ export const useAuthSync = () => {
               userPoints: 0,
               createdAt: serverTimestamp(),
               lastLoginAt: serverTimestamp(),
-              referredBy: localStorage.getItem('referralCode') || null
+              referredBy: localStorage.getItem('referralCode') || null,
+              tutorialState: { hasSeenMarket: false, hasSeenPitch: false }
             };
             await setDoc(userDocRef, newUserData);
           } else {
@@ -68,7 +69,8 @@ export const useAuthSync = () => {
                 role: userData.role || 'player',
                 balls: userData.balls !== undefined ? userData.balls : (userData.energyBottles || 0),
                 userPoints: userData.userPoints || 0,
-                dailyQuests: userData.dailyQuests || {} // 🌟 NEW: เก็บข้อมูลภารกิจเข้า Store
+                dailyQuests: userData.dailyQuests || {}, // 🌟 NEW: เก็บข้อมูลภารกิจเข้า Store
+                tutorialState: userData.tutorialState || { hasSeenMarket: false, hasSeenPitch: false }
               });
             }
           });

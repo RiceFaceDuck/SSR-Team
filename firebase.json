@@ -2,6 +2,9 @@
   "firestore": {
     "rules": "firestore.rules.txt"
   },
+  "functions": {
+    "source": "functions"
+  },
   "hosting": [
     {
       "site": "ssr-team",

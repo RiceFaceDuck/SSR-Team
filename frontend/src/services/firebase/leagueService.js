@@ -5,9 +5,9 @@ const LEAGUE_COLLECTION = 'leagues';
 
 export const leagueService = {
   /**
-   * สร้างลีกใหม่
+   * สร้างลีกใหม่ หรือ การดวล
    */
-  createLeague: async (user, leagueName) => {
+  createLeague: async (user, leagueName, options = { mode: 'classic', customRules: {} }) => {
     if (!user || !user.uid || !leagueName.trim()) return { success: false, message: 'ข้อมูลไม่ครบถ้วน' };
     
     // สร้างรหัส 6 หลักสุ่มแบบง่าย
@@ -18,6 +18,8 @@ export const leagueService = {
         name: leagueName.trim(),
         code: code,
         creatorId: user.uid,
+        mode: options.mode,
+        customRules: options.customRules || {},
         members: [user.uid], // ผู้สร้างก็เป็นสมาชิกคนแรก
         createdAt: serverTimestamp()
       });

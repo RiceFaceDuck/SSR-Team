@@ -10,6 +10,10 @@
 - `components/`: Shared UI components (Dropzone, DataTable, etc.)
 - `config/`: Firebase config (`firebase.js`)
 - `features/`: Domain-driven feature modules
+  - `dashboard/`: Dashboard Feature
+    - `components/`: `GameweekStatusCard.jsx`, `GameweekPipeline.jsx`, `PipelineStep.jsx`, `GameweekProcessForm.jsx`
+    - `hooks/`: `useDashboardData.js`
+    - `views/`: `Dashboard.jsx`
   - `players/`: Player Management Feature
     - `components/`: `PlayerManualForm.jsx`, `PlayerTable.jsx`, `ExcelPreview.jsx`, `PlayerValueFormulaConfig.jsx`, `PlayerValuePreviewTable.jsx`
     - `hooks/`: `usePlayers.js` (Business logic), `usePlayerSync.js` (API Sync Logic), `usePlayerSyncActions.js`, `usePlayerValueEngine.js`
@@ -24,15 +28,19 @@
     - `hooks/`: `useLiveMatchAdmin.js`
     - `views/`: `MatchDashboard.jsx`
   - `cards/`: Power Card Management Feature
-    - `components/`: `CardForm.jsx`, `CardItem.jsx`, `CardListHeader.jsx`
+    - `components/`: `CardForm.jsx`, `CardBasicInfoFields.jsx`, `CardEffectConfigurator.jsx`, `CardItem.jsx`, `CardListHeader.jsx`
     - `hooks/`: `useCardFormLogic.js`
     - `views/`: `CardList.jsx`
   - `system/`: System Settings Feature
-    - `components/`: `GameSettings.jsx`, `ThemeSettings.jsx`, `ThemeUploadField.jsx`, `ThemePromptBox.jsx`
-    - `hooks/`: `useThemeUploadLogic.js`
+    - `components/`: `GameSettings.jsx`, `ThemeSettings.jsx`, `ThemePromptBox.jsx`
     - `views/`: `SystemSettings.jsx`, `LogicManual.jsx`
+  - `theme/`: Theme Management Feature (Refactored)
+    - `components/`: `ThemeUploadField.jsx`
+    - `hooks/`: `useThemeUploadLogic.js`
+    - `ThemeController.jsx`
   - `gameRules/`: Game Rules, Scoring, and Conditions Feature (New!)
     - `components/`: `ToggleSwitch.jsx`, `ScoreStatItem.jsx`, `PositionScoreCard.jsx`, `RuleSettingItem.jsx`
+    - `hooks/`: `useGameRulesManager.js`, `useScoreRulesManager.js`
     - `views/`: `GameRulesManager.jsx`, `ScoreRulesManager.jsx`, `GameConditionsManager.jsx`
   - `gameweek/`: Gameweek Management Feature
     - `components/`: `PlayerStatsEntry.jsx`, `PlayerStatsTable.jsx`, `PlayerStatsToolbar.jsx`, `GameweekFixtures.jsx`, `ApiSettingsPanel.jsx`
@@ -46,24 +54,38 @@
     - `components/`: `RewardTable.jsx`, `DeleteConfirmModal.jsx`, `RewardBasicInfo.jsx`, `RewardEconomy.jsx`
     - `hooks/`: `useRewardFormLogic.js`
     - `views/`: `RewardManager.jsx`, `RewardFormModal.jsx`
+  - `economy/`: Economy Calculation Simulator (NEW!)
+    - `components/`: `CalculatorInputs.jsx`, `CalculatorResults.jsx`
+    - `hooks/`: `useBallsCalculator.js`
+    - `views/`: `BallsCalculatorBoard.jsx`
+  - `achievements/`: Achievements Management Feature (NEW!)
+    - `components/`: `AchievementForm.jsx`
+    - `hooks/`: `useAchievementsAdmin.js`
+    - `views/`: `AchievementManager.jsx`
   - `history/`: Historical Data Archive Feature (New!)
     - `components/`: `HistoricalApiConfig.jsx`, `DataFetchMonitor.jsx`
+    - `hooks/`: `useArchiveManager.js` (NEW)
     - `views/`: `HistoryArchive.jsx`
   - `users/`, `verify/`: Other features
     - `components/`: `UserTable.jsx`, `AdjustBallsModal.jsx`
 - `services/`: External integrations
   - `firebase/`: 
     - `player/`: `playerFetchService.js`, `playerUpdateService.js`, `playerBulkService.js`, `playerUtils.js`
-    - `playerDatabase.js` (Facade), `managerDatabase.js`, `gameRulesDatabase.js`, `historyDatabase.js` etc.
+    - `playerDatabase.js` (Facade), `managerDatabase.js`, `gameRulesDatabase.js`, `historyDatabase.js` (NEW), etc.
   - `engine/`: 
-    - `gameweekCalculationService.js` (Refactored)
-    - `utils/`: `pointCalculator.js` (NEW), `squadModifiers.js` (NEW)
-    - `leaderboardEngine.js` (Game Loop Logic)
+    - `gameweekCalculationService.js` (Refactored to use Pipeline)
+    - `modifiers/`: (NEW - Centralized Modifier Engine)
+      - `ModifierPipeline.js`
+      - `rules/`: `captainRule.js`, `synergyRule.js`, `managerRule.js`, `powerCardRule.js`, `underdogRule.js`, `mvpRule.js`
+    - `utils/`: `pointCalculator.js`, `valueFormulaEngine.js`, `valueSyncService.js`
+    - `leaderboardEngine.js`
     - `playerValueCalculationService.js`
 - `utils/`: Global utilities
 
 ## Frontend Structure `frontend/src/`
 - `components/`: Shared UI components
+  - `player/`: `PlayerBottomSheet.jsx`, `BottomSheetHighlights.jsx`, `PositionBadge.jsx`
+  - `tutorial/`: `TutorialOverlay.jsx` (NEW - Interactive Onboarding)
 - `features/`: Domain-driven feature modules (`auth/`, `market/`, `pitch/`, etc.)
   - `auth/`:
     - `authService.js`: Google Auth SignIn & SignOut logic
@@ -84,6 +106,8 @@
       - `PlayerActionPopup.jsx`: ป็อปอัปเมนูเมื่อคลิกผู้เล่นในสนาม
       - `popup/`: `PopupHeader.jsx`, `PopupStats.jsx`, `PopupActions.jsx`
       - `Pitch.jsx`, `PlayerNode.jsx`, `EmptyNode.jsx`, `SquadHeader.jsx`, `SquadActions.jsx`
+      - `SynergyIndicator.jsx` (NEW - Synergy highlighting UI)
+      - `PitchModals.jsx` (NEW - Extracted modals container)
       - `PlayerStatsBar.jsx`: แถบแสดงสถิติ Goals, Assists, Cards (New)
       - `powerCard/`: 
         - `PowerCardHeader.jsx`, `PowerCardList.jsx`, `PowerCardItem.jsx` (Refactored)
@@ -104,9 +128,14 @@
       - `SaveSquadManager.jsx`: ควบคุมการทำงานของป็อปอัปบันทึกทีมและดูโฆษณา
     - `PowerCardPopup.jsx`: ป็อปอัปสำหรับดึงข้อมูลการ์ดและสวมใส่ให้นักเตะ (Main Container)
     - `utils/`:
-      - `autoFillEngine.js`: Engine แบบ Standalone คำนวณตรรกะจัดทีมอัตโนมัติ
+      - `autofill/`: (NEW - Smart Auto-Fill Engine 2.0)
+        - `AutoFillOrchestrator.js`
+        - `strategies/`: `budgetOptimizer.js`, `synergyAnalyzer.js`
+      - `autoFillEngine.js` (DEPRECATED)
   - `profile/`:
+    - `RulesScreen.jsx`: หน้าจอกฎกติกา
     - `ProfileScreen.jsx`: หน้าจอโปรไฟล์หลักและกระเป๋าเงิน (Wallet)
+    - `data/`: `rulesSectionsData.jsx`
     - `components/`: 
       - `ProfileHeaderCard.jsx`: การ์ดแสดงข้อมูลผู้ใช้งาน
       - `WalletSummaryView.jsx`: การ์ดแสดงยอดเงิน
@@ -115,6 +144,11 @@
       - `GameweekHistory.jsx`: สรุปคะแนนการจัดทีมย้อนหลังรายสัปดาห์
       - `ClubManagerView.jsx`: หน้าต่างจัดการอัพเกรดสโมสร
       - `FacilityCard.jsx`: การ์ดสิ่งก่อสร้างสำหรับอัพเกรดสโมสร
+      - `AchievementManager.jsx`: แสดงความสำเร็จและตั้งค่าฉายา (NEW)
+  - leaderboard/:
+    - `LeaderboardScreen.jsx`: หน้าจอหลักของการจัดอันดับ (Refactored)
+    - `components/`: `LeaderboardTabs.jsx`, `LeaderboardList.jsx`, `LeaderboardItem.jsx`, `SponsorBanner.jsx`
+    - `hooks/`: `useLeaderboardData.js`: จัดการ Query สำหรับ อันดับสัปดาห์, ซีซั่น, และ My Club (รวมถึงสร้างไฟล์ .txt)
   - `live/`:
     - `LiveScoreScreen.jsx`: หน้าจอหลักของ Live Match และ Global Chat
     - `components/`:
@@ -123,19 +157,26 @@
       - `LiveLatestEvent.jsx`: แผงแสดงเหตุการณ์ใหม่ล่าสุด 1 รายการ
       - `LiveEventsModal.jsx`: ป็อปอัปแสดงประวัติเหตุการณ์ทั้งหมด
       - `LiveChatContainer.jsx`: ควบคุม State ของแชท
-      - `ChatMessageList.jsx`: แสดงรายการข้อความแชท และจัดการ Pinned Super Chat
+      - `ChatMessageList.jsx`: แสดงรายการข้อความแชท
+      - `chat/`: `NormalMessageItem.jsx` (NEW)
       - `ChatMessageInput.jsx`: กล่องป้อนข้อความพร้อมปุ่ม Normal / Super Chat
   - `social/`:
     - `SocialScreen.jsx`: หน้าจอหลักของคอมมูนิตี้และลีกส่วนตัว
-    - `components/`: `ReferralCard.jsx` (ชวนเพื่อน), `LeagueManager.jsx` (สร้าง/เข้าร่วมลีก), `LeagueList.jsx` (รายการลีก), `LeagueDetailsModal.jsx`, `LeagueHeader.jsx`, `LeagueLeaderboard.jsx`, `LeagueSettings.jsx`
-    - `hooks/`: `useLeagueDetailsLogic.js`
+    - `components/`: `ReferralCard.jsx` (ชวนเพื่อน), `LeagueManager.jsx` (สร้าง/เข้าร่วมลีก), `LeagueList.jsx` (รายการลีก), `LeagueDetailsModal.jsx`, `LeagueHeader.jsx`, `LeagueLeaderboard.jsx`, `LeagueSettings.jsx`, `FriendManager.jsx` (NEW)
+    - `hooks/`: `useLeagueDetailsLogic.js`, `useLeagueRanking.js` (NEW), `useLeagueForm.js` (NEW)
+  - `redeem/`:
+    - `RedeemScreen.jsx`: หน้าจอร้านค้าและการสุ่ม
+    - `components/`: `RedeemHeader.jsx`, `WonItemModal.jsx`, `RewardCard.jsx`
   - `services/`: Core logic decoupled from React
     - `api/`: `apiFootballService.js`, `apiStatusService.js`
     - `engine/`: 
       - `squadCalculationService.js`: Engine สำหรับคำนวณคะแนนรวมของทีมตาม Gameweek
       - `gameweekCalculationService.js`: Engine ย่อย
       - `playerValueCalculationService.js`: Engine สำหรับคำนวณและปรับสมดุลราคานักเตะ
-    - `firebase/`: Firestore database wrappers (`clubService.js`, `questService.js`, `chatService.js`, `redeemService.js`, `playerDatabase.js`, etc. - Refactored for SRP)
+    - `firebase/`: Firestore database wrappers (`clubService.js`, `questService.js`, `chatService.js`, `redeemService.js`, `playerDatabase.js`, `friendService.js` (NEW), etc. - Refactored for SRP)
+      - `market/`: (NEW - Market Services SRP)
+        - `marketFetchService.js`: จัดการเฉพาะการดึงข้อมูลตลาด
+        - `marketTransactionService.js`: จัดการเฉพาะธุรกรรมซื้อขาย
 - `store/`: Zustand global state
   - `useUserStore.js`: Store หลักที่รวม Slices เข้าด้วยกัน
   - `slices/`: 
@@ -151,6 +192,8 @@
     - `createWalletSlice.js`: จัดการงบและ Balls
     - `inventorySlice.js`: จัดการคลังเก็บการ์ดและผู้จัดการทีม (NEW)
     - `createClubSlice.js`: จัดการข้อมูลและระบบอัพเกรดสโมสร
+    - `createFriendSlice.js`: จัดการระบบเพื่อน (NEW)
+    - `tutorialSlice.js`: จัดการระบบสอนเล่น Interactive (NEW)
 - `hooks/`: Global app hooks
   - `useAuthSync.js`: Firebase auth state sync and profile creation (New/Refactored)
   - `useSessionTimeout.js`: 20-minute session management (New)

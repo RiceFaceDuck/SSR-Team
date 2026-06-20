@@ -6,7 +6,7 @@ import { toast } from '../../../utils/toast';
 import { normalizePosition } from '../../../utils/squadValidator';
 import FullscreenToggle from './FullscreenToggle';
 
-const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId, pendingPlacement }) => {
+const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId, pendingPlacement, highlightedTeam }) => {
   const { setMarketFilterPos } = useUserStore();
   const currentFormation = getFormationData(formation);
 
@@ -30,6 +30,9 @@ const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId,
 
       const isTargetValid = pendingPlacement && normalizePosition(pendingPlacement.position) === normalizePosition(category);
       const highlightClass = isTargetValid ? 'ring-4 ring-[#fbbf24] shadow-[0_0_20px_rgba(251,191,36,0.8)] rounded-md animate-pulse z-30' : '';
+      
+      const isPlayerHighlighted = highlightedTeam && player?.team === highlightedTeam;
+      const synergyGlowClass = isPlayerHighlighted ? 'ring-4 ring-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.9)] rounded-md z-20 scale-105 transition-all duration-300' : '';
 
       slots.push(
         <div 
@@ -42,7 +45,7 @@ const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId,
               if (onPlayerClick) onPlayerClick(player);
             }
           }}
-          className={`relative transition-all duration-300 cursor-pointer active:scale-95 ${selectedPlayerId === String(player?.playerId) ? 'scale-105 z-20' : ''} ${highlightClass} ${!player ? 'hover:-translate-y-1' : ''}`}
+          className={`relative transition-all duration-300 cursor-pointer active:scale-95 ${selectedPlayerId === String(player?.playerId) ? 'scale-105 z-20' : ''} ${highlightClass} ${synergyGlowClass} ${!player ? 'hover:-translate-y-1' : ''}`}
         >
           {isTargetValid && (
              <div className="absolute inset-0 bg-[#fbbf24] bg-opacity-20 rounded-md pointer-events-none"></div>
@@ -51,6 +54,7 @@ const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId,
             player={player} 
             expectedPosition={category} 
             isSelected={selectedPlayerId === String(player?.playerId)}
+            isSynergyHighlighted={isPlayerHighlighted}
           />
         </div>
       );

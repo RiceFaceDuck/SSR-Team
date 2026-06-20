@@ -1,5 +1,6 @@
 import { collection, addDoc, serverTimestamp, runTransaction, doc, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import { appendTransactionLog } from './transactionService';
 
 const CHAT_COLLECTION = 'global_chat';
 
@@ -70,6 +71,14 @@ export const chatService = {
         const updates = {};
         if (appliedCost > 0) {
           updates.balls = currentBalls - appliedCost;
+          appendTransactionLog(
+            transaction, 
+            user.uid, 
+            -appliedCost, 
+            'spend', 
+            options.isSuperChat ? 'super_chat' : 'normal_chat', 
+            options.isSuperChat ? 'ส่ง Super Chat' : 'ส่งข้อความ Chat'
+          );
         }
         if (usedFreeChat) {
           updates.lastFreeChatAt = serverTimestamp();
@@ -108,6 +117,8 @@ export const chatService = {
           userId: user.uid,
           userName: user.displayName || 'ผู้เล่นนิรนาม',
           userPhoto: user.photoURL || '',
+          clubTier: options.clubTier || 0,
+          equippedTitle: options.equippedTitle || null,
           text: text.trim(),
           createdAt: serverTimestamp(),
           isSystem: false,

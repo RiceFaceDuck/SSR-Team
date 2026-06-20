@@ -5,8 +5,6 @@ import UserTable from './components/UserTable';
 import AdjustBallsModal from './components/AdjustBallsModal';
 
 const UserManager = () => {
-  const location = useLocation();
-  const isBallsMode = location.pathname === '/balls';
   const { users, isLoading, error, fetchUsers, updateUserBallsAction } = useUserStore();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -69,9 +67,12 @@ const UserManager = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">{isBallsMode ? 'จัดการ Balls ⚽' : 'จัดการผู้เล่น (User Management)'}</h1>
-        <div className="text-sm text-gray-500">
-          จำนวนผู้เล่นทั้งหมด: <span className="font-bold text-blue-600">{users.length}</span> บัญชี
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">จัดการผู้เล่นและการเงิน ⚽</h1>
+          <p className="text-sm text-gray-500 mt-1">ดูรายชื่อผู้ใช้งานและปรับยอดเงิน (Balls) ได้ในที่เดียว</p>
+        </div>
+        <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
+          จำนวนบัญชีทั้งหมด: <span className="font-bold text-blue-600 text-lg">{users.length}</span>
         </div>
       </div>
 

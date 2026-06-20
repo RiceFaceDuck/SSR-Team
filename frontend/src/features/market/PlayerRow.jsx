@@ -89,9 +89,13 @@ export default function PlayerRow({ player, onActionClick, onClick }) {
               {safePlayer.price?.toFixed(1) || '0.0'}m
             </p>
           </div>
-          <span className="text-[10px] font-bold text-slate-500 leading-none">
-            {safePlayer.totalPoints || 0} Pts
-          </span>
+          <div className="flex items-center gap-1">
+            {safePlayer.formStatus === 'HOT' && <span title="ฟอร์มกำลังร้อนแรง" className="text-[10px]">🔥</span>}
+            {safePlayer.formStatus === 'COLD' && <span title="ฟอร์มตก" className="text-[10px]">❄️</span>}
+            <span className="text-[10px] font-bold text-slate-500 leading-none">
+              {safePlayer.totalPoints || 0} Pts
+            </span>
+          </div>
         </div>
         
         {/* ปุ่ม ซื้อ/ขาย 

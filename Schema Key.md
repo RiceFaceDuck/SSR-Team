@@ -55,7 +55,7 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
-| `mySquad`   | Array  | เก็บนักเตะ `[{ playerId, position, isStarting, slotIndex, appliedCardId, isLocked }]` |
+| `mySquad`   | Array  | เก็บนักเตะ `[{ playerId, position, isStarting, slotIndex, appliedCardId, appliedCard, isLocked }]` **(เมื่อประมวลผล Gameweek เสร็จ appliedCard จะถูกลบทิ้งอัตโนมัติ เพราะเป็นไอเทมใช้ครั้งเดียว)** |
 | `budgetLeft`| Number | งบประมาณที่เหลืออยู่ (Base + Carried Over) |
 | `carriedOverBudget`| Number | งบประมาณโบนัสที่ยกยอดมาจากสัปดาห์ก่อนหน้า (ถ้ามี) |
 | `formation` | String | แผนการเล่นปัจจุบัน (เช่น '4-4-2') |
@@ -85,14 +85,20 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | ----------- | ------ | ----------- |
 | `uid`          | String    | รหัสผู้ใช้งาน |
 | `displayName`  | String    | ชื่อที่แสดงผล |
+| `teamName`     | String    | ชื่อทีมของผู้เล่น (แสดงใน Leaderboard และ Profile) |
 | `email`        | String    | อีเมล |
 | `photoURL`     | String    | URL รูปภาพโปรไฟล์ |
 | `role`         | String    | บทบาท ('player', 'admin') |
+| `hasJoinedGame`| Boolean   | สถานะเข้าร่วมเกม (จัดทีมครั้งแรกสำเร็จ) ใช้กรองใน Leaderboard |
 | `balls`        | Number    | เหรียญ/แต้มสำหรับใช้ทำกิจกรรม (แชท, สุ่มกาชา) |
 | `userPoints`   | Number    | คะแนนสะสมโดยรวมของผู้เล่น |
+| `lastGameweekPoints`| Number | คะแนนที่ได้ใน Gameweek ล่าสุด (ใช้จัดอันดับประจำสัปดาห์) |
+| `clubSpentExp` | Number    | จำนวน EXP รวมที่ใช้อัพเกรดสโมสร (ใช้จัดอันดับ MY CLUB) |
+| `equippedTitle`| String    | ฉายาที่ผู้เล่นเลือกแสดงผลข้างชื่อ |
 | `createdAt`    | Timestamp | วันเวลาที่สร้างบัญชี |
-| `lastLoginAt`  | Timestamp | วันเวลาที่ล็อกอินล่าสุด |
+| `lastLoginAt`  | Timestamp | วันเวลาที่ล็อกอินล่าสุด **(Indexed: ใช้ประเมิน DAU สำหรับ Quota Analyzer)** |
 | `lastFreeChatAt`| Timestamp | วันเวลาที่ส่งแชทฟรีครั้งล่าสุด |
+| `tutorialState`| Object    | สถานะการดูสอนเล่น เช่น `{"hasSeenMarket": true, "hasSeenPitch": false}` |
 
 ### 4.1 Gameweek History Sub-collection
 `users/{userId}/gameweek_history/{gameweekId}`
@@ -110,6 +116,7 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 ### 4.2 Transactions Sub-collection
 `users/{userId}/transactions/{transactionId}`
 เก็บประวัติการได้รับหรือใช้จ่าย Balls ของผู้เล่น
+**(IMPORTANT: ทุกครั้งที่มีการเพิ่ม/ลด Balls จะต้องเขียนข้อมูลลง Collection นี้เสมอด้วย `appendTransactionLog` หรือ `processTransaction` เพื่อให้ประวัติกับยอดเงินตรงกัน)**
 
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
@@ -134,6 +141,19 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `spentExp`            | Number | แต้มสะสมรวมที่ถูกใช้ไปเพื่ออัพเกรด |
 | `updatedAt`           | Timestamp | เวลาอัปเดตล่าสุด |
 
+### 4.4 Friends Sub-collection
+`users/{userId}/friends/{friendId}`
+เก็บข้อมูลเพื่อนและสถานะคำขอเป็นเพื่อน
+
+| Field       | Type   | Description |
+| ----------- | ------ | ----------- |
+| `uid`       | String | รหัสผู้ใช้งานของเพื่อน |
+| `displayName`| String | ชื่อเพื่อน |
+| `photoURL`  | String | รูปเพื่อน |
+| `status`    | String | สถานะ: 'pending' (รอรับ), 'requested' (ส่งคำขอไปแล้ว), 'accepted' (เป็นเพื่อนกันแล้ว) |
+| `createdAt` | Timestamp | วันที่บันทึก |
+| `updatedAt` | Timestamp | เวลาอัปเดตสถานะล่าสุด |
+
 ## 6. System Config Schema (การตั้งค่าระบบ)
 `public_data/system_config`
 
@@ -147,6 +167,21 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `buttonAdsConfig`  | Object  | `{ "autoPick": {cooldownSeconds: 15, adLinkUrl: ""}, "reset": {...} }` |
 | `chatConfig`       | Object  | `{"normalChatCost":2, "superChatCost":15, "superChatDuration":30, "superChatCostIncrement":5, "superChatResetTime":60, "normalChatFreeInterval":300}` |
 | `latestSuperChatEndTime` | Timestamp | เวลาสิ้นสุดของ Super Chat ตัวสุดท้าย (ใช้คำนวณคิว) |
+
+## 6.5 Achievement Schema (ฉายาและความสำเร็จ)
+`public_data/achievements/list/{achievementId}`
+
+| Field              | Type    | Description |
+| ------------------ | ------- | ----------- |
+| `title`            | String  | ชื่อฉายา (เช่น 'ROOKIE') |
+| `desc`             | String  | คำอธิบายการปลดล็อค |
+| `iconType`         | String  | ชื่อไอคอนสำหรับ UI (เช่น 'Star', 'Shield', 'Trophy', 'Award') |
+| `rarity`           | String  | ระดับความหายาก ('common', 'rare', 'epic', 'legendary') |
+| `conditionType`    | String  | ตัวแปรเงื่อนไข ('userPoints', 'lastGameweekPoints', 'balls', 'clubSpentExp', 'stadiumLevel', 'streak', 'admin', 'none') |
+| `conditionValue`   | Number  | ค่าที่ต้องผ่านเงื่อนไขถึงจะปลดล็อค |
+| `isActive`         | Boolean | สถานะการเปิดใช้งาน |
+| `createdAt`        | Timestamp | เวลาที่สร้าง |
+| `updatedAt`        | Timestamp | เวลาที่อัปเดต |
 
 ## 7. Gameweek Config Schema
 `public_data/gameweeks/weeks/{gameweekId}`
@@ -178,10 +213,12 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
-| `name`      | String | ชื่อลีก |
+| `name`      | String | ชื่อลีกหรือการดวล |
 | `code`      | String | รหัส 6 หลักสำหรับเข้าร่วม |
 | `creatorId` | String | รหัสผู้สร้างลีก |
-| `members`   | Array  | เก็บ userId ผู้เข้าร่วม `[userId1, userId2]` |
+| `mode`      | String | 'classic' หรือ 'duel' |
+| `customRules`| Object | กติกาพิเศษ เช่น `{ captainMultiplier: 2, goal: 800, assist: 600 }` |
+| `members`   | Array  | เก็บข้อมูลผู้เข้าร่วม `[{ id, displayName, photoURL, teamName, userPoints, updatedAt }]` (updatedAt ใช้ทำ Tie-breaker) |
 | `createdAt` | Timestamp | วันที่สร้าง |
 ## 10. Live Match Schema
 `public_data/live_match` (Main real-time document)

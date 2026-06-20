@@ -25,12 +25,13 @@ export const participationService = {
       const userRef = doc(db, 'users', userId);
       const userSnap = await getDoc(userRef);
       if (userSnap.exists()) {
-        return userSnap.data().hasJoinedGame === true;
+        const userData = userSnap.data();
+        return { hasJoined: userData.hasJoinedGame === true, userData };
       }
-      return false;
+      return { hasJoined: false, userData: null };
     } catch (error) {
       console.warn('⚠️ [ParticipationCenter] ไม่สามารถตรวจสอบสิทธิ์การเข้าร่วมได้:', error);
-      return false;
+      return { hasJoined: false, userData: null };
     }
   },
 

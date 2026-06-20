@@ -2,55 +2,69 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Helper Function: ตรวจสอบว่าเป็น Admin หรือไม่ (อ้างอิงจาก Email)
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == "bentsbac@gmail.com";
+    }
+
+    // Helper Function: ตรวจสอบว่าตลาดซื้อขาย/จัดทีม ยังเปิดอยู่หรือไม่
+    function isGameweekOpen() {
+      let currentGW = get(/databases/$(database)/documents/public_data/system_config).data.currentGameweek;
+      let gwStatus = get(/databases/$(database)/documents/public_data/gameweeks/weeks/$(currentGW)).data.status;
+      return gwStatus == 'upcoming';
+    }
+
     // 👤 ระบบผู้ใช้งาน (Users & Sub-collections)
     match /users/{userId} {
       // ให้อ่านได้ทุกคนที่ล็อกอิน (เผื่อดูสถิติเพื่อน) แต่แก้ไขได้เฉพาะเจ้าของ
+      // ป้องกันการแก้ไข Balls ให้ติดลบ
       allow read: if request.auth != null;
-      allow write: if request.auth != null && (request.auth.uid == userId || request.resource.data._adminSecret == "super_secret_admin_key_2026");
+      allow write: if request.auth != null && (
+        (request.auth.uid == userId && (!request.resource.data.keys().hasAny(['balls']) || request.resource.data.balls >= 0))
+        || isAdmin()
+      );
       
       // การเข้าถึง Sub-collection ด้านในของ users
       match /{document=**} {
         allow read: if request.auth != null;
-        allow write: if request.auth != null && (request.auth.uid == userId || request.resource.data._adminSecret == "super_secret_admin_key_2026");
+        allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
       }
       
       // ให้เฉพาะ Admin หรือตัวเองเท่านั้นที่เขียน gameweek_history ได้
-      // ในความเป็นจริง Client ไม่ควรเขียนได้ แต่เปิดไว้สำหรับ Admin ที่ใช้สิทธิ์ฝั่ง Client
       match /gameweek_history/{gameweekId} {
         allow read: if request.auth != null;
-        allow write: if request.auth != null; // ฝากความปลอดภัยไว้ที่ Backend/Admin
+        allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
       }
     }
 
     // ⚽ ระบบจัดการนักเตะ (Database)
     match /players/{document=**} {
-      // นักเตะทั่วไป ผู้เล่นอ่านได้อย่างเดียว แอดมินแก้ไขได้ (สมมติให้อ่านได้ถ้าล็อกอิน)
       allow read: if request.auth != null;
-      allow write: if false; // ปิด write จาก client ให้ทำผ่านแอดมินหรือ backend
+      allow write: if isAdmin();
     }
 
     // 🛡️ ระบบจัดการทีม (Teams - Clubs)
     match /teams/{document=**} {
       allow read: if request.auth != null;
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
     // 🏆 ระบบจัดการการแข่งขัน
     match /matches/{document=**} {
       allow read: if request.auth != null;
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
     // 🎯 ระบบเควสต์และสปอนเซอร์
     match /quests/{document=**} {
       allow read: if request.auth != null;
-      allow write: if false; // แก้ไขผ่าน backend/admin
+      allow write: if isAdmin();
     }
 
     // 🎁 ระบบร้านค้า ของรางวัล
     match /rewards/{document=**} {
       allow read: if request.auth != null;
-      allow write: if false;
+      allow write: if isAdmin();
     }
     
     // 💳 ระบบประวัติการทำรายการ Statement
@@ -60,75 +74,101 @@ service cloud.firestore {
 
     // ⚙️ ระบบตั้งค่า
     match /settings/{document=**} {
-      allow read: if true; // เผื่อการดึงตั้งค่าระบบก่อนล็อกอิน
-      allow write: if false;
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // 🧩 ระบบไฟล์เสริม (Artifacts) ที่ระบบ Admin จำเป็นต้องใช้งาน
+    match /artifacts/{appId}/users/{userId} {
+      // 🚨 ล็อกการเซฟทีม (Squad) เมื่อหมดเวลา
+      match /game_data/squad {
+        allow read: if true;
+        allow write: if request.auth != null && (isAdmin() || (request.auth.uid == userId && isGameweekOpen()));
+      }
+      
+      // การเข้าถึง Artifacts ไฟล์อื่นๆ ปล่อยตามปกติ แต่ห้ามซ้ำกับ squad
+      match /{document=**} {
+        allow read: if true;
+        allow write: if request.auth != null && (request.auth.uid == userId || isAdmin()) 
+          && !(request.path[7] == 'game_data' && request.path[8] == 'squad');
+      }
+    }
     match /artifacts/{document=**} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
     // 📊 ระบบสถิติส่วนกลาง และ การตั้งค่าโฆษณา
     match /public_data/system_config {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
     match /public_data/ads_config {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    
+    // 🏆 ความสำเร็จและฉายา
+    match /public_data/achievements/list/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // 📋 กติกาเกม คะแนน และเงื่อนไข
     match /public_data/game_rules {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
     match /public_data/scoring_rules {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
     match /public_data/game_conditions {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
     
     // 📅 ระบบสถานะแต่ละ Gameweek
     match /public_data/gameweeks/weeks/{gameweekId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
     // 📡 ระบบ Live Match (ควบคุมโดยแอดมิน)
     match /public_data/live_match {
       allow read: if true;
-      allow write: if request.auth != null && request.resource.data._adminSecret == "super_secret_admin_key_2026";
+      allow write: if isAdmin();
     }
     
     match /public_data/live_match/events/{eventId} {
       allow read: if true;
-      allow write: if request.auth != null && request.resource.data._adminSecret == "super_secret_admin_key_2026";
+      allow write: if isAdmin();
     }
 
     // 📚 คลังข้อมูลอดีต (Historical Data)
     match /historical_players/{document=**} {
       allow read: if true;
-      allow write: if request.auth != null; // อนุญาตให้ admin เขียน
+      allow write: if isAdmin();
     }
     match /historical_teams/{document=**} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
     match /historical_fixtures/{document=**} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    
+    // 📊 ข้อมูลสถิติสดระหว่างสัปดาห์
+    match /public_data/live_gameweek_stats/{playerId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
     
     // 🛡️ ประวัติการดึงข้อมูล (Admin Data)
     match /api_fetch_history/{document=**} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null;
+      allow read: if isAdmin();
+      allow write: if isAdmin();
     }
 
     // 💬 ระบบแชทส่วนรวม

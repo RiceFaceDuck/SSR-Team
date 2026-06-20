@@ -46,25 +46,19 @@ export const squadService = {
       lastFetchTime = Date.now();
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
 
-      const isFullSquad = participationService.isSquadComplete(mySquad, manager);
+      const participationStatus = await participationService.checkUserParticipation(userId);
+      const hasAlreadyJoined = participationStatus.hasJoined;
       
-      if (isFullSquad) {
-        const hasAlreadyJoined = await participationService.checkUserParticipation(userId);
-        
-        if (!hasAlreadyJoined) {
-          await participationService.registerParticipation(userId);
+      if (!hasAlreadyJoined) {
+        await participationService.registerParticipation(userId);
 
-          const userDocSnap = await getDoc(doc(db, 'users', userId));
-          if (userDocSnap.exists()) {
-            const userData = userDocSnap.data();
-            if (userData.referredBy) {
-              const rewardBalls = useGameStore.getState().referralRewardBalls || 50;
-              await referralService.triggerReward(userData.referredBy, userId, rewardBalls);
-            }
-          }
-        } else {
-          await participationService.syncAndRepairCounter(userId);
+        const userData = participationStatus.userData;
+        if (userData && userData.referredBy) {
+          const rewardBalls = useGameStore.getState().referralRewardBalls || 50;
+          await referralService.triggerReward(userData.referredBy, userId, rewardBalls);
         }
+      } else {
+        await participationService.syncAndRepairCounter(userId);
       }
 
       return true;

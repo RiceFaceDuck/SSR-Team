@@ -62,6 +62,72 @@ export const historyDatabase = {
   },
 
   /**
+   * เก็บข้อมูล Gameweek ปัจจุบันลงคลังข้อมูลประวัติศาสตร์แบบ Batch
+   * @param {string} gameweekId รหัสสัปดาห์ (เช่น 'GW1')
+   * @param {string} season ปีฤดูกาล (เช่น '2026')
+   * @returns {Promise<Object>} สรุปผลลัพธ์
+   */
+  archiveGameweekData: async (gameweekId, season = new Date().getFullYear().toString()) => {
+    try {
+      const liveStatsRef = collection(db, 'public_data', 'live_gameweek_stats');
+      const statsSnapshot = await getDocs(liveStatsRef);
+      
+      if (statsSnapshot.empty) {
+        return { success: true, message: 'ไม่มีข้อมูลสดให้ Archive' };
+      }
+
+      let batch = writeBatch(db);
+      let count = 0;
+      let batchCount = 0;
+
+      for (const statDoc of statsSnapshot.docs) {
+        const data = statDoc.data();
+        const playerId = statDoc.id; // usually SKU
+        
+        const historyId = `${season}_${playerId}`;
+        const historyRef = doc(db, 'historical_players', historyId);
+        
+        batch.set(historyRef, {
+          id: historyId,
+          sku: playerId,
+          season: Number(season),
+          updatedAt: serverTimestamp(),
+          [`gw_history.${gameweekId}`]: {
+            goals: data.goals || 0,
+            assists: data.assists || 0,
+            cleanSheets: data.cleanSheets || 0,
+            yellowCards: data.yellowCards || 0,
+            redCards: data.redCards || 0,
+            gwPoints: data.gwPoints || 0,
+            minutes: data.minutes || 0
+          }
+        }, { merge: true });
+
+        // เคลียร์ข้อมูลสดทิ้ง
+        batch.delete(statDoc.ref);
+
+        count++;
+        if (count >= 240) { // 2 operations per doc => 240 doc = 480 ops
+          await batch.commit();
+          batchCount++;
+          batch = writeBatch(db);
+          count = 0;
+        }
+      }
+
+      if (count > 0) {
+        await batch.commit();
+        batchCount++;
+      }
+
+      return { success: true, archivedCount: statsSnapshot.size, batches: batchCount };
+    } catch (error) {
+      console.error('Error archiving gameweek data:', error);
+      return { success: false, error };
+    }
+  },
+
+  /**
    * บันทึกประวัติการดึง API
    */
   saveFetchHistory: async (type, season, status, recordsFetched, adminId) => {

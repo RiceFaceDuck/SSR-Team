@@ -1,12 +1,12 @@
 /**
- * @file marketService.js
- * @description Service Layer สำหรับดึงข้อมูลตลาดนักเตะ (Frontend)
+ * @file marketFetchService.js
+ * @description Service Layer สำหรับดึงข้อมูลตลาดนักเตะ (Frontend) - แยกส่วนดึงข้อมูลตามหลัก SRP
  * อัปเกรด: รองรับ Caching, Promise Deduping, Offline Fallback และ Data Sanitization ให้สอดคล้องกับระบบหลังบ้าน
  */
 
 import { collection, getDocs, query } from 'firebase/firestore';
-import { db } from '../../config/firebase';
-import { sanitizePlayerMarketData } from './marketDataParser';
+import { db } from '../../../config/firebase';
+import { sanitizePlayerMarketData } from '../marketDataParser';
 
 // ==========================================
 // 🧠 ระบบจัดการ Cache & Data Synchronization
@@ -25,7 +25,7 @@ const getPlayersCollection = () => {
   return collection(db, 'artifacts', appId, 'public', 'data', 'players');
 };
 
-export const marketService = {
+export const marketFetchService = {
   /**
    * ดึงข้อมูลนักเตะทั้งหมด (รองรับ Caching ขั้นสูง และ Offline Mode)
    * @param {boolean} forceRefresh - บังคับดึงข้อมูลใหม่จาก Firebase เสมอ
@@ -36,20 +36,20 @@ export const marketService = {
 
     // 1. ตรวจสอบ Cache ใน Memory (เร็วกว่าแสง 0ms)
     if (!forceRefresh && cachedPlayers && (now - lastFetchTime < CACHE_TTL)) {
-      console.log('%c📦 [Market] เสิร์ฟข้อมูลนักเตะจาก Memory Cache (0 Reads)', 'color: #10b981; font-weight: bold;');
+      console.log('%c📦 [MarketFetch] เสิร์ฟข้อมูลนักเตะจาก Memory Cache (0 Reads)', 'color: #10b981; font-weight: bold;');
       return cachedPlayers;
     }
 
     // 2. ป้องกัน Race Condition: ถ้าระบบกำลังโหลดอยู่ ให้ Request อื่นๆ รอผลลัพธ์ร่วมกัน
     if (fetchPromise && !forceRefresh) {
-      console.log('%c⏳ [Market] มีการดึงข้อมูลอยู่แล้ว รอรับผลลัพธ์ร่วมกัน...', 'color: #f59e0b; font-weight: bold;');
+      console.log('%c⏳ [MarketFetch] มีการดึงข้อมูลอยู่แล้ว รอรับผลลัพธ์ร่วมกัน...', 'color: #f59e0b; font-weight: bold;');
       return fetchPromise;
     }
 
     // 3. เริ่มกระบวนการดึงข้อมูลใหม่
     fetchPromise = (async () => {
       try {
-        console.log('%c☁️ [Market] ดึงข้อมูลนักเตะล่าสุดจาก Firebase Firestore...', 'color: #3b82f6; font-weight: bold;');
+        console.log('%c☁️ [MarketFetch] ดึงข้อมูลนักเตะล่าสุดจาก Firebase Firestore...', 'color: #3b82f6; font-weight: bold;');
         const playersRef = getPlayersCollection();
         
         // ดึงข้อมูลทั้งหมดจาก Database โดยตรง (จะไป Sort ต่อใน MarketStore)
@@ -74,26 +74,26 @@ export const marketService = {
             timestamp: lastFetchTime,
             data: players
           }));
-          console.log('%c💾 [Market] สร้างแบคอัพ Local สำเร็จ', 'color: #8b5cf6; font-weight: bold;');
+          console.log('%c💾 [MarketFetch] สร้างแบคอัพ Local สำเร็จ', 'color: #8b5cf6; font-weight: bold;');
         } catch (e) {
-          console.warn('⚠️ [Market] ไม่สามารถสร้าง Local Backup ได้ (Storage อาจเต็ม)');
+          console.warn('⚠️ [MarketFetch] ไม่สามารถสร้าง Local Backup ได้ (Storage อาจเต็ม)');
         }
 
         return players;
 
       } catch (error) {
-        console.error('❌ [Market] ล้มเหลวในการดึงข้อมูลจาก Firebase:', error);
+        console.error('❌ [MarketFetch] ล้มเหลวในการดึงข้อมูลจาก Firebase:', error);
         
         // 6. Fallback (กู้ชีพ): ถ้าเน็ตมีปัญหา ลองดึงข้อมูลชุดล่าสุดจาก Local Storage
         try {
           const backup = localStorage.getItem(LOCAL_STORAGE_KEY);
           if (backup) {
             const parsedBackup = JSON.parse(backup);
-            console.log('%c🔄 [Market] ใช้งาน Offline Mode: ดึงข้อมูลแบคอัพจาก Local Storage สำเร็จ', 'color: #f97316; font-weight: bold;');
+            console.log('%c🔄 [MarketFetch] ใช้งาน Offline Mode: ดึงข้อมูลแบคอัพจาก Local Storage สำเร็จ', 'color: #f97316; font-weight: bold;');
             return parsedBackup.data; // นำข้อมูลเก่ามาให้เล่นแก้ขัด
           }
         } catch (fallbackError) {
-          console.error('❌ [Market] ไม่สามารถกู้ข้อมูลจาก Local Backup ได้');
+          console.error('❌ [MarketFetch] ไม่สามารถกู้ข้อมูลจาก Local Backup ได้');
         }
 
         // หากล้มเหลวทั้งหมด โยน Error ให้ UI นำไปโชว์
@@ -120,6 +120,6 @@ export const marketService = {
     } catch (e) {
       // เพิกเฉย
     }
-    console.log('%c🧹 [Market] ล้างระบบ Cache และ Backup เรียบร้อย', 'color: #ef4444; font-weight: bold;');
+    console.log('%c🧹 [MarketFetch] ล้างระบบ Cache และ Backup เรียบร้อย', 'color: #ef4444; font-weight: bold;');
   }
 };

@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { X, UserPlus, BarChart2, Wallet, AlertCircle } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import PositionBadge from './PositionBadge';
+import BottomSheetHighlights from './BottomSheetHighlights';
+import PlayerStatsDetailModal from './PlayerStatsDetailModal';
 
 const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
   const getEffectiveBudget = useUserStore((state) => state.getEffectiveBudget);
   const budgetLeft = getEffectiveBudget();
 
@@ -128,6 +131,9 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
             </div>
           </div>
 
+          {/* ไฮไลท์สถิติผู้เล่น (ฤดูกาล / สัปดาห์ล่าสุด / ฟอร์ม) */}
+          <BottomSheetHighlights player={player} />
+
           {/* Error Message (If not affordable) */}
           {!isAffordable && (
             <div className="flex items-center gap-2 text-rose-400 bg-rose-500/10 p-3 rounded-xl mb-4 border border-rose-500/20 text-sm">
@@ -143,8 +149,7 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
                 if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
                   window.navigator.vibrate(20);
                 }
-                // TODO: นำไปสู่หน้าสถิติแบบละเอียด (Phase ถัดไป)
-                alert('ระบบสถิติเชิงลึกกำลังพัฒนา!');
+                setIsStatsModalOpen(true);
               }}
               className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 active:scale-[0.98] transition-all"
             >
@@ -167,6 +172,12 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
           </div>
         </div>
       </div>
+
+      <PlayerStatsDetailModal 
+        isOpen={isStatsModalOpen}
+        onClose={() => setIsStatsModalOpen(false)}
+        player={player}
+      />
     </div>
   );
 };

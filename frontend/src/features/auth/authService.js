@@ -50,3 +50,22 @@ export const logoutUser = async () => {
         return { success: false, message: 'ไม่สามารถออกจากระบบได้ในขณะนี้' };
     }
 };
+
+/**
+ * ฟังก์ชันอัปเดตสถานะการดู Tutorial ของผู้เล่น
+ * @param {string} userId - รหัสผู้ใช้งาน
+ * @param {string} step - หน้าจอที่ดูจบแล้ว (เช่น 'market', 'pitch')
+ */
+export const updateTutorialState = async (userId, step) => {
+    try {
+        const userDocRef = doc(db, 'users', userId);
+        const updateField = `tutorialState.hasSeen${step.charAt(0).toUpperCase() + step.slice(1)}`;
+        await setDoc(userDocRef, {
+            [updateField]: true
+        }, { merge: true });
+        return { success: true };
+    } catch (error) {
+        console.error("เกิดข้อผิดพลาดในการอัปเดตสถานะ Tutorial:", error);
+        return { success: false, error };
+    }
+};

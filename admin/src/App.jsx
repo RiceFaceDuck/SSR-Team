@@ -17,6 +17,8 @@ import DashboardScreen from './features/dashboard/views/Dashboard';
 import GameRulesDashboard from './features/gameRules/views/GameRulesDashboard';
 import HistoryArchive from './features/history/views/HistoryArchive';
 import MatchDashboard from './features/matches/views/MatchDashboard';
+import BallsCalculatorBoard from './features/economy/views/BallsCalculatorBoard';
+import AchievementManager from './features/achievements/views/AchievementManager';
 
 // 🌟 Removed placeholder DashboardScreen
 
@@ -75,7 +77,7 @@ export default function App() {
                 {/* เรียกใช้ Component ของจริง */}
                 <Route path="/quests" element={<QuestManager />} />
                 <Route path="/users" element={<UserManager />} />
-                <Route path="/balls" element={<UserManager />} />
+                <Route path="/achievements" element={<AchievementManager />} />
                 <Route path="/rewards" element={<RewardManager />} />
                 
                 {/* 🌟 จุดที่แก้ไข (Hotfix): ลบ div กำลังพัฒนาออก และเสียบระบบจริงเข้าไป */}
@@ -92,6 +94,7 @@ export default function App() {
                 
                 {/* Route จำลองอื่นๆ ป้องกัน Error */}
                 <Route path="/matches" element={<MatchDashboard />} />
+                <Route path="/economy" element={<BallsCalculatorBoard />} />
                 
                 {/* ดักจับ Route มั่วๆ ให้กลับไปหน้าแรก */}
                 <Route path="*" element={<Navigate to="/" replace />} />

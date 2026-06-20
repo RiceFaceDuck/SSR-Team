@@ -1,6 +1,7 @@
 import React from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useActionCooldown } from '../../../hooks/useActionCooldown';
+import { useUserStore } from '../../../store/useUserStore';
 
 /**
  * SquadActions - Bottom action bar for Auto Pick, Reset, and Save Team.
@@ -8,6 +9,7 @@ import { useActionCooldown } from '../../../hooks/useActionCooldown';
  */
 const SquadActions = ({ totalBudget, managerBonus = 0, bank, squadCount, actions, isAutoFilling }) => {
   const { cooldowns, executeActionWithCooldown, isNoAdsMode } = useActionCooldown({ autoPick: 0, reset: 0, saveTeam: 0 });
+  const hasUnsavedChanges = useUserStore(state => state.hasUnsavedChanges);
 
   const renderButtonContent = (btnId, defaultIcon, defaultText, isLoading = false, loadingText = '') => {
     const cd = cooldowns[btnId];
@@ -67,7 +69,7 @@ const SquadActions = ({ totalBudget, managerBonus = 0, bank, squadCount, actions
         
         <button 
           onClick={() => executeActionWithCooldown('saveTeam', actions.handleSaveTeam)}
-          className="flex-1 bg-gradient-to-b from-[#3b82f6] to-[#2563eb] hover:from-[#60a5fa] hover:to-[#3b82f6] text-white font-bold py-2 rounded-md shadow-[0_2px_10px_rgba(59,130,246,0.3)] flex items-center justify-center gap-1 active:scale-95 transition-all duration-200 border border-[#1e40af] overflow-hidden"
+          className={`flex-1 bg-gradient-to-b from-[#3b82f6] to-[#2563eb] hover:from-[#60a5fa] hover:to-[#3b82f6] text-white font-bold py-2 rounded-md shadow-[0_2px_10px_rgba(59,130,246,0.3)] flex items-center justify-center gap-1 active-press transition-all duration-200 border border-[#1e40af] overflow-hidden ${hasUnsavedChanges ? 'animate-pulse-glow' : ''}`}
         >
           {renderButtonContent(
             'saveTeam',

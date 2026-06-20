@@ -17,7 +17,9 @@ export const createAuthSlice = (set, get) => ({
       email: userPayload.email,
       photoURL: userPayload.photoURL,
       role: userPayload.role || 'player',
-      dailyQuests: userPayload.dailyQuests || {} // 🌟 Added dailyQuests
+      dailyQuests: userPayload.dailyQuests || {},
+      equippedTitle: userPayload.equippedTitle || null,
+      tutorialState: userPayload.tutorialState || { hasSeenMarket: false, hasSeenPitch: false }
     },
     balls: Number(userPayload.balls !== undefined ? userPayload.balls : (userPayload.energyBottles || 0)),
     userPoints: Number(userPayload.userPoints) || 0,

@@ -4,11 +4,13 @@ import { useGameStore } from '../../store/useGameStore';
 import ReferralCard from './components/ReferralCard';
 import LeagueManager from './components/LeagueManager';
 import LeagueList from './components/LeagueList';
+import FriendManager from './components/FriendManager';
 
 export default function SocialScreen() {
   const themeConfig = useGameStore(state => state.themeConfig);
   const [refreshLeagues, setRefreshLeagues] = useState(0);
   const [leagueCount, setLeagueCount] = useState(0);
+  const [activeTab, setActiveTab] = useState('leagues'); // 'leagues' | 'friends'
 
   const handleLeagueAdded = () => {
     setRefreshLeagues(prev => prev + 1);
@@ -39,11 +41,33 @@ export default function SocialScreen() {
         {/* บล็อกชวนเพื่อน */}
         <ReferralCard />
 
-        {/* จัดการลีก (สร้าง/เข้าร่วม) */}
-        <LeagueManager onLeagueAdded={handleLeagueAdded} compactMode={leagueCount > 0} />
+        {/* Tab Navigation */}
+        <div className="flex bg-white/80 backdrop-blur-md rounded-xl p-1 mb-4 shadow-sm border border-slate-200">
+          <button 
+            onClick={() => setActiveTab('leagues')}
+            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'leagues' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
+          >
+            ลีก & การดวล
+          </button>
+          <button 
+            onClick={() => setActiveTab('friends')}
+            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'friends' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
+          >
+            ระบบเพื่อน
+          </button>
+        </div>
 
-        {/* รายการลีกส่วนตัว */}
-        <LeagueList refreshTrigger={refreshLeagues} onLeaguesLoaded={setLeagueCount} />
+        {activeTab === 'leagues' ? (
+          <>
+            {/* จัดการลีก (สร้าง/เข้าร่วม) */}
+            <LeagueManager onLeagueAdded={handleLeagueAdded} compactMode={leagueCount > 0} />
+
+            {/* รายการลีกส่วนตัว */}
+            <LeagueList refreshTrigger={refreshLeagues} onLeaguesLoaded={setLeagueCount} />
+          </>
+        ) : (
+          <FriendManager />
+        )}
 
       </div>
     </div>

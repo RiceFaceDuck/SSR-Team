@@ -48,11 +48,21 @@ export const upgradeClubFacility = async (userId, facilityKey, newLevel, totalSp
   if (!userId) throw new Error('User ID is required');
   try {
     const clubRef = getClubRef(userId);
-    await updateDoc(clubRef, {
+    const userRef = doc(db, 'users', userId);
+    const { writeBatch } = await import('firebase/firestore');
+    const batch = writeBatch(db);
+    
+    batch.update(clubRef, {
       [facilityKey]: newLevel,
       spentExp: totalSpentExp,
       updatedAt: new Date()
     });
+    
+    batch.update(userRef, {
+      clubSpentExp: totalSpentExp
+    });
+    
+    await batch.commit();
     return true;
   } catch (error) {
     console.error(`Error upgrading ${facilityKey}:`, error);

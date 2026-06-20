@@ -33,21 +33,23 @@ export const leaderboardEngine = {
       // จัดเรียงตามคะแนนมากไปน้อย
       usersArray.sort((a, b) => b.userPoints - a.userPoints);
 
-      const batch = writeBatch(db);
+      let batch = writeBatch(db);
       let batchCount = 0;
 
       // ลูปเพื่อยัด Rank กลับเข้าไป
-      usersArray.forEach((user, index) => {
+      for (let index = 0; index < usersArray.length; index++) {
+        const user = usersArray[index];
         const newRank = index + 1;
         batch.update(user.ref, { rank: newRank });
         batchCount++;
 
         if (batchCount >= 490) {
-          // ในความเป็นจริงต้องมี array of batches หรือ await ระหว่างลูป
-          // แต่เพื่อให้ง่ายใน MVP เราจะถือว่า user ไม่น่าเกิน 500 คนใน batch แรก
-          // หากเกินควรจะแตก logic เป็น chunk
+          await batch.commit();
+          console.log(`[Leaderboard Engine] Commit batch กลางคัน ${batchCount} บัญชี (ป้องกันลิมิต)`);
+          batchCount = 0;
+          batch = writeBatch(db);
         }
-      });
+      }
 
       if (batchCount > 0) {
         await batch.commit();

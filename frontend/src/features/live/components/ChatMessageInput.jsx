@@ -5,7 +5,7 @@ import { chatService } from '../../../services/firebase/chatService';
 import { showToast } from '../../../utils/toast';
 
 export default function ChatMessageInput({ chatConfig, messages = [] }) {
-  const { userData, balls, useBalls } = useUserStore();
+  const { userData, balls, useBalls, clubData } = useUserStore();
   const [inputText, setInputText] = useState('');
   const [isSending, setIsSending] = useState(false);
   
@@ -46,6 +46,9 @@ export default function ChatMessageInput({ chatConfig, messages = [] }) {
     const currentBalls = balls || 0;
     const cost = isSuperChat ? currentSuperCost : actualNormalCost;
 
+    const totalLevels = (clubData?.stadiumLevel || 1) + (clubData?.trainingGroundLevel || 1) + (clubData?.hospitalLevel || 1) + (clubData?.gymLevel || 1) + (clubData?.youthAcademyLevel || 1);
+    const clubTier = totalLevels >= 45 ? 4 : totalLevels >= 30 ? 3 : totalLevels >= 15 ? 2 : 1;
+
     if (currentBalls < cost) {
       showToast(`Balls ไม่พอ (ต้องการ ${cost} Balls)`, 'error');
       return;
@@ -56,7 +59,9 @@ export default function ChatMessageInput({ chatConfig, messages = [] }) {
       isSuperChat,
       cost,
       duration: superDuration,
-      freeInterval: freeInterval
+      freeInterval: freeInterval,
+      clubTier,
+      equippedTitle: userData.equippedTitle || null
     });
 
     if (result.success) {

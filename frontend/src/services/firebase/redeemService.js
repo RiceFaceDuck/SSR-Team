@@ -1,5 +1,6 @@
 import { doc, collection, getDocs, query, where, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import { appendTransactionLog } from './transactionService';
 
 const REWARDS_COLLECTION = 'rewards';
 const USERS_COLLECTION = 'users';
@@ -92,19 +93,15 @@ export const redeemService = {
           updatedAt: serverTimestamp() 
         });
         
-        // Write the transaction inside users/{userId}/transactions (Using the updated Schema standard!)
-        const secureTransactionRef = doc(collection(db, USERS_COLLECTION, userId, TRANSACTIONS_COLLECTION));
-        transaction.set(secureTransactionRef, {
-          amount: -rewardData.price,
-          type: 'spend',
-          source: 'REDEEM',
-          description: `แลกของรางวัล: ${rewardData.name}`,
-          rewardId: rewardId,
-          rewardType: rewardData.type,
-          wonItem: wonItem,
-          timestamp: serverTimestamp(),
-          status: 'success'
-        });
+        // Write the transaction inside users/{userId}/transactions
+        appendTransactionLog(
+          transaction, 
+          userId, 
+          -rewardData.price, 
+          'spend', 
+          'REDEEM', 
+          `แลกของรางวัล: ${rewardData.name}`
+        );
 
         return {
           success: true,

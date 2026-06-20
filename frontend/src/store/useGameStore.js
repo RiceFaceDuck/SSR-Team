@@ -87,12 +87,14 @@ export const useGameStore = create((set, get) => ({
   },
 
   startingBudget: 100, // Default fallback
+  gameRules: null,
   fetchGameRules: async () => {
     try {
       const docRef = doc(db, 'public_data', 'game_rules');
       const docSnap = await import('firebase/firestore').then(m => m.getDoc(docRef));
       if (docSnap.exists()) {
         const rules = docSnap.data();
+        set({ gameRules: rules });
         if (rules.startingBudget?.isActive) {
           set({ startingBudget: Number(rules.startingBudget.value) || 100 });
         }

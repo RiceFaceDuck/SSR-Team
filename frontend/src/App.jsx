@@ -106,7 +106,7 @@ export default function App() {
 
   // เทคนิค Keep-alive DOM เพื่อให้สลับแท็บเร็วขึ้น
   const getRouteClass = (path) => currentPath === path 
-    ? "block h-full w-full animate-in fade-in duration-300" 
+    ? "flex flex-col flex-1 w-full min-h-0 animate-in fade-in duration-300" 
     : "fixed -left-[9999px] opacity-0 pointer-events-none";
 
   return (

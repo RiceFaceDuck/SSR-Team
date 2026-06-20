@@ -1,5 +1,6 @@
 import { doc, getDoc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import { appendTransactionLog } from './transactionService';
 
 const getAppId = () => typeof __app_id !== 'undefined' ? __app_id : 'ssr-team';
 
@@ -50,6 +51,7 @@ export const inventoryService = {
         }
 
         transaction.update(userRef, { balls: currentBalls - price });
+        appendTransactionLog(transaction, userId, -price, 'spend', 'buy_manager', `ซื้อผู้จัดการทีม ${managerId}`);
 
         inventoryData.ownedManagers.push(managerId);
         inventoryData.lastUpdated = serverTimestamp();
@@ -85,6 +87,7 @@ export const inventoryService = {
         if (!inventoryData.ownedCards) inventoryData.ownedCards = {};
         
         transaction.update(userRef, { balls: currentBalls - price });
+        appendTransactionLog(transaction, userId, -price, 'spend', 'buy_card', `ซื้อการ์ดเสริมพลัง ${cardId}`);
 
         inventoryData.ownedCards[cardId] = (inventoryData.ownedCards[cardId] || 0) + 1;
         inventoryData.lastUpdated = serverTimestamp();
