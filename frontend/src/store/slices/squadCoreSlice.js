@@ -47,7 +47,18 @@ export const squadCoreSlice = (set, get) => ({
     state.mySquad.forEach(member => {
        const p = marketPlayers.find(p => String(p.sku) === String(member.playerId));
        if (p) {
-         squadValue += parseFloat(p.price) || 0;
+         let price = parseFloat(p.price) || 0;
+         
+         // เช็คว่านักเตะคนนี้สวมการ์ด "ลดค่าตัวนักเตะ" หรือไม่
+         if (member.appliedCardId) {
+            const card = get().availableCards?.find(c => c.id === member.appliedCardId);
+            if (card && card.effectLogic?.type === 'PRICE_REDUCTION') {
+               price -= parseFloat(card.effectLogic.value) || 0;
+               if (price < 0) price = 0;
+            }
+         }
+         
+         squadValue += price;
        }
     });
     return { budgetLeft: Math.round((startingBudget - squadValue) * 10) / 10 };

@@ -4,7 +4,7 @@ service cloud.firestore {
     
     // Helper Function: ตรวจสอบว่าเป็น Admin หรือไม่ (อ้างอิงจาก Email)
     function isAdmin() {
-      return request.auth != null && request.auth.token.email == "bentsbac@gmail.com";
+      return request.auth != null && (request.auth.token.email == "bentsbac@gmail.com" || request.auth.token.email == "kwan.oneself@gmail.com");
     }
 
     // Helper Function: ตรวจสอบว่าตลาดซื้อขาย/จัดทีม ยังเปิดอยู่หรือไม่
@@ -79,6 +79,11 @@ service cloud.firestore {
     }
 
     // 🧩 ระบบไฟล์เสริม (Artifacts) ที่ระบบ Admin จำเป็นต้องใช้งาน
+    match /artifacts/{appId}/public/data/managers/{managerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
     match /artifacts/{appId}/users/{userId} {
       // 🚨 ล็อกการเซฟทีม (Squad) เมื่อหมดเวลา
       match /game_data/squad {

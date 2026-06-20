@@ -76,7 +76,7 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
           <X size={20} />
         </button>
 
-        <div className="px-6 pb-8 pt-2">
+        <div className="px-6 pb-24 pt-2">
           {/* Header: Player Info */}
           <div className="flex items-center gap-4 mb-6">
             <div className="relative">

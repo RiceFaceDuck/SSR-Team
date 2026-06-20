@@ -6,13 +6,12 @@ export const useQuotaAnalyzer = () => {
   const [dau, setDau] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Estimates for a typical user session
+  // Estimates for a typical user session across the 4 main systems
   const ESTIMATED_QUOTA_PER_SESSION = {
-    login: { label: 'Login & Init', reads: 5, writes: 1 },
-    viewMarket: { label: 'Market View', reads: 15, writes: 0 },
-    setupSquad: { label: 'Squad Setup', reads: 10, writes: 3 },
-    chat: { label: 'Chat & Social', reads: 10, writes: 2 },
-    leaderboard: { label: 'Leaderboard', reads: 20, writes: 0 }
+    coreEngine: { label: '1. Core Engine (Sync & Points)', reads: 35, writes: 5 },
+    security: { label: '2. Security & Anti-Cheat (Rules)', reads: 20, writes: 0 },
+    adminOps: { label: '3. Admin & Operation', reads: 5, writes: 1 },
+    monetization: { label: '4. Monetization & Onboarding', reads: 15, writes: 4 }
   };
 
   const totalSessionReads = Object.values(ESTIMATED_QUOTA_PER_SESSION).reduce((acc, curr) => acc + curr.reads, 0);

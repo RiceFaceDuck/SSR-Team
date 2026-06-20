@@ -42,13 +42,20 @@ export const enrichSquadData = (
       }
     }
 
+    let displayPrice = fullData?.price || 0;
+    if (appliedCard?.effectLogic?.type === 'PRICE_REDUCTION') {
+      displayPrice -= parseFloat(appliedCard.effectLogic.value) || 0;
+      if (displayPrice < 0) displayPrice = 0;
+    }
+
     return {
       id: String(squadPlayer.slotIndex), 
       playerId: squadPlayer.playerId,
       name: fullData?.name || fullData?.fullName || 'Unknown',
       team: fullData?.team || 'UNK',
       position: squadPlayer.position,
-      price: fullData?.price || 0,
+      price: displayPrice,
+      originalPrice: fullData?.price || 0,
       imageUrl: fullData?.imageUrl || null,
       totalPoints: basePoints,
       displayPoints: displayPoints,

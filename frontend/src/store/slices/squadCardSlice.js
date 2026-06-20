@@ -16,6 +16,7 @@ export const squadCardSlice = (set, get) => ({
       p.playerId === playerId ? { ...p, appliedCardId: cardId } : p
     );
     set({ mySquad: updatedSquad, hasUnsavedChanges: true });
+    get().syncBudget(); // Recalculate budget in case of PRICE_REDUCTION
   },
 
   removeCard: (playerId) => {
@@ -28,5 +29,6 @@ export const squadCardSlice = (set, get) => ({
       return p;
     });
     set({ mySquad: updatedSquad, hasUnsavedChanges: true });
+    get().syncBudget(); // Recalculate budget in case of PRICE_REDUCTION removal
   }
 });
