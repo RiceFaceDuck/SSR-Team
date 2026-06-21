@@ -2,6 +2,7 @@ import React from 'react';
 import { User } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { normalizePosition } from '../../utils/squadValidator';
+import { formatPlayerName } from '../../utils/formatters';
 
 // อัปเกรดสีประจำตำแหน่งให้มีความพรีเมียม (เพิ่ม Gradient และ Drop Shadow)
 const POS_COLORS = {
@@ -51,8 +52,8 @@ export default function PlayerSlot({
   // รูปภาพของนักเตะ (รองรับการเปลี่ยนแปลงชื่อ field ในอนาคต)
   const playerImage = player?.photoURL || player?.image;
   
-  // ชื่อย่อสำหรับแสดงผล (ป้องกันชื่อยาวเกินไปแล้ว UI พัง)
-  const shortName = player?.name ? (player.name.length > 8 ? player.name.substring(0, 7) + '...' : player.name) : '';
+  // ชื่อย่อสำหรับแสดงผล
+  const shortName = player?.name ? formatPlayerName(player.name) : '';
 
   if (isGhost) {
     return (

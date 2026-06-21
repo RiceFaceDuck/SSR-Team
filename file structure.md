@@ -3,6 +3,13 @@
 ## Root `C:\SSR Team`
 - `admin/`: Admin Dashboard Application (Vite + React)
 - `frontend/`: User Facing Application (Vite + React)
+- `functions/`: Firebase Cloud Functions (Node.js Backend) - **NEW!**
+  - `src/api/`: `adminRoutes.js`, `economyRoutes.js`, `engineRoutes.js`, `socialRoutes.js`, `schemas.js` (Zod Validation)
+  - `src/middleware/`: `rateLimiter.js`, `validation.js`
+  - `src/notifications/`: `notificationService.js` (FCM)
+  - `src/engine/`: `gameweekCalculation.js`, `playerValueCalculation.js`, `leaderboardEngine.js`, `syncLiveStats.js` (Dynamic Polling), `utils/`, `modifiers/`
+  - `src/economy/`: `transactionService.js`
+  - `src/social/`: `friendService.js`, `leagueService.js`
 - `.firebase/`, `firebase.json`, `.firebaserc`: Firebase configuration
 - `deploy_all.bat`, `push_github.bat`: Utility scripts
 
@@ -66,6 +73,10 @@
     - `components/`: `HistoricalApiConfig.jsx`, `DataFetchMonitor.jsx`
     - `hooks/`: `useArchiveManager.js` (NEW)
     - `views/`: `HistoryArchive.jsx`
+  - `teams/`: Team Management Feature
+    - `components/`: `TeamList.jsx`, `TeamFormModal.jsx`
+    - `hooks/`: `useTeams.js`
+    - `views/`: `TeamManager.jsx`
   - `users/`, `verify/`: Other features
     - `components/`: `UserTable.jsx`, `AdjustBallsModal.jsx`
 - `services/`: External integrations
@@ -131,7 +142,10 @@
       - `autofill/`: (NEW - Smart Auto-Fill Engine 2.0)
         - `AutoFillOrchestrator.js`
         - `strategies/`: `budgetOptimizer.js`, `synergyAnalyzer.js`
-      - `autoFillEngine.js` (DEPRECATED)
+  - `fixtures/`:
+    - `FixturesScreen.jsx`: หน้าจอตารางการแข่งขัน
+    - `components/`: `FixtureDateGroup.jsx`, `FixtureItem.jsx`
+    - `hooks/`: `useFixtures.js`
   - `profile/`:
     - `RulesScreen.jsx`: หน้าจอกฎกติกา
     - `ProfileScreen.jsx`: หน้าจอโปรไฟล์หลักและกระเป๋าเงิน (Wallet)
@@ -160,6 +174,8 @@
       - `ChatMessageList.jsx`: แสดงรายการข้อความแชท
       - `chat/`: `NormalMessageItem.jsx` (NEW)
       - `ChatMessageInput.jsx`: กล่องป้อนข้อความพร้อมปุ่ม Normal / Super Chat
+    - `hooks/`:
+      - `useLiveMatchData.js`: (NEW) Hook สำหรับดึงข้อมูลคะแนนสดและสถิติแยกรายบุคคล
   - `social/`:
     - `SocialScreen.jsx`: หน้าจอหลักของคอมมูนิตี้และลีกส่วนตัว
     - `components/`: `ReferralCard.jsx` (ชวนเพื่อน), `LeagueManager.jsx` (สร้าง/เข้าร่วมลีก), `LeagueList.jsx` (รายการลีก), `LeagueDetailsModal.jsx`, `LeagueHeader.jsx`, `LeagueLeaderboard.jsx`, `LeagueSettings.jsx`, `FriendManager.jsx` (NEW)
@@ -168,15 +184,14 @@
     - `RedeemScreen.jsx`: หน้าจอร้านค้าและการสุ่ม
     - `components/`: `RedeemHeader.jsx`, `WonItemModal.jsx`, `RewardCard.jsx`
   - `services/`: Core logic decoupled from React
-    - `api/`: `apiFootballService.js`, `apiStatusService.js`
+    - `api/`: `apiFootballService.js` (with Resilient localStorage Fallback), `apiStatusService.js`
     - `engine/`: 
-      - `squadCalculationService.js`: Engine สำหรับคำนวณคะแนนรวมของทีมตาม Gameweek
       - `gameweekCalculationService.js`: Engine ย่อย
       - `playerValueCalculationService.js`: Engine สำหรับคำนวณและปรับสมดุลราคานักเตะ
     - `firebase/`: Firestore database wrappers (`clubService.js`, `questService.js`, `chatService.js`, `redeemService.js`, `playerDatabase.js`, `friendService.js` (NEW), etc. - Refactored for SRP)
       - `market/`: (NEW - Market Services SRP)
         - `marketFetchService.js`: จัดการเฉพาะการดึงข้อมูลตลาด
-        - `marketTransactionService.js`: จัดการเฉพาะธุรกรรมซื้อขาย
+        - `marketTransactionService.js`: จัดการเฉพาะธุรกรรมซื้อขาย (Secured with runTransaction)
 - `store/`: Zustand global state
   - `useUserStore.js`: Store หลักที่รวม Slices เข้าด้วยกัน
   - `slices/`: 

@@ -129,7 +129,10 @@ export const runAutoFillEngine = ({ marketPlayers = [], mySquad = [], formation,
   const finalBaseBudgetLeft = Math.round((effectiveBudget - finalSpent - managerBonus) * 10) / 10;
 
   // 4. Assign slots and starters
-  newSquad = newSquad.map(player => ({ ...player, isStarting: false, slotIndex: null }));
+  newSquad = newSquad.map(player => {
+    if (player.isLocked) return player;
+    return { ...player, isStarting: false, slotIndex: null };
+  });
 
   const availableSlots = { FW: [], MF: [], DF: [], GK: [] };
   formationData.rows.forEach(row => {
@@ -139,14 +142,29 @@ export const runAutoFillEngine = ({ marketPlayers = [], mySquad = [], formation,
   });
   if (availableSlots['GK'].length === 0) availableSlots['GK'].push('GK-0');
 
-  // เรียงคนที่คะแนนเยอะสุดลงสนามก่อน
-  const sortedSquad = [...newSquad].sort((a, b) => {
+  // หักลบ Slot ที่ถูกใช้โดยผู้เล่นที่ถูก Lock ออกไปก่อน
+  newSquad.filter(p => p.isLocked && p.isStarting).forEach(lockedP => {
+    const pos = normalizePosition(lockedP.position);
+    const index = availableSlots[pos].indexOf(lockedP.slotIndex);
+    if (index > -1) {
+      availableSlots[pos].splice(index, 1);
+    } else if (availableSlots[pos].length > 0) {
+      // ถ้าไม่มี slot index ที่ตรงเป๊ะ (เช่น อาจเกิดจากการเปลี่ยนแผน) ให้ยึด slot ถัดไปแทน
+      availableSlots[pos].shift();
+    }
+  });
+
+  const lockedPlayers = newSquad.filter(p => p.isLocked);
+  const unlockedPlayers = newSquad.filter(p => !p.isLocked);
+
+  // เรียงคนที่คะแนนเยอะสุดลงสนามก่อน (สำหรับคนที่ยังไม่ถูก Lock เท่านั้น)
+  const sortedUnlocked = [...unlockedPlayers].sort((a, b) => {
     const pA = marketPlayers.find(p => String(p.sku) === a.playerId);
     const pB = marketPlayers.find(p => String(p.sku) === b.playerId);
     return (parseInt(pB?.totalPoints) || 0) - (parseInt(pA?.totalPoints) || 0);
   });
 
-  newSquad = sortedSquad.map(player => {
+  const assignedUnlocked = sortedUnlocked.map(player => {
     const pos = normalizePosition(player.position);
     if (availableSlots[pos] && availableSlots[pos].length > 0) {
       const assignedSlot = availableSlots[pos].shift();
@@ -154,6 +172,8 @@ export const runAutoFillEngine = ({ marketPlayers = [], mySquad = [], formation,
     }
     return player; 
   });
+
+  newSquad = [...lockedPlayers, ...assignedUnlocked];
 
   if (isModified || newSquad.some(p => p.isStarting)) {
     return { 

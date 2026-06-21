@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLiveMatchAdmin } from '../hooks/useLiveMatchAdmin';
 import MatchConfigPanel from '../components/MatchConfigPanel';
 import MatchScoreController from '../components/MatchScoreController';
@@ -18,6 +18,19 @@ export default function MatchDashboard() {
     publishEvent, 
     incrementScore 
   } = useLiveMatchAdmin();
+
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   if (isLoading) {
     return (
@@ -49,11 +62,13 @@ export default function MatchDashboard() {
         <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 flex items-center gap-3">
           <div className="flex flex-col text-right">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">สถานะระบบ</span>
-            <span className="text-sm font-bold text-slate-700">เชื่อมต่อแล้ว (Real-time)</span>
+            <span className={`text-sm font-bold ${isOnline ? 'text-emerald-700' : 'text-rose-600'}`}>
+              {isOnline ? 'เชื่อมต่อแล้ว (Real-time)' : 'ขาดการเชื่อมต่อ (Offline)'}
+            </span>
           </div>
           <span className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            {isOnline && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
+            <span className={`relative inline-flex rounded-full h-3 w-3 ${isOnline ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
           </span>
         </div>
       </div>

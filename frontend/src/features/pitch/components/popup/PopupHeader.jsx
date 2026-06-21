@@ -1,5 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { formatPlayerName, formatTeamShortName } from '../../../../utils/formatters';
 
 const PopupHeader = ({ player, onClose }) => {
   return (
@@ -21,10 +22,10 @@ const PopupHeader = ({ player, onClose }) => {
         </div>
       </div>
       
-      <h2 className="text-lg font-black text-slate-800 mt-2 mb-1">{player.name}</h2>
+      <h2 className="text-lg font-black text-slate-800 mt-2 mb-1">{formatPlayerName(player.name)}</h2>
       <div className="flex items-center gap-2">
         <span className="px-2 py-0.5 bg-amber-400 text-slate-900 text-[10px] font-black rounded-sm">{player.position}</span>
-        <span className="px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-bold rounded-sm border border-slate-300">{player.team.substring(0, 3).toUpperCase()}</span>
+        <span className="px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-bold rounded-sm border border-slate-300">{formatTeamShortName(player.team)}</span>
       </div>
     </div>
   );

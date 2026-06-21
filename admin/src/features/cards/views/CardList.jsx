@@ -68,20 +68,7 @@ export default function CardList() {
     if (window.confirm('คุณต้องการสร้างการ์ดจำลองใช่หรือไม่?')) {
       try {
         setIsLoading(true);
-        const mockCards = [
-          { name: 'ลดค่าตัวนักเตะ', description: 'ลดราคาค่าตัวนักเตะคนนี้ลง 0.5m ทันที', icon: '💰', effectLogic: { type: 'PRICE_REDUCTION', value: 0.5 }, price: 50, isActive: true, rarity: 'COMMON' },
-          { name: 'พลังตัวจริง', description: 'ได้รับ +2 คะแนนโบนัสพิเศษ หากไม่ถูกเปลี่ยนตัวออก', icon: '🏃‍♂️', effectLogic: { type: 'NOT_SUBBED_BONUS', value: 2 }, price: 80, isActive: true, rarity: 'RARE' },
-          { name: 'รอดพ้นใบเหลือง', description: 'ไม่โดนหักคะแนนแม้จะได้รับใบเหลืองในเกมนี้', icon: '🛡️', effectLogic: { type: 'IMMUNE_YELLOW', value: '' }, price: 100, isActive: true, rarity: 'EPIC' },
-          { name: 'กัปตันจอมแบก', description: 'คูณ 3 คะแนนสำหรับกัปตันทีมสัปดาห์นี้', icon: '👑', effectLogic: { type: 'TRIPLE_CAPTAIN', value: '' }, price: 200, isActive: true, rarity: 'LEGENDARY' }
-        ];
-        
-        const newSavedCards = [];
-        for (const card of mockCards) {
-          const savedCard = await cardDatabase.saveCard(card);
-          newSavedCards.push(savedCard);
-        }
-        
-        // อัปเดต State ต่อท้ายทันที
+        const newSavedCards = await cardDatabase.seedMockCards();
         setCards(prev => [...prev, ...newSavedCards]);
         alert('สร้างการ์ดจำลองสำเร็จ!');
       } catch (error) {

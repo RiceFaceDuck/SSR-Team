@@ -16,7 +16,7 @@ export const usePitchActions = () => {
     
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    const result = useUserStore.getState().autoFillTeam(marketPlayers);
+    const result = await useUserStore.getState().autoFillTeam(marketPlayers);
     if (result.success) {
       toast.success("✅ " + result.message);
     } else {

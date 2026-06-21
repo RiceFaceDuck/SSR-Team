@@ -2,6 +2,7 @@ import React from 'react';
 import { Lock } from 'lucide-react';
 import EmptyNode from './EmptyNode';
 import PlayerStatsBar from './PlayerStatsBar';
+import { formatPlayerName, formatTeamShortName } from '../../../utils/formatters';
 
 /**
  * PlayerNode - Displays an individual player on the pitch.
@@ -11,7 +12,8 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench, isSynergyHi
   if (!player) return <EmptyNode expectedPosition={expectedPosition} isBench={isBench} />;
 
   // Mocks for image and team abbreviation
-  const playerImage = player.imageUrl || player.fullData?.imageUrl || player.fullData?.image || ('https://ui-avatars.com/api/?background=random&color=fff&name=' + player.name);
+  const defaultSilhouette = "https://cdn.discordapp.com/attachments/1182283993883832360/1218206584284577832/player-silhouette.png?ex=65e1dd91&is=65cf6891&hm=4a70b20cb374a24c2ed55c2f37e174eb";
+  const playerImage = player.imageUrl || player.fullData?.imageUrl || player.fullData?.image || defaultSilhouette;
   const teamAbbr = player.team || 'UNK';
   const role = player.role || ''; // e.g. (C) or (VC)
   const isCaptain = role === 'C';
@@ -38,7 +40,12 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench, isSynergyHi
       <div className="relative w-full h-10 sm:h-12 lg:h-14 flex justify-center items-end mb-[1px]">
         {/* Placeholder for player face / shirt */}
         <div className="w-full h-10 sm:h-12 lg:h-14 bg-white rounded-t-md shadow-sm border border-b-0 border-slate-300 overflow-hidden relative flex items-end justify-center">
-          <img src={playerImage} alt={player.name} className="w-full h-full object-cover" />
+          <img 
+            src={playerImage} 
+            alt={player.name} 
+            className="w-full h-full object-cover" 
+            onError={(e) => { e.target.src = defaultSilhouette; }}
+          />
           
           {/* Captain / Vice Captain Indicator */}
           {(isCaptain || isViceCaptain) && (
@@ -86,10 +93,10 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench, isSynergyHi
           </div>
           <div className="flex flex-col items-start justify-center flex-1 overflow-hidden">
             <span className="text-[8px] sm:text-[9px] font-black text-slate-800 leading-none truncate w-full text-left">
-              {player.name.split(' ').pop()}
+              {formatPlayerName(player.name)}
             </span>
             <span className="text-[6px] sm:text-[7px] font-semibold text-slate-500 leading-none mt-0.5 text-left truncate w-full">
-              {teamAbbr.substring(0, 3).toUpperCase()} {role && <span className="font-bold text-slate-800">({role})</span>}
+              {formatTeamShortName(teamAbbr)} {role && <span className="font-bold text-slate-800">({role})</span>}
             </span>
           </div>
         </div>

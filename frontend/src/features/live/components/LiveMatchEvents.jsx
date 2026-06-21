@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatPlayerName, formatTeamShortName } from '../../../../utils/formatters';
 
 export default function LiveMatchEvents({ events }) {
   if (!events || events.length === 0) {
@@ -33,10 +34,10 @@ export default function LiveMatchEvents({ events }) {
             <span className="font-bold text-slate-400 w-6 text-right shrink-0">{ev.time.elapsed}'</span>
             <span className="text-[12px] shrink-0">{getEventIcon(ev)}</span>
             <span className="truncate font-medium text-slate-700">
-              {ev.player?.name} {ev.assist?.name ? `(${ev.assist.name})` : ''}
+              {formatPlayerName(ev.player?.name)} {ev.assist?.name ? `(${formatPlayerName(ev.assist.name)})` : ''}
             </span>
-            <span className="ml-auto text-slate-400 text-[9px] truncate max-w-[60px] text-right">
-              {ev.team?.name}
+            <span className="ml-auto text-slate-400 text-[9px] truncate max-w-[60px] text-right uppercase">
+              {formatTeamShortName(ev.team?.name)}
             </span>
           </div>
         ))}

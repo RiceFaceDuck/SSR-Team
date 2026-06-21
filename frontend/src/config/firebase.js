@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
+import { getFunctions } from "firebase/functions";
 
 // โค้ด FirebaseConfig ที่ลูกพี่ส่งมา
 const firebaseConfig = {
@@ -21,6 +22,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
+export const functions = getFunctions(app, 'us-central1'); // Default region
 
 // Enable Offline Persistence for Firestore (ประหยัด Reads + รองรับ Offline)
 enableIndexedDbPersistence(db).catch((err) => {

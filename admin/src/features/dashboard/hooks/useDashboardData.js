@@ -96,8 +96,10 @@ export const useDashboardData = () => {
     
     try {
       setIsProcessing(true);
-      await gameweekCalculationService.processGameweek(processGwId);
-      await leaderboardEngine.updateLeaderboardRanks();
+      const { httpsCallable } = require('firebase/functions');
+      const { functions } = require('../../../config/firebase');
+      const processGameweekFn = httpsCallable(functions, 'processGameweek');
+      await processGameweekFn({ gameweekId: processGwId });
       alert(`บันทึกผลการแข่งขัน ${processGwId} สำเร็จ!`);
       fetchHistory(); 
     } catch (error) {

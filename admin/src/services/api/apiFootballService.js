@@ -18,6 +18,49 @@ let currentConfig = {
   season: safeGetItem('apiFootballSeason') || safeGetEnv('VITE_API_FOOTBALL_SEASON') || "2024" // Free plan supports up to 2024
 };
 
+const fetchWithFallback = async (url, cacheKey) => {
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: apiFootballService.getHeaders()
+    });
+
+    const result = await response.json();
+    
+    if (result.errors && Object.keys(result.errors).length > 0) {
+      throw new Error(Object.values(result.errors)[0]);
+    }
+
+    const data = result.response || [];
+    
+    // Save to cache on success
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+      } catch (e) {
+        console.warn("Could not save to localStorage (quota exceeded?)", e);
+      }
+    }
+    
+    return data;
+  } catch (error) {
+    console.warn(`[API Fallback] Fetch failed for ${cacheKey}:`, error.message);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        console.info(`[API Fallback] Using cached data for ${cacheKey}`);
+        try {
+          return JSON.parse(cached);
+        } catch (e) {
+          console.error("Failed to parse cached data", e);
+        }
+      }
+    }
+    // If no cache is available, rethrow the error
+    throw error;
+  }
+};
+
 export const apiFootballService = {
   /**
    * ตั้งค่า API ใหม่และบันทึกลง LocalStorage
@@ -43,24 +86,9 @@ export const apiFootballService = {
    * ดึงรายการรอบการแข่งขัน (Gameweeks) ที่มีทั้งหมด
    */
   fetchAvailableGameweeks: async () => {
-    try {
-      const { leagueId, season } = currentConfig;
-      const response = await fetch(`${BASE_URL}/fixtures/rounds?league=${leagueId}&season=${season}`, {
-        method: "GET",
-        headers: apiFootballService.getHeaders()
-      });
-
-      const result = await response.json();
-      
-      if (result.errors && Object.keys(result.errors).length > 0) {
-        throw new Error(Object.values(result.errors)[0]);
-      }
-
-      return result.response || [];
-    } catch (error) {
-      console.error("API-Football Fetch Rounds Error:", error);
-      throw error;
-    }
+    const { leagueId, season } = currentConfig;
+    const url = `${BASE_URL}/fixtures/rounds?league=${leagueId}&season=${season}`;
+    return await fetchWithFallback(url, `cache_rounds_${leagueId}_${season}`);
   },
 
   /**
@@ -68,99 +96,38 @@ export const apiFootballService = {
    * @param {string|number} gameweekNumber เลขสัปดาห์ (เช่น 1)
    */
   fetchFixtures: async (gameweekNumber) => {
-    try {
-      const { leagueId, season } = currentConfig;
-      // รูปแบบ round ของพรีเมียร์ลีกมักจะเป็น "Regular Season - X"
-      const roundStr = `Regular Season - ${gameweekNumber}`;
-      
-      const response = await fetch(`${BASE_URL}/fixtures?league=${leagueId}&season=${season}&round=${encodeURIComponent(roundStr)}`, {
-        method: "GET",
-        headers: apiFootballService.getHeaders()
-      });
-
-      const result = await response.json();
-      
-      if (result.errors && Object.keys(result.errors).length > 0) {
-        throw new Error(Object.values(result.errors)[0]);
-      }
-
-      return result.response || [];
-    } catch (error) {
-      console.error("API-Football Fetch Fixtures Error:", error);
-      throw error;
-    }
+    const { leagueId, season } = currentConfig;
+    const roundStr = `Regular Season - ${gameweekNumber}`;
+    const url = `${BASE_URL}/fixtures?league=${leagueId}&season=${season}&round=${encodeURIComponent(roundStr)}`;
+    return await fetchWithFallback(url, `cache_fixtures_${leagueId}_${season}_${gameweekNumber}`);
   },
 
   /**
    * ดึงข้อมูลนักเตะตามชื่อหรือ ID
    */
   fetchPlayers: async (query) => {
-    try {
-      const { season } = currentConfig;
-      const response = await fetch(`${BASE_URL}/players?search=${encodeURIComponent(query)}&season=${season}`, {
-        method: "GET",
-        headers: apiFootballService.getHeaders()
-      });
-
-      const result = await response.json();
-      
-      if (result.errors && Object.keys(result.errors).length > 0) {
-        throw new Error(Object.values(result.errors)[0]);
-      }
-
-      return result.response || [];
-    } catch (error) {
-      console.error("API-Football Fetch Error:", error);
-      throw error;
-    }
+    const { season } = currentConfig;
+    const url = `${BASE_URL}/players?search=${encodeURIComponent(query)}&season=${season}`;
+    return await fetchWithFallback(url, `cache_players_search_${season}_${query}`);
   },
 
   /**
    * ดึงข้อมูลนักเตะทั้งทีม (ตาม Team ID)
    */
   fetchTeamPlayers: async (teamId) => {
-    try {
-      const { season } = currentConfig;
-      const response = await fetch(`${BASE_URL}/players?team=${teamId}&season=${season}`, {
-        method: "GET",
-        headers: apiFootballService.getHeaders()
-      });
-
-      const result = await response.json();
-      
-      if (result.errors && Object.keys(result.errors).length > 0) {
-        throw new Error(Object.values(result.errors)[0]);
-      }
-
-      return result.response || [];
-    } catch (error) {
-      console.error("API-Football Fetch Team Error:", error);
-      throw error;
-    }
+    const { season } = currentConfig;
+    const url = `${BASE_URL}/players?team=${teamId}&season=${season}`;
+    return await fetchWithFallback(url, `cache_players_team_${season}_${teamId}`);
   },
 
   /**
    * ดึงข้อมูลนักเตะรายบุคคล (ตาม Player ID)
    */
   fetchPlayerById: async (playerId) => {
-    try {
-      const { season } = currentConfig;
-      const response = await fetch(`${BASE_URL}/players?id=${playerId}&season=${season}`, {
-        method: "GET",
-        headers: apiFootballService.getHeaders()
-      });
-
-      const result = await response.json();
-      
-      if (result.errors && Object.keys(result.errors).length > 0) {
-        throw new Error(Object.values(result.errors)[0]);
-      }
-
-      return result.response && result.response.length > 0 ? result.response[0] : null;
-    } catch (error) {
-      console.error("API-Football Fetch Player by ID Error:", error);
-      throw error;
-    }
+    const { season } = currentConfig;
+    const url = `${BASE_URL}/players?id=${playerId}&season=${season}`;
+    const data = await fetchWithFallback(url, `cache_player_id_${season}_${playerId}`);
+    return data && data.length > 0 ? data[0] : null;
   },
 
   /**

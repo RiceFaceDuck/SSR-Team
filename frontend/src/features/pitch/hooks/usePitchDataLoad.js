@@ -8,7 +8,8 @@ export const usePitchDataLoad = () => {
     mySquad, 
     fetchCards,
     isCardsFetched,
-    fetchLiveStats,
+    startListeningLiveStats,
+    stopListeningLiveStats,
     loadInventory,
     isInventoryLoaded
   } = useUserStore();
@@ -21,16 +22,20 @@ export const usePitchDataLoad = () => {
     if (!isCardsFetched) fetchCards();
     if (!isInventoryLoaded && userData?.uid) loadInventory(userData.uid);
     
-    // Fetch live stats only once when pitch loads, if there's a squad
+    // Listen to live stats in real-time
     if (mySquad?.length > 0) {
-      fetchLiveStats();
+      startListeningLiveStats();
     }
 
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 800);
-    return () => clearTimeout(timer);
-  }, [userData?.uid]); // Run once per user session/mount
+    
+    return () => {
+      clearTimeout(timer);
+      stopListeningLiveStats();
+    };
+  }, [userData?.uid, mySquad?.length]);
 
   return { isLoading };
 };

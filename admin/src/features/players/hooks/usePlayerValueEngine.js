@@ -61,8 +61,11 @@ export const usePlayerValueEngine = (onClose) => {
   const handleCalculate = async () => {
     setIsCalculating(true);
     try {
-      const results = await previewPlayerValues(config);
-      setPreviews(results);
+      const { httpsCallable } = require('firebase/functions');
+      const { functions } = require('../../../config/firebase');
+      const previewFn = httpsCallable(functions, 'previewPlayerValues');
+      const res = await previewFn({ config });
+      setPreviews(res.data.previews);
       setHasCalculated(true);
     } catch (error) {
       alert('เกิดข้อผิดพลาดในการคำนวณ: ' + error.message);
@@ -78,14 +81,24 @@ export const usePlayerValueEngine = (onClose) => {
     if (!confirmSave) return;
 
     setIsSaving(true);
-    const result = await commitPlayerValues(previews);
-    setIsSaving(false);
+    try {
+      const { httpsCallable } = require('firebase/functions');
+      const { functions } = require('../../../config/firebase');
+      const commitFn = httpsCallable(functions, 'commitPlayerValues');
+      const res = await commitFn({ previews });
+      const result = res.data.result;
+      
+      setIsSaving(false);
 
-    if (result.success) {
-      alert(`บันทึกราคาใหม่สำเร็จ ${result.updatedCount} คน (ผ่าน ${result.batches} Batches)`);
-      if (onClose) onClose();
-    } else {
-      alert('เกิดข้อผิดพลาดในการบันทึก: ' + result.error?.message);
+      if (result.success) {
+        alert(`บันทึกราคาใหม่สำเร็จ ${result.updatedCount} คน (ผ่าน ${result.batches} Batches)`);
+        if (onClose) onClose();
+      } else {
+        alert('เกิดข้อผิดพลาดในการบันทึก: ' + result.error?.message);
+      }
+    } catch (err) {
+      setIsSaving(false);
+      alert('เกิดข้อผิดพลาดในการบันทึก: ' + err.message);
     }
   };
 

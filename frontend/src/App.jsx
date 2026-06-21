@@ -24,6 +24,7 @@ import LeaderboardScreen from './features/leaderboard/LeaderboardScreen';
 import SocialScreen from './features/social/SocialScreen';
 import LiveScoreScreen from './features/live/LiveScoreScreen';
 import RulesScreen from './features/profile/RulesScreen';
+import FixturesScreen from './features/fixtures/FixturesScreen';
 
 export default function App() {
   const { isAuthenticated, isAuthLoading } = useUserStore();
@@ -116,6 +117,7 @@ export default function App() {
       <MobileLayout currentPath={currentPath} onNavigate={setCurrentPath} onLogout={handleLogout}>
         <div className={getRouteClass('pitch')}><PitchScreen /></div>
         <div className={getRouteClass('market')}><MarketScreen /></div>
+        <div className={getRouteClass('fixtures')}><FixturesScreen /></div>
         <div className={getRouteClass('quest')}><QuestScreen /></div>
         <div className={getRouteClass('redeem')}><RedeemScreen /></div>
         <div className={getRouteClass('profile')}><ProfileScreen /></div>

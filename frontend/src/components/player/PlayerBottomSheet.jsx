@@ -4,6 +4,7 @@ import { useUserStore } from '../../store/useUserStore';
 import PositionBadge from './PositionBadge';
 import BottomSheetHighlights from './BottomSheetHighlights';
 import PlayerStatsDetailModal from './PlayerStatsDetailModal';
+import { formatPlayerName, formatTeamShortName } from '../../utils/formatters';
 
 const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -83,7 +84,7 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-800 border-2 border-slate-600 overflow-hidden shadow-lg flex items-center justify-center">
                 <img 
                   src={player.image || '/assets/default-avatar.png'} 
-                  alt={player.name}
+                  alt={formatPlayerName(player.name)}
                   className="w-full h-full object-cover"
                   onError={(e) => { e.target.src = '/assets/default-avatar.png' }}
                 />
@@ -95,11 +96,11 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
             
             <div className="flex-1">
               <h3 className="text-xl font-bold text-white leading-tight mb-1 truncate">
-                {player.name}
+                {formatPlayerName(player.name)}
               </h3>
               <div className="flex flex-wrap items-center gap-2 text-sm">
                 <span className="text-slate-300 bg-slate-800 px-2 py-0.5 rounded-md">
-                  {player.club || 'Unknown Club'}
+                  {formatTeamShortName(player.club || player.team || 'Unknown Club')}
                 </span>
                 <span className="text-amber-400 font-bold bg-amber-400/10 px-2 py-0.5 rounded-md">
                   OVR {player.overall || player.base_overall || '?'}

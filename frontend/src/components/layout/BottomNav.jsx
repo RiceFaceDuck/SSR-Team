@@ -1,11 +1,12 @@
 import React from 'react';
-import { Home, ShoppingBag, Target, Gift } from 'lucide-react';
+import { Home, ShoppingBag, Target, Gift, Calendar } from 'lucide-react';
 import { playSound, STYLES } from '../../config/theme';
 
 export default function BottomNav({ currentPath, onNavigate }) {
   const navItems = [
     { id: 'pitch', icon: Home, label: 'แผนการเล่น' },
     { id: 'market', icon: ShoppingBag, label: 'นักเตะ' },
+    { id: 'fixtures', icon: Calendar, label: 'ตารางแข่ง' },
     { id: 'quest', icon: Target, label: 'ภารกิจ' },
     { id: 'redeem', icon: Gift, label: 'ร้านค้า' },
   ];

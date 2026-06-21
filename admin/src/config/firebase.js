@@ -18,7 +18,10 @@ const firebaseConfig = {
 // เช็คว่ามีการ Initialize Firebase ไปแล้วหรือยัง (ป้องกัน Error duplicate-app จาก Vite HMR รันซ้ำ)
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
+import { getFunctions } from "firebase/functions";
+
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const functions = getFunctions(app);
 
 export default app;

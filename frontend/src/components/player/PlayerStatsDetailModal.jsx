@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Activity, TrendingUp, Shield, Target, Clock, AlertCircle } from 'lucide-react';
+import { formatPlayerName } from '../../utils/formatters';
 
 const PlayerStatsDetailModal = ({ isOpen, onClose, player }) => {
   if (!isOpen || !player) return null;
@@ -31,7 +32,7 @@ const PlayerStatsDetailModal = ({ isOpen, onClose, player }) => {
               />
             </div>
             <div>
-              <h3 className="text-white font-bold leading-none">{player.name}</h3>
+              <h3 className="text-white font-bold leading-none">{formatPlayerName(player.name)}</h3>
               <p className="text-xs text-slate-400 mt-1">Detailed Statistics</p>
             </div>
           </div>

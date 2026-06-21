@@ -16,13 +16,12 @@ export default function GameweekProcessPanel({ initialGwId = 'GW1' }) {
       setIsProcessing(true);
       addLog(`เริ่มคำนวณคะแนนสำหรับ ${gwId}...`);
       
-      await gameweekCalculationService.processGameweek(gwId);
-      addLog(`คำนวณคะแนน ${gwId} สำเร็จ`);
-      
-      addLog(`กำลังอัปเดตกระดานจัดอันดับ (Leaderboard)...`);
-      await leaderboardEngine.updateLeaderboardRanks();
-      addLog(`อัปเดตอันดับสำเร็จทั้งหมด`);
-      
+      const { httpsCallable } = require('firebase/functions');
+      const { functions } = require('../../../config/firebase');
+      const processGameweekFn = httpsCallable(functions, 'processGameweek');
+      await processGameweekFn({ gameweekId: gwId });
+
+      addLog(`คำนวณคะแนน ${gwId} และอัปเดตกระดานจัดอันดับสำเร็จ`);
       alert('ประมวลผล Gameweek เสร็จสมบูรณ์!');
     } catch (error) {
       console.error(error);

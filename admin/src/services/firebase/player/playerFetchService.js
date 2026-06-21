@@ -1,10 +1,11 @@
-import { getDocs, getDoc } from 'firebase/firestore';
+import { getDocs, getDoc, query, limit } from 'firebase/firestore';
 import { getCollectionRef, getDocRef } from './playerUtils';
 
 export const playerFetchService = {
   getAllPlayers: async () => {
     try {
-      const snapshot = await getDocs(getCollectionRef());
+      const q = query(getCollectionRef(), limit(1500)); // Safety limit
+      const snapshot = await getDocs(q);
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
       console.error("Error fetching players:", error);

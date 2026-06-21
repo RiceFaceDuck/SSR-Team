@@ -7,6 +7,7 @@
 import React from 'react';
 import { useDragStore } from '../../store/useDragStore';
 import PositionBadge from './PositionBadge';
+import { formatPlayerName } from '../../utils/formatters';
 
 export default function FloatingDragAvatar() {
   // ดึง State การลากจากศูนย์บัญชาการ
@@ -44,7 +45,7 @@ export default function FloatingDragAvatar() {
         {/* ข้อมูลนักเตะ */}
         <div className="flex-1 min-w-0 pr-2">
           <h4 className="font-bold text-slate-800 text-sm truncate leading-tight">
-            {draggedPlayer.name}
+            {formatPlayerName(draggedPlayer.name)}
           </h4>
           <div className="flex items-center gap-2 mt-0.5">
             <PositionBadge position={draggedPlayer.position} className="!text-[8px] !px-1.5" />

@@ -9,15 +9,19 @@ export default function ManagerList() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
 
-  const mockManagers = [
-    { id: 'A', name: 'Arthur Shield', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=A', effectLogic: { type: 'DEF_CLEAN_SHEET_BONUS', value: 2 }, description: 'กองหลังได้รับ +2 คะแนน เมื่อทำคลีนชีตสำเร็จ', price: 150, isActive: true },
-    { id: 'B', name: 'Victor Wealth', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=B', effectLogic: { type: 'BUDGET_BONUS', value: 25 }, description: 'เพิ่มงบประมาณสโมสรในการซื้อนักเตะ +25M', price: 200, isActive: true },
-    { id: 'C', name: 'Prof. Tacticus', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=C', effectLogic: { type: 'UNLOCK_FORMATION' }, description: 'ปลดล็อกแผนการเล่นพิเศษเพื่อใช้จัดทีม', price: 100, isActive: true },
-    { id: 'D', name: 'Max Firepower', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=D', effectLogic: { type: 'FW_GOAL_FEST_BONUS', value: 2 }, description: 'กองหน้าได้รับ +2 คะแนน เมื่อทีมยิงได้ 3 ประตูขึ้นไป', price: 150, isActive: true },
-    { id: 'E', name: 'Simon Synergy', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=E', effectLogic: { type: 'CLUB_SYNERGY_BONUS', value: 1 }, description: 'นักเตะที่มาจากสโมสรเดียวกัน 3 คนขึ้นไป ได้รับโบนัสคนละ +1 คะแนน', price: 120, isActive: true },
-    { id: 'F', name: 'Nigel Negotiator', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=F', effectLogic: { type: 'MARKET_DISCOUNT', value: 10 }, description: 'ลดราคานักเตะในตลาดซื้อขายลง 10%', price: 180, isActive: true },
-    { id: 'G', name: 'Master Commander', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=G', effectLogic: { type: 'CAPTAIN_TRIPLE_BONUS' }, description: 'กัปตันทีมจะได้รับโบนัสคะแนนคูณ 3 (จากเดิมคูณ 2)', price: 250, isActive: true },
-  ];
+  const handleSeedData = async () => {
+    if (!window.confirm('Are you sure you want to seed the default managers? This will overwrite existing managers with the same IDs.')) return;
+    setIsSeeding(true);
+    try {
+      await managerDatabase.seedMockManagers();
+      alert('Mock managers seeded successfully!');
+      fetchManagers();
+    } catch (e) {
+      console.error(e);
+      alert('Failed to seed managers: ' + e.message);
+    }
+    setIsSeeding(false);
+  };
 
   const fetchManagers = async () => {
     setIsLoading(true);
@@ -47,22 +51,6 @@ export default function ManagerList() {
   const handleSaved = () => {
     setIsFormOpen(false);
     fetchManagers();
-  };
-
-  const handleSeedData = async () => {
-    if (!window.confirm('Are you sure you want to seed the default managers? This will overwrite existing managers with the same IDs.')) return;
-    setIsSeeding(true);
-    try {
-      for (const m of mockManagers) {
-        await managerDatabase.saveManager(m.id, m);
-      }
-      alert('Mock managers seeded successfully!');
-      fetchManagers();
-    } catch (e) {
-      console.error(e);
-      alert('Failed to seed managers: ' + e.message);
-    }
-    setIsSeeding(false);
   };
 
   return (

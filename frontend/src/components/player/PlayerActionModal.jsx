@@ -7,6 +7,7 @@
 import React from 'react';
 import { X, ShoppingCart, Tag, Coins, Star, ShieldAlert } from 'lucide-react';
 import PositionBadge from './PositionBadge';
+import { formatPlayerName, formatTeamShortName } from '../../utils/formatters';
 
 /**
  * @param {boolean} isOpen - สถานะการเปิด/ปิด Modal
@@ -72,10 +73,10 @@ export default function PlayerActionModal({ isOpen, onClose, player, actionType 
             </div>
             
             <div className="flex-1 min-w-0">
-              <h4 className="font-bold text-slate-800 text-base truncate">{player.name}</h4>
+              <h4 className="font-bold text-slate-800 text-base truncate">{formatPlayerName(player.name)}</h4>
               <div className="flex items-center gap-2 mt-1">
                 <PositionBadge position={player.position} />
-                <span className="text-xs font-medium text-slate-500 truncate">{player.team}</span>
+                <span className="text-xs font-medium text-slate-500 truncate">{formatTeamShortName(player.team)}</span>
               </div>
             </div>
           </div>

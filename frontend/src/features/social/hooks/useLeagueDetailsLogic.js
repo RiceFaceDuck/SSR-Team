@@ -12,6 +12,14 @@ export const useLeagueDetailsLogic = (league, onClose, onLeagueUpdated) => {
   
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(league?.name || '');
+  
+  // Settings State
+  const [editSettings, setEditSettings] = useState({
+    mode: league?.mode || 'classic',
+    rankBy: league?.rankBy || 'userPoints',
+    customRules: league?.customRules || { captainMultiplier: 2, goal: 800, assist: 600 }
+  });
+  
   const [actionLoading, setActionLoading] = useState(false);
 
   const isCreator = userData?.uid === league?.creatorId;
@@ -20,6 +28,11 @@ export const useLeagueDetailsLogic = (league, onClose, onLeagueUpdated) => {
     const fetchMembers = async () => {
       setLoading(true);
       const data = await leagueService.getLeagueMembersData(league.members || []);
+      
+      // Sort members based on league's rankBy setting
+      const rankByField = league?.rankBy || 'userPoints';
+      data.sort((a, b) => (b[rankByField] || 0) - (a[rankByField] || 0));
+      
       const rankedData = data.map((m, index) => ({ ...m, rank: index + 1 }));
       setMembers(rankedData);
       setLoading(false);
@@ -38,15 +51,15 @@ export const useLeagueDetailsLogic = (league, onClose, onLeagueUpdated) => {
     });
   };
 
-  const handleSaveName = async () => {
-    if (!editName.trim() || editName === league.name) {
-      setIsEditing(false);
-      return;
-    }
+  const handleSaveSettings = async () => {
     setActionLoading(true);
-    const result = await leagueService.updateLeagueName(league.id, editName);
+    const result = await leagueService.updateLeagueSettings(league.id, {
+      name: editName,
+      ...editSettings
+    });
+    
     if (result.success) {
-      showToast('success', 'เปลี่ยนชื่อลีกสำเร็จ');
+      showToast('success', 'บันทึกการตั้งค่าสำเร็จ');
       setIsEditing(false);
       if (onLeagueUpdated) onLeagueUpdated();
     } else {
@@ -94,10 +107,12 @@ export const useLeagueDetailsLogic = (league, onClose, onLeagueUpdated) => {
     setIsEditing,
     editName,
     setEditName,
+    editSettings,
+    setEditSettings,
     actionLoading,
     isCreator,
     handleCopyCode,
-    handleSaveName,
+    handleSaveSettings,
     handleLeave,
     handleDelete
   };

@@ -1,6 +1,7 @@
 import { toast } from '../../../utils/toast';
 import { useUserStore } from '../../../store/useUserStore';
 import { normalizePosition } from '../../../utils/squadValidator';
+import { formatPlayerName } from '../../../utils/formatters';
 
 export const usePitchHandlers = ({
   enrichedStarters,
@@ -96,18 +97,18 @@ export const usePitchHandlers = ({
     switch (action) {
       case 'CAPTAIN':
         setCaptain(popupPlayer.playerId);
-        toast.success(`ตั้ง ${popupPlayer.name} เป็นกัปตันทีมแล้ว!`);
+        toast.success(`ตั้ง ${formatPlayerName(popupPlayer.name)} เป็นกัปตันทีมแล้ว!`);
         setPopupPlayer(null);
         break;
       case 'VICE_CAPTAIN':
         setViceCaptain(popupPlayer.playerId);
-        toast.success(`ตั้ง ${popupPlayer.name} เป็นรองกัปตันทีมแล้ว!`);
+        toast.success(`ตั้ง ${formatPlayerName(popupPlayer.name)} เป็นรองกัปตันทีมแล้ว!`);
         setPopupPlayer(null);
         break;
       case 'SWAP':
         setSelectedPlayer({ playerId: popupPlayer.playerId });
         setPopupPlayer(null);
-        toast.info(`เลือก ${popupPlayer.name} แล้ว กดที่นักเตะคนอื่นหรือตำแหน่งว่างเพื่อสลับ`);
+        toast.info(`เลือก ${formatPlayerName(popupPlayer.name)} แล้ว กดที่นักเตะคนอื่นหรือตำแหน่งว่างเพื่อสลับ`);
         break;
       case 'SUBSTITUTE':
         useUserStore.getState().setPendingTargetSlot(popupPlayer.id);
@@ -121,7 +122,7 @@ export const usePitchHandlers = ({
         if (viceCaptainId === popupPlayer.playerId) setViceCaptain(null);
         sellPlayer(popupPlayer.fullData);
         setPopupPlayer(null);
-        toast.success(`ลบ ${popupPlayer.name} ออกจากทีมและคืนงบประมาณแล้ว`);
+        toast.success(`ลบ ${formatPlayerName(popupPlayer.name)} ออกจากทีมและคืนงบประมาณแล้ว`);
         break;
       case 'POWER_CARD':
         setPowerCardPlayer(popupPlayer);
@@ -129,7 +130,7 @@ export const usePitchHandlers = ({
         break;
       case 'TOGGLE_LOCK':
         useUserStore.getState().togglePlayerLock(popupPlayer.playerId);
-        toast.success(popupPlayer.isLocked ? `ปลดล็อค ${popupPlayer.name} แล้ว` : `ล็อค ${popupPlayer.name} แล้ว จะไม่ถูกลบเมื่อสุ่มใหม่`);
+        toast.success(popupPlayer.isLocked ? `ปลดล็อค ${formatPlayerName(popupPlayer.name)} แล้ว` : `ล็อค ${formatPlayerName(popupPlayer.name)} แล้ว จะไม่ถูกลบเมื่อสุ่มใหม่`);
         setPopupPlayer(null);
         break;
       default:

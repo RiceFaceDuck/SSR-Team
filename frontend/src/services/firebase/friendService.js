@@ -1,7 +1,7 @@
-import { collection, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, getDocs, serverTimestamp, runTransaction } from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import { collection, doc, getDoc, getDocs, query, limit } from 'firebase/firestore';
+import { db, functions } from '../../config/firebase';
+import { httpsCallable } from 'firebase/functions';
 
-const getUsersRef = () => collection(db, 'users');
 const getFriendsRef = (userId) => collection(db, 'users', userId, 'friends');
 
 /**
@@ -27,7 +27,8 @@ export const searchUserByUid = async (uid) => {
 export const fetchFriends = async (userId) => {
   if (!userId) throw new Error('User ID is required');
   try {
-    const friendsSnap = await getDocs(getFriendsRef(userId));
+    const q = query(getFriendsRef(userId), limit(500)); // Safety limit
+    const friendsSnap = await getDocs(q);
     const friends = [];
     friendsSnap.forEach(doc => {
       friends.push({ id: doc.id, ...doc.data() });
@@ -40,83 +41,43 @@ export const fetchFriends = async (userId) => {
 };
 
 /**
- * ส่งคำขอเป็นเพื่อน
+ * ส่งคำขอเป็นเพื่อน (ผ่าน Cloud Functions)
  */
 export const sendFriendRequest = async (senderUid, receiverUid, senderData, receiverData) => {
-  if (!senderUid || !receiverUid) throw new Error('UIDs are required');
-  if (senderUid === receiverUid) throw new Error('Cannot send request to yourself');
-
   try {
-    await runTransaction(db, async (transaction) => {
-      const senderFriendRef = doc(db, 'users', senderUid, 'friends', receiverUid);
-      const receiverFriendRef = doc(db, 'users', receiverUid, 'friends', senderUid);
-
-      const senderFriendDoc = await transaction.get(senderFriendRef);
-      if (senderFriendDoc.exists()) {
-        throw new Error('Friend relationship already exists');
-      }
-
-      // ในฝั่งผู้ส่ง ให้บันทึกว่า 'requested'
-      transaction.set(senderFriendRef, {
-        uid: receiverUid,
-        displayName: receiverData.displayName || 'Unknown',
-        photoURL: receiverData.photoURL || '',
-        status: 'requested',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-
-      // ในฝั่งผู้รับ ให้บันทึกว่า 'pending'
-      transaction.set(receiverFriendRef, {
-        uid: senderUid,
-        displayName: senderData.displayName || 'Unknown',
-        photoURL: senderData.photoURL || '',
-        status: 'pending',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-    });
+    const sendRequestFn = httpsCallable(functions, 'sendFriendRequest');
+    await sendRequestFn({ receiverUid, senderData });
     return true;
   } catch (error) {
-    console.error('Error sending friend request:', error);
-    throw error;
+    console.error('Error sending friend request via CF:', error);
+    throw new Error(error.message || 'เกิดข้อผิดพลาดในการส่งคำขอ');
   }
 };
 
 /**
- * ยอมรับคำขอเป็นเพื่อน
+ * ยอมรับคำขอเป็นเพื่อน (ผ่าน Cloud Functions)
  */
 export const acceptFriendRequest = async (currentUid, friendUid) => {
   try {
-    await runTransaction(db, async (transaction) => {
-      const currentRef = doc(db, 'users', currentUid, 'friends', friendUid);
-      const friendRef = doc(db, 'users', friendUid, 'friends', currentUid);
-
-      transaction.update(currentRef, { status: 'accepted', updatedAt: serverTimestamp() });
-      transaction.update(friendRef, { status: 'accepted', updatedAt: serverTimestamp() });
-    });
+    const acceptRequestFn = httpsCallable(functions, 'acceptFriendRequest');
+    await acceptRequestFn({ friendUid });
     return true;
   } catch (error) {
-    console.error('Error accepting friend request:', error);
-    throw error;
+    console.error('Error accepting friend request via CF:', error);
+    throw new Error(error.message || 'เกิดข้อผิดพลาดในการรับคำขอ');
   }
 };
 
 /**
- * ปฏิเสธคำขอ ลบเพื่อน หรือยกเลิกคำขอ
+ * ปฏิเสธคำขอ ลบเพื่อน หรือยกเลิกคำขอ (ผ่าน Cloud Functions)
  */
 export const removeFriend = async (currentUid, friendUid) => {
   try {
-    await runTransaction(db, async (transaction) => {
-      const currentRef = doc(db, 'users', currentUid, 'friends', friendUid);
-      const friendRef = doc(db, 'users', friendUid, 'friends', currentUid);
-
-      transaction.delete(currentRef);
-      transaction.delete(friendRef);
-    });
+    const removeFriendFn = httpsCallable(functions, 'removeFriend');
+    await removeFriendFn({ friendUid });
     return true;
   } catch (error) {
-    console.error('Error removing friend:', error);
-    throw error;
+    console.error('Error removing friend via CF:', error);
+    throw new Error(error.message || 'เกิดข้อผิดพลาดในการลบเพื่อน');
   }
 };

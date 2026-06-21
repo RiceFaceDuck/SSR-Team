@@ -1,10 +1,26 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import PlayerNode from './PlayerNode';
 import { getFormationData } from '../../../utils/formationUtils';
 import { useUserStore } from '../../../store/useUserStore';
 import { toast } from '../../../utils/toast';
 import { normalizePosition } from '../../../utils/squadValidator';
 import FullscreenToggle from './FullscreenToggle';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.8 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 400, damping: 25 } }
+};
 
 const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId, pendingPlacement, highlightedTeam }) => {
   const { setMarketFilterPos } = useUserStore();
@@ -35,8 +51,9 @@ const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId,
       const synergyGlowClass = isPlayerHighlighted ? 'ring-4 ring-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.9)] rounded-md z-20 scale-105 transition-all duration-300' : '';
 
       slots.push(
-        <div 
+        <motion.div 
           key={slotId} 
+          variants={itemVariants}
           onClick={() => {
             if (!player) {
               if (onSlotClick) onSlotClick(slotId, category);
@@ -56,14 +73,20 @@ const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId,
             isSelected={selectedPlayerId === String(player?.playerId)}
             isSynergyHighlighted={isPlayerHighlighted}
           />
-        </div>
+        </motion.div>
       );
     }
 
     return (
-      <div key={`row-${role}`} className="flex justify-evenly items-end w-full px-1 sm:px-4 py-0.5 sm:py-2">
+      <motion.div 
+        key={`row-${role}`} 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="flex justify-evenly items-end w-full px-1 sm:px-4 py-0.5 sm:py-2"
+      >
         {slots}
-      </div>
+      </motion.div>
     );
   };
 

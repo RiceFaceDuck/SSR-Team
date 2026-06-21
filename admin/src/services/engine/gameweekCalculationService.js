@@ -93,7 +93,10 @@ export const gameweekCalculationService = {
                 ...playerItem,
                 basePoints: pointsEarned,
                 pointsEarned: pointsEarned,
-                hasPlayed
+                hasPlayed,
+                team: pData ? pData.team : 'UNK',
+                yellowCards: pData && pData.stats ? (pData.stats.yellowCards || 0) : 0,
+                stats: pData ? pData.stats : {}
               });
             }
           }

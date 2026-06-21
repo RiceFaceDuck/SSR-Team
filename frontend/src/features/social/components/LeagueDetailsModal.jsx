@@ -77,6 +77,9 @@ export default function LeagueDetailsModal({ league, onClose, onLeagueUpdated })
               handleDelete={handleDelete}
               handleLeave={handleLeave}
               actionLoading={actionLoading}
+              editSettings={editSettings}
+              setEditSettings={setEditSettings}
+              handleSaveSettings={handleSaveSettings}
             />
           )}
         </div>

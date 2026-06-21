@@ -23,6 +23,7 @@ This document outlines the standard data structures used across the SSR Team Fan
 
 ### 1.1 Player Stats Object (`stats`)
 Inside the Player Schema, there is a `stats` object mapping to game attributes.
+*(Note on Optimization: When fetching all players in Admin, the query uses `limit(1500)` to cap memory usage.)*
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
 | `pace`      | Number | 0-99 speed rating |
@@ -36,6 +37,17 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `cleanSheets`| Number | Real-world clean sheets |
 | `yellowCards`| Number | Real-world yellow cards |
 | `redCards`  | Number | Real-world red cards |
+
+## 1.5 Team Schema (สโมสรต้นสังกัด)
+`artifacts/{appId}/public/data/teams/{teamId}`
+
+| Field       | Type   | Description |
+| ----------- | ------ | ----------- |
+| `id`        | String | รหัสทีม หรืออ้างอิง Slug (เช่น 'arsenal') **[IMMUTABLE]** |
+| `name`      | String | ชื่อทีมแบบเต็ม (เช่น 'Arsenal') |
+| `shortName` | String | ชื่อย่อตัวพิมพ์ใหญ่ 3-4 ตัว (เช่น 'ARS') ใช้สำหรับ UI |
+| `logo`      | String | URL รูปภาพโลโก้สโมสร |
+| `updatedAt` | Timestamp | วันเวลาที่อัปเดตข้อมูลล่าสุด |
 
 ## 5. Card Schema (การ์ดเสริมพลัง)
 `artifacts/{appId}/public/data/cards/{cardId}`
@@ -56,7 +68,7 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
 | `mySquad`   | Array  | เก็บนักเตะ `[{ playerId, position, isStarting, slotIndex, appliedCardId, appliedCard, isLocked }]` **(เมื่อประมวลผล Gameweek เสร็จ appliedCard จะถูกลบทิ้งอัตโนมัติ เพราะเป็นไอเทมใช้ครั้งเดียว)** |
-| `budgetLeft`| Number | งบประมาณที่เหลืออยู่ (Base + Carried Over) |
+| `budgetLeft`| Number | งบประมาณที่เหลืออยู่ (Base + Carried Over) **[Secured by Client-side Transaction]** |
 | `carriedOverBudget`| Number | งบประมาณโบนัสที่ยกยอดมาจากสัปดาห์ก่อนหน้า (ถ้ามี) |
 | `formation` | String | แผนการเล่นปัจจุบัน (เช่น '4-4-2') |
 | `managerId` | String | รหัสผู้จัดการทีมที่เลือกใช้งาน |
@@ -99,6 +111,13 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `lastLoginAt`  | Timestamp | วันเวลาที่ล็อกอินล่าสุด **(Indexed: ใช้ประเมิน DAU สำหรับ Quota Analyzer)** |
 | `lastFreeChatAt`| Timestamp | วันเวลาที่ส่งแชทฟรีครั้งล่าสุด |
 | `tutorialState`| Object    | สถานะการดูสอนเล่น เช่น `{"hasSeenMarket": true, "hasSeenPitch": false}` |
+
+### 4.0 Private Data Sub-collection
+`users/{userId}/private/fcm_tokens`
+เก็บ Tokens สำหรับส่ง Push Notifications (FCM)
+| Field       | Type   | Description |
+| ----------- | ------ | ----------- |
+| `{token}`   | Boolean| Token FCM ของอุปกรณ์ (ค่าเป็น `true` หากยังใช้งานได้) |
 
 ### 4.1 Gameweek History Sub-collection
 `users/{userId}/gameweek_history/{gameweekId}`
@@ -355,3 +374,23 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | --- | --- | --- |
 | `adLinks` | Array | รายการโฆษณาแบบกำหนดเอง `[{ id, position, imageUrl, linkUrl, isActive }]` |
 | `googleAdsense` | Object | การตั้งค่า Google AdSense `{"clientId": "", "slotId": "", "isActive": false}` |
+
+## 15. Cloud Functions Architecture (NEW!)
+มีการย้ายลอจิกสำคัญจาก Client ไปยัง Backend (Cloud Functions) เพื่อความปลอดภัย (ป้องกันการโกง) และรวมศูนย์ (Single Responsibility):
+
+### 15.1 API Routes & Middleware (`functions/src/api` & `functions/src/middleware`)
+- **`schemas.js` & `validation.js`**: ตรวจสอบความถูกต้องของข้อมูล (Data Validation) ด้วย Zod ก่อนทำงาน
+- **`rateLimiter.js`**: ป้องกันการรัวคำสั่ง (Rate Limiting) สำหรับระบบแชทและการทำธุรกรรม
+
+### 15.2 Engine Functions (`functions/src/engine`)
+- **`gameweekCalculation.js`**: คำนวณคะแนนของนักเตะแต่ละคนในสัปดาห์นั้นๆ (ใช้ 490-operation batch limit ของ Firestore เพื่อรองรับข้อมูลขนาดใหญ่)
+- **`playerValueCalculation.js`**: อัปเดตและคำนวณราคานักเตะใหม่ตามสถิติของสัปดาห์
+- **`leaderboardEngine.js`**: ประมวลผลและอัปเดตกระดานจัดอันดับอัตโนมัติ
+- **`syncLiveStats.js`**: (NEW) ดึงข้อมูลการแข่งขันสดและอัปเดตแบบ Real-time ไปที่ `public_data/live_gameweek_stats` เพื่อประหยัด Reads
+
+### 15.2 Economy Functions (`functions/src/economy`)
+- **`transactionService.js`**: จัดการธุรกรรมทางการเงิน (เพิ่ม/ลด Balls) ผ่าน `db.runTransaction` เพื่อป้องกัน Race condition และป้องกันผู้เล่นแก้ไขยอดเงินตัวเองโดยพลการ
+
+### 15.3 Social Functions (`functions/src/social`)
+- **`friendService.js`**: (NEW) ตรวจสอบและประมวลผลคำขอเป็นเพื่อนผ่านฝั่ง Server ป้องกันการปลอมแปลง UID
+- **`leagueService.js`**: (NEW) สร้างและจัดการรหัสลีกส่วนตัวอย่างปลอดภัย

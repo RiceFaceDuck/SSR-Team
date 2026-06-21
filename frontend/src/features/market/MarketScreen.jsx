@@ -24,6 +24,7 @@ import { useUserStore } from '../../store/useUserStore';
 import { useGameStore } from '../../store/useGameStore';
 import { validateSellPlayer } from '../../utils/squadValidator';
 import { toast } from '../../utils/toast';
+import { formatPlayerName } from '../../utils/formatters';
 
 export default function MarketScreen() {
   // 1. ดึง State และ Action จาก Stores
@@ -117,7 +118,7 @@ export default function MarketScreen() {
       const validation = validateSellPlayer(player, currentSquadObjects);
       if (validation.isValid) {
         sellPlayer(player);
-        toast.success(`ขาย ${player.name} ออกจากทีมเรียบร้อย`);
+        toast.success(`ขาย ${formatPlayerName(player.name)} ออกจากทีมเรียบร้อย`);
       } else {
         toast.error(validation.message);
       }

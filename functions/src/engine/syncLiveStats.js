@@ -1,6 +1,6 @@
 const axios = require('axios');
 const admin = require('firebase-admin');
-const { API_KEY, API_HOST, LEAGUE_ID, SEASON } = require('./apiConfig');
+const { API_KEY, API_HOST, LEAGUE_ID, SEASON } = require('../apiConfig');
 
 const APP_ID = 'ssr-team';
 const db = admin.firestore();
@@ -13,16 +13,25 @@ const api = axios.create({
     }
 });
 
-const engine = require('./engine');
+const engine = require('./utils/pointCalculator'); // Adjusted path
 
-// ฟังก์ชันดึงข้อมูลแมตช์ที่กำลังเตะสด (Live Fixtures) หรือดึงข้อมูลรายวัน
+// ฟังก์ชันดึงข้อมูลแมตช์ที่กำลังเตะสด (Live Fixtures)
 async function syncLiveStats() {
     try {
         console.log('[SYNC] Checking for live matches...');
         
         // Fetch scoring rules for live points calculation
         const systemConfigDoc = await db.collection('public_data').doc('system_config').get();
-        const scoringRules = systemConfigDoc.exists ? (systemConfigDoc.data().scoringRules || {}) : {};
+        const sysData = systemConfigDoc.exists ? systemConfigDoc.data() : {};
+        const scoringRules = sysData.scoringRules || {};
+        
+        // Dynamic Polling Optimization:
+        // If the market is open, it usually means there are no matches going on.
+        // We can skip fetching the API to save quota and Firebase reads.
+        if (sysData.isMarketOpen === true) {
+            console.log('[SYNC] Market is open. Skipping live sync to save API quota.');
+            return { status: 'skipped_market_open' };
+        }
 
         // ดึงรายการแมตช์ของลีกที่กำลังเตะสด
         const liveFixturesRes = await api.get('/fixtures', {
@@ -35,10 +44,10 @@ async function syncLiveStats() {
 
         const fixtures = liveFixturesRes.data.response;
         
-        // ถ้าไม่มีคู่ไหนเตะอยู่ ให้ดึงข้อมูลของแมตช์ที่เพิ่งจบไปหมาดๆ ในวันนี้แทน (เผื่ออัปเดตตกหล่น)
-        // เพื่อความง่ายในต้นแบบ จะข้ามไปก่อนถ้าไม่มี live
         if (!fixtures || fixtures.length === 0) {
             console.log('[SYNC] No live matches right now.');
+            // อัปเดตสถานะ live_match เป็นไม่มีเตะสด เพื่อให้ Client รู้
+            await db.collection('public_data').doc('live_match').set({ status: 'upcoming', updatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
             return { status: 'no_live_matches' };
         }
 
@@ -46,8 +55,24 @@ async function syncLiveStats() {
         let batch = db.batch();
         let updateCount = 0;
 
+        // เลือกคู่ที่น่าสนใจสุดมาตั้งเป็น Main Live Match (คู่แรก)
+        const mainMatch = fixtures[0];
+        const liveMatchRef = db.collection('public_data').doc('live_match');
+        
+        batch.set(liveMatchRef, {
+            homeTeam: { code: mainMatch.teams.home.name.substring(0,3).toUpperCase(), logo: mainMatch.teams.home.logo, name: mainMatch.teams.home.name },
+            awayTeam: { code: mainMatch.teams.away.name.substring(0,3).toUpperCase(), logo: mainMatch.teams.away.logo, name: mainMatch.teams.away.name },
+            homeScore: mainMatch.goals.home || 0,
+            awayScore: mainMatch.goals.away || 0,
+            minute: mainMatch.fixture.status.elapsed + "'",
+            status: 'LIVE',
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        updateCount++;
+
         for (const fixture of fixtures) {
             const fixtureId = fixture.fixture.id;
+            
             // ดึงสถิตินักเตะในแมตช์นั้น
             const statsRes = await api.get('/fixtures/players', {
                 params: { fixture: fixtureId }
@@ -59,18 +84,12 @@ async function syncLiveStats() {
             for (const team of teamsStats) {
                 for (const playerObj of team.players) {
                     const pInfo = playerObj.player;
-                    const pStats = playerObj.statistics[0]; // stats for this specific match
+                    const pStats = playerObj.statistics[0]; 
 
                     if (!pStats) continue;
 
-                    // ค้นหานักเตะใน Firestore ด้วย API ID
                     const sku = `API-${pInfo.id}`;
-                    const playerRef = db.collection(`artifacts/${APP_ID}/public/data/players`).doc(sku);
                     
-                    // Fetch current position from existing doc (cached ideally, but here we do a read)
-                    // Note: In a highly optimized version, we'd cache the player positions beforehand to save Reads.
-                    // To save reads, we can use the position from API-Football. But API-Football returns position like 'Attacker', 'Midfielder', 'Defender', 'Goalkeeper'
-                    // We map it to our format: FWD, MID, DEF, GK
                     let pos = 'MID';
                     if (pStats.games.position === 'Attacker') pos = 'FWD';
                     else if (pStats.games.position === 'Defender') pos = 'DEF';
@@ -91,15 +110,17 @@ async function syncLiveStats() {
 
                     const livePoints = engine.calculatePlayerPoints(newStats, pos, scoringRules);
 
-                    batch.set(playerRef, {
-                        stats: newStats,
-                        totalPoints: livePoints, // Live Event Point Calculation!
+                    // อัปเดตที่ public_data/live_gameweek_stats/{sku} แทนที่จะเป็น players/{sku} เพื่อลดโหลด Reads ฝั่ง Client
+                    const liveStatRef = db.collection('public_data/live_gameweek_stats/players').doc(sku);
+                    
+                    batch.set(liveStatRef, {
+                        ...newStats,
+                        gwPoints: livePoints,
                         updatedAt: admin.firestore.FieldValue.serverTimestamp()
                     }, { merge: true });
 
                     updateCount++;
 
-                    // Firestore batch limit is 500
                     if (updateCount === 490) {
                         await batch.commit();
                         batch = db.batch();
@@ -111,7 +132,7 @@ async function syncLiveStats() {
 
         if (updateCount > 0) {
             await batch.commit();
-            console.log(`[SYNC] Successfully updated ${updateCount} players live stats.`);
+            console.log(`[SYNC] Successfully updated ${updateCount} records in live_gameweek_stats.`);
         }
 
         return { status: 'success', updated: updateCount };

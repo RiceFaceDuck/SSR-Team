@@ -3,6 +3,7 @@ import { useUserStore } from '../../store/useUserStore';
 import { toast } from '../../utils/toast';
 import PowerCardHeader from './components/powerCard/PowerCardHeader';
 import PowerCardList from './components/powerCard/PowerCardList';
+import { formatPlayerName } from '../../utils/formatters';
 
 export default function PowerCardPopup({ isOpen, onClose, player }) {
   const { 
@@ -98,7 +99,7 @@ export default function PowerCardPopup({ isOpen, onClose, player }) {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           onClose={onClose}
-          playerName={player.name}
+          playerName={formatPlayerName(player.name)}
         />
 
         {/* List Content */}

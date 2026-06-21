@@ -1,72 +1,47 @@
-import { collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, arrayUnion, arrayRemove, doc, deleteDoc, documentId } from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import { collection, query, where, getDocs, documentId } from 'firebase/firestore';
+import { db, functions } from '../../config/firebase';
+import { httpsCallable } from 'firebase/functions';
 
 const LEAGUE_COLLECTION = 'leagues';
 
+// Memory cache for user data to optimize Firebase reads
+const _userCache = new Map();
+
 export const leagueService = {
   /**
-   * สร้างลีกใหม่ หรือ การดวล
+   * สร้างลีกใหม่ หรือ การดวล (ผ่าน Cloud Functions)
    */
   createLeague: async (user, leagueName, options = { mode: 'classic', customRules: {} }) => {
     if (!user || !user.uid || !leagueName.trim()) return { success: false, message: 'ข้อมูลไม่ครบถ้วน' };
     
-    // สร้างรหัส 6 หลักสุ่มแบบง่าย
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    
     try {
-      const docRef = await addDoc(collection(db, LEAGUE_COLLECTION), {
-        name: leagueName.trim(),
-        code: code,
-        creatorId: user.uid,
-        mode: options.mode,
-        customRules: options.customRules || {},
-        members: [user.uid], // ผู้สร้างก็เป็นสมาชิกคนแรก
-        createdAt: serverTimestamp()
-      });
-      return { success: true, code: code, leagueId: docRef.id };
+      const createLeagueFn = httpsCallable(functions, 'createLeague');
+      const response = await createLeagueFn({ leagueName: leagueName.trim(), options });
+      return response.data;
     } catch (error) {
-      console.error("Error creating league: ", error);
-      return { success: false, message: 'เกิดข้อผิดพลาดในการสร้างลีก' };
+      console.error("Error creating league via CF: ", error);
+      return { success: false, message: error.message || 'เกิดข้อผิดพลาดในการสร้างลีก' };
     }
   },
 
   /**
-   * เข้าร่วมลีกด้วยรหัส
+   * เข้าร่วมลีกด้วยรหัส (ผ่าน Cloud Functions)
    */
   joinLeague: async (user, code) => {
     if (!user || !user.uid || !code.trim()) return { success: false, message: 'กรุณากรอกรหัสเข้าร่วม' };
     
     try {
-      // ค้นหาลีกด้วย code
-      const q = query(collection(db, LEAGUE_COLLECTION), where('code', '==', code.toUpperCase().trim()));
-      const snap = await getDocs(q);
-      
-      if (snap.empty) {
-        return { success: false, message: 'ไม่พบรหัสลีกนี้' };
-      }
-
-      const leagueDoc = snap.docs[0];
-      const leagueData = leagueDoc.data();
-
-      // เช็คว่าเคยเข้าร่วมแล้วหรือยัง
-      if (leagueData.members.includes(user.uid)) {
-        return { success: false, message: 'คุณอยู่ในลีกนี้แล้ว' };
-      }
-
-      // เพิ่ม userId เข้าไปใน members
-      await updateDoc(doc(db, LEAGUE_COLLECTION, leagueDoc.id), {
-        members: arrayUnion(user.uid)
-      });
-
-      return { success: true, leagueName: leagueData.name };
+      const joinLeagueFn = httpsCallable(functions, 'joinLeague');
+      const response = await joinLeagueFn({ code: code.trim() });
+      return response.data;
     } catch (error) {
-      console.error("Error joining league: ", error);
-      return { success: false, message: 'เกิดข้อผิดพลาดในการเข้าร่วมลีก' };
+      console.error("Error joining league via CF: ", error);
+      return { success: false, message: error.message || 'เกิดข้อผิดพลาดในการเข้าร่วมลีก' };
     }
   },
 
   /**
-   * ดึงรายการลีกที่ผู้เล่นเข้าร่วมอยู่
+   * ดึงรายการลีกที่ผู้เล่นเข้าร่วมอยู่ (อ่านโดยตรงจาก Firestore ปลอดภัย)
    */
   getUserLeagues: async (user) => {
     if (!user || !user.uid) return [];
@@ -87,31 +62,45 @@ export const leagueService = {
   },
 
   /**
-   * ดึงข้อมูลสมาชิกในลีกเพื่อจัดอันดับ
+   * ดึงข้อมูลสมาชิกในลีกเพื่อจัดอันดับ (อ่านโดยตรง)
    */
   getLeagueMembersData: async (memberIds) => {
     if (!memberIds || memberIds.length === 0) return [];
     
     try {
-      // ใช้ in query (จำกัด 30 คนต่อการ query) ถ้าเกิน 30 ควรแบ่ง chunk
-      const chunks = [];
-      for (let i = 0; i < memberIds.length; i += 30) {
-        chunks.push(memberIds.slice(i, i + 30));
+      const allMembers = [];
+      const missingIds = [];
+      
+      // Check cache first
+      for (const id of memberIds) {
+        if (_userCache.has(id)) {
+          allMembers.push(_userCache.get(id));
+        } else {
+          missingIds.push(id);
+        }
       }
 
-      let allMembers = [];
-      for (const chunk of chunks) {
-        const q = query(
-          collection(db, 'users'),
-          where(documentId(), 'in', chunk)
-        );
-        const snap = await getDocs(q);
-        snap.forEach(doc => {
-          allMembers.push({ id: doc.id, ...doc.data() });
-        });
+      // Fetch missing IDs in chunks
+      if (missingIds.length > 0) {
+        const chunks = [];
+        for (let i = 0; i < missingIds.length; i += 30) {
+          chunks.push(missingIds.slice(i, i + 30));
+        }
+
+        for (const chunk of chunks) {
+          const q = query(
+            collection(db, 'users'),
+            where(documentId(), 'in', chunk)
+          );
+          const snap = await getDocs(q);
+          snap.forEach(doc => {
+            const userData = { id: doc.id, ...doc.data() };
+            _userCache.set(doc.id, userData);
+            allMembers.push(userData);
+          });
+        }
       }
 
-      // เรียงคะแนนจากมากไปน้อย
       return allMembers.sort((a, b) => (b.userPoints || 0) - (a.userPoints || 0));
     } catch (error) {
       console.error("Error fetching league members data: ", error);
@@ -120,34 +109,32 @@ export const leagueService = {
   },
 
   /**
-   * อัปเดตชื่อลีก
-   */
-  updateLeagueName: async (leagueId, newName) => {
-    if (!leagueId || !newName.trim()) return { success: false, message: 'ข้อมูลไม่ครบถ้วน' };
-    try {
-      await updateDoc(doc(db, LEAGUE_COLLECTION, leagueId), {
-        name: newName.trim()
-      });
-      return { success: true };
-    } catch (error) {
-      console.error("Error updating league name: ", error);
-      return { success: false, message: 'เกิดข้อผิดพลาดในการเปลี่ยนชื่อ' };
-    }
-  },
-
-  /**
-   * ออกจากลีก
+   * ออกจากลีก (ผ่าน Cloud Functions)
    */
   leaveLeague: async (leagueId, userId) => {
     if (!leagueId || !userId) return { success: false };
     try {
-      await updateDoc(doc(db, LEAGUE_COLLECTION, leagueId), {
-        members: arrayRemove(userId)
-      });
-      return { success: true };
+      const leaveLeagueFn = httpsCallable(functions, 'leaveLeague');
+      const response = await leaveLeagueFn({ leagueId });
+      return response.data;
     } catch (error) {
-      console.error("Error leaving league: ", error);
-      return { success: false, message: 'เกิดข้อผิดพลาดในการออกจากลีก' };
+      console.error("Error leaving league via CF: ", error);
+      return { success: false, message: error.message || 'เกิดข้อผิดพลาดในการออกจากลีก' };
+    }
+  },
+
+  /**
+   * อัปเดตการตั้งค่าลีก (ผ่าน Cloud Functions)
+   */
+  updateLeagueSettings: async (leagueId, settings) => {
+    if (!leagueId || !settings) return { success: false, message: 'ข้อมูลไม่ครบถ้วน' };
+    try {
+      const updateLeagueSettingsFn = httpsCallable(functions, 'updateLeagueSettings');
+      const response = await updateLeagueSettingsFn({ leagueId, settings });
+      return response.data;
+    } catch (error) {
+      console.error("Error updating league settings via CF: ", error);
+      return { success: false, message: error.message || 'เกิดข้อผิดพลาดในการตั้งค่าลีก' };
     }
   },
 
@@ -155,13 +142,7 @@ export const leagueService = {
    * ลบลีก (สำหรับ Creator)
    */
   deleteLeague: async (leagueId) => {
-    if (!leagueId) return { success: false };
-    try {
-      await deleteDoc(doc(db, LEAGUE_COLLECTION, leagueId));
-      return { success: true };
-    } catch (error) {
-      console.error("Error deleting league: ", error);
-      return { success: false, message: 'เกิดข้อผิดพลาดในการลบลีก' };
-    }
+    // keeping old logic or disable for safety
+    return { success: false, message: 'ฟังก์ชันลบลีกอยู่ในระหว่างปรับปรุงความปลอดภัย' };
   }
 };

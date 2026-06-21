@@ -37,81 +37,13 @@ export const redeemService = {
    */
   redeemReward: async (userId, rewardId) => {
     try {
-      const userRef = doc(db, USERS_COLLECTION, userId);
-      const rewardRef = doc(db, REWARDS_COLLECTION, rewardId);
+      const { httpsCallable } = require('firebase/functions');
+      const { functions } = require('../../config/firebase');
+      
+      const redeemRewardFn = httpsCallable(functions, 'redeemReward');
+      const result = await redeemRewardFn({ rewardId });
 
-      const result = await runTransaction(db, async (transaction) => {
-        const userDoc = await transaction.get(userRef);
-        const rewardDoc = await transaction.get(rewardRef);
-
-        if (!userDoc.exists()) throw new Error("ไม่พบข้อมูลผู้ใช้งานของคุณ");
-        if (!rewardDoc.exists()) throw new Error("ไม่พบข้อมูลของรางวัลในระบบ");
-
-        const userData = userDoc.data();
-        const rewardData = rewardDoc.data();
-
-        if (rewardData.stock <= 0) {
-          throw new Error("เสียใจด้วย ของรางวัลชิ้นนี้หมดแล้ว (Out of Stock)");
-        }
-
-        if (userData.balls < rewardData.price) {
-          throw new Error("ยอด Balls ⚽ ของคุณไม่เพียงพอ ไปทำเควสต์เพิ่มด่วน!");
-        }
-
-        if (rewardData.isFlashSale && rewardData.flashSaleEndTime) {
-          const endTime = new Date(rewardData.flashSaleEndTime).getTime();
-          const now = new Date().getTime();
-          if (now > endTime) {
-            throw new Error("คุณมาไม่ทัน หมดเวลา Flash Sale แล้วครับ");
-          }
-        }
-
-        const newBalance = userData.balls - rewardData.price;
-        const newStock = rewardData.stock - 1;
-
-        let wonItem = null;
-        if (rewardData.type === 'gacha') {
-          const rand = Math.random();
-          if (rand > 0.9) {
-            wonItem = { name: "บัตร True Money 300 บาท", rarity: "Legendary" };
-          } else if (rand > 0.6) {
-            wonItem = { name: "เสื้อกีฬาบอลรุ่นลิมิเต็ด", rarity: "Epic" };
-          } else if (rand > 0.3) {
-            wonItem = { name: "ตั๋วลดราคาสปอนเซอร์ 10%", rarity: "Rare" };
-          } else {
-            wonItem = { name: "เกลือ (เงินคืน 10 Balls)", rarity: "Common" };
-          }
-        }
-        
-        transaction.update(userRef, { 
-          balls: newBalance,
-          updatedAt: serverTimestamp()
-        });
-        
-        transaction.update(rewardRef, { 
-          stock: newStock,
-          updatedAt: serverTimestamp() 
-        });
-        
-        // Write the transaction inside users/{userId}/transactions
-        appendTransactionLog(
-          transaction, 
-          userId, 
-          -rewardData.price, 
-          'spend', 
-          'REDEEM', 
-          `แลกของรางวัล: ${rewardData.name}`
-        );
-
-        return {
-          success: true,
-          newBalance: newBalance,
-          rewardDetails: rewardData,
-          wonItem: wonItem
-        };
-      });
-
-      return result;
+      return result.data;
       
     } catch (error) {
       console.error("Redeem Transaction failed: ", error);
