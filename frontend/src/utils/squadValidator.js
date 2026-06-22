@@ -34,10 +34,10 @@ export const validateBuyPlayer = (playerToBuy, currentSquadObjects, currentBudge
     return { isValid: false, message: 'ข้อมูลนักเตะไม่ถูกต้อง หรือเซิร์ฟเวอร์ขัดข้อง' };
   }
 
-  const rules = dynamicRules || SQUAD_RULES;
-  const maxTotal = rules.MAX_PLAYERS_TOTAL || SQUAD_RULES.MAX_PLAYERS_TOTAL;
-  const maxSameTeam = rules.MAX_PLAYERS_SAME_TEAM || SQUAD_RULES.MAX_PLAYERS_SAME_TEAM;
-  const posLimits = rules.POSITION_LIMITS || SQUAD_RULES.POSITION_LIMITS;
+  const maxTotal = dynamicRules?.maxPlayersTotal?.value || SQUAD_RULES.MAX_PLAYERS_TOTAL;
+  // In Firestore, maxPlayersPerTeam refers to Max Players from the Same Club/Team
+  const maxSameTeam = dynamicRules?.maxPlayersPerTeam?.value || SQUAD_RULES.MAX_PLAYERS_SAME_TEAM;
+  const posLimits = dynamicRules?.positionLimits || SQUAD_RULES.POSITION_LIMITS;
 
   const isAlreadyInSquad = currentSquadObjects.some(p => p.sku === playerToBuy.sku);
   if (isAlreadyInSquad) {
@@ -90,7 +90,7 @@ export const validateSellPlayer = (playerToSell, currentSquadObjects) => {
 };
 
 export const validateSquadReadyForSave = (currentSquadObjects, dynamicRules = null) => {
-  const maxTotal = dynamicRules?.MAX_PLAYERS_TOTAL || SQUAD_RULES.MAX_PLAYERS_TOTAL;
+  const maxTotal = dynamicRules?.maxPlayersTotal?.value || SQUAD_RULES.MAX_PLAYERS_TOTAL;
 
   if (currentSquadObjects.length < maxTotal) {
     return { 

@@ -1,6 +1,5 @@
-import { collection, addDoc, serverTimestamp, runTransaction, doc, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import { appendTransactionLog } from './transactionService';
 
 const CHAT_COLLECTION = 'global_chat';
 

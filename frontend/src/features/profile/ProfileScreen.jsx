@@ -12,7 +12,7 @@ import GameweekHistory from './components/GameweekHistory';
 import ProfileHeaderCard from './components/ProfileHeaderCard';
 import WalletSummaryView from './components/WalletSummaryView';
 import TransactionHistoryPreview from './components/TransactionHistoryPreview';
-import ClubManagerView from './components/ClubManagerView';
+import ClubManagerModal from '../club/components/ClubManagerModal';
 import AchievementManager from './components/AchievementManager';
 
 // 🎨 Mock STYLES and Theme
@@ -176,7 +176,7 @@ export default function ProfileScreen() {
       />
 
       {/* 🏰 Club Manager Modal */}
-      <ClubManagerView 
+      <ClubManagerModal 
         isOpen={isClubManagerOpen}
         onClose={() => setIsClubManagerOpen(false)}
       />

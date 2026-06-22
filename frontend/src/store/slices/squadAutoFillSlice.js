@@ -45,32 +45,40 @@ export const squadAutoFillSlice = (set, get) => ({
                 if (result.success) {
                     let finalSquad = [...result.newSquad];
 
-                    // ⚡ 5. สุ่มการ์ดพลัง (จากคลังที่มี)
+                    // ⚽ 6. เลือกกัปตันทีม (จากตัวจริงที่เก่งที่สุด)
+                    const finalStarters = finalSquad.filter(p => p.isStarting);
+                    let bestCaptainId = null;
+                    if (finalStarters.length > 0) {
+                        // หาคนที่มีคะแนนรวมเยอะที่สุดเพื่อเป็นกัปตัน
+                        let maxPoints = -1;
+                        finalStarters.forEach(starter => {
+                            const pData = marketPlayers.find(mp => String(mp.sku) === starter.playerId);
+                            const pts = parseFloat(pData?.totalPoints) || 0;
+                            if (pts > maxPoints) {
+                                maxPoints = pts;
+                                bestCaptainId = starter.playerId;
+                            }
+                        });
+                        if (!bestCaptainId) bestCaptainId = finalStarters[0].playerId;
+                        setCaptain(bestCaptainId);
+                    }
+
+                    // ⚡ 5. สุ่มการ์ดพลัง (จากคลังที่มี) และใส่ให้ผู้เล่นตัวท็อป (เช่น กัปตัน)
                     if (ownedCards) {
                         const availableCardIds = Object.keys(ownedCards).filter(id => ownedCards[id] > 0);
-                        if (availableCardIds.length > 0) {
+                        if (availableCardIds.length > 0 && bestCaptainId) {
                             const randomCardId = availableCardIds[Math.floor(Math.random() * availableCardIds.length)];
-                            const starters = finalSquad.filter(p => p.isStarting && !p.isLocked);
-                            if (starters.length > 0) {
-                                const randomStarterIdx = Math.floor(Math.random() * starters.length);
-                                const targetPlayerId = starters[randomStarterIdx].playerId;
-                                finalSquad = finalSquad.map(p => 
-                                    p.playerId === targetPlayerId ? { ...p, appliedCardId: randomCardId } : p
-                                );
-                            }
+                            
+                            // เปลี่ยนจากการสุ่มเป็นการใส่ให้คนเก่งที่สุด (กัปตันทีม) ก่อน
+                            finalSquad = finalSquad.map(p => 
+                                p.playerId === bestCaptainId ? { ...p, appliedCardId: randomCardId } : p
+                            );
                         }
                     }
 
-                    // ⚽ 6. สุ่มกัปตันทีม (จากตัวจริง)
-                    const finalStarters = finalSquad.filter(p => p.isStarting);
-                    if (finalStarters.length > 0) {
-                        const randomCaptainIdx = Math.floor(Math.random() * finalStarters.length);
-                        const captainId = finalStarters[randomCaptainIdx].playerId;
-                        setCaptain(captainId);
-                    }
-
                     if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-                        window.navigator.vibrate([40, 60, 100]); // สั่นสะใจขึ้น
+                        // สั่นแบบ Haptic Feedback ที่ดีขึ้น (Light, Medium, Heavy)
+                        window.navigator.vibrate([30, 50, 40, 50, 60]); 
                     }
                     
                     set({ 

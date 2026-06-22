@@ -1,6 +1,5 @@
 import { doc, collection, getDocs, query, where, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import { appendTransactionLog } from './transactionService';
 
 const REWARDS_COLLECTION = 'rewards';
 const USERS_COLLECTION = 'users';

@@ -27,18 +27,19 @@ export const squadService = {
     if (!userId) throw new Error("เซิร์ฟเวอร์ปฏิเสธการเข้าถึง: ไม่พบรหัสผู้ใช้งาน (UID)");
 
     try {
-      const docRef = getSquadDocRef(userId);
-
       const dataToSave = {
         mySquad: mySquad || [],
         budgetLeft: parseFloat(budgetLeft) || 0,
         formation: formation || '4-4-2',
         manager: manager || null,
-        captainId: captainId || null,
-        updatedAt: serverTimestamp()
+        captainId: captainId || null
       };
 
-      await setDoc(docRef, dataToSave, { merge: true });
+      const { httpsCallable } = require('firebase/functions');
+      const { functions } = require('../../config/firebase');
+      
+      const saveSquadFn = httpsCallable(functions, 'saveSquad');
+      await saveSquadFn({ userId, squadData: dataToSave });
       console.log('💾 [SquadService] บันทึกทีมขึ้น Cloud สำเร็จ!');
       
       // อัปเดต Cache ทันทีหลังบันทึก

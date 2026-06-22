@@ -1,6 +1,5 @@
 import { doc, getDoc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import { appendTransactionLog } from './transactionService';
 
 const getAppId = () => typeof __app_id !== 'undefined' ? __app_id : 'ssr-team';
 

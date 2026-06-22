@@ -14,7 +14,9 @@ export const participationService = {
    * ตรวจสอบว่าผู้เล่นจัดทีมครบตามกติกาหรือไม่ (15 นักเตะ + 1 ผู้จัดการทีม)
    */
   isSquadComplete: (mySquad, manager) => {
-    return (mySquad && mySquad.length === 15) && (manager !== null && manager !== undefined);
+    const gameRules = useGameStore.getState().gameRules || {};
+    const maxTotal = gameRules?.maxPlayersTotal?.value || 15;
+    return (mySquad && mySquad.length === maxTotal) && (manager !== null && manager !== undefined);
   },
 
   /**

@@ -1,55 +1,47 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
+import { useQuery } from '@tanstack/react-query';
 
 const APP_ID = 'ssr-team';
 
 export const useLeaderboardData = () => {
   const [activeTab, setActiveTab] = useState('weekly'); // 'weekly', 'season', 'club'
-  const [leaders, setLeaders] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
 
-  useEffect(() => {
-    const fetchLeaderboard = async () => {
-      setLoading(true);
-      try {
-        let q;
-        switch (activeTab) {
-          case 'weekly':
-            // Assuming lastGameweekPoints exists, fallback to userPoints if it doesn't 
-            q = query(collection(db, 'users'), orderBy('lastGameweekPoints', 'desc'), limit(50));
-            break;
-          case 'season':
-            q = query(collection(db, 'users'), orderBy('userPoints', 'desc'), limit(50));
-            break;
-          case 'club':
-            q = query(collection(db, 'users'), orderBy('clubSpentExp', 'desc'), limit(50));
-            break;
-          default:
-            q = query(collection(db, 'users'), orderBy('rank', 'asc'), limit(50));
-        }
-
-        const snap = await getDocs(q);
-        const list = [];
-        let index = 1;
-        snap.forEach(doc => {
-          const data = doc.data();
-          if (data.hasJoinedGame) {
-            // Assign a display rank based on the sorted order since we might not have pre-calculated ranks for all criteria
-            list.push({ id: doc.id, displayRank: index++, ...data });
-          }
-        });
-        setLeaders(list);
-      } catch (error) {
-        console.error("Error fetching leaderboard:", error);
-      } finally {
-        setLoading(false);
+  const { data: leaders = [], isLoading: loading } = useQuery({
+    queryKey: ['leaderboard', activeTab],
+    queryFn: async () => {
+      let q;
+      switch (activeTab) {
+        case 'weekly':
+          // Assuming lastGameweekPoints exists, fallback to userPoints if it doesn't 
+          q = query(collection(db, 'users'), orderBy('lastGameweekPoints', 'desc'), limit(50));
+          break;
+        case 'season':
+          q = query(collection(db, 'users'), orderBy('userPoints', 'desc'), limit(50));
+          break;
+        case 'club':
+          q = query(collection(db, 'users'), orderBy('clubSpentExp', 'desc'), limit(50));
+          break;
+        default:
+          q = query(collection(db, 'users'), orderBy('rank', 'asc'), limit(50));
       }
-    };
-    
-    fetchLeaderboard();
-  }, [activeTab]);
+
+      const snap = await getDocs(q);
+      const list = [];
+      let index = 1;
+      snap.forEach(doc => {
+        const data = doc.data();
+        if (data.hasJoinedGame) {
+          // Assign a display rank based on the sorted order since we might not have pre-calculated ranks for all criteria
+          list.push({ id: doc.id, displayRank: index++, ...data });
+        }
+      });
+      return list;
+    },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
 
   const exportCompetitorData = async () => {
     setIsExporting(true);

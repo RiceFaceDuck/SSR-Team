@@ -43,6 +43,7 @@ exports.useCard = economyRoutes.useCard;
 exports.returnCard = economyRoutes.returnCard;
 exports.saveSquad = economyRoutes.saveSquad;
 exports.processTransaction = economyRoutes.processTransaction;
+exports.claimReferralRewards = economyRoutes.claimReferralRewards;
 
 // 5. Social & League Functions
 exports.sendFriendRequest = socialRoutes.sendFriendRequest;

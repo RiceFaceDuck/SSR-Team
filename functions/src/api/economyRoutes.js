@@ -3,13 +3,25 @@ const { processTransaction } = require('../economy/transactionService');
 const { saveSquad } = require('../economy/marketService');
 const { buyItem, useCard, returnCard } = require('../economy/inventoryService');
 const { sendChatMessage } = require('../economy/chatService');
-const { claimQuestReward, redeemReward } = require('../economy/rewardService');
+const { claimQuestReward, redeemReward, claimReferralRewards } = require('../economy/rewardService');
+const { upgradeClubFacility } = require('../economy/clubService');
 const { withValidation } = require('../middleware/validation');
 const { checkRateLimit } = require('../middleware/rateLimiter');
 const { 
     claimQuestRewardSchema, redeemRewardSchema, sendChatMessageSchema, 
-    buyItemSchema, useCardSchema, returnCardSchema, saveSquadSchema, processTransactionSchema 
+    buyItemSchema, useCardSchema, returnCardSchema, saveSquadSchema, processTransactionSchema,
+    upgradeClubFacilitySchema
 } = require('./schemas');
+const { z } = require('zod');
+
+const apiClaimReferralRewards = functions.https.onCall(async (data, context) => {
+    if (!context.auth) throw new functions.https.HttpsError('unauthenticated', 'User must be logged in.');
+    try {
+        return await claimReferralRewards(context.auth.uid);
+    } catch (error) {
+        throw new functions.https.HttpsError('invalid-argument', error.message);
+    }
+});
 
 const apiClaimQuestReward = functions.https.onCall(withValidation(claimQuestRewardSchema, async (data, context) => {
     if (!context.auth) throw new functions.https.HttpsError('unauthenticated', 'User must be logged in.');
@@ -126,6 +138,19 @@ const apiProcessTransaction = functions.https.onCall(withValidation(processTrans
     }
 }));
 
+const apiUpgradeClubFacility = functions.https.onCall(withValidation(upgradeClubFacilitySchema, async (data, context) => {
+    if (!context.auth) throw new functions.https.HttpsError('unauthenticated', 'User must be logged in.');
+    
+    const { userId, facilityKey } = data;
+    if (context.auth.uid !== userId) throw new functions.https.HttpsError('permission-denied', 'Denied.');
+
+    try {
+        return await upgradeClubFacility(userId, facilityKey);
+    } catch (error) {
+        throw new functions.https.HttpsError('invalid-argument', error.message);
+    }
+}));
+
 module.exports = {
     claimQuestReward: apiClaimQuestReward,
     redeemReward: apiRedeemReward,
@@ -134,5 +159,7 @@ module.exports = {
     useCard: apiUseCard,
     returnCard: apiReturnCard,
     saveSquad: apiSaveSquad,
-    processTransaction: apiProcessTransaction
+    processTransaction: apiProcessTransaction,
+    claimReferralRewards: apiClaimReferralRewards,
+    upgradeClubFacility: apiUpgradeClubFacility
 };

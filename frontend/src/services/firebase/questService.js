@@ -1,6 +1,5 @@
 import { collection, getDocs, query, where, doc, runTransaction, Timestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import { processTransaction } from './transactionService';
 
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'ssr-team';
 

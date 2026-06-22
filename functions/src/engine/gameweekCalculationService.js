@@ -41,9 +41,9 @@ exports.gameweekCalculationService = {
         };
       });
 
-      // 2. ดึง Users ทั้งหมดที่เข้าร่วมเล่นเกม
-      const usersSnap = await db.collection('users').get();
-      const activeUsers = usersSnap.docs.filter(doc => doc.data().hasJoinedGame);
+      // 2. ดึง Users เฉพาะที่เข้าร่วมเล่นเกมแล้ว (Optimization: ประหยัด Reads โดยการใช้ where)
+      const usersSnap = await db.collection('users').where('hasJoinedGame', '==', true).get();
+      const activeUsers = usersSnap.docs;
       
       let batch = db.batch();
       let batchCount = 0;
@@ -63,6 +63,7 @@ exports.gameweekCalculationService = {
         for (const { userDoc, squadSnap } of chunkResults) {
           if (!squadSnap.exists) continue;
 
+          try {
           const userData = userDoc.data();
           const userId = userDoc.id;
           const squadData = squadSnap.data();
@@ -161,10 +162,18 @@ exports.gameweekCalculationService = {
           });
 
           batchCount += 3;
+          } catch (userErr) {
+            console.error(`[GW Engine] เกิดข้อผิดพลาดกับ User ${userDoc.id}:`, userErr);
+          }
 
           if (batchCount >= 490) {
-            await batch.commit();
-            console.log('[GW Engine] Commit batch กลางคัน (ป้องกันลิมิต 500)');
+            try {
+              await batch.commit();
+              console.log('[GW Engine] Commit batch กลางคัน (ป้องกันลิมิต 500)');
+            } catch (batchErr) {
+              console.error('[GW Engine] Batch commit ล้มเหลว กลางคัน:', batchErr);
+              throw batchErr;
+            }
             batchCount = 0;
             batch = db.batch();
           }
@@ -172,7 +181,12 @@ exports.gameweekCalculationService = {
       }
 
       if (batchCount > 0) {
-        await batch.commit();
+        try {
+          await batch.commit();
+        } catch (batchErr) {
+          console.error('[GW Engine] Batch commit ล้มเหลว (รอบสุดท้าย):', batchErr);
+          throw batchErr;
+        }
       }
 
       // 7. อัปเดตสถานะ Gameweek เป็น completed

@@ -1,4 +1,5 @@
-import { normalizePosition } from '../../utils/squadValidator';
+import { normalizePosition, validateBuyPlayer } from '../../utils/squadValidator';
+import { useMarketStore } from '../useMarketStore';
 
 export const squadPlacementSlice = (set, get) => ({
   pendingPlacement: null,   
@@ -7,21 +8,20 @@ export const squadPlacementSlice = (set, get) => ({
   startPlacement: (player) => {
     const effectiveBudget = get().getEffectiveBudget() || 0;
     const currentSquad = get().mySquad || [];
-    const playerPrice = parseFloat(player.price) || 0;
+    const gameRules = get().gameRules || null;
     
-    if (effectiveBudget < playerPrice) {
-      if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-        window.navigator.vibrate([50, 100, 50]);
-      }
-      return { success: false, message: 'งบประมาณไม่เพียงพอสำหรับการดึงตัวนักเตะคนนี้' };
-    }
+    const players = useMarketStore.getState().players || [];
+    const currentSquadObjects = currentSquad.map(sq => 
+      players.find(p => String(p.sku) === String(sq.playerId))
+    ).filter(Boolean);
 
-    const isDuplicate = currentSquad.some(p => p.playerId === String(player.sku));
-    if (isDuplicate) {
+    const validation = validateBuyPlayer(player, currentSquadObjects, effectiveBudget, gameRules);
+    
+    if (!validation.isValid) {
       if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
         window.navigator.vibrate([50, 100, 50]);
       }
-      return { success: false, message: 'นักเตะคนนี้อยู่ในทีมของคุณแล้ว' };
+      return { success: false, message: validation.message };
     }
 
     if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
@@ -36,6 +36,8 @@ export const squadPlacementSlice = (set, get) => ({
       return { success: confirmResult.success, message: 'ซื้อและลงสนามในตำแหน่งที่เลือกเรียบร้อย!' };
     }
 
+    const playerPrice = parseFloat(player.price) || 0;
+    
     set({ 
       pendingPlacement: player,
       projectedBudget: Math.round((effectiveBudget - playerPrice) * 10) / 10

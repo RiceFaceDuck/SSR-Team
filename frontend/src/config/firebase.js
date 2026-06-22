@@ -3,6 +3,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 import { getFunctions } from "firebase/functions";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 
 // โค้ด FirebaseConfig ที่ลูกพี่ส่งมา
 const firebaseConfig = {
@@ -23,6 +24,13 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
 export const functions = getFunctions(app, 'us-central1'); // Default region
+
+// 🌟 NEW: เปิดใช้งาน Firebase App Check เพื่อป้องกันบอทและสแปม
+// หากจะใช้จริงบน Production ต้องไปเอา Site Key จาก Google Cloud Console (reCAPTCHA Enterprise)
+const appCheck = initializeAppCheck(app, {
+  provider: new ReCaptchaEnterpriseProvider('YOUR_RECAPTCHA_ENTERPRISE_SITE_KEY'),
+  isTokenAutoRefreshEnabled: true
+});
 
 // Enable Offline Persistence for Firestore (ประหยัด Reads + รองรับ Offline)
 enableIndexedDbPersistence(db).catch((err) => {

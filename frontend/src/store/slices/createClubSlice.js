@@ -1,5 +1,6 @@
-import { fetchClubData, upgradeClubFacility } from '../../services/firebase/clubService';
-
+import { fetchClubData } from '../../services/firebase/clubService';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../../config/firebase';
 const getExpRequiredForLevel = (level) => {
   // Base cost 50, scales up to ~1000 at level 10
   // Lv 1->2: 50
@@ -59,9 +60,11 @@ export const createClubSlice = (set, get) => ({
     });
 
     try {
-      await upgradeClubFacility(userId, facilityKey, newLevel, newSpentExp);
+      const upgradeClubFacilityFn = httpsCallable(functions, 'upgradeClubFacility');
+      await upgradeClubFacilityFn({ userId, facilityKey });
       return true;
     } catch (error) {
+      console.error("❌ Error upgrading facility:", error);
       // Revert on failure
       set({ clubData: club });
       return false;

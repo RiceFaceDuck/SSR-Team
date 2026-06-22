@@ -5,8 +5,20 @@
  */
 
 /**
+ * @typedef {Object} PlayerStats
+ * @property {number} [minutes]
+ * @property {number} [played]
+ * @property {number} [goals]
+ * @property {number} [assists]
+ * @property {number} [cleanSheets]
+ * @property {number} [yellowCards]
+ * @property {number} [redCards]
+ * @property {number} [saves]
+ */
+
+/**
  * คำนวณคะแนนพื้นฐานของนักเตะ 1 คน อิงตาม 10k Scale (Configurable)
- * @param {Object} stats สถิติการแข่งขันของนักเตะ (เช่น goals, assists)
+ * @param {PlayerStats} stats สถิติการแข่งขันของนักเตะ (เช่น goals, assists)
  * @param {string} position ตำแหน่งนักเตะ (FWD, MID, DEF, GK)
  * @param {Object} rules กฎการให้คะแนนที่โหลดมาจากฐานข้อมูล (ถ้ามี)
  * @returns {number} คะแนนรวมพื้นฐานที่ได้

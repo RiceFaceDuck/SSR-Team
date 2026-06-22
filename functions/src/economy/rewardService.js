@@ -171,3 +171,42 @@ exports.redeemReward = async (userId, rewardId) => {
         };
     });
 };
+
+exports.claimReferralRewards = async (userId) => {
+    return await db.runTransaction(async (transaction) => {
+        const referralsRef = db.collection('referrals');
+        const userRef = db.collection(USERS_COLLECTION).doc(userId);
+
+        const q = referralsRef.where('referrerId', '==', userId).where('claimed', '==', false);
+        const snap = await transaction.get(q);
+
+        if (snap.empty) return 0;
+
+        let totalBalls = 0;
+        snap.forEach((docSnap) => {
+            const data = docSnap.data();
+            totalBalls += data.balls || 0;
+            transaction.update(docSnap.ref, { claimed: true });
+        });
+
+        if (totalBalls > 0) {
+            const userDoc = await transaction.get(userRef);
+            if (userDoc.exists) {
+                const currentBalls = userDoc.data().balls || 0;
+                transaction.update(userRef, { balls: currentBalls + totalBalls });
+                
+                const txRef = userRef.collection('transactions').doc();
+                transaction.set(txRef, {
+                    amount: totalBalls,
+                    type: 'earn',
+                    source: 'referral',
+                    description: 'รางวัลจากการชวนเพื่อน',
+                    timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                    status: 'success'
+                });
+            }
+        }
+
+        return totalBalls;
+    });
+};

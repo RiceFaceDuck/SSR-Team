@@ -49,39 +49,14 @@ export const referralService = {
     if (!currentUserId) return 0;
 
     try {
-      const q = query(
-        collection(db, REFERRALS_COL),
-        where('referrerId', '==', currentUserId),
-        where('claimed', '==', false)
-      );
+      const { httpsCallable } = require('firebase/functions');
+      const { functions } = require('../../config/firebase');
       
-      const snap = await getDocs(q);
-      if (snap.empty) return 0;
-
-      let totalBalls = 0;
-      const batchPromises = [];
-
-      snap.forEach((docSnap) => {
-        const data = docSnap.data();
-        totalBalls += data.balls || 0;
-        
-        // อัปเดตสถานะว่าเคลมแล้ว
-        batchPromises.push(
-          updateDoc(doc(db, REFERRALS_COL, docSnap.id), { claimed: true })
-        );
-      });
+      const claimReferralRewardsFn = httpsCallable(functions, 'claimReferralRewards');
+      const response = await claimReferralRewardsFn();
+      const totalBalls = response.data;
 
       if (totalBalls > 0) {
-        // อัปเดตเงินในกระเป๋าผู้ใช้
-        batchPromises.push(
-          updateDoc(doc(db, 'users', currentUserId), {
-            balls: increment(totalBalls)
-          })
-        );
-        
-        await Promise.all(batchPromises);
-        
-        // แจ้งเตือนผู้ใช้งาน
         showToast('success', `🎉 ได้รับ ${totalBalls} Balls จากการชวนเพื่อน!`);
         return totalBalls;
       }

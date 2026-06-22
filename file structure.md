@@ -8,7 +8,7 @@
   - `src/middleware/`: `rateLimiter.js`, `validation.js`
   - `src/notifications/`: `notificationService.js` (FCM)
   - `src/engine/`: `gameweekCalculation.js`, `playerValueCalculation.js`, `leaderboardEngine.js`, `syncLiveStats.js` (Dynamic Polling), `utils/`, `modifiers/`
-  - `src/economy/`: `transactionService.js`
+  - `src/economy/`: `transactionService.js`, `clubService.js` (NEW - Secure Upgrades)
   - `src/social/`: `friendService.js`, `leagueService.js`
 - `.firebase/`, `firebase.json`, `.firebaserc`: Firebase configuration
 - `deploy_all.bat`, `push_github.bat`: Utility scripts
@@ -141,7 +141,7 @@
     - `utils/`:
       - `autofill/`: (NEW - Smart Auto-Fill Engine 2.0)
         - `AutoFillOrchestrator.js`
-        - `strategies/`: `budgetOptimizer.js`, `synergyAnalyzer.js`
+        - `strategies/`: `budgetOptimizer.js`, `synergyAnalyzer.js`, `starterAssigner.js` (NEW - SRP extracted)
   - `fixtures/`:
     - `FixturesScreen.jsx`: หน้าจอตารางการแข่งขัน
     - `components/`: `FixtureDateGroup.jsx`, `FixtureItem.jsx`
@@ -156,9 +156,13 @@
       - `TransactionHistoryPreview.jsx`: ประวัติการทำรายการล่าสุดแบบย่อ
       - `ProfileSettingsModal.jsx`: ป็อปอัปสำหรับตั้งค่าบัญชีและชื่อทีม
       - `GameweekHistory.jsx`: สรุปคะแนนการจัดทีมย้อนหลังรายสัปดาห์
-      - `ClubManagerView.jsx`: หน้าต่างจัดการอัพเกรดสโมสร
-      - `FacilityCard.jsx`: การ์ดสิ่งก่อสร้างสำหรับอัพเกรดสโมสร
       - `AchievementManager.jsx`: แสดงความสำเร็จและตั้งค่าฉายา (NEW)
+  - `club/`: (NEW - Refactored SRP)
+    - `components/`:
+      - `ClubManagerModal.jsx`: หน้าต่างจัดการอัพเกรดสโมสร (Main Container)
+      - `ClubHeader.jsx`: ส่วนหัวแสดงระดับและ EXP
+      - `FacilityList.jsx`: ลิสต์สิ่งก่อสร้าง
+      - `FacilityCard.jsx`: การ์ดสิ่งก่อสร้างสำหรับอัพเกรดสโมสร
   - leaderboard/:
     - `LeaderboardScreen.jsx`: หน้าจอหลักของการจัดอันดับ (Refactored)
     - `components/`: `LeaderboardTabs.jsx`, `LeaderboardList.jsx`, `LeaderboardItem.jsx`, `SponsorBanner.jsx`
@@ -188,7 +192,7 @@
     - `engine/`: 
       - `gameweekCalculationService.js`: Engine ย่อย
       - `playerValueCalculationService.js`: Engine สำหรับคำนวณและปรับสมดุลราคานักเตะ
-    - `firebase/`: Firestore database wrappers (`clubService.js`, `questService.js`, `chatService.js`, `redeemService.js`, `playerDatabase.js`, `friendService.js` (NEW), etc. - Refactored for SRP)
+    - `firebase/`: Firestore database wrappers (`clubService.js`, `questService.js`, `chatService.js`, `redeemService.js`, `playerDatabase.js`, `friendService.js`, `gameRulesService.js`, `participationService.js` etc. - Refactored for SRP)
       - `market/`: (NEW - Market Services SRP)
         - `marketFetchService.js`: จัดการเฉพาะการดึงข้อมูลตลาด
         - `marketTransactionService.js`: จัดการเฉพาะธุรกรรมซื้อขาย (Secured with runTransaction)

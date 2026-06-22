@@ -292,8 +292,11 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 ### 12.1 Game Rules
 `public_data/game_rules`
 เก็บกติกาพื้นฐานในการจัดทีม เช่น โควต้าผู้เล่น กัปตัน
+*หมายเหตุ: ค่าเหล่านี้ถูกดึงไปใช้ฝั่ง Frontend โดยมีระบบ Cache 1 ชั่วโมงผ่าน `gameRulesService.js`*
 | Field | Type | Description |
 | --- | --- | --- |
+| `maxPlayersTotal` | Object | `{"value": 15, "isActive": true}` (เพิ่มใหม่เพื่อใช้แทน Hardcode) |
+| `positionLimits` | Object | `{"GK": 2, "DF": 5, "MF": 5, "FW": 3, "isActive": true}` (เพิ่มใหม่เพื่อความยืดหยุ่น) |
 | `startingBudget` | Object | `{"value": 100, "isActive": true}` |
 | `maxPlayersPerTeam` | Object | `{"value": 3, "isActive": true}` |
 | `freeTransfers` | Object | `{"value": 1, "isActive": true}` |
@@ -390,6 +393,7 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 
 ### 15.2 Economy Functions (`functions/src/economy`)
 - **`transactionService.js`**: จัดการธุรกรรมทางการเงิน (เพิ่ม/ลด Balls) ผ่าน `db.runTransaction` เพื่อป้องกัน Race condition และป้องกันผู้เล่นแก้ไขยอดเงินตัวเองโดยพลการ
+- **`clubService.js`**: (NEW) จัดการการอัพเกรดสโมสร (หัก EXP และเลื่อน Level อย่างปลอดภัย) ผ่าน `db.runTransaction` ป้องกันการโดนแก้ข้อมูลจากฝั่งผู้เล่น
 
 ### 15.3 Social Functions (`functions/src/social`)
 - **`friendService.js`**: (NEW) ตรวจสอบและประมวลผลคำขอเป็นเพื่อนผ่านฝั่ง Server ป้องกันการปลอมแปลง UID

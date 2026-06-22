@@ -6,6 +6,7 @@
 
 import { create } from 'zustand';
 import { marketFetchService } from '../services/firebase/market/marketFetchService';
+import { queryClient } from '../config/queryClient';
 
 export const useMarketStore = create((set, get) => ({
   // ==========================================
@@ -32,8 +33,16 @@ export const useMarketStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      // 3. เรียกใช้งาน Service ขั้นเทพที่เราเพิ่งอัปเกรด (มันจะจัดการ Cache & Dedupe ให้เอง)
-      const fetchedPlayers = await marketFetchService.getPlayers(forceRefresh);
+      // 3. เรียกใช้งาน React Query เพื่อจัดการ Cache & Dedupe อย่างสมบูรณ์แบบ
+      if (forceRefresh) {
+        queryClient.invalidateQueries({ queryKey: ['marketPlayers'] });
+      }
+      
+      const fetchedPlayers = await queryClient.fetchQuery({
+        queryKey: ['marketPlayers'],
+        queryFn: () => marketFetchService.getPlayers(forceRefresh),
+        staleTime: 5 * 60 * 1000, // แคชไว้ 5 นาที
+      });
 
       // 4. บันทึกข้อมูลลง Store สำเร็จ พร้อมล็อก Flag ว่ามีข้อมูลแล้ว
       set({ 

@@ -14,6 +14,8 @@ const convertToDirectLink = (url) => {
   return url;
 };
 
+import { gameRulesService } from '../services/firebase/gameRulesService';
+
 export const useGameStore = create((set, get) => ({
   themeConfig: {
     loginBackgroundUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2000', 
@@ -88,12 +90,10 @@ export const useGameStore = create((set, get) => ({
 
   startingBudget: 100, // Default fallback
   gameRules: null,
-  fetchGameRules: async () => {
+  fetchGameRules: async (forceRefresh = false) => {
     try {
-      const docRef = doc(db, 'public_data', 'game_rules');
-      const docSnap = await import('firebase/firestore').then(m => m.getDoc(docRef));
-      if (docSnap.exists()) {
-        const rules = docSnap.data();
+      const rules = await gameRulesService.fetchGameRules(forceRefresh);
+      if (rules) {
         set({ gameRules: rules });
         if (rules.startingBudget?.isActive) {
           set({ startingBudget: Number(rules.startingBudget.value) || 100 });

@@ -10,12 +10,20 @@ exports.saveSquad = async (userId, squadData) => {
     const appId = 'ssr-team'; // Hardcoded for now as per schema
     
     return await db.runTransaction(async (transaction) => {
-        // 1. Fetch Game Rules (for starting budget)
+        // 1. Fetch Game Rules (for starting budget and quotas)
         const rulesRef = db.collection('public_data').doc('game_rules');
         const rulesDoc = await transaction.get(rulesRef);
         let startingBudget = 100; // default fallback
-        if (rulesDoc.exists && rulesDoc.data().startingBudget?.isActive) {
-            startingBudget = Number(rulesDoc.data().startingBudget.value) || 100;
+        let maxPlayersTotal = 15;
+        let maxPlayersPerTeam = 3;
+        let positionLimits = { GK: 2, DF: 5, MF: 5, FW: 3 };
+
+        if (rulesDoc.exists) {
+            const rulesData = rulesDoc.data();
+            if (rulesData.startingBudget?.isActive) startingBudget = Number(rulesData.startingBudget.value) || 100;
+            if (rulesData.maxPlayersTotal?.isActive) maxPlayersTotal = Number(rulesData.maxPlayersTotal.value) || 15;
+            if (rulesData.maxPlayersPerTeam?.isActive) maxPlayersPerTeam = Number(rulesData.maxPlayersPerTeam.value) || 3;
+            if (rulesData.positionLimits?.isActive) positionLimits = rulesData.positionLimits;
         }
 
         // 2. Fetch User's current squad for carriedOverBudget
@@ -30,14 +38,18 @@ exports.saveSquad = async (userId, squadData) => {
         
         const totalBudget = startingBudget + carriedOverBudget;
 
-        // 3. Fetch all player prices
+        // 3. Fetch all player prices and validate rules
         let totalCost = 0;
         const mySquad = squadData.mySquad;
+        
+        if (mySquad.length > maxPlayersTotal) {
+            throw new Error(`จำนวนนักเตะในทีมเกินโควต้าที่กำหนด (${maxPlayersTotal} คน)`);
+        }
+
         if (mySquad.length > 0) {
-            const playerIds = mySquad.map(p => p.playerId);
-            // Firestore transactions don't support "in" queries well across multiple batches if > 10, 
-            // but a squad is usually 11-15 players.
-            // We can fetch them individually in the transaction
+            let teamCounts = {};
+            let posCounts = {};
+
             for (const p of mySquad) {
                 const pRef = db.collection('artifacts').doc(appId)
                                .collection('public').doc('data')
@@ -46,8 +58,27 @@ exports.saveSquad = async (userId, squadData) => {
                 if (pDoc.exists) {
                     const price = Number(pDoc.data().price) || 0;
                     totalCost += price;
-                    // Ensure the player data in squad has the correct price (optional but good for consistency)
                     p.price = price;
+                    
+                    const team = pDoc.data().team || 'UNKNOWN';
+                    const rawPos = pDoc.data().position || 'MF';
+                    
+                    // Normalize position
+                    let pos = rawPos.toUpperCase();
+                    if (['LWB', 'RWB', 'CB', 'LB', 'RB'].includes(pos)) pos = 'DF';
+                    else if (['CDM', 'CM', 'CAM', 'RM', 'LM'].includes(pos)) pos = 'MF';
+                    else if (['LW', 'RW', 'ST', 'CF'].includes(pos)) pos = 'FW';
+                    else if (pos !== 'GK' && pos !== 'DF' && pos !== 'MF' && pos !== 'FW') pos = 'MF';
+                    
+                    teamCounts[team] = (teamCounts[team] || 0) + 1;
+                    posCounts[pos] = (posCounts[pos] || 0) + 1;
+
+                    if (teamCounts[team] > maxPlayersPerTeam) {
+                        throw new Error(`เลือกนักเตะจากทีม ${team} เกินโควต้าที่กำหนด (${maxPlayersPerTeam} คน)`);
+                    }
+                    if (posCounts[pos] > (positionLimits[pos] || 0)) {
+                        throw new Error(`เลือกนักเตะตำแหน่ง ${pos} เกินโควต้าที่กำหนด (${positionLimits[pos]} คน)`);
+                    }
                 } else {
                     throw new Error(`Player ${p.playerId} not found`);
                 }

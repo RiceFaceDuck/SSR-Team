@@ -1,4 +1,4 @@
-const { describe, it, expect } = require('vitest');
+import { describe, it, expect } from 'vitest';
 const { calculatePlayerPoints, determineSquadMVP } = require('./pointCalculator');
 
 describe('pointCalculator', () => {

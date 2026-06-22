@@ -64,6 +64,11 @@ const processTransactionSchema = z.object({
     description: z.string().optional()
 });
 
+const upgradeClubFacilitySchema = z.object({
+    userId: z.string().min(1),
+    facilityKey: z.enum(['stadiumLevel', 'trainingGroundLevel', 'hospitalLevel', 'gymLevel', 'youthAcademyLevel'])
+});
+
 // Social & League
 const sendFriendRequestSchema = z.object({
     receiverUid: z.string().min(1),
@@ -115,5 +120,6 @@ module.exports = {
     createLeagueSchema,
     joinLeagueSchema,
     leaveLeagueSchema,
-    updateLeagueSettingsSchema
+    updateLeagueSettingsSchema,
+    upgradeClubFacilitySchema
 };

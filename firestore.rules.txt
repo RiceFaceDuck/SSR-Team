@@ -22,21 +22,40 @@ service cloud.firestore {
       // ให้อ่านได้ทุกคนที่ล็อกอิน (เผื่อดูสถิติเพื่อน) แต่แก้ไขได้เฉพาะเจ้าของ
       // ป้องกันการแก้ไข Balls ให้ติดลบ
       allow read: if request.auth != null;
-      allow write: if request.auth != null && (
-        (request.auth.uid == userId && (!request.resource.data.keys().hasAny(['balls']) || request.resource.data.balls >= 0))
+      allow create: if request.auth != null && (
+        (request.auth.uid == userId && 
+         request.resource.data.balls == 100 && 
+         request.resource.data.userPoints == 0 && 
+         request.resource.data.role == 'player') 
         || isAdmin()
       );
+      allow update: if request.auth != null && (
+        (request.auth.uid == userId && 
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+           'balls', 'userPoints', 'lastGameweekPoints', 'clubSpentExp', 'role', 'hasJoinedGame'
+         ])) 
+        || isAdmin()
+      );
+      allow delete: if isAdmin();
       
       // การเข้าถึง Sub-collection ด้านในของ users
       match /{document=**} {
         allow read: if request.auth != null;
-        allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+        allow write: if request.auth != null && (request.auth.uid == userId || isAdmin())
+                     && request.path[5] != 'transactions';
       }
       
       // ให้เฉพาะ Admin หรือตัวเองเท่านั้นที่เขียน gameweek_history ได้
       match /gameweek_history/{gameweekId} {
         allow read: if request.auth != null;
         allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      }
+
+      // บล็อกไม่ให้ผู้เล่นเขียนประวัติธุรกรรม (ป้องกันการปลอมแปลงยอดการเงิน)
+      // ให้ Cloud Functions (Admin SDK) เป็นผู้เขียนเท่านั้น
+      match /transactions/{transactionId} {
+        allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+        allow write: if false; 
       }
     }
 
@@ -88,10 +107,10 @@ service cloud.firestore {
     }
     
     match /artifacts/{appId}/users/{userId} {
-      // 🚨 ล็อกการเซฟทีม (Squad) เมื่อหมดเวลา
+      // 🚨 ล็อกการเซฟทีม (Squad) ให้ทำผ่าน Cloud Function (Admin SDK) เท่านั้น
       match /game_data/squad {
         allow read: if true;
-        allow write: if request.auth != null && (isAdmin() || (request.auth.uid == userId && isGameweekOpen()));
+        allow write: if isAdmin();
       }
       
       // การเข้าถึง Artifacts ไฟล์อื่นๆ ปล่อยตามปกติ แต่ห้ามซ้ำกับ squad
@@ -185,13 +204,13 @@ service cloud.firestore {
     // 💬 ระบบแชทส่วนรวม
     match /global_chat/{document=**} {
       allow read: if true;
-      allow write: if request.auth != null && (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAdmin();
     }
 
     // 🤝 ระบบลีกส่วนตัว
     match /leagues/{document=**} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
     // 🎁 ระบบ Referral

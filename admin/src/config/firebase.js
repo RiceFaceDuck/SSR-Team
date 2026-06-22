@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 // import { getAnalytics } from "firebase/analytics"; 
 // ฝั่ง Admin มักจะไม่ต้องใช้ Analytics จึงปิดไว้ก่อนได้ครับ
 
@@ -23,5 +24,11 @@ import { getFunctions } from "firebase/functions";
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const functions = getFunctions(app);
+
+// 🌟 NEW: เปิดใช้งาน Firebase App Check
+const appCheck = initializeAppCheck(app, {
+  provider: new ReCaptchaEnterpriseProvider('YOUR_RECAPTCHA_ENTERPRISE_SITE_KEY'),
+  isTokenAutoRefreshEnabled: true
+});
 
 export default app;
