@@ -23,9 +23,11 @@
     - `views/`: `Dashboard.jsx`
   - `players/`: Player Management Feature
     - `components/`: `PlayerManualForm.jsx`, `PlayerTable.jsx`, `ExcelPreview.jsx`, `PlayerValueFormulaConfig.jsx`, `PlayerValuePreviewTable.jsx`
-    - `hooks/`: `usePlayers.js` (Business logic), `usePlayerSync.js` (API Sync Logic), `usePlayerSyncActions.js`, `usePlayerValueEngine.js`
+      - `overlap/`: `OverlapGroupCard.jsx`, `OverlapHeader.jsx`, `OverlapPlayerItem.jsx` (NEW SRP)
+      - `forms/`: `PlayerIdentityForm.jsx`, `PlayerGameInfoForm.jsx`, `PlayerStatsForm.jsx` (NEW SRP)
+    - `hooks/`: `usePlayers.js` (Business logic), `usePlayerSync.js` (API Sync Logic), `usePlayerSyncActions.js`, `usePlayerValueEngine.js`, `useOverlapLogic.js` (NEW)
     - `utils/`: `excelParser.js`, `templateUtil.js`
-    - `views/`: `PlayerFeature.jsx`, `PlayerList.jsx`, `PlayerListModals.jsx`, `PlayerDetails.jsx`, `DataOverlapManagement.jsx`, `PlayerValueManager.jsx`
+    - `views/`: `PlayerFeature.jsx`, `PlayerList.jsx`, `PlayerListModals.jsx`, `PlayerDetails.jsx`, `DataOverlapManagement.jsx` (Refactored), `PlayerValueManager.jsx`
   - `managers/`: Manager Management Feature (New!)
     - `components/`: `ManagerForm.jsx`
     - `hooks/`: `useManagerFormLogic.js`
@@ -54,7 +56,8 @@
     - `views/`: `GameweekDashboard.jsx`
     - `TimeController.jsx`, `NoAdsToggle.jsx`
   - `quests/`: Quest and Sponsor Management Feature (Refactored)
-    - `components/`: `QuestImageUploader.jsx`, `QuestBasicInputs.jsx`, `QuestSettingsInputs.jsx`, `QuestTab.jsx`, `AdLinksTab.jsx`, `AdSenseTab.jsx`
+    - `components/`: `QuestImageUploader.jsx`, `QuestBasicInputs.jsx`, `QuestSettingsInputs.jsx`, `QuestTab.jsx`, `AdLinksTab.jsx`, `AdSenseTab.jsx`, `SponsorAdCard.jsx`
+    - `hooks/`: `useQuestCooldown.js`
     - `QuestFormModal.jsx`
     - `QuestManager.jsx` (Tab Container)
   - `rewards/`: Reward Management Feature
@@ -104,10 +107,11 @@
     - `StartGameScreen.jsx`: หน้าจอ Tap to Start Animation (New)
   - `market/`:
     - `MarketScreen.jsx`: หน้าจอหลักของตลาดนักเตะ
-    - `MarketHeader.jsx`: คอมโพเนนต์ส่วนหัว และงบประมาณคงเหลือ (Refactored)
-    - `MarketFilters.jsx`: UI ค้นหาและกรองตำแหน่ง
-    - `MarketPlayerList.jsx`: คอมโพเนนต์แสดงลิสต์รายชื่อ (Refactored)
-    - `PlayerRow.jsx`
+    - `components/`: (Refactored SRP)
+      - `MarketHeader.jsx`: คอมโพเนนต์ส่วนหัว และงบประมาณคงเหลือ
+      - `MarketFilters.jsx`: UI ค้นหาและกรองตำแหน่ง
+      - `MarketPlayerList.jsx`: คอมโพเนนต์แสดงลิสต์รายชื่อ
+      - `PlayerRow.jsx`
     - `hooks/`:
       - `useMarketFilters.js`: Logic กรองและเรียงลำดับนักเตะ (SRP)
   - `pitch/`:
@@ -117,6 +121,7 @@
       - `PlayerActionPopup.jsx`: ป็อปอัปเมนูเมื่อคลิกผู้เล่นในสนาม
       - `popup/`: `PopupHeader.jsx`, `PopupStats.jsx`, `PopupActions.jsx`
       - `Pitch.jsx`, `PlayerNode.jsx`, `EmptyNode.jsx`, `SquadHeader.jsx`, `SquadActions.jsx`
+      - `FullscreenToggle.jsx`: ปุ่มขยายหน้าจอพร้อม Tooltip น่าสนใจ (NEW)
       - `SynergyIndicator.jsx` (NEW - Synergy highlighting UI)
       - `PitchModals.jsx` (NEW - Extracted modals container)
       - `PlayerStatsBar.jsx`: แถบแสดงสถิติ Goals, Assists, Cards (New)
@@ -165,8 +170,9 @@
       - `FacilityCard.jsx`: การ์ดสิ่งก่อสร้างสำหรับอัพเกรดสโมสร
   - leaderboard/:
     - `LeaderboardScreen.jsx`: หน้าจอหลักของการจัดอันดับ (Refactored)
-    - `components/`: `LeaderboardTabs.jsx`, `LeaderboardList.jsx`, `LeaderboardItem.jsx`, `SponsorBanner.jsx`
-    - `hooks/`: `useLeaderboardData.js`: จัดการ Query สำหรับ อันดับสัปดาห์, ซีซั่น, และ My Club (รวมถึงสร้างไฟล์ .txt)
+    - `components/`: `LeaderboardTabs.jsx`, `LeaderboardList.jsx`, `LeaderboardItem.jsx`, `SponsorBanner.jsx`, `LeaderboardPodium.jsx` (NEW - Premium UI)
+    - `hooks/`: `useLeaderboardData.js`: Hook จัดการ UI State และเรียกใช้ Service
+    - `services/`: `leaderboardFetchService.js` (NEW - จัดการดึงข้อมูลจาก Cache ที่ 1 Read)
   - `live/`:
     - `LiveScoreScreen.jsx`: หน้าจอหลักของ Live Match และ Global Chat
     - `components/`:
@@ -193,6 +199,7 @@
       - `gameweekCalculationService.js`: Engine ย่อย
       - `playerValueCalculationService.js`: Engine สำหรับคำนวณและปรับสมดุลราคานักเตะ
     - `firebase/`: Firestore database wrappers (`clubService.js`, `questService.js`, `chatService.js`, `redeemService.js`, `playerDatabase.js`, `friendService.js`, `gameRulesService.js`, `participationService.js` etc. - Refactored for SRP)
+      - `player/`: `playerFetchService.js`, `playerUpdateService.js`, `playerBulkService.js`, `playerOverlapService.js` (NEW)
       - `market/`: (NEW - Market Services SRP)
         - `marketFetchService.js`: จัดการเฉพาะการดึงข้อมูลตลาด
         - `marketTransactionService.js`: จัดการเฉพาะธุรกรรมซื้อขาย (Secured with runTransaction)
@@ -206,7 +213,7 @@
     - `squadPitchSlice.js`: จัดการการกระทำในสนาม เช่น สลับตัวหรือถอดออก
     - `squadActionSlice.js`: (DEPRECATED) 
     - `squadMarketSlice.js`: จัดการการซื้อขายนักเตะ
-    - `squadAutoFillSlice.js`: จัดการการจัดทีมอัตโนมัติ
+    - `squadAutoFillSlice.js`: จัดการการจัดทีมอัตโนมัติ (NEW: รองรับโหมด Balanced, Star-focused, Wildcard)
     - `squadCardSlice.js`: จัดการระบบการ์ดเสริมพลัง
     - `createWalletSlice.js`: จัดการงบและ Balls
     - `inventorySlice.js`: จัดการคลังเก็บการ์ดและผู้จัดการทีม (NEW)

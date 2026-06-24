@@ -19,7 +19,46 @@ const fileToBase64 = (file) => {
   });
 };
 
-export const uploadImageToDrive = async (file) => {
+const compressImage = (file, maxWidth = 300, maxHeight = 300, quality = 0.7) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      
+      let width = img.width;
+      let height = img.height;
+      
+      if (width > height) {
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      const dataUrl = canvas.toDataURL('image/webp', quality);
+      resolve({ dataUrl, mimeType: 'image/webp' });
+    };
+    img.onerror = (error) => {
+      URL.revokeObjectURL(url);
+      reject(error);
+    };
+    img.src = url;
+  });
+};
+
+export const uploadImageToDrive = async (file, prefix = 'image', autoCompress = false) => {
   if (!file) {
     throw new Error("กรุณาเลือกไฟล์ก่อนทำการอัปโหลด");
   }
@@ -31,20 +70,32 @@ export const uploadImageToDrive = async (file) => {
 
   const maxSizeMB = 5;
   const maxSizeBytes = maxSizeMB * 1024 * 1024;
-  if (file.size > maxSizeBytes) {
+  // ถ้าระบบเปิด autoCompress ไว้ จะข้ามการเช็คขนาดไฟล์ต้นฉบับไปเลย เพราะเดี๋ยวก็จะโดนย่อให้เล็กอยู่ดี
+  if (!autoCompress && file.size > maxSizeBytes) {
     throw new Error(`ขนาดไฟล์ใหญ่เกินไป (สูงสุด ${maxSizeMB}MB)`);
   }
 
   try {
-    const base64Data = await fileToBase64(file);
-    const cleanFileName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-    const uniqueFileName = `sponsor_${Date.now()}_${cleanFileName}`;
+    let base64Data;
+    let mimeType = file.type;
+    let cleanFileName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+
+    if (autoCompress && file.type !== 'image/gif') {
+      const compressed = await compressImage(file, 300, 300, 0.7);
+      base64Data = compressed.dataUrl;
+      mimeType = compressed.mimeType;
+      cleanFileName = cleanFileName.replace(/\.[^/.]+$/, "") + ".webp";
+    } else {
+      base64Data = await fileToBase64(file);
+    }
+    
+    const uniqueFileName = `${prefix}_${Date.now()}_${cleanFileName}`;
     
     // 🎯 แก้ไข: ปรับ Key ให้ตรงกับที่ Google Apps Script ของลูกพี่รอรับอยู่เป๊ะๆ
     const payload = {
       base64: base64Data,       // เดิมเขียน fileData ทำให้สคริปต์พัง
       filename: uniqueFileName, // เดิมเขียน fileName
-      mimeType: file.type
+      mimeType: mimeType
     };
 
     // ส่งข้อมูลแบบเดียวกับที่ ThemeController ทำ (ถอด Header Text/Plain ออกให้เหมือนเดิม)

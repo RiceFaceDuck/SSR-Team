@@ -45,10 +45,18 @@ service cloud.firestore {
                      && request.path[5] != 'transactions';
       }
       
-      // ให้เฉพาะ Admin หรือตัวเองเท่านั้นที่เขียน gameweek_history ได้
+      // บล็อกผู้เล่นอัปเกรดคลับเอง (ป้องกัน Hack) ให้ Cloud Function ทำหน้าที่แทน
+      match /game_data/club {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null && request.auth.uid == userId 
+                      && request.resource.data.stadiumLevel == 1; // อนุญาตแค่สร้างตอนแรกเท่านั้น
+        allow update: if isAdmin(); // ปิดกั้นการอัปเดตผ่าน Client โดยเด็ดขาด
+      }
+      
+      // ล็อกประวัติคะแนนย้อนหลัง (gameweek_history) ให้เฉพาะ Admin และ Cloud Function เขียนได้ ป้องกันผู้เล่นปลอมแปลงคะแนน
       match /gameweek_history/{gameweekId} {
         allow read: if request.auth != null;
-        allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+        allow write: if isAdmin();
       }
 
       // บล็อกไม่ให้ผู้เล่นเขียนประวัติธุรกรรม (ป้องกันการปลอมแปลงยอดการเงิน)
@@ -134,6 +142,10 @@ service cloud.firestore {
       );
     }
     match /public_data/ads_config {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /public_data/leaderboard_cache {
       allow read: if true;
       allow write: if isAdmin();
     }

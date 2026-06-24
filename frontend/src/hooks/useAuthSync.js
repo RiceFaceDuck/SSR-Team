@@ -33,7 +33,9 @@ export const useAuthSync = () => {
                 await auth.signOut();
                 clearAuth();
                 setAuthReady();
-                alert("ขณะนี้ระบบปิดรับสมัครผู้เข้าแข่งขันใหม่แล้ว (Registration Closed)");
+                window.dispatchEvent(new CustomEvent('SHOW_TOAST', {
+                  detail: { message: 'ขณะนี้ระบบปิดรับสมัครผู้เข้าแข่งขันใหม่แล้ว (Registration Closed)', type: 'error' }
+                }));
                 return;
             }
 

@@ -30,17 +30,17 @@ export default function FullscreenToggle() {
 
     const hideTimer = setTimeout(() => {
       setShowTooltip(false);
-    }, 5000);
+    }, 6000); // Show for 6 seconds
 
-    // Set interval for every 5 minutes (300,000 ms)
+    // Set interval to remind frequently (every 30 seconds)
     const intervalTimer = setInterval(() => {
       if (!document.fullscreenElement) {
         setShowTooltip(true);
         setTimeout(() => {
           setShowTooltip(false);
-        }, 5000);
+        }, 6000);
       }
-    }, 300000);
+    }, 30000);
 
     return () => {
       clearTimeout(hideTimer);
@@ -63,28 +63,35 @@ export default function FullscreenToggle() {
   }, []);
 
   return (
-    <div className="absolute top-2 right-2 z-50 flex items-start justify-end pointer-events-auto">
+    <div className="absolute top-3 right-3 z-50 flex items-start justify-end pointer-events-auto">
       
       {/* Tooltip */}
       <div 
-        className={`mr-3 mt-1 bg-white/90 backdrop-blur-sm text-slate-800 text-xs font-bold py-1.5 px-3 rounded-lg shadow-lg border border-[#fbbf24] transition-all duration-500 ease-out origin-right ${
-          showTooltip && !isFullscreen ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-95 translate-x-4 pointer-events-none'
+        className={`relative mr-4 my-auto max-w-[240px] sm:max-w-[300px] bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600 text-white text-xs sm:text-sm font-bold py-2.5 px-3 rounded-xl shadow-[0_0_25px_rgba(168,85,247,0.8)] border-2 border-white/50 transition-all duration-700 ease-in-out origin-right flex items-center ${
+          showTooltip && !isFullscreen ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-90 translate-x-8 pointer-events-none'
         }`}
       >
-        <div className="relative">
-          💡 มีฟังก์ชั่น Full screen อยู่ตรงนี้!
-          {/* Arrow pointing to the button */}
-          <div className="absolute top-1/2 -right-4 -translate-y-1/2 border-8 border-transparent border-l-white/90"></div>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <span className="text-lg sm:text-xl flex-shrink-0 animate-pulse">✨</span>
+          <span className="leading-tight text-center">ขยายเต็มจอได้ที่นี่<br/>เพื่อเพิ่มอรรถรสในการเล่น!</span>
+          <span className="text-lg sm:text-xl flex-shrink-0 animate-pulse">🤩</span>
         </div>
+        {/* Arrow pointing to the button */}
+        <div className="absolute top-1/2 -right-[17px] -translate-y-1/2 border-[8px] border-transparent border-l-white/50"></div>
+        <div className="absolute top-1/2 -right-[13px] -translate-y-1/2 border-[7px] border-transparent border-l-fuchsia-600"></div>
       </div>
 
       {/* Button */}
       <button
         onClick={toggleFullscreen}
-        className="w-10 h-10 bg-[#1e293b]/80 backdrop-blur-md rounded-full flex items-center justify-center border border-slate-600/50 text-white hover:bg-[#fbbf24] hover:text-[#1e293b] hover:border-[#fbbf24] transition-all duration-300 shadow-md active-press hover-lift"
+        className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 shadow-xl active-press hover-lift ${
+          isFullscreen 
+            ? 'bg-[#1e293b]/80 backdrop-blur-md border-slate-600/50 text-white hover:bg-slate-700'
+            : 'bg-gradient-to-br from-amber-400 to-orange-500 border-white text-white hover:from-orange-500 hover:to-amber-400 animate-pulse shadow-[0_0_20px_rgba(245,158,11,0.6)]'
+        }`}
         aria-label="Toggle Fullscreen"
       >
-        {isFullscreen ? <Minimize size={20} strokeWidth={2.5} /> : <Maximize size={20} strokeWidth={2.5} />}
+        {isFullscreen ? <Minimize size={24} strokeWidth={2.5} /> : <Maximize size={24} strokeWidth={2.5} />}
       </button>
 
     </div>

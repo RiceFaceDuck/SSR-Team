@@ -85,3 +85,17 @@ export const formatDate = (timestamp) => {
     return '-';
   }
 };
+
+/**
+ * 5. แปลงลิงก์ Google Drive แบบ uc ให้เป็นแบบ thumbnail เพื่อแก้ปัญหาภาพไม่แสดง (CORS / SameSite)
+ */
+export const getOptimizedImageUrl = (url) => {
+  if (!url) return url;
+  if (url.includes('drive.google.com/uc')) {
+    const idMatch = url.match(/id=([^&]+)/);
+    if (idMatch && idMatch[1]) {
+      return `https://drive.google.com/thumbnail?id=${idMatch[1]}&sz=w1000`;
+    }
+  }
+  return url;
+};

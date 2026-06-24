@@ -1,58 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { ExternalLink, ShieldCheck, Clock, CheckCircle } from 'lucide-react';
 import { playSound } from '../../config/theme';
+import { useQuestCooldown } from './hooks/useQuestCooldown';
 
 export default function SponsorAdCard({ quest, record, onClaim, isClaiming }) {
-  const [timeLeft, setTimeLeft] = useState(null);
-  const [isCooldown, setIsCooldown] = useState(false);
-  const [isMaxed, setIsMaxed] = useState(false);
-
-  // คำนวณ Cooldown และ โควต้า แบบ Real-time
-  useEffect(() => {
-    // 1. ตรวจสอบว่าใช้งานครบโควต้าต่อวันหรือยัง?
-    if (record && record.uses >= quest.maxClaimsPerUser) {
-      setIsMaxed(true);
-      setIsCooldown(false);
-      setTimeLeft(null);
-      return;
-    }
-
-    // 2. ตรวจสอบว่าติด Cooldown อยู่หรือไม่?
-    if (record && record.lastClaimed && record.uses > 0) {
-      const checkCooldown = () => {
-        const lastClaimTime = new Date(record.lastClaimed).getTime();
-        const cooldownMs = quest.cooldownHours * 60 * 60 * 1000;
-        const nextAvailableTime = lastClaimTime + cooldownMs;
-        const now = new Date().getTime();
-
-        if (now < nextAvailableTime) {
-          setIsCooldown(true);
-          const diff = nextAvailableTime - now;
-          
-          const h = Math.floor(diff / (1000 * 60 * 60));
-          const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          const s = Math.floor((diff % (1000 * 60)) / 1000);
-          
-          // Format เวลาให้ออกมาสวยงาม (เช่น 02:15:30)
-          const formatTime = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-          setTimeLeft(formatTime);
-        } else {
-          setIsCooldown(false);
-          setTimeLeft(null);
-        }
-      };
-
-      checkCooldown(); // รันทันที 1 ครั้ง
-      const intervalId = setInterval(checkCooldown, 1000); // อัปเดตทุกๆ 1 วินาที
-      
-      return () => clearInterval(intervalId); // ล้าง Timer เมื่อ Component ถูกทำลาย
-    } else {
-      // กรณียังไม่เคยกด หรือ ไม่ติดอะไรเลย
-      setIsMaxed(false);
-      setIsCooldown(false);
-      setTimeLeft(null);
-    }
-  }, [record, quest.cooldownHours, quest.maxClaimsPerUser]);
+  const { isMaxed, isCooldown, timeLeft } = useQuestCooldown(quest, record);
 
   // --- Helpers ---
   // 🎯 ฟังก์ชันฉลาด: แปลงลิงก์แชร์ Google Drive ให้เป็น Direct Image URL เพื่อให้ <img src> แสดงผลได้ 100%

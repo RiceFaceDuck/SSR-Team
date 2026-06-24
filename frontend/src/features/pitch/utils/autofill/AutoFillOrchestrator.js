@@ -10,7 +10,7 @@ import { budgetOptimizer } from './strategies/budgetOptimizer';
 import { synergyAnalyzer } from './strategies/synergyAnalyzer';
 import { starterAssigner } from './strategies/starterAssigner';
 
-export const runAutoFillEngine = ({ marketPlayers = [], mySquad = [], formation, budgetLeft, effectiveBudget }) => {
+export const runAutoFillEngine = ({ marketPlayers = [], mySquad = [], formation, budgetLeft, effectiveBudget, mode = 'balanced' }) => {
   const limits = getPositionLimits(formation);
   const formationData = getFormationData(formation);
   let newSquad = [];
@@ -47,7 +47,8 @@ export const runAutoFillEngine = ({ marketPlayers = [], mySquad = [], formation,
     ownedPlayerIds.add(p.playerId);
   });
 
-  let currentBaseBudget = effectiveBudget - spentBudget; 
+  // effectiveBudget ที่ส่งมาจากหน้าบ้าน คือเงินที่ใช้ได้ทั้งหมดสำหรับตำแหน่งที่ว่าง (หลังคืนเงินคนไม่ล็อคแล้ว)
+  let currentBaseBudget = effectiveBudget; 
   const MAX_PER_TEAM = 3;
 
   // 2. ค้นหานักเตะผ่าน Optimizer
@@ -69,7 +70,8 @@ export const runAutoFillEngine = ({ marketPlayers = [], mySquad = [], formation,
         ownedPlayerIds, 
         teamCounts, 
         MAX_PER_TEAM,
-        synergyTeam
+        synergyTeam,
+        mode
       );
 
       // ถ้าเงินไม่พอซื้อตัวเทพตามโควต้างบต่อหัว ให้ยอมซื้อตัวที่ถูกที่สุดที่มีในงบรวม
@@ -130,24 +132,18 @@ export const runAutoFillEngine = ({ marketPlayers = [], mySquad = [], formation,
   });
 
   // 3. จัดตัวจริง / สำรอง ตาม Form
-  let finalSpent = 0;
-  newSquad.forEach(p => {
-    const pData = marketPlayers.find(mp => String(mp.sku) === p.playerId);
-    if (pData) finalSpent += parseFloat(pData.price) || 0;
-  });
-  
-  const managerBonus = effectiveBudget - budgetLeft;
-  const finalBaseBudgetLeft = Math.round((effectiveBudget - finalSpent - managerBonus) * 10) / 10;
+  const finalBaseBudgetLeft = Math.round(currentBaseBudget * 10) / 10;
 
   // 4. Assign slots and starters
   newSquad = starterAssigner.assignStarters(newSquad, marketPlayers, formationData);
 
   if (isModified || newSquad.some(p => p.isStarting)) {
+    const isComplete = newSquad.length === 15;
     return { 
       success: true, 
       newSquad, 
       newBudget: finalBaseBudgetLeft, 
-      message: 'AI วิเคราะห์ฟอร์มและจัดทีมแบบกระจายงบประมาณเสร็จสิ้น!' 
+      message: isComplete ? 'AI วิเคราะห์ฟอร์มและจัดทีมแบบกระจายงบประมาณเสร็จสิ้น!' : `จัดทีมได้ ${newSquad.length}/15 คน (นักเตะในตลาดหรือเงินไม่พอ)` 
     };
   } else {
     return { 

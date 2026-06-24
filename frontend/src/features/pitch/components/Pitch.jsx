@@ -99,42 +99,44 @@ const Pitch = ({ squad, formation, onSlotClick, onPlayerClick, selectedPlayerId,
   };
 
   return (
-    <div className="relative flex-1 w-full h-full flex flex-col justify-evenly overflow-hidden bg-[#228B22] shadow-[inset_0_0_80px_rgba(0,0,0,0.4)]">
+    <div className="relative flex-1 w-full h-full flex flex-col justify-evenly overflow-hidden bg-[#228B22] sm:rounded-xl sm:m-1 sm:border-2 sm:border-[#3b82f6]/30 shadow-[inset_0_0_80px_rgba(0,0,0,0.6),0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-300"
+         style={{ background: 'radial-gradient(ellipse at center, #2e9f2e 0%, #1a5e1a 100%)' }}>
       <FullscreenToggle />
       {/* CSS Gradient Pitch Pattern (Underlay) - Horizontal Stripes */}
       <div 
-        className="absolute inset-0 z-0 pointer-events-none"
+        className="absolute inset-0 z-0 pointer-events-none opacity-40"
         style={{
-          background: 'repeating-linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.05) 10%, rgba(0,0,0,0.05) 10%, rgba(0,0,0,0.05) 20%)'
+          background: 'repeating-linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.08) 10%, rgba(0,0,0,0.08) 10%, rgba(0,0,0,0.08) 20%)'
         }}
       />
       
       {/* Pitch Lines (Penalty box, half way line) */}
-      <div className="absolute inset-0 z-0 pointer-events-none flex flex-col items-center justify-between opacity-50">
+      <div className="absolute inset-0 z-0 pointer-events-none flex flex-col items-center justify-between opacity-60">
         {/* Top Area */}
         <div className="w-[60%] h-[20%] flex flex-col items-center">
           {/* Penalty Box */}
-          <div className="w-full h-[75%] border-b-2 border-x-2 border-white/60 relative flex justify-center">
+          <div className="w-full h-[75%] border-b-2 border-x-2 border-white/70 relative flex justify-center shadow-[0_0_10px_rgba(255,255,255,0.2)]">
             {/* 6-Yard Box */}
-            <div className="absolute top-0 w-[40%] h-[40%] border-b-2 border-x-2 border-white/60"></div>
+            <div className="absolute top-0 w-[40%] h-[40%] border-b-2 border-x-2 border-white/70"></div>
           </div>
           {/* Penalty Arc */}
-          <div className="w-[30%] h-[25%] border-b-2 border-x-2 border-white/60 rounded-b-[100%] border-t-0 -mt-[2px]"></div>
+          <div className="w-[30%] h-[25%] border-b-2 border-x-2 border-white/70 rounded-b-[100%] border-t-0 -mt-[2px] shadow-[0_0_10px_rgba(255,255,255,0.2)]"></div>
         </div>
         
         {/* Halfway Line */}
-        <div className="w-full border-t-2 border-white/60 relative flex justify-center items-center z-0">
-           <div className="w-20 h-20 border-2 border-white/60 rounded-full absolute -top-10 bg-transparent"></div>
+        <div className="w-full border-t-2 border-white/70 relative flex justify-center items-center z-0 shadow-[0_0_10px_rgba(255,255,255,0.2)]">
+           <div className="w-20 h-20 border-2 border-white/70 rounded-full absolute -top-10 bg-transparent shadow-[inset_0_0_10px_rgba(255,255,255,0.1),0_0_10px_rgba(255,255,255,0.2)]"></div>
+           <div className="w-2 h-2 bg-white/80 rounded-full absolute"></div>
         </div>
         
         {/* Bottom Area */}
         <div className="w-[60%] h-[20%] flex flex-col items-center justify-end">
           {/* Penalty Arc */}
-          <div className="w-[30%] h-[25%] border-t-2 border-x-2 border-white/60 rounded-t-[100%] border-b-0 -mb-[2px]"></div>
+          <div className="w-[30%] h-[25%] border-t-2 border-x-2 border-white/70 rounded-t-[100%] border-b-0 -mb-[2px] shadow-[0_0_10px_rgba(255,255,255,0.2)]"></div>
           {/* Penalty Box */}
-          <div className="w-full h-[75%] border-t-2 border-x-2 border-white/60 relative flex justify-center">
+          <div className="w-full h-[75%] border-t-2 border-x-2 border-white/70 relative flex justify-center shadow-[0_0_10px_rgba(255,255,255,0.2)]">
             {/* 6-Yard Box */}
-            <div className="absolute bottom-0 w-[40%] h-[40%] border-t-2 border-x-2 border-white/60"></div>
+            <div className="absolute bottom-0 w-[40%] h-[40%] border-t-2 border-x-2 border-white/70"></div>
           </div>
         </div>
       </div>

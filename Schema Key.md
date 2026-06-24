@@ -7,7 +7,7 @@ This document outlines the standard data structures used across the SSR Team Fan
 
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
-| `sku`       | String | Unique identifier (e.g. 'API-1234' or 'EXCEL-...'). **[IMMUTABLE]** ห้ามเปลี่ยนค่าเด็ดขาดเพราะเป็น Document ID |
+| `sku`       | String | Unique identifier (e.g. 'API-1234' or 'EXCEL-...'). **[IMMUTABLE]** ห้ามเปลี่ยนค่าเด็ดขาดเพราะเป็น Document ID. (กฏ Data Overlap: `API-` คือ Foundation เสมอ) |
 | `name`      | String | Short name used in game UI (e.g. 'Saka') |
 | `fullName`  | String | Full name of the player |
 | `imageUrl`  | String | URL to the player's photo |
@@ -24,6 +24,7 @@ This document outlines the standard data structures used across the SSR Team Fan
 ### 1.1 Player Stats Object (`stats`)
 Inside the Player Schema, there is a `stats` object mapping to game attributes.
 *(Note on Optimization: When fetching all players in Admin, the query uses `limit(1500)` to cap memory usage.)*
+*(Note on Auto-Kick: หากนักเตะถูกลบ หรือตั้งค่า `isActive: false` ระบบประมวลผล Gameweek จะทำการเตะนักเตะออกอัตโนมัติ พร้อมคืนเงินค่าตัวให้กับผู้เล่น)*
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
 | `pace`      | Number | 0-99 speed rating |
@@ -37,6 +38,12 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `cleanSheets`| Number | Real-world clean sheets |
 | `yellowCards`| Number | Real-world yellow cards |
 | `redCards`  | Number | Real-world red cards |
+
+### 🔗 Frontend Data Relationships (marketDataParser.js)
+The frontend consumes the exact fields defined above. Specifically, `marketDataParser.js` ensures strict compliance:
+- **`position`**: Fallbacks to 'RES' if missing, normalizes 'ATTACKER' to 'FW'.
+- **`totalPoints`**: If missing or 0, fallback points are calculated using `stats`.
+- **`price`**: If > 1000, divides by 1,000,000 to convert to float (e.g. 50000000 -> 50.0).
 
 ## 1.5 Team Schema (สโมสรต้นสังกัด)
 `artifacts/{appId}/public/data/teams/{teamId}`
@@ -67,7 +74,7 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
-| `mySquad`   | Array  | เก็บนักเตะ `[{ playerId, position, isStarting, slotIndex, appliedCardId, appliedCard, isLocked }]` **(เมื่อประมวลผล Gameweek เสร็จ appliedCard จะถูกลบทิ้งอัตโนมัติ เพราะเป็นไอเทมใช้ครั้งเดียว)** |
+| `mySquad`   | Array  | เก็บนักเตะ `[{ playerId, position, isStarting, slotIndex, appliedCardId, appliedCard, isLocked }]` **(Secure: ผ่านการ Validate ด้วย Zod Schema อย่างเข้มงวด เมื่อประมวลผล Gameweek เสร็จ appliedCard จะถูกลบทิ้งอัตโนมัติ)** |
 | `budgetLeft`| Number | งบประมาณที่เหลืออยู่ (Base + Carried Over) **[Secured by Client-side Transaction]** |
 | `carriedOverBudget`| Number | งบประมาณโบนัสที่ยกยอดมาจากสัปดาห์ก่อนหน้า (ถ้ามี) |
 | `formation` | String | แผนการเล่นปัจจุบัน (เช่น '4-4-2') |
@@ -121,6 +128,7 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 
 ### 4.1 Gameweek History Sub-collection
 `users/{userId}/gameweek_history/{gameweekId}`
+**(IMPORTANT: เขียนได้เฉพาะ Cloud Functions / Admin เท่านั้น เพื่อป้องกันการปลอมแปลงคะแนนย้อนหลัง)**
 
 | Field       | Type   | Description |
 | ----------- | ------ | ----------- |
@@ -148,7 +156,7 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 
 ### 4.3 Club Upgrades Sub-collection
 `users/{userId}/game_data/club`
-เก็บข้อมูลระดับการอัพเกรดสโมสรของผู้เล่น
+เก็บข้อมูลระดับการอัพเกรดสโมสรของผู้เล่น **[Secure: บล็อกการ Update ผ่าน Client โดยเด็ดขาด ให้อัปเกรดผ่าน Cloud Functions เพื่อป้องกันการโกง]**
 
 | Field                 | Type   | Description |
 | --------------------- | ------ | ----------- |
@@ -266,7 +274,7 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 | `timestamp`       | Timestamp | เวลาเกิดเหตุการณ์ |
 
 ### 10.2 Live Gameweek Stats
-`public_data/live_gameweek_stats/{playerId}`
+`public_data/live_gameweek_stats/players/{playerId}`
 เก็บสถิติและคะแนนเฉพาะในสัปดาห์ปัจจุบัน (Gameweek ปัจจุบัน) แบบ Real-time เพื่อประหยัดโควต้าการอ่าน (Query เพียงนักเตะที่มีในทีมด้วย `in`)
 | Field             | Type   | Description |
 | ----------------- | ------ | ----------- |
@@ -398,3 +406,15 @@ Inside the Player Schema, there is a `stats` object mapping to game attributes.
 ### 15.3 Social Functions (`functions/src/social`)
 - **`friendService.js`**: (NEW) ตรวจสอบและประมวลผลคำขอเป็นเพื่อนผ่านฝั่ง Server ป้องกันการปลอมแปลง UID
 - **`leagueService.js`**: (NEW) สร้างและจัดการรหัสลีกส่วนตัวอย่างปลอดภัย
+
+## 16. Leaderboard Cache Schema (NEW!)
+`public_data/leaderboard_cache`
+ข้อมูลการจัดอันดับและไฟล์ Export ที่ถูกคำนวณและสร้างไว้ล่วงหน้าจาก Cloud Functions เพื่อประหยัด Reads (ลดจาก N Reads เหลือ 1 Read)
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `weekly` | Array | รายชื่อ Top 100 ผู้เล่นที่คะแนน `lastGameweekPoints` สูงสุด `[{ id, displayName, teamName, photoURL, lastGameweekPoints, displayRank }]` |
+| `season` | Array | รายชื่อ Top 100 ผู้เล่นที่คะแนน `userPoints` สูงสุด `[{ id, displayName, teamName, photoURL, userPoints, displayRank }]` |
+| `club` | Array | รายชื่อ Top 100 ผู้เล่นที่ใช้ `clubSpentExp` สูงสุด `[{ id, displayName, teamName, photoURL, clubSpentExp, displayRank }]` |
+| `exportDataTxt` | String | ข้อมูล String (.txt) ที่ถูกสร้างไว้แล้วล่วงหน้า สำหรับดาวน์โหลดทีมของ Top 50 ผู้เข้าแข่งขัน |
+| `updatedAt` | Timestamp | เวลาที่ประมวลผลการจัดอันดับครั้งล่าสุด |

@@ -1,5 +1,5 @@
 import { db } from '../../config/firebase';
-import { doc, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { doc, collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 
 const LIVE_MATCH_DOC_ID = 'live_match';
 
@@ -26,7 +26,7 @@ export const liveMatchService = {
    */
   subscribeToLiveEvents(callback) {
     const eventsRef = collection(db, 'public_data', LIVE_MATCH_DOC_ID, 'events');
-    const q = query(eventsRef, orderBy('timestamp', 'desc'));
+    const q = query(eventsRef, orderBy('timestamp', 'desc'), limit(50));
     
     return onSnapshot(q, (snapshot) => {
       const events = snapshot.docs.map(doc => ({

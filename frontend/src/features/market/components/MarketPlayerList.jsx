@@ -1,6 +1,6 @@
 import React from 'react';
 import PlayerRow from './PlayerRow';
-import SkeletonLoader from '../../components/common/SkeletonLoader';
+import SkeletonLoader from '../../../components/common/SkeletonLoader';
 
 export default function MarketPlayerList({ 
   isLoading, 

@@ -111,7 +111,12 @@ export const usePitchHandlers = ({
         toast.info(`เลือก ${formatPlayerName(popupPlayer.name)} แล้ว กดที่นักเตะคนอื่นหรือตำแหน่งว่างเพื่อสลับ`);
         break;
       case 'SUBSTITUTE':
-        useUserStore.getState().setPendingTargetSlot(popupPlayer.id);
+        if (!popupPlayer.isStarting) {
+           sellPlayer(popupPlayer.fullData);
+           useUserStore.getState().setPendingTargetSlot('bench');
+        } else {
+           useUserStore.getState().setPendingTargetSlot(popupPlayer.id);
+        }
         useUserStore.getState().setMarketFilterPos(popupPlayer.position);
         window.dispatchEvent(new CustomEvent('switchTab', { detail: 'market' }));
         toast.info(`กำลังพาไปยังตลาดเพื่อหาตัวแทนตำแหน่ง ${popupPlayer.position}...`);

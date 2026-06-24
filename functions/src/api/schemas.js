@@ -48,11 +48,18 @@ const returnCardSchema = z.object({
 const saveSquadSchema = z.object({
     userId: z.string().min(1),
     squadData: z.object({
-        mySquad: z.array(z.any()),
+        mySquad: z.array(z.object({
+            playerId: z.string().min(1),
+            position: z.string().min(1),
+            isStarting: z.boolean(),
+            slotIndex: z.number().nullable().optional(),
+            appliedCardId: z.string().nullable().optional(),
+            isLocked: z.boolean().optional()
+        })).min(11, "ต้องมีผู้เล่นอย่างน้อย 11 คน").max(15, "มีผู้เล่นเกินโควต้า 15 คน"),
         formation: z.string().optional(),
-        managerId: z.string().optional(),
-        captainId: z.string().optional(),
-        viceCaptainId: z.string().optional(),
+        managerId: z.string().nullable().optional(),
+        captainId: z.string().nullable().optional(),
+        viceCaptainId: z.string().nullable().optional(),
         budgetLeft: z.number().min(0, "Budget cannot be negative").optional()
     }).passthrough()
 });

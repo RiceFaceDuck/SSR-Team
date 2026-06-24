@@ -68,15 +68,15 @@ export const marketFetchService = {
         cachedPlayers = players;
         lastFetchTime = Date.now();
 
-        // 5. แบคอัพลง LocalStorage สำหรับ Offline Mode (กันเน็ตผู้เล่นหลุด)
+        // 5. แบคอัพลง SessionStorage สำหรับ Offline Mode (ใช้ SessionStorage ดีกว่า เพราะลบอัตโนมัติตอนปิดแท็บ)
         try {
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({
+          sessionStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({
             timestamp: lastFetchTime,
             data: players
           }));
-          console.log('%c💾 [MarketFetch] สร้างแบคอัพ Local สำเร็จ', 'color: #8b5cf6; font-weight: bold;');
+          console.log('%c💾 [MarketFetch] สร้างแบคอัพ Session สำเร็จ', 'color: #8b5cf6; font-weight: bold;');
         } catch (e) {
-          console.warn('⚠️ [MarketFetch] ไม่สามารถสร้าง Local Backup ได้ (Storage อาจเต็ม)');
+          console.warn('⚠️ [MarketFetch] ไม่สามารถสร้าง Session Backup ได้ (Storage อาจเต็ม)');
         }
 
         return players;
@@ -84,16 +84,16 @@ export const marketFetchService = {
       } catch (error) {
         console.error('❌ [MarketFetch] ล้มเหลวในการดึงข้อมูลจาก Firebase:', error);
         
-        // 6. Fallback (กู้ชีพ): ถ้าเน็ตมีปัญหา ลองดึงข้อมูลชุดล่าสุดจาก Local Storage
+        // 6. Fallback (กู้ชีพ): ถ้าเน็ตมีปัญหา ลองดึงข้อมูลชุดล่าสุดจาก Session Storage
         try {
-          const backup = localStorage.getItem(LOCAL_STORAGE_KEY);
+          const backup = sessionStorage.getItem(LOCAL_STORAGE_KEY);
           if (backup) {
             const parsedBackup = JSON.parse(backup);
-            console.log('%c🔄 [MarketFetch] ใช้งาน Offline Mode: ดึงข้อมูลแบคอัพจาก Local Storage สำเร็จ', 'color: #f97316; font-weight: bold;');
+            console.log('%c🔄 [MarketFetch] ใช้งาน Offline Mode: ดึงข้อมูลแบคอัพจาก Session Storage สำเร็จ', 'color: #f97316; font-weight: bold;');
             return parsedBackup.data; // นำข้อมูลเก่ามาให้เล่นแก้ขัด
           }
         } catch (fallbackError) {
-          console.error('❌ [MarketFetch] ไม่สามารถกู้ข้อมูลจาก Local Backup ได้');
+          console.error('❌ [MarketFetch] ไม่สามารถกู้ข้อมูลจาก Session Backup ได้');
         }
 
         // หากล้มเหลวทั้งหมด โยน Error ให้ UI นำไปโชว์
@@ -116,7 +116,7 @@ export const marketFetchService = {
     lastFetchTime = 0;
     fetchPromise = null;
     try {
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      sessionStorage.removeItem(LOCAL_STORAGE_KEY);
     } catch (e) {
       // เพิกเฉย
     }

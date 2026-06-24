@@ -65,8 +65,8 @@ const Dropzone = ({
   return (
     <div className="w-full">
       <div
-        className={`relative w-full p-8 border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all duration-200 cursor-pointer
-          ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}
+        className={`relative w-full p-8 border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all duration-300 ease-in-out cursor-pointer
+          ${isDragActive ? 'border-blue-500 bg-blue-50 scale-105 shadow-md' : 'border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400'}
           ${isLoading ? 'opacity-70 pointer-events-none cursor-not-allowed' : ''}
         `}
         onDragOver={handleDragOver}

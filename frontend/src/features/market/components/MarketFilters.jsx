@@ -61,8 +61,7 @@ const MarketFilters = ({
                 key={tab.value}
                 onClick={() => {
                   setActiveTab(tab.value);
-                  setMarketFilterPos(tab.value); 
-                  setPendingTargetSlot(null); 
+                  setMarketFilterPos(tab.value);
                 }}
                 className={`whitespace-nowrap px-4 py-2 rounded-lg text-xs font-bold border transition-all 
                   ${isActive 

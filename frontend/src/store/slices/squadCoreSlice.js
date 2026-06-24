@@ -44,9 +44,14 @@ export const squadCoreSlice = (set, get) => ({
     if (marketPlayers.length === 0) return state; // wait till loaded
     
     let squadValue = 0;
+    let validSquad = [];
+    let wasModified = false;
+    let kickedNames = [];
+
     state.mySquad.forEach(member => {
        const p = marketPlayers.find(p => String(p.sku) === String(member.playerId));
-       if (p) {
+       // 🛡️ Auto-kick logic: เตะนักเตะที่ไม่มีในฐานข้อมูล หรือโดนปิดใช้งาน
+       if (p && p.isActive !== false) {
          let price = parseFloat(p.price) || 0;
          
          // เช็คว่านักเตะคนนี้สวมการ์ด "ลดค่าตัวนักเตะ" หรือไม่
@@ -59,8 +64,29 @@ export const squadCoreSlice = (set, get) => ({
          }
          
          squadValue += price;
+         validSquad.push(member);
+       } else {
+         wasModified = true;
+         // ลองหาชื่อนักเตะเผื่อยังอยู่ใน mySquad เดิม หรือใส่รหัสไปก่อน
+         kickedNames.push(member.playerId); 
        }
     });
+
+    if (wasModified) {
+       // แจ้งเตือนผู้เล่นว่านักเตะถูกถอดออก
+       import('../../utils/toast').then(({ toast }) => {
+          toast.error(`พบนักเตะที่ไม่มีในระบบ ถูกถอดออกจากทีมอัตโนมัติ กรุณาจัดทีมใหม่และกดบันทึก`, { duration: 5000 });
+       });
+       
+       return { 
+           mySquad: validSquad, 
+           budgetLeft: Math.round((startingBudget - squadValue) * 10) / 10,
+           hasUnsavedChanges: true, // บังคับให้ผู้เล่นต้องกดเซฟใหม่
+           captainId: validSquad.some(p => p.playerId === state.captainId) ? state.captainId : null,
+           viceCaptainId: validSquad.some(p => p.playerId === state.viceCaptainId) ? state.viceCaptainId : null
+       };
+    }
+
     return { budgetLeft: Math.round((startingBudget - squadValue) * 10) / 10 };
   }),
 

@@ -66,12 +66,7 @@ export default function LeaderboardScreen() {
         {/* Leaderboard Section */}
         <div className={STYLES.card}>
           <LeaderboardTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-
-          <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
-            <span className="text-xs font-bold text-slate-500 w-12 text-center">อันดับ</span>
-            <span className="text-xs font-bold text-slate-500 flex-1 px-2">ชื่อทีม / ผู้จัดการ</span>
-            <span className="text-xs font-bold text-slate-500 text-right">{activeTab === 'club' ? 'EXP สะสม' : 'คะแนน'}</span>
-          </div>
+          
           
           <LeaderboardList 
             leaders={leaders} 

@@ -48,7 +48,9 @@ export default function LoginScreen({ onLogin }) {
 
   const copyUrl = () => {
       navigator.clipboard.writeText(window.location.href);
-      alert('คัดลอกลิงก์แล้ว! นำไปวางใน Chrome หรือ Safari ได้เลยครับ');
+      window.dispatchEvent(new CustomEvent('SHOW_TOAST', {
+        detail: { message: 'คัดลอกลิงก์แล้ว! นำไปวางใน Chrome หรือ Safari ได้เลยครับ', type: 'success' }
+      }));
   };
 
   return (

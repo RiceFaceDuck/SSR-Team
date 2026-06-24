@@ -56,12 +56,19 @@ exports.saveSquad = async (userId, squadData) => {
                                .collection('players').doc(p.playerId);
                 const pDoc = await transaction.get(pRef);
                 if (pDoc.exists) {
-                    const price = Number(pDoc.data().price) || 0;
+                    const playerData = pDoc.data();
+                    
+                    // 🛡️ Security Check: ป้องกันการบันทึกนักเตะที่โดนแบน หรือไม่อยู่ในระบบ (isActive = false)
+                    if (playerData.isActive === false) {
+                        throw new Error(`นักเตะ ${playerData.name || p.playerId} ถูกถอดออกจากระบบและไม่สามารถจัดลงทีมได้`);
+                    }
+
+                    const price = Number(playerData.price) || 0;
                     totalCost += price;
                     p.price = price;
                     
-                    const team = pDoc.data().team || 'UNKNOWN';
-                    const rawPos = pDoc.data().position || 'MF';
+                    const team = playerData.team || 'UNKNOWN';
+                    const rawPos = playerData.position || 'MF';
                     
                     // Normalize position
                     let pos = rawPos.toUpperCase();
@@ -80,7 +87,7 @@ exports.saveSquad = async (userId, squadData) => {
                         throw new Error(`เลือกนักเตะตำแหน่ง ${pos} เกินโควต้าที่กำหนด (${positionLimits[pos]} คน)`);
                     }
                 } else {
-                    throw new Error(`Player ${p.playerId} not found`);
+                    throw new Error(`ไม่พบข้อมูลนักเตะ ${p.playerId} ในระบบ`);
                 }
             }
         }

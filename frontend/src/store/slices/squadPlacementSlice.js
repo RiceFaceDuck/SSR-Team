@@ -6,14 +6,36 @@ export const squadPlacementSlice = (set, get) => ({
   projectedBudget: null,    
 
   startPlacement: (player) => {
-    const effectiveBudget = get().getEffectiveBudget() || 0;
+    let effectiveBudget = get().getEffectiveBudget() || 0;
     const currentSquad = get().mySquad || [];
     const gameRules = get().gameRules || null;
+    const { pendingTargetSlot } = get();
     
     const players = useMarketStore.getState().players || [];
-    const currentSquadObjects = currentSquad.map(sq => 
+    let currentSquadObjects = currentSquad.map(sq => 
       players.find(p => String(p.sku) === String(sq.playerId))
     ).filter(Boolean);
+
+    // If we are replacing a player from a specific slot, exclude them from validation and add their price to budget temporarily
+    if (pendingTargetSlot && String(pendingTargetSlot) !== 'bench' && String(pendingTargetSlot) !== 'null') {
+      const playerToReplaceSquadItem = currentSquad.find(sq => String(sq.slotIndex) === String(pendingTargetSlot) && sq.isStarting);
+      if (playerToReplaceSquadItem) {
+        const playerToReplace = currentSquadObjects.find(p => String(p.sku) === String(playerToReplaceSquadItem.playerId));
+        if (playerToReplace) {
+          currentSquadObjects = currentSquadObjects.filter(p => String(p.sku) !== String(playerToReplace.sku));
+          
+          let priceToRefund = parseFloat(playerToReplace.price) || 0;
+          if (playerToReplaceSquadItem.appliedCardId) {
+             const card = get().availableCards?.find(c => c.id === playerToReplaceSquadItem.appliedCardId);
+             if (card && card.effectLogic?.type === 'PRICE_REDUCTION') {
+                priceToRefund -= parseFloat(card.effectLogic.value) || 0;
+                if (priceToRefund < 0) priceToRefund = 0;
+             }
+          }
+          effectiveBudget += priceToRefund;
+        }
+      }
+    }
 
     const validation = validateBuyPlayer(player, currentSquadObjects, effectiveBudget, gameRules);
     
@@ -28,7 +50,7 @@ export const squadPlacementSlice = (set, get) => ({
       window.navigator.vibrate(30);
     }
 
-    const { pendingTargetSlot } = get();
+
     if (pendingTargetSlot) {
       set({ pendingPlacement: player });
       const confirmResult = get().confirmPlacement(pendingTargetSlot);
@@ -59,17 +81,36 @@ export const squadPlacementSlice = (set, get) => ({
        return { success: false, message: 'เกิดข้อผิดพลาด: งบประมาณไม่เพียงพอ' };
     }
 
-    const newBudget = Math.round((budgetLeft - playerPrice) * 10) / 10;
-    const newSquad = [...mySquad];
+    let newBudget = Math.round((budgetLeft - playerPrice) * 10) / 10;
+    let newSquad = [...mySquad];
     const normalizedPos = normalizePosition(pendingPlacement.position);
     
-    const actualSlotIndex = slotIndex === 'bench' ? null : slotIndex;
+    const actualSlotIndex = (slotIndex === 'bench' || slotIndex === 'null' || slotIndex === null) ? null : slotIndex;
 
     if (actualSlotIndex !== undefined && actualSlotIndex !== null) {
-      const existingStarterIndex = newSquad.findIndex(p => p.slotIndex === actualSlotIndex && p.isStarting);
+      const existingStarterIndex = newSquad.findIndex(p => String(p.slotIndex) === String(actualSlotIndex) && p.isStarting);
       if (existingStarterIndex !== -1) {
-        newSquad[existingStarterIndex].isStarting = false;
-        newSquad[existingStarterIndex].slotIndex = null;
+        // Find the actual player object to get their price
+        const oldPlayerSquadData = newSquad[existingStarterIndex];
+        const players = useMarketStore.getState().players || [];
+        const oldPlayer = players.find(p => String(p.sku) === String(oldPlayerSquadData.playerId));
+        
+        if (oldPlayer) {
+           let oldPlayerPrice = parseFloat(oldPlayer.price) || 0;
+           
+           if (oldPlayerSquadData.appliedCardId) {
+              const card = get().availableCards?.find(c => c.id === oldPlayerSquadData.appliedCardId);
+              if (card && card.effectLogic?.type === 'PRICE_REDUCTION') {
+                 oldPlayerPrice -= parseFloat(card.effectLogic.value) || 0;
+                 if (oldPlayerPrice < 0) oldPlayerPrice = 0;
+              }
+           }
+           
+           newBudget = Math.round((newBudget + oldPlayerPrice) * 10) / 10;
+        }
+        
+        // Remove the old player entirely (Sell them) instead of just moving to bench
+        newSquad.splice(existingStarterIndex, 1);
       }
     }
 

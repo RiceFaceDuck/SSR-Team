@@ -79,7 +79,7 @@ const ExcelPreview = ({ data = [], onConfirm, onCancel, isLoading = false }) => 
         <div className="mx-auto w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
           <AlertTriangle className="w-8 h-8 text-yellow-600" />
         </div>
-        <h3 className="text-xl font-bold text-gray-800 mb-2">ไม่พบข้อมูล หรือ รูปแบบตารางไม่ถูกต้อง</h3>
+        <h3 className="text-xl font-bold text-gray-800 mb-2">ไม่พบข้อมูล หรือ รูปแบบตารางไม่ถูกต้อง (อัปเดตล่าสุด)</h3>
         <p className="text-gray-600 mb-6 max-w-lg mx-auto leading-relaxed">
           ระบบไม่สามารถดึงข้อมูลนักเตะจากไฟล์ Excel ของคุณได้ กรุณาตรวจสอบว่ามีข้อมูลใน Sheet แรก และมี <span className="font-semibold text-gray-800">หัวตาราง (Header)</span> ตรงตามที่ระบบต้องการอย่างน้อย 4 ช่องด้านล่างนี้:
         </p>

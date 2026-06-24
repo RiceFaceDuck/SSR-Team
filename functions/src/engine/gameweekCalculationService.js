@@ -67,18 +67,32 @@ exports.gameweekCalculationService = {
           const userData = userDoc.data();
           const userId = userDoc.id;
           const squadData = squadSnap.data();
-          const { mySquad, captainId, viceCaptainId, manager, budgetLeft, currentStreak = 0 } = squadData;
+          let { mySquad, captainId, viceCaptainId, manager, budgetLeft, currentStreak = 0 } = squadData;
           
           let processedSquad = [];
+          let squadWasModified = false;
+          let refundedBudget = 0;
+
           if (mySquad && Array.isArray(mySquad)) {
             for (const playerItem of mySquad) {
+              let pData = playerStatsMap[playerItem.playerId];
+              
+              // 🛡️ Auto-kick: เตะนักเตะที่หายไป หรือถูกปิดสถานะ (isActive = false) ออกจากทีม
+              if (!pData || pData.isActive === false) {
+                 squadWasModified = true;
+                 // คืนเงินถ้ารู้ราคา (กรณี isActive = false แต่ยังมี pData)
+                 if (pData && pData.price) {
+                     refundedBudget += Number(pData.price);
+                 }
+                 continue; // ข้ามการเพิ่มเข้า processedSquad (เท่ากับเตะออก)
+              }
+
               let pointsEarned = 0;
               let hasPlayed = false;
-              let pData = playerStatsMap[playerItem.playerId];
               
               const isPlaying = playerItem.isStarting || (playerItem.appliedCard?.effectLogic?.type === 'BENCH_BOOST');
               
-              if (isPlaying && pData) {
+              if (isPlaying) {
                   pointsEarned = calculatePlayerPoints(pData.stats, pData.position, scoringRules);
                   hasPlayed = (pData.stats?.minutes > 0) || (pData.stats?.played > 0) || pointsEarned > 0;
               }
@@ -88,11 +102,20 @@ exports.gameweekCalculationService = {
                 basePoints: pointsEarned,
                 pointsEarned: pointsEarned,
                 hasPlayed,
-                team: pData ? pData.team : 'UNK',
-                yellowCards: pData && pData.stats ? (pData.stats.yellowCards || 0) : 0,
-                stats: pData ? pData.stats : {}
+                team: pData.team || 'UNK',
+                yellowCards: pData.stats ? (pData.stats.yellowCards || 0) : 0,
+                stats: pData.stats || {}
               });
             }
+          }
+
+          // อัปเดตงบประมาณหากมีนักเตะถูกเตะออก
+          if (squadWasModified) {
+              budgetLeft = parseFloat((budgetLeft + refundedBudget).toFixed(1));
+              
+              // ล้างกัปตันหากคนที่ถูกเตะคือกัปตัน
+              if (!processedSquad.some(p => p.playerId === captainId)) captainId = null;
+              if (!processedSquad.some(p => p.playerId === viceCaptainId)) viceCaptainId = null;
           }
 
           // 5. Apply Modifiers via Centralized Pipeline
@@ -154,12 +177,20 @@ exports.gameweekCalculationService = {
             lastGameweekPoints: totalGwPoints
           });
 
-          batch.update(squadSnap.ref, {
+          const squadUpdateData = {
             mySquad: squadForSave,
             carriedOverBudget: carriedOverBudget + streakReward,
             currentStreak: newStreak,
             updatedAt: admin.firestore.FieldValue.serverTimestamp()
-          });
+          };
+          
+          if (squadWasModified) {
+              squadUpdateData.budgetLeft = budgetLeft;
+              squadUpdateData.captainId = captainId;
+              squadUpdateData.viceCaptainId = viceCaptainId;
+          }
+
+          batch.update(squadSnap.ref, squadUpdateData);
 
           batchCount += 3;
           } catch (userErr) {

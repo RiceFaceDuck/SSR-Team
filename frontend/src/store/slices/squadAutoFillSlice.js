@@ -33,7 +33,36 @@ export const squadAutoFillSlice = (set, get) => ({
     }
 
     // 💸 3. ใช้งบให้คุ้มที่สุด
-    const currentBaseBudget = getEffectiveBudget() || budgetLeft;
+    let currentBaseBudget = getEffectiveBudget() || budgetLeft;
+
+    // คืนเงินนักเตะที่ไม่ได้ล็อคกลับสู่งบประมาณสุ่ม
+    if (mySquad && mySquad.length > 0) {
+        mySquad.forEach(p => {
+            if (!p.isLocked) {
+                const pData = marketPlayers.find(mp => String(mp.sku) === String(p.playerId));
+                if (pData) {
+                    let priceToRefund = parseFloat(pData.price) || 0;
+                    if (p.appliedCardId) {
+                        const card = get().availableCards?.find(c => c.id === p.appliedCardId);
+                        if (card && card.effectLogic?.type === 'PRICE_REDUCTION') {
+                            priceToRefund -= parseFloat(card.effectLogic.value) || 0;
+                            if (priceToRefund < 0) priceToRefund = 0;
+                        }
+                    }
+                    currentBaseBudget += priceToRefund;
+                }
+            }
+        });
+    }
+    currentBaseBudget = Math.round(currentBaseBudget * 10) / 10;
+
+    // 🎲 3.5 สุ่มโหมดการจัดทีม (เพิ่มความหลากหลาย)
+    const modes = ['balanced', 'star_focused', 'wildcard'];
+    const selectedMode = modes[Math.floor(Math.random() * modes.length)];
+    let modeText = '';
+    if (selectedMode === 'balanced') modeText = 'สายสมดุลย์';
+    else if (selectedMode === 'star_focused') modeText = 'เน้นสตาร์ดัง';
+    else modeText = 'สายอินดี้ (Wildcard)';
 
     return new Promise((resolve) => {
         // 4. ให้ Engine จัดทีมผ่าน Web Worker
@@ -86,7 +115,7 @@ export const squadAutoFillSlice = (set, get) => ({
                         budgetLeft: result.newBudget, 
                         hasUnsavedChanges: true 
                     }); 
-                    resolve({ success: true, message: '🔥 Super Auto Pick จัดทีมสุดมันส์ให้คุณเรียบร้อยแล้ว!' });
+                    resolve({ success: true, message: `🔥 Super Auto Pick จัดทีมสุดมันส์ให้คุณเรียบร้อยแล้ว! (สไตล์: ${modeText})` });
                 } else {
                     resolve({ success: false, message: result.message });
                 }
@@ -101,7 +130,8 @@ export const squadAutoFillSlice = (set, get) => ({
             mySquad,
             formation: randomFormation,
             budgetLeft: currentBaseBudget,
-            effectiveBudget: currentBaseBudget
+            effectiveBudget: currentBaseBudget,
+            mode: selectedMode
         });
     });
   }

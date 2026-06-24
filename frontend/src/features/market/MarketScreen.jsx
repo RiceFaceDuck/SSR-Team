@@ -7,10 +7,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, ArrowUpDown } from 'lucide-react';
-import PlayerRow from './PlayerRow';
-import MarketFilters from './MarketFilters';
-import MarketHeader from './MarketHeader';
-import MarketPlayerList from './MarketPlayerList';
+import PlayerRow from './components/PlayerRow';
+import MarketFilters from './components/MarketFilters';
+import MarketHeader from './components/MarketHeader';
+import MarketPlayerList from './components/MarketPlayerList';
 import GoogleAdWrapper from '../../components/ads/GoogleAdWrapper';
 import BudgetBar from '../../components/common/BudgetBar';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
@@ -25,6 +25,7 @@ import { useGameStore } from '../../store/useGameStore';
 import { validateSellPlayer } from '../../utils/squadValidator';
 import { toast } from '../../utils/toast';
 import { formatPlayerName } from '../../utils/formatters';
+import { playSound } from '../../config/theme';
 
 export default function MarketScreen() {
   // 1. ดึง State และ Action จาก Stores
@@ -93,6 +94,7 @@ export default function MarketScreen() {
 
   // 4. Handlers (Refactored to keep UI component clean)
   const handlePlayerClick = (player) => {
+    playSound('click'); // 🌟 Haptic Feedback
     // โยนเข้าสู่ระบบเตรียมจัดวาง (ยังไม่หักเงินจริง)
     const result = startPlacement(player);
     

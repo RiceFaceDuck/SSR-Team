@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Activity, TrendingUp, Shield, Target, Clock, AlertCircle } from 'lucide-react';
-import { formatPlayerName } from '../../utils/formatters';
+import { formatPlayerName, getOptimizedImageUrl } from '../../utils/formatters';
 
 const PlayerStatsDetailModal = ({ isOpen, onClose, player }) => {
   if (!isOpen || !player) return null;
@@ -25,7 +25,7 @@ const PlayerStatsDetailModal = ({ isOpen, onClose, player }) => {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-slate-800 overflow-hidden border border-slate-700 flex items-center justify-center">
               <img 
-                src={player.imageUrl || player.image || '/assets/default-avatar.png'} 
+                src={getOptimizedImageUrl(player.imageUrl || player.image) || '/assets/default-avatar.png'} 
                 alt={player.name}
                 className="w-full h-full object-cover"
                 onError={(e) => { e.target.src = '/assets/default-avatar.png' }}
