@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  LogOut, 
-  ChevronRight
-} from 'lucide-react';
+import { LogOut, ChevronRight } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { useGameStore } from '../../store/useGameStore';
 
@@ -24,17 +21,11 @@ const playSound = (type) => {
 
 export default function ProfileScreen() {
   // 🌟 NEW: ดึงข้อมูล transactions และฟังก์ชันโหลดจาก Store มาด้วย
-  const { 
-    userData, 
-    balls, 
-    clearAuth,
-    transactions,
-    isTransactionsLoading,
-    loadTransactions
-  } = useUserStore();
-  
-  const themeConfig = useGameStore(state => state.themeConfig);
-  
+  const { userData, balls, clearAuth, transactions, isTransactionsLoading, loadTransactions } =
+    useUserStore();
+
+  const themeConfig = useGameStore((state) => state.themeConfig);
+
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isClubManagerOpen, setIsClubManagerOpen] = useState(false);
@@ -59,14 +50,19 @@ export default function ProfileScreen() {
     if (!timestamp) return '';
     // รองรับทั้ง Firestore Timestamp และ Date ปกติ
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }) + ' • ' + 
-           date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+    return (
+      date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }) +
+      ' • ' +
+      date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+    );
   };
 
   return (
-    <div 
+    <div
       className="p-3 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24 min-h-screen bg-cover bg-center bg-fixed relative flex flex-col"
-      style={{ backgroundImage: `url(${themeConfig?.marketBackgroundUrl || 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000'})` }}
+      style={{
+        backgroundImage: `url(${themeConfig?.marketBackgroundUrl || 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000'})`,
+      }}
     >
       {/* Blurred overlay */}
       <div className="absolute inset-0 bg-slate-50/80 backdrop-blur-md pointer-events-none"></div>
@@ -80,113 +76,113 @@ export default function ProfileScreen() {
             </h2>
           </div>
         </div>
-      
-      {/* 👤 Header: ข้อมูลผู้เล่น */}
-      <ProfileHeaderCard 
-        userData={userData} 
-        onOpenSettings={() => setIsSettingsOpen(true)} 
-        playSound={playSound} 
-      />
 
-      {/* ⚽ Balls Economy Card (Premium Style) */}
-      <WalletSummaryView 
-        balls={balls} 
-        onOpenHistory={() => setIsHistoryOpen(true)} 
-        playSound={playSound} 
-      />
+        {/* 👤 Header: ข้อมูลผู้เล่น */}
+        <ProfileHeaderCard
+          userData={userData}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          playSound={playSound}
+        />
 
-      {/* 🏟️ My Club Banner Button */}
-      <button 
-        onClick={() => {
-          playSound('click');
-          setIsClubManagerOpen(true);
-        }}
-        className="w-full my-4 relative overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 p-5 rounded-2xl border border-indigo-500/30 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-indigo-500/20 active:scale-[0.98] transition-all group"
-      >
-        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl group-hover:bg-indigo-500/30 transition-colors" />
-        <div className="relative z-10 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 flex items-center justify-center shadow-inner">
-              <span className="text-xl">🏰</span>
+        {/* ⚽ Balls Economy Card (Premium Style) */}
+        <WalletSummaryView
+          balls={balls}
+          onOpenHistory={() => setIsHistoryOpen(true)}
+          playSound={playSound}
+        />
+
+        {/* 🏟️ My Club Banner Button */}
+        <button
+          onClick={() => {
+            playSound('click');
+            setIsClubManagerOpen(true);
+          }}
+          className="w-full my-4 relative overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 p-5 rounded-2xl border border-indigo-500/30 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-indigo-500/20 active:scale-[0.98] transition-all group"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl group-hover:bg-indigo-500/30 transition-colors" />
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 flex items-center justify-center shadow-inner">
+                <span className="text-xl">🏰</span>
+              </div>
+              <div className="text-left">
+                <h3 className="font-black text-white text-lg tracking-tight leading-tight">
+                  MY CLUB
+                </h3>
+                <p className="text-indigo-200 text-xs font-medium">Manage Facilities & Upgrades</p>
+              </div>
             </div>
-            <div className="text-left">
-              <h3 className="font-black text-white text-lg tracking-tight leading-tight">MY CLUB</h3>
-              <p className="text-indigo-200 text-xs font-medium">Manage Facilities & Upgrades</p>
-            </div>
+            <ChevronRight
+              size={24}
+              className="text-indigo-300 group-hover:translate-x-1 transition-transform"
+            />
           </div>
-          <ChevronRight size={24} className="text-indigo-300 group-hover:translate-x-1 transition-transform" />
+        </button>
+
+        {/* 🏆 Gameweek History Slider */}
+        <GameweekHistory />
+
+        {/* 💳 Statement: ประวัติรายการล่าสุด (Banking Style) แทนตู้โชว์ */}
+        <TransactionHistoryPreview
+          transactions={transactions}
+          isTransactionsLoading={isTransactionsLoading}
+          onOpenHistory={() => setIsHistoryOpen(true)}
+          formatDate={formatDate}
+        />
+
+        {/* ⚙️ เมนูอื่นๆ และปุ่ม Logout */}
+        <div className="space-y-3">
+          <button
+            onClick={() => {
+              playSound('click');
+              setIsAchievementOpen(true);
+            }}
+            className="w-full bg-white p-4 rounded-xl flex items-center justify-between border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:bg-slate-50 active:scale-[0.98] transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-100 text-amber-600 rounded-lg">
+                <span className="text-lg leading-none">🏆</span>
+              </div>
+              <div className="text-left">
+                <span className="font-bold text-slate-800 text-sm block">ความสำเร็จ & ฉายา</span>
+                <span className="text-xs text-slate-500 font-medium">ดูและตั้งค่าฉายาของคุณ</span>
+              </div>
+            </div>
+            <ChevronRight size={18} className="text-slate-400" />
+          </button>
+
+          <button className="w-full bg-white p-4 rounded-xl flex items-center justify-between border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:bg-slate-50 active:scale-[0.98] transition-all">
+            <span className="font-semibold text-slate-800 text-sm">คู่มือการใช้งานระบบ</span>
+            <ChevronRight size={18} className="text-slate-400" />
+          </button>
+          <button className="w-full bg-white p-4 rounded-xl flex items-center justify-between border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:bg-slate-50 active:scale-[0.98] transition-all">
+            <span className="font-semibold text-slate-800 text-sm">ติดต่อทีมงาน Support</span>
+            <ChevronRight size={18} className="text-slate-400" />
+          </button>
+
+          <button
+            onClick={handleLogout}
+            className="w-full mt-4 py-4 bg-red-50 hover:bg-red-100 text-red-500 font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-red-200 active:scale-95 transition-all shadow-md"
+          >
+            <LogOut size={16} />
+            ออกจากระบบ
+          </button>
         </div>
-      </button>
 
-      {/* 🏆 Gameweek History Slider */}
-      <GameweekHistory />
+        {/* 📜 Bottom Sheet: ประวัติการทำรายการ (ซ่อนอยู่ จะโผล่มาเมื่อ isHistoryOpen เป็น true) */}
+        <TransactionHistory isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
 
-      {/* 💳 Statement: ประวัติรายการล่าสุด (Banking Style) แทนตู้โชว์ */}
-      <TransactionHistoryPreview 
-        transactions={transactions} 
-        isTransactionsLoading={isTransactionsLoading} 
-        onOpenHistory={() => setIsHistoryOpen(true)} 
-        formatDate={formatDate} 
-      />
+        {/* ⚙️ Settings Modal */}
+        <ProfileSettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
 
-      {/* ⚙️ เมนูอื่นๆ และปุ่ม Logout */}
-      <div className="space-y-3">
-        <button 
-          onClick={() => { playSound('click'); setIsAchievementOpen(true); }}
-          className="w-full bg-white p-4 rounded-xl flex items-center justify-between border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:bg-slate-50 active:scale-[0.98] transition-all"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-amber-100 text-amber-600 rounded-lg"><span className="text-lg leading-none">🏆</span></div>
-            <div className="text-left">
-              <span className="font-bold text-slate-800 text-sm block">ความสำเร็จ & ฉายา</span>
-              <span className="text-xs text-slate-500 font-medium">ดูและตั้งค่าฉายาของคุณ</span>
-            </div>
-          </div>
-          <ChevronRight size={18} className="text-slate-400" />
-        </button>
+        {/* 🏰 Club Manager Modal */}
+        <ClubManagerModal isOpen={isClubManagerOpen} onClose={() => setIsClubManagerOpen(false)} />
 
-        <button className="w-full bg-white p-4 rounded-xl flex items-center justify-between border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:bg-slate-50 active:scale-[0.98] transition-all">
-          <span className="font-semibold text-slate-800 text-sm">คู่มือการใช้งานระบบ</span>
-          <ChevronRight size={18} className="text-slate-400" />
-        </button>
-        <button className="w-full bg-white p-4 rounded-xl flex items-center justify-between border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:bg-slate-50 active:scale-[0.98] transition-all">
-          <span className="font-semibold text-slate-800 text-sm">ติดต่อทีมงาน Support</span>
-          <ChevronRight size={18} className="text-slate-400" />
-        </button>
-
-        <button 
-          onClick={handleLogout}
-          className="w-full mt-4 py-4 bg-red-50 hover:bg-red-100 text-red-500 font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-red-200 active:scale-95 transition-all shadow-md"
-        >
-          <LogOut size={16} />
-          ออกจากระบบ
-        </button>
-      </div>
-
-      {/* 📜 Bottom Sheet: ประวัติการทำรายการ (ซ่อนอยู่ จะโผล่มาเมื่อ isHistoryOpen เป็น true) */}
-      <TransactionHistory 
-        isOpen={isHistoryOpen} 
-        onClose={() => setIsHistoryOpen(false)} 
-      />
-
-      {/* ⚙️ Settings Modal */}
-      <ProfileSettingsModal 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-      />
-
-      {/* 🏰 Club Manager Modal */}
-      <ClubManagerModal 
-        isOpen={isClubManagerOpen}
-        onClose={() => setIsClubManagerOpen(false)}
-      />
-
-      {/* 🏆 Achievement Manager Modal */}
-      <AchievementManager 
-        isOpen={isAchievementOpen}
-        onClose={() => setIsAchievementOpen(false)}
-      />
-
+        {/* 🏆 Achievement Manager Modal */}
+        <AchievementManager
+          isOpen={isAchievementOpen}
+          onClose={() => setIsAchievementOpen(false)}
+        />
       </div>
     </div>
   );

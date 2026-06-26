@@ -40,7 +40,10 @@ export default function UserTable({ users, isLoading, openAdjustModal }) {
               </td>
               <td className="px-5 py-4 border-b border-gray-200 bg-transparent text-sm text-right">
                 <span className="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
-                  <span aria-hidden className="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span>
+                  <span
+                    aria-hidden
+                    className="absolute inset-0 bg-green-200 opacity-50 rounded-full"
+                  ></span>
                   <span className="relative text-lg">{user.balls?.toLocaleString() || 0}</span>
                 </span>
               </td>

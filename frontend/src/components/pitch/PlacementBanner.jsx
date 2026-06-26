@@ -24,13 +24,12 @@ export default function PlacementBanner() {
       */}
       <div className="w-full max-w-md animate-in slide-in-from-top-4 fade-in duration-300 pointer-events-auto">
         <div className="bg-slate-900/90 backdrop-blur-md border border-emerald-500/40 shadow-[0_8px_30px_rgba(16,185,129,0.2)] rounded-2xl p-3 flex items-center justify-between">
-          
           {/* ฝั่งซ้าย: ไอคอน และ ข้อมูลนักเตะ */}
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="w-10 h-10 shrink-0 rounded-full bg-emerald-500/20 flex items-center justify-center animate-pulse">
               <MapPin className="text-emerald-400" size={20} />
             </div>
-            
+
             <div className="min-w-0">
               <p className="text-emerald-400 font-bold text-[10px] mb-0.5 uppercase tracking-wider">
                 โหมดจัดวางนักเตะ
@@ -45,7 +44,7 @@ export default function PlacementBanner() {
               </div>
             </div>
           </div>
-          
+
           {/* ฝั่งขวา: ปุ่มยกเลิก */}
           <button
             onClick={handleCancel}
@@ -54,7 +53,6 @@ export default function PlacementBanner() {
           >
             <X size={18} strokeWidth={2.5} />
           </button>
-          
         </div>
       </div>
     </div>

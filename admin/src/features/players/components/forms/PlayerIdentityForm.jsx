@@ -1,5 +1,14 @@
 import React, { useState, useRef } from 'react';
-import { Info, Image as ImageIcon, User, UploadCloud, Copy, Check, Sparkles, Loader2 } from 'lucide-react';
+import {
+  Info,
+  Image as ImageIcon,
+  User,
+  UploadCloud,
+  Copy,
+  Check,
+  Sparkles,
+  Loader2,
+} from 'lucide-react';
 import { uploadImageToDrive } from '../../../../utils/googleDriveUploader';
 import { getOptimizedImageUrl } from '../../utils/formatters';
 
@@ -44,6 +53,9 @@ const PlayerIdentityForm = ({ formData, handleChange, handleFullNameChange, isEd
 - อัตราส่วนภาพ: 1:1 (สี่เหลี่ยมจัตุรัส)
 - โทนสีและลายเส้น (Art Style): ลายเส้นคมชัด, ใช้สีสันสดใส (Vibrant), มีแสงเงาที่ดูมีมิติแบบ 3D/Esports
 - ขนาดไฟล์: บีบอัดให้เล็กที่สุด เหมาะสำหรับใช้บนเว็บไซต์
+- ออกแบบให้นักเตะมีการทำท่า Action (สไตล์ E-sport) เหมาะสมกับ Character ดังกล่าว
+- ชื่อไฟล์จะต้องตรงกับชื่อนักเตะคนนั้นๆ
+- ชุดสวมใส่ไม่จำเป็นต้องสมจริง (แต่ยังคงเอกลักษณ์เรื่องสี ชุดเหย้า)
 </format>
 
 <rule>
@@ -62,38 +74,54 @@ const PlayerIdentityForm = ({ formData, handleChange, handleFullNameChange, isEd
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-        <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><Info size={16} /></div>
+        <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
+          <Info size={16} />
+        </div>
         <h3 className="font-semibold text-gray-700">ข้อมูลระบุตัวตน</h3>
       </div>
-      
+
       {/* พรีวิวภาพนักเตะ */}
       <div className="flex flex-col items-center justify-center p-4 bg-gray-50 border border-gray-200 border-dashed rounded-xl relative overflow-hidden group hover:border-blue-300 transition-colors">
         {formData.imageUrl ? (
-            <img src={getOptimizedImageUrl(formData.imageUrl)} alt="Preview" className="w-24 h-24 object-cover rounded-full border-4 border-white shadow-md bg-white z-10" onError={(e) => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
+          <img
+            src={getOptimizedImageUrl(formData.imageUrl)}
+            alt="Preview"
+            className="w-24 h-24 object-cover rounded-full border-4 border-white shadow-md bg-white z-10"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'flex';
+            }}
+          />
         ) : null}
-        <div className={`w-24 h-24 bg-gray-200 rounded-full border-4 border-white shadow-md items-center justify-center ${formData.imageUrl ? 'hidden' : 'flex'}`}>
+        <div
+          className={`w-24 h-24 bg-gray-200 rounded-full border-4 border-white shadow-md items-center justify-center ${formData.imageUrl ? 'hidden' : 'flex'}`}
+        >
           <User size={32} className="text-gray-400 group-hover:text-blue-400 transition-colors" />
         </div>
-        
+
         {/* ปุ่มอัปโหลด */}
         <div className="mt-4 w-full flex flex-col items-center gap-2">
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileUpload} 
-            accept="image/jpeg, image/png, image/webp" 
-            className="hidden" 
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            accept="image/jpeg, image/png, image/webp"
+            className="hidden"
           />
-          <button 
+          <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
             className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-sm font-medium transition-colors border border-blue-200 w-full"
           >
-            {isUploading ? <Loader2 size={16} className="animate-spin" /> : <UploadCloud size={16} />}
+            {isUploading ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <UploadCloud size={16} />
+            )}
             {isUploading ? 'กำลังอัปโหลด...' : 'อัปโหลดรูปภาพ'}
           </button>
-          
+
           {uploadError && <div className="text-xs text-red-500 mt-1">{uploadError}</div>}
         </div>
 
@@ -128,7 +156,9 @@ const PlayerIdentityForm = ({ formData, handleChange, handleFullNameChange, isEd
             {copied ? 'คัดลอกแล้ว' : 'คัดลอก'}
           </button>
         </div>
-        <p className="text-xs text-purple-600/80 mb-2">ใช้ข้อความนี้เพื่อสร้างรูปภาพนักเตะที่ตรงตามสไตล์ของเกม (เปลี่ยนตามชื่อนักเตะ)</p>
+        <p className="text-xs text-purple-600/80 mb-2">
+          ใช้ข้อความนี้เพื่อสร้างรูปภาพนักเตะที่ตรงตามสไตล์ของเกม (เปลี่ยนตามชื่อนักเตะ)
+        </p>
         <div className="bg-white/60 p-3 rounded-lg border border-purple-100/50 text-xs text-gray-700 max-h-32 overflow-y-auto custom-scrollbar font-mono">
           {geminiPrompt.split('\n').map((line, i) => (
             <React.Fragment key={i}>
@@ -141,12 +171,18 @@ const PlayerIdentityForm = ({ formData, handleChange, handleFullNameChange, isEd
 
       <div>
         <label className="flex justify-between items-end text-sm font-medium text-gray-700 mb-1">
-          <span>SKU (รหัสอ้างอิง) <span className="text-red-500">*</span></span>
+          <span>
+            SKU (รหัสอ้างอิง) <span className="text-red-500">*</span>
+          </span>
           {formData.sku && formData.sku.startsWith('API-') && (
-            <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded border border-green-200">API Synced</span>
+            <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded border border-green-200">
+              API Synced
+            </span>
           )}
           {formData.sku && formData.sku.startsWith('EXCEL-') && (
-            <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded border border-blue-200">Excel Import</span>
+            <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded border border-blue-200">
+              Excel Import
+            </span>
           )}
         </label>
         <input

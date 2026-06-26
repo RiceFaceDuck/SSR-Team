@@ -23,12 +23,12 @@ export const commitPlayerValues = async (playersToUpdate) => {
     for (let i = 0; i < total; i++) {
       const p = playersToUpdate[i];
       const playerRef = doc(db, `artifacts/${APP_ID}/public/data/players`, p.id);
-      
+
       currentBatch.update(playerRef, {
         price: p.newPrice,
         oldPrice: p.oldPrice,
         priceDiff: p.priceDiff,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
 
       countInBatch++;

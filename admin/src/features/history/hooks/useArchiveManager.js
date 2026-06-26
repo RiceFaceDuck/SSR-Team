@@ -12,7 +12,11 @@ export const useArchiveManager = () => {
       return;
     }
 
-    if (!window.confirm(`คุณต้องการ Archive ข้อมูลของสัปดาห์ ${gameweekId} ใช่หรือไม่? ข้อมูลสดจะถูกย้ายและลบออกเพื่อเตรียมสำหรับสัปดาห์ถัดไป`)) {
+    if (
+      !window.confirm(
+        `คุณต้องการ Archive ข้อมูลของสัปดาห์ ${gameweekId} ใช่หรือไม่? ข้อมูลสดจะถูกย้ายและลบออกเพื่อเตรียมสำหรับสัปดาห์ถัดไป`
+      )
+    ) {
       return;
     }
 
@@ -22,9 +26,11 @@ export const useArchiveManager = () => {
 
     try {
       const result = await historyDatabase.archiveGameweekData(gameweekId);
-      
+
       if (result.success) {
-        setArchiveResult(`สำเร็จ! ย้ายข้อมูลแล้วจำนวน ${result.archivedCount || 0} รายการ (จำนวน ${result.batches || 0} batches)`);
+        setArchiveResult(
+          `สำเร็จ! ย้ายข้อมูลแล้วจำนวน ${result.archivedCount || 0} รายการ (จำนวน ${result.batches || 0} batches)`
+        );
       } else {
         setError(result.message || 'เกิดข้อผิดพลาดในการ Archive');
       }
@@ -46,6 +52,6 @@ export const useArchiveManager = () => {
     archiveResult,
     error,
     handleArchive,
-    clearResult
+    clearResult,
   };
 };

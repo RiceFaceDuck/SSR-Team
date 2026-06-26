@@ -4,12 +4,7 @@ import React, { useEffect, useRef } from 'react';
  * Component สำหรับยิงเอฟเฟกต์พลุกระดาษตอนแลกของรางวัลสำเร็จ (AAA Gamification)
  * อัปเดต: โหลดผ่าน CDN อัตโนมัติ ไม่ต้อง npm install
  */
-const ConfettiEffect = ({ 
-  isActive, 
-  duration = 2500, 
-  onComplete,
-  type = 'burst' 
-}) => {
+const ConfettiEffect = ({ isActive, duration = 2500, onComplete, type = 'burst' }) => {
   const scriptLoaded = useRef(false);
 
   // โหลดสคริปต์ canvas-confetti จาก CDN เมื่อ Component ถูกเมาท์
@@ -23,7 +18,8 @@ const ConfettiEffect = ({
     if (!document.getElementById(scriptId)) {
       const script = document.createElement('script');
       script.id = scriptId;
-      script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js';
+      script.src =
+        'https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js';
       script.onload = () => {
         scriptLoaded.current = true;
       };
@@ -58,13 +54,18 @@ const ConfettiEffect = ({
         fire(0.1, { spread: 120, startVelocity: 45 });
 
         if (onComplete) setTimeout(onComplete, duration);
-
       } else if (type === 'fireworks') {
         // 🎆 โหมด 2: ยิงต่อเนื่องแบบดอกไม้ไฟ
         const animationEnd = Date.now() + duration;
-        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999, colors: ssrColors };
+        const defaults = {
+          startVelocity: 30,
+          spread: 360,
+          ticks: 60,
+          zIndex: 9999,
+          colors: ssrColors,
+        };
 
-        const interval = setInterval(function() {
+        const interval = setInterval(function () {
           const timeLeft = animationEnd - Date.now();
 
           if (timeLeft <= 0) {
@@ -74,10 +75,18 @@ const ConfettiEffect = ({
           }
 
           const particleCount = 50 * (timeLeft / duration);
-          confetti({ ...defaults, particleCount, origin: { x: Math.random() * 0.3, y: Math.random() - 0.2 } });
-          confetti({ ...defaults, particleCount, origin: { x: Math.random() * 0.3 + 0.7, y: Math.random() - 0.2 } });
+          confetti({
+            ...defaults,
+            particleCount,
+            origin: { x: Math.random() * 0.3, y: Math.random() - 0.2 },
+          });
+          confetti({
+            ...defaults,
+            particleCount,
+            origin: { x: Math.random() * 0.3 + 0.7, y: Math.random() - 0.2 },
+          });
         }, 250);
-        
+
         // แนบ interval id ไว้กับ window ชั่วคราวเพื่อจะได้ clear ทิ้งตอน unmount ได้
         window._confettiInterval = interval;
       }
@@ -95,7 +104,7 @@ const ConfettiEffect = ({
           runConfetti();
         }
       }, 100);
-      
+
       // หมดเวลาคอยถ้าเกิน 2 วิ
       setTimeout(() => clearInterval(checkInterval), 2000);
     }

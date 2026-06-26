@@ -3,7 +3,7 @@ import ToggleSwitch from './ToggleSwitch';
 
 export default function PositionScoreCard({ ruleKey, label, desc, ruleData, onUpdate }) {
   const data = ruleData || {};
-  
+
   return (
     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
       <ToggleSwitch
@@ -14,7 +14,7 @@ export default function PositionScoreCard({ ruleKey, label, desc, ruleData, onUp
       />
       {data.isActive && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-          {['FWD', 'MID', 'DEF', 'GK'].map(pos => (
+          {['FWD', 'MID', 'DEF', 'GK'].map((pos) => (
             <div key={`${ruleKey}-${pos}`}>
               <label className="block text-xs font-bold text-slate-500 mb-1">{pos}</label>
               <input

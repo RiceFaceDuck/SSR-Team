@@ -15,7 +15,9 @@ export default function RulesScreen() {
           </div>
           <div>
             <h1 className="text-xl font-black text-slate-800">กติกาการเล่น</h1>
-            <p className="text-xs font-semibold text-slate-500">วิธีเล่นและระบบคะแนน (How to Play)</p>
+            <p className="text-xs font-semibold text-slate-500">
+              วิธีเล่นและระบบคะแนน (How to Play)
+            </p>
           </div>
         </div>
       </div>
@@ -26,7 +28,8 @@ export default function RulesScreen() {
           <div className="relative z-10">
             <h2 className="font-black text-lg mb-1">ก้าวสู่สุดยอดกุนซือ</h2>
             <p className="text-xs text-indigo-100 leading-relaxed">
-              ศึกษากฎกติกาให้ละเอียดเพื่อคว้าความได้เปรียบเหนือคู่แข่งของคุณ ระบบที่ซับซ้อนเหล่านี้ออกแบบมาเพื่อให้คุณได้วางแผนกลยุทธ์ได้อย่างอิสระ!
+              ศึกษากฎกติกาให้ละเอียดเพื่อคว้าความได้เปรียบเหนือคู่แข่งของคุณ
+              ระบบที่ซับซ้อนเหล่านี้ออกแบบมาเพื่อให้คุณได้วางแผนกลยุทธ์ได้อย่างอิสระ!
             </p>
           </div>
           <div className="absolute -right-4 -bottom-4 text-white opacity-10">
@@ -40,13 +43,13 @@ export default function RulesScreen() {
           {rulesSectionsData.map((sec, index) => {
             const isOpen = openSection === index;
             return (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${
                   isOpen ? 'border-indigo-300 shadow-md' : 'border-slate-200 shadow-sm'
                 }`}
               >
-                <button 
+                <button
                   onClick={() => setOpenSection(isOpen ? -1 : index)}
                   className="w-full p-4 flex items-center justify-between text-left focus:outline-none"
                 >
@@ -56,20 +59,18 @@ export default function RulesScreen() {
                     </div>
                     <span className="font-bold text-slate-800">{sec.title}</span>
                   </div>
-                  <ChevronDown 
-                    className={`text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
-                    size={20} 
+                  <ChevronDown
+                    className={`text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                    size={20}
                   />
                 </button>
-                
-                <div 
+
+                <div
                   className={`transition-all duration-300 ease-in-out px-4 ${
                     isOpen ? 'max-h-[500px] pb-4 opacity-100' : 'max-h-0 opacity-0'
                   }`}
                 >
-                  <div className="pt-2 border-t border-slate-100">
-                    {sec.content}
-                  </div>
+                  <div className="pt-2 border-t border-slate-100">{sec.content}</div>
                 </div>
               </div>
             );

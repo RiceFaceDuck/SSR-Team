@@ -4,9 +4,9 @@ export const mvpRule = {
   apply: (squad, context) => {
     // หา MVP ของทีมในสัปดาห์นี้
     const mvpId = determineSquadMVP(squad);
-    
+
     if (mvpId) {
-      return squad.map(p => {
+      return squad.map((p) => {
         if (p.playerId === mvpId && p.isStarting) {
           p.pointsEarned += 500;
           p.isMvp = true;
@@ -14,7 +14,7 @@ export const mvpRule = {
         return p;
       });
     }
-    
+
     return squad;
-  }
+  },
 };

@@ -3,7 +3,15 @@ import { usePlayerStore } from '../../../store/playerStore';
 import { playerDatabase } from '../../../services/firebase/playerDatabase';
 
 export const usePlayers = () => {
-  const { players, isLoading, error, setPlayers, setLoading, setError, addPlayer: addPlayerToStore } = usePlayerStore();
+  const {
+    players,
+    isLoading,
+    error,
+    setPlayers,
+    setLoading,
+    setError,
+    addPlayer: addPlayerToStore,
+  } = usePlayerStore();
 
   const fetchPlayers = useCallback(async () => {
     setLoading(true);
@@ -57,7 +65,7 @@ export const usePlayers = () => {
     setError(null);
     try {
       await playerDatabase.deletePlayer(playerId);
-      const filteredPlayers = players.filter(p => p.id !== playerId);
+      const filteredPlayers = players.filter((p) => p.id !== playerId);
       setPlayers(filteredPlayers);
       return { success: true };
     } catch (err) {
@@ -75,6 +83,6 @@ export const usePlayers = () => {
     fetchPlayers,
     addMultiplePlayers,
     saveManualPlayer,
-    removePlayer
+    removePlayer,
   };
 };

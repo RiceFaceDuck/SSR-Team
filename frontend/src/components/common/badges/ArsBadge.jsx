@@ -11,7 +11,7 @@ export default function ArsBadge({ size = 'md', className = '', showText = true 
   const currentSize = sizeStyles[size] || sizeStyles.md;
 
   return (
-    <div 
+    <div
       className={`relative flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#EF0107] via-[#a80004] to-[#4a0002] shadow-[0_0_8px_rgba(239,1,7,0.5)] shrink-0 ${currentSize} ${className} transition-transform hover:scale-110 cursor-pointer`}
     >
       {/* White Sleeves (Armor plating effect) */}

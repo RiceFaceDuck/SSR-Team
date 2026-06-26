@@ -8,6 +8,8 @@ const ApiSettingsModal = ({ isOpen, onClose }) => {
     autoSyncInterval: 'never',
     overridePrice: false,
     overrideStats: true,
+    syncTeam: true,
+    syncStatus: true,
   });
 
   // Load initial from localStorage
@@ -43,7 +45,10 @@ const ApiSettingsModal = ({ isOpen, onClose }) => {
               <p className="text-xs text-gray-500">จัดการการดึงข้อมูลกีฬาฟุตบอล</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-100 transition-colors">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-100 transition-colors"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -58,20 +63,20 @@ const ApiSettingsModal = ({ isOpen, onClose }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">League ID</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={settings.leagueId}
-                  onChange={e => setSettings({...settings, leagueId: e.target.value})}
+                  onChange={(e) => setSettings({ ...settings, leagueId: e.target.value })}
                   className="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
                   placeholder="เช่น 39 (พรีเมียร์ลีก)"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Season</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={settings.season}
-                  onChange={e => setSettings({...settings, season: e.target.value})}
+                  onChange={(e) => setSettings({ ...settings, season: e.target.value })}
                   className="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
                   placeholder="เช่น 2023"
                 />
@@ -90,13 +95,17 @@ const ApiSettingsModal = ({ isOpen, onClose }) => {
                   <input
                     type="checkbox"
                     checked={settings.overrideStats}
-                    onChange={e => setSettings({...settings, overrideStats: e.target.checked})}
+                    onChange={(e) => setSettings({ ...settings, overrideStats: e.target.checked })}
                     className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded transition-colors"
                   />
                 </div>
                 <div className="ml-3 text-sm">
-                  <span className="font-medium text-gray-700 group-hover:text-indigo-600 transition-colors">อนุญาตให้อัปเดตสถิติ (Stats)</span>
-                  <p className="text-gray-500 text-xs mt-0.5">เช่น Goals, Assists, Clean Sheets จะถูกแทนที่ด้วยข้อมูลจาก API ล่าสุด</p>
+                  <span className="font-medium text-gray-700 group-hover:text-indigo-600 transition-colors">
+                    อนุญาตให้อัปเดตสถิติ (Stats)
+                  </span>
+                  <p className="text-gray-500 text-xs mt-0.5">
+                    เช่น Goals, Assists, Clean Sheets จะถูกแทนที่ด้วยข้อมูลจาก API ล่าสุด
+                  </p>
                 </div>
               </label>
 
@@ -105,13 +114,55 @@ const ApiSettingsModal = ({ isOpen, onClose }) => {
                   <input
                     type="checkbox"
                     checked={settings.overridePrice}
-                    onChange={e => setSettings({...settings, overridePrice: e.target.checked})}
+                    onChange={(e) => setSettings({ ...settings, overridePrice: e.target.checked })}
                     className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded transition-colors"
                   />
                 </div>
                 <div className="ml-3 text-sm">
-                  <span className="font-medium text-gray-700 group-hover:text-indigo-600 transition-colors">อนุญาตให้อัปเดตราคา (Price) อัตโนมัติ</span>
-                  <p className="text-gray-500 text-xs mt-0.5">ระวัง: หากเปิดใช้งาน ราคาที่คุณตั้งไว้ด้วยมือจะถูกเขียนทับด้วยสูตรคำนวณจาก API ทันที</p>
+                  <span className="font-medium text-gray-700 group-hover:text-indigo-600 transition-colors">
+                    อนุญาตให้อัปเดตราคา (Price) อัตโนมัติ
+                  </span>
+                  <p className="text-gray-500 text-xs mt-0.5">
+                    ระวัง: หากเปิดใช้งาน ราคาที่คุณตั้งไว้ด้วยมือจะถูกเขียนทับด้วยสูตรคำนวณจาก API ทันที
+                  </p>
+                </div>
+              </label>
+
+              <label className="flex items-start cursor-pointer group">
+                <div className="flex items-center h-5">
+                  <input
+                    type="checkbox"
+                    checked={settings.syncTeam}
+                    onChange={(e) => setSettings({ ...settings, syncTeam: e.target.checked })}
+                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded transition-colors"
+                  />
+                </div>
+                <div className="ml-3 text-sm">
+                  <span className="font-medium text-gray-700 group-hover:text-indigo-600 transition-colors">
+                    อนุญาตให้อัปเดตสโมสรต้นสังกัด (Team)
+                  </span>
+                  <p className="text-gray-500 text-xs mt-0.5">
+                    อัปเดตสโมสรเมื่อนักเตะย้ายทีม (ข้อมูลจาก API จะเป็นชื่อเต็ม)
+                  </p>
+                </div>
+              </label>
+
+              <label className="flex items-start cursor-pointer group">
+                <div className="flex items-center h-5">
+                  <input
+                    type="checkbox"
+                    checked={settings.syncStatus}
+                    onChange={(e) => setSettings({ ...settings, syncStatus: e.target.checked })}
+                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded transition-colors"
+                  />
+                </div>
+                <div className="ml-3 text-sm">
+                  <span className="font-medium text-gray-700 group-hover:text-indigo-600 transition-colors">
+                    อนุญาตให้อัปเดตสถานะ (Status)
+                  </span>
+                  <p className="text-gray-500 text-xs mt-0.5">
+                    อัปเดตสถานะความฟิต อาการบาดเจ็บ หรือโดนแบน
+                  </p>
                 </div>
               </label>
             </div>
@@ -123,10 +174,12 @@ const ApiSettingsModal = ({ isOpen, onClose }) => {
               <Clock className="w-4 h-4" /> ระบบอัตโนมัติ (Automation)
             </h3>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">ความถี่ในการดึงข้อมูลเบื้องหลัง (Background Sync)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                ความถี่ในการดึงข้อมูลเบื้องหลัง (Background Sync)
+              </label>
               <select
                 value={settings.autoSyncInterval}
-                onChange={e => setSettings({...settings, autoSyncInterval: e.target.value})}
+                onChange={(e) => setSettings({ ...settings, autoSyncInterval: e.target.value })}
                 className="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
               >
                 <option value="never">ปิดการใช้งาน (Manual เท่านั้น)</option>
@@ -135,19 +188,25 @@ const ApiSettingsModal = ({ isOpen, onClose }) => {
                 <option value="24h">ทุกๆ 24 ชั่วโมง (แนะนำ)</option>
               </select>
               <p className="mt-2 text-xs text-rose-500 font-medium">
-                * ระวัง: การตั้งค่านี้อาจส่งผลต่อ API Quota ของคุณ (API-Sports ให้โควต้าฟรี 100 requests/วัน)
+                * ระวัง: การตั้งค่านี้อาจส่งผลต่อ API Quota ของคุณ (API-Sports ให้โควต้าฟรี 100
+                requests/วัน)
               </p>
             </div>
           </div>
-
         </div>
 
         {/* Footer */}
         <div className="p-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-200 bg-gray-100 rounded-lg transition-colors">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-200 bg-gray-100 rounded-lg transition-colors"
+          >
             ยกเลิก
           </button>
-          <button onClick={handleSave} className="px-6 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-md shadow-indigo-500/20 transition-all flex items-center gap-2">
+          <button
+            onClick={handleSave}
+            className="px-6 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-md shadow-indigo-500/20 transition-all flex items-center gap-2"
+          >
             <Save className="w-4 h-4" /> บันทึกการตั้งค่า
           </button>
         </div>

@@ -4,10 +4,14 @@ import { Image as ImageIcon } from 'lucide-react';
 const RewardBasicInfo = ({ formData, handleChange }) => {
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">ข้อมูลพื้นฐาน (Basic Info)</h3>
-      
+      <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+        ข้อมูลพื้นฐาน (Basic Info)
+      </h3>
+
       <div>
-        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">ชื่อของรางวัล <span className="text-red-500">*</span></label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+          ชื่อของรางวัล <span className="text-red-500">*</span>
+        </label>
         <input
           type="text"
           name="name"
@@ -20,7 +24,9 @@ const RewardBasicInfo = ({ formData, handleChange }) => {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">รายละเอียด</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+          รายละเอียด
+        </label>
         <textarea
           name="description"
           value={formData.description}
@@ -32,7 +38,9 @@ const RewardBasicInfo = ({ formData, handleChange }) => {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">URL รูปภาพ</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+          URL รูปภาพ
+        </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <ImageIcon size={18} className="text-slate-400" />

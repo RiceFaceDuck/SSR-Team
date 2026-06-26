@@ -1,22 +1,21 @@
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  orderBy, 
-  serverTimestamp 
+import {
+  collection,
+  doc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  orderBy,
+  serverTimestamp,
 } from 'firebase/firestore';
-// สมมติว่าไฟล์ตั้งค่า Firebase ของคุณอยู่ที่ src/config/firebase.js 
+// สมมติว่าไฟล์ตั้งค่า Firebase ของคุณอยู่ที่ src/config/firebase.js
 // (ปรับแก้ Path ได้ตามโครงสร้างจริงของคุณครับ)
 import { db } from '../../config/firebase';
 
 const REWARDS_COLLECTION = 'rewards';
 
 export const rewardAdminService = {
-  
   /**
    * ดึงข้อมูลของรางวัลทั้งหมดจาก Firestore
    * เรียงลำดับตามวันที่สร้าง (ใหม่ล่าสุดขึ้นก่อน)
@@ -27,16 +26,16 @@ export const rewardAdminService = {
       // สร้าง Query เพื่อเรียงลำดับข้อมูล
       const q = query(rewardsRef, orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
-      
-      const rewards = snapshot.docs.map(doc => ({
+
+      const rewards = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
-      
+
       return rewards;
     } catch (error) {
-      console.error("Error fetching rewards:", error);
-      throw new Error("ไม่สามารถดึงข้อมูลของรางวัลได้ กรุณาลองใหม่อีกครั้ง");
+      console.error('Error fetching rewards:', error);
+      throw new Error('ไม่สามารถดึงข้อมูลของรางวัลได้ กรุณาลองใหม่อีกครั้ง');
     }
   },
 
@@ -47,31 +46,31 @@ export const rewardAdminService = {
   createReward: async (rewardData) => {
     try {
       const rewardsRef = collection(db, REWARDS_COLLECTION);
-      
+
       // เตรียมข้อมูลก่อนบันทึก พร้อมกำหนดค่า Default เพื่อความปลอดภัย
       const newReward = {
-        name: rewardData.name || "ไม่มีชื่อ",
-        description: rewardData.description || "",
-        imageUrl: rewardData.imageUrl || "",
+        name: rewardData.name || 'ไม่มีชื่อ',
+        description: rewardData.description || '',
+        imageUrl: rewardData.imageUrl || '',
         price: Number(rewardData.price) || 0,
         stock: Number(rewardData.stock) || 0,
-        type: rewardData.type || "normal", // 'normal' | 'gacha'
+        type: rewardData.type || 'normal', // 'normal' | 'gacha'
         isActive: rewardData.isActive !== undefined ? rewardData.isActive : true,
-        
+
         // ฟิลด์สำหรับระบบ Flash Sale / ลิมิเต็ด
         isFlashSale: rewardData.isFlashSale || false,
         flashSaleEndTime: rewardData.flashSaleEndTime || null,
-        
+
         // Metadata
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
 
       const docRef = await addDoc(rewardsRef, newReward);
       return { id: docRef.id, ...newReward };
     } catch (error) {
-      console.error("Error creating reward:", error);
-      throw new Error("ไม่สามารถสร้างของรางวัลใหม่ได้");
+      console.error('Error creating reward:', error);
+      throw new Error('ไม่สามารถสร้างของรางวัลใหม่ได้');
     }
   },
 
@@ -81,18 +80,18 @@ export const rewardAdminService = {
   updateReward: async (id, updateData) => {
     try {
       const rewardRef = doc(db, REWARDS_COLLECTION, id);
-      
+
       // อัปเดตเวลาที่แก้ไขล่าสุดด้วยเสมอ
       const dataToUpdate = {
         ...updateData,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
 
       await updateDoc(rewardRef, dataToUpdate);
       return { id, ...dataToUpdate };
     } catch (error) {
       console.error(`Error updating reward ${id}:`, error);
-      throw new Error("ไม่สามารถอัปเดตข้อมูลของรางวัลได้");
+      throw new Error('ไม่สามารถอัปเดตข้อมูลของรางวัลได้');
     }
   },
 
@@ -107,12 +106,12 @@ export const rewardAdminService = {
       return id;
     } catch (error) {
       console.error(`Error deleting reward ${id}:`, error);
-      throw new Error("ไม่สามารถลบของรางวัลได้");
+      throw new Error('ไม่สามารถลบของรางวัลได้');
     }
   },
 
   /**
-   * ฟังก์ชันช่วยเหลือ: อัปเดตเฉพาะจำนวนสต็อกสินค้า 
+   * ฟังก์ชันช่วยเหลือ: อัปเดตเฉพาะจำนวนสต็อกสินค้า
    * (เผื่อให้แอดมินกดเติมสต็อกแบบด่วน)
    */
   updateStock: async (id, newStockAmount) => {
@@ -120,12 +119,12 @@ export const rewardAdminService = {
       const rewardRef = doc(db, REWARDS_COLLECTION, id);
       await updateDoc(rewardRef, {
         stock: Number(newStockAmount),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
       return true;
     } catch (error) {
       console.error(`Error updating stock for ${id}:`, error);
-      throw new Error("ไม่สามารถอัปเดตสต็อกได้");
+      throw new Error('ไม่สามารถอัปเดตสต็อกได้');
     }
-  }
+  },
 };

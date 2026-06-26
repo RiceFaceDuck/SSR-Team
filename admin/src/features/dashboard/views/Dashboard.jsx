@@ -18,7 +18,7 @@ export default function Dashboard() {
     isAutoMode,
     setIsAutoMode,
     updateSystemState,
-    handleProcessGameweek
+    handleProcessGameweek,
   } = useDashboardData();
 
   if (isLoading) {
@@ -31,7 +31,6 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
-      
       {/* Header Section */}
       <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 p-8 opacity-10">
@@ -43,17 +42,17 @@ export default function Dashboard() {
             GAMEWEEK LIFECYCLE MANAGER
           </h1>
           <p className="text-blue-200 font-medium max-w-2xl">
-            แผงควบคุมหลักสำหรับจัดการวัฏจักรของเกมในแต่ละสัปดาห์ ควบคุมสถานะและเข้าถึงเครื่องมือคำนวณได้อย่างรวดเร็ว
+            แผงควบคุมหลักสำหรับจัดการวัฏจักรของเกมในแต่ละสัปดาห์
+            ควบคุมสถานะและเข้าถึงเครื่องมือคำนวณได้อย่างรวดเร็ว
           </p>
         </div>
       </div>
 
       {/* Main Control Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
         {/* Left: Quick Status & Controls */}
         <div className="lg:col-span-1 space-y-6">
-          <GameweekStatusCard 
+          <GameweekStatusCard
             config={config}
             setConfig={setConfig}
             isUpdating={isUpdating}
@@ -68,7 +67,7 @@ export default function Dashboard() {
 
         {/* Right: The Loop Pipeline */}
         <div className="lg:col-span-2">
-          <GameweekPipeline 
+          <GameweekPipeline
             config={config}
             isAutoMode={isAutoMode}
             setIsAutoMode={setIsAutoMode}
@@ -79,7 +78,6 @@ export default function Dashboard() {
             gwHistory={gwHistory}
           />
         </div>
-
       </div>
     </div>
   );

@@ -7,14 +7,8 @@ import { useArchiveManager } from '../hooks/useArchiveManager';
 export default function HistoryArchive() {
   const [activeTab, setActiveTab] = useState('archive'); // 'archive', 'config', 'monitor'
   const [gwInput, setGwInput] = useState('');
-  
-  const {
-    isArchiving,
-    archiveResult,
-    error,
-    handleArchive,
-    clearResult
-  } = useArchiveManager();
+
+  const { isArchiving, archiveResult, error, handleArchive, clearResult } = useArchiveManager();
 
   return (
     <div className="space-y-6">
@@ -24,7 +18,9 @@ export default function HistoryArchive() {
         </div>
         <div>
           <h1 className="text-3xl font-black text-slate-800 tracking-tight">คลังข้อมูลในอดีต</h1>
-          <p className="text-slate-500 font-medium mt-1">จัดการ Archive ข้อมูลสัปดาห์ที่จบลงแล้วเพื่อลดโควต้าการอ่าน (Reads)</p>
+          <p className="text-slate-500 font-medium mt-1">
+            จัดการ Archive ข้อมูลสัปดาห์ที่จบลงแล้วเพื่อลดโควต้าการอ่าน (Reads)
+          </p>
         </div>
       </div>
 
@@ -76,18 +72,20 @@ export default function HistoryArchive() {
                   การ Archive ข้อมูลคืออะไร?
                 </h3>
                 <p className="text-sm text-indigo-700 mt-2 leading-relaxed">
-                  เมื่อ Gameweek ปัจจุบันจบลง และคำนวณคะแนนทุกอย่างเสร็จสิ้นแล้ว คุณควรกด Archive 
-                  เพื่อย้าย "สถิติสดของสัปดาห์นี้" ไปเก็บรวมใน "คลังข้อมูลนักเตะถาวร" 
-                  การทำเช่นนี้จะล้างข้อมูลเดิมทิ้ง ทำให้ฐานข้อมูลเบาลง และพร้อมดึงสถิติสดสำหรับสัปดาห์ถัดไป 
-                  ช่วยประหยัดค่าใช้จ่าย Firebase ได้อย่างมหาศาล
+                  เมื่อ Gameweek ปัจจุบันจบลง และคำนวณคะแนนทุกอย่างเสร็จสิ้นแล้ว คุณควรกด Archive
+                  เพื่อย้าย "สถิติสดของสัปดาห์นี้" ไปเก็บรวมใน "คลังข้อมูลนักเตะถาวร"
+                  การทำเช่นนี้จะล้างข้อมูลเดิมทิ้ง ทำให้ฐานข้อมูลเบาลง
+                  และพร้อมดึงสถิติสดสำหรับสัปดาห์ถัดไป ช่วยประหยัดค่าใช้จ่าย Firebase ได้อย่างมหาศาล
                 </p>
               </div>
 
               <div className="flex flex-col gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">ระบุ Gameweek ที่ต้องการจัดเก็บ (เช่น GW1)</label>
-                  <input 
-                    type="text" 
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    ระบุ Gameweek ที่ต้องการจัดเก็บ (เช่น GW1)
+                  </label>
+                  <input
+                    type="text"
                     value={gwInput}
                     onChange={(e) => {
                       setGwInput(e.target.value);
@@ -137,9 +135,7 @@ export default function HistoryArchive() {
             <HistoricalApiConfig onFetchStart={() => setActiveTab('monitor')} />
           )}
 
-          {activeTab === 'monitor' && (
-            <DataFetchMonitor />
-          )}
+          {activeTab === 'monitor' && <DataFetchMonitor />}
         </div>
       </div>
     </div>

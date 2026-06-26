@@ -9,14 +9,13 @@ import { useGameStore } from '../../store/useGameStore';
  * เพื่อให้สอดคล้องกับหลัก Single Responsibility Principle (SRP)
  */
 export const participationService = {
-  
   /**
    * ตรวจสอบว่าผู้เล่นจัดทีมครบตามกติกาหรือไม่ (15 นักเตะ + 1 ผู้จัดการทีม)
    */
   isSquadComplete: (mySquad, manager) => {
     const gameRules = useGameStore.getState().gameRules || {};
     const maxTotal = gameRules?.maxPlayersTotal?.value || 15;
-    return (mySquad && mySquad.length === maxTotal) && (manager !== null && manager !== undefined);
+    return mySquad && mySquad.length === maxTotal && manager !== null && manager !== undefined;
   },
 
   /**
@@ -39,44 +38,18 @@ export const participationService = {
 
   /**
    * ลงทะเบียนเข้าร่วมเกมอย่างเป็นทางการ
+   * (ย้ายไปให้ Cloud Function saveSquad จัดการเพื่อความปลอดภัย)
    */
   registerParticipation: async (userId) => {
-    try {
-      const userRef = doc(db, 'users', userId);
-      const sysConfigRef = doc(db, 'public_data', 'system_config');
-
-      // ประทับตราในระบบผู้ใช้
-      await setDoc(userRef, { hasJoinedGame: true }, { merge: true });
-      
-      // สั่งบวกยอดรวมในศูนย์กลาง
-      await setDoc(sysConfigRef, {
-        totalJoinedTeams: increment(1)
-      }, { merge: true });
-
-      console.log('✅ [ParticipationCenter] ลงทะเบียนและนับยอดผู้เข้าร่วม +1 สำเร็จ!');
-      return true;
-    } catch (error) {
-      console.error('❌ [ParticipationCenter] เกิดข้อผิดพลาดในการลงทะเบียนเข้าร่วม:', error);
-      return false;
-    }
+    console.log('✅ [ParticipationCenter] ลงทะเบียนเข้าร่วมเรียบร้อย (จัดการโดย Backend)');
+    return true;
   },
 
   /**
    * ฟังก์ชั่นซ่อมแซมตัวเอง (Auto-Repair) กรณีตัวเลขสถิติมีปัญหา
+   * (ยกเลิกการแก้ไขฝั่ง Client เพื่อความปลอดภัย)
    */
   syncAndRepairCounter: async (userId) => {
-    try {
-      const sysConfigRef = doc(db, 'public_data', 'system_config');
-      const sysConfigSnap = await getDoc(sysConfigRef);
-      const currentTotal = sysConfigSnap.exists() ? (sysConfigSnap.data().totalJoinedTeams || 0) : 0;
-      
-      // ถ้ายอดรวมระบบค้างที่ 0 ทั้งที่บัญชีนี้ระบุว่าเคยเข้าร่วมแล้ว ให้ซ่อมแซมยอดนับใหม่
-      if (currentTotal === 0) {
-        console.log('🔧 [ParticipationCenter] ตรวจพบยอดรวมผิดปกติ (0) ทำการกู้คืนและบวกยอด...');
-        await setDoc(sysConfigRef, { totalJoinedTeams: increment(1) }, { merge: true });
-      }
-    } catch (error) {
-      console.warn('⚠️ [ParticipationCenter] ระบบซ่อมแซมสถิติทำงานล้มเหลว:', error);
-    }
-  }
+    // ปิดการทำงานจากฝั่ง Client
+  },
 };

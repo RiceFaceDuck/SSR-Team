@@ -8,13 +8,13 @@ import ChatMessageInput from './ChatMessageInput';
 
 export default function LiveChatContainer() {
   const [messages, setMessages] = useState([]);
-  const chatConfig = useGameStore(state => state.chatConfig);
+  const chatConfig = useGameStore((state) => state.chatConfig);
 
   useEffect(() => {
     const unsubscribe = chatService.subscribeToChat((newMessages) => {
       setMessages(newMessages);
     });
-    
+
     return () => unsubscribe();
   }, []);
 
@@ -23,7 +23,7 @@ export default function LiveChatContainer() {
       <h3 className="font-bold text-slate-800 mb-2 border-b-2 border-slate-200 pb-2 flex items-center gap-2 shrink-0">
         <MessageCircle size={18} className="text-indigo-500" /> ห้องแชทรวม (Global Chat)
       </h3>
-      
+
       <ChatMessageList messages={messages} />
       <ChatMessageInput chatConfig={chatConfig} messages={messages} />
     </div>

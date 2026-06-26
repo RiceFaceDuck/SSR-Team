@@ -20,10 +20,10 @@ export default function GameweekHistory() {
         );
         const snap = await getDocs(q);
         const list = [];
-        snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+        snap.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
         setHistory(list);
       } catch (err) {
-        console.error("Error fetching gameweek history", err);
+        console.error('Error fetching gameweek history', err);
       } finally {
         setLoading(false);
       }
@@ -51,14 +51,21 @@ export default function GameweekHistory() {
 
       <div className="flex overflow-x-auto gap-4 pb-4 custom-scrollbar snap-x">
         {history.map((gw) => (
-          <div key={gw.id} className="min-w-[140px] bg-gradient-to-br from-slate-800 to-indigo-900 rounded-2xl p-4 shadow-lg text-white snap-center relative overflow-hidden flex flex-col justify-between">
-            <div className="absolute top-0 right-0 p-2 opacity-20"><Calendar size={40} /></div>
+          <div
+            key={gw.id}
+            className="min-w-[140px] bg-gradient-to-br from-slate-800 to-indigo-900 rounded-2xl p-4 shadow-lg text-white snap-center relative overflow-hidden flex flex-col justify-between"
+          >
+            <div className="absolute top-0 right-0 p-2 opacity-20">
+              <Calendar size={40} />
+            </div>
             <div>
               <p className="text-xs font-medium text-indigo-200">สัปดาห์ที่</p>
               <p className="font-black text-xl tracking-tight">{gw.gameweekId}</p>
             </div>
             <div className="mt-4">
-              <p className="text-2xl font-black text-amber-400">{gw.points} <span className="text-xs font-medium text-indigo-200">Pts</span></p>
+              <p className="text-2xl font-black text-amber-400">
+                {gw.points} <span className="text-xs font-medium text-indigo-200">Pts</span>
+              </p>
             </div>
           </div>
         ))}

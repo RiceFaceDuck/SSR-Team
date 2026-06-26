@@ -15,7 +15,7 @@ export const showToast = (message, type = 'info', duration = 3000) => {
   const event = new CustomEvent('SHOW_TOAST', {
     detail: { message, type, duration },
   });
-  
+
   // ให้ Haptic Feedback เพื่อความพรีเมียมบนมือถือ (สั่นแบบแตกต่างกันตามประเภท)
   if (window.navigator && window.navigator.vibrate) {
     if (type === 'success') window.navigator.vibrate([10, 30, 10]);

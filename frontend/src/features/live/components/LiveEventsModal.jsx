@@ -7,7 +7,7 @@ export default function LiveEventsModal({ isOpen, onClose, match }) {
 
   useEffect(() => {
     if (!isOpen) return;
-    
+
     setLoading(true);
     const unsubscribe = liveMatchService.subscribeToLiveEvents((data) => {
       setEvents(data);
@@ -22,13 +22,12 @@ export default function LiveEventsModal({ isOpen, onClose, match }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        
         <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
           <h3 className="font-bold text-slate-800 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
             เหตุการณ์ทั้งหมด (Match Events)
           </h3>
-          <button 
+          <button
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 text-slate-600 hover:bg-slate-300 transition-colors"
           >
@@ -38,7 +37,9 @@ export default function LiveEventsModal({ isOpen, onClose, match }) {
 
         <div className="p-4 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50">
           {loading ? (
-            <div className="text-center py-8 text-sm text-slate-500 animate-pulse">กำลังโหลดข้อมูล...</div>
+            <div className="text-center py-8 text-sm text-slate-500 animate-pulse">
+              กำลังโหลดข้อมูล...
+            </div>
           ) : events.length === 0 ? (
             <div className="text-center py-8 text-sm text-slate-400 italic">ยังไม่มีเหตุการณ์</div>
           ) : (
@@ -56,7 +57,8 @@ export default function LiveEventsModal({ isOpen, onClose, match }) {
                     <div className="flex justify-between items-start mb-1">
                       <span className="font-bold text-sm text-slate-800">{ev.primaryDetail}</span>
                       <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
-                        {match?.homeTeam?.code} {ev.homeScore}-{ev.awayScore} {match?.awayTeam?.code}
+                        {match?.homeTeam?.code} {ev.homeScore}-{ev.awayScore}{' '}
+                        {match?.awayTeam?.code}
                       </span>
                     </div>
                     {ev.secondaryDetail && (
@@ -68,7 +70,6 @@ export default function LiveEventsModal({ isOpen, onClose, match }) {
             </div>
           )}
         </div>
-
       </div>
     </div>
   );

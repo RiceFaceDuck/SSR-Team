@@ -17,8 +17,8 @@ export const FORMATION_REGISTRY = {
     rows: [
       { role: 'FW', category: 'FW', count: 2 },
       { role: 'MF', category: 'MF', count: 4 },
-      { role: 'DF', category: 'DF', count: 4 }
-    ]
+      { role: 'DF', category: 'DF', count: 4 },
+    ],
   },
   '4-3-3': {
     id: '4-3-3',
@@ -28,8 +28,8 @@ export const FORMATION_REGISTRY = {
     rows: [
       { role: 'FW', category: 'FW', count: 3 },
       { role: 'MF', category: 'MF', count: 3 },
-      { role: 'DF', category: 'DF', count: 4 }
-    ]
+      { role: 'DF', category: 'DF', count: 4 },
+    ],
   },
   '3-5-2': {
     id: '3-5-2',
@@ -39,8 +39,8 @@ export const FORMATION_REGISTRY = {
     rows: [
       { role: 'FW', category: 'FW', count: 2 },
       { role: 'MF', category: 'MF', count: 5 },
-      { role: 'DF', category: 'DF', count: 3 }
-    ]
+      { role: 'DF', category: 'DF', count: 3 },
+    ],
   },
   '3-4-3': {
     id: '3-4-3',
@@ -50,8 +50,8 @@ export const FORMATION_REGISTRY = {
     rows: [
       { role: 'FW', category: 'FW', count: 3 },
       { role: 'MF', category: 'MF', count: 4 },
-      { role: 'DF', category: 'DF', count: 3 }
-    ]
+      { role: 'DF', category: 'DF', count: 3 },
+    ],
   },
   '4-5-1': {
     id: '4-5-1',
@@ -61,8 +61,8 @@ export const FORMATION_REGISTRY = {
     rows: [
       { role: 'FW', category: 'FW', count: 1 },
       { role: 'MF', category: 'MF', count: 5 },
-      { role: 'DF', category: 'DF', count: 4 }
-    ]
+      { role: 'DF', category: 'DF', count: 4 },
+    ],
   },
   '5-3-2': {
     id: '5-3-2',
@@ -72,8 +72,8 @@ export const FORMATION_REGISTRY = {
     rows: [
       { role: 'FW', category: 'FW', count: 2 },
       { role: 'MF', category: 'MF', count: 3 },
-      { role: 'DF', category: 'DF', count: 5 }
-    ]
+      { role: 'DF', category: 'DF', count: 5 },
+    ],
   },
   '5-4-1': {
     id: '5-4-1',
@@ -83,8 +83,8 @@ export const FORMATION_REGISTRY = {
     rows: [
       { role: 'FW', category: 'FW', count: 1 },
       { role: 'MF', category: 'MF', count: 4 },
-      { role: 'DF', category: 'DF', count: 5 }
-    ]
+      { role: 'DF', category: 'DF', count: 5 },
+    ],
   },
   // --- 2. Modern 4-Layers (Removed to match UI options) ---
   // 4-2-3-1, 4-1-4-1, 4-2-2-2, 4-3-2-1 have been removed.
@@ -120,9 +120,9 @@ export const getAllFormations = () => {
 export const getPositionLimits = (formationId) => {
   const data = getFormationData(formationId);
   const limits = { FW: 0, MF: 0, DF: 0, GK: 1 }; // GK บังคับ 1 เสมอ
-  
+
   // รวบรวม count จากทุกเลเยอร์ ตาม category หลัก (FW, MF, DF)
-  data.rows.forEach(row => {
+  data.rows.forEach((row) => {
     if (limits[row.category] !== undefined) {
       limits[row.category] += row.count;
     }

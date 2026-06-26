@@ -8,8 +8,12 @@ const MarketHeader = ({ budgetLeft }) => {
           MARKET.
         </h2>
         <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-300 shadow-md px-3 py-1.5 rounded-lg flex flex-col items-end">
-          <span className="text-[10px] text-slate-500 font-bold leading-none uppercase">งบประมาณ</span>
-          <span className="text-sm font-black text-indigo-600 leading-none mt-1">{budgetLeft.toFixed(1)}m</span>
+          <span className="text-[10px] text-slate-500 font-bold leading-none uppercase">
+            งบประมาณ
+          </span>
+          <span className="text-sm font-black text-indigo-600 leading-none mt-1">
+            {budgetLeft.toFixed(1)}m
+          </span>
         </div>
       </div>
     </div>

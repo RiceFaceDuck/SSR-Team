@@ -7,12 +7,7 @@ import { useGameStore } from '../store/useGameStore';
 import { referralService } from '../services/firebase/referralService';
 
 export const useAuthSync = () => {
-  const { 
-    setUserAuth, 
-    clearAuth, 
-    setAuthReady,
-    loadSquadFromCloud 
-  } = useUserStore();
+  const { setUserAuth, clearAuth, setAuthReady, loadSquadFromCloud } = useUserStore();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -23,20 +18,28 @@ export const useAuthSync = () => {
           // 1. ตรวจสอบการมีอยู่ของเอกสารก่อน หรือสร้างใหม่
           const userDocRef = doc(db, 'users', user.uid);
           const userDocSnap = await getDoc(userDocRef);
-          
+
           if (!userDocSnap.exists()) {
             // Check if registration is open
             const sysConfigSnap = await getDoc(doc(db, 'public_data', 'system_config'));
-            const isRegOpen = sysConfigSnap.exists() && sysConfigSnap.data().isRegistrationOpen !== undefined ? sysConfigSnap.data().isRegistrationOpen : true;
-            
+            const isRegOpen =
+              sysConfigSnap.exists() && sysConfigSnap.data().isRegistrationOpen !== undefined
+                ? sysConfigSnap.data().isRegistrationOpen
+                : true;
+
             if (!isRegOpen) {
-                await auth.signOut();
-                clearAuth();
-                setAuthReady();
-                window.dispatchEvent(new CustomEvent('SHOW_TOAST', {
-                  detail: { message: 'ขณะนี้ระบบปิดรับสมัครผู้เข้าแข่งขันใหม่แล้ว (Registration Closed)', type: 'error' }
-                }));
-                return;
+              await auth.signOut();
+              clearAuth();
+              setAuthReady();
+              window.dispatchEvent(
+                new CustomEvent('SHOW_TOAST', {
+                  detail: {
+                    message: 'ขณะนี้ระบบปิดรับสมัครผู้เข้าแข่งขันใหม่แล้ว (Registration Closed)',
+                    type: 'error',
+                  },
+                })
+              );
+              return;
             }
 
             // สร้าง Profile ใหม่
@@ -51,7 +54,7 @@ export const useAuthSync = () => {
               createdAt: serverTimestamp(),
               lastLoginAt: serverTimestamp(),
               referredBy: localStorage.getItem('referralCode') || null,
-              tutorialState: { hasSeenMarket: false, hasSeenPitch: false }
+              tutorialState: { hasSeenMarket: false, hasSeenPitch: false },
             };
             await setDoc(userDocRef, newUserData);
           } else {
@@ -69,10 +72,13 @@ export const useAuthSync = () => {
                 email: user.email,
                 photoURL: userData.photoURL || user.photoURL,
                 role: userData.role || 'player',
-                balls: userData.balls !== undefined ? userData.balls : (userData.energyBottles || 0),
+                balls: userData.balls !== undefined ? userData.balls : userData.energyBottles || 0,
                 userPoints: userData.userPoints || 0,
                 dailyQuests: userData.dailyQuests || {}, // 🌟 NEW: เก็บข้อมูลภารกิจเข้า Store
-                tutorialState: userData.tutorialState || { hasSeenMarket: false, hasSeenPitch: false }
+                tutorialState: userData.tutorialState || {
+                  hasSeenMarket: false,
+                  hasSeenPitch: false,
+                },
               });
             }
           });
@@ -91,9 +97,8 @@ export const useAuthSync = () => {
 
           // บันทึกเวลาที่ทำกิจกรรมล่าสุด
           localStorage.setItem('lastActivity', Date.now().toString());
-
         } catch (error) {
-          console.error("❌ Auth Fetch Error:", error);
+          console.error('❌ Auth Fetch Error:', error);
           clearAuth();
         }
       } else {

@@ -11,7 +11,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error("Admin ErrorBoundary caught an error", error, errorInfo);
+    console.error('Admin ErrorBoundary caught an error', error, errorInfo);
     this.setState({ error, errorInfo });
   }
 
@@ -44,7 +44,7 @@ class ErrorBoundary extends React.Component {
       );
     }
 
-    return this.props.children; 
+    return this.props.children;
   }
 }
 

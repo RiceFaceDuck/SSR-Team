@@ -1,5 +1,13 @@
 import React from 'react';
-import { Search, Plus, FileSpreadsheet, RefreshCw, DatabaseZap, ShieldAlert, Trash2 } from 'lucide-react';
+import {
+  Search,
+  Plus,
+  FileSpreadsheet,
+  RefreshCw,
+  DatabaseZap,
+  ShieldAlert,
+  Trash2,
+} from 'lucide-react';
 import TeamTabs from '../../teams/components/TeamTabs';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,7 +26,7 @@ const PlayerToolbar = ({
   fetchPlayers,
   onAddManual,
   onImportExcel,
-  handleDeleteAll
+  handleDeleteAll,
 }) => {
   const navigate = useNavigate();
 
@@ -38,19 +46,28 @@ const PlayerToolbar = ({
             <p className="text-xs text-slate-400">ควบคุมการดึงข้อมูลและอัปเดตสถิติอัตโนมัติ</p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-4">
           <label className="flex items-center cursor-pointer">
             <div className="relative">
-              <input type="checkbox" className="sr-only" checked={autoSync} onChange={() => setAutoSync(!autoSync)} />
-              <div className={`block w-10 h-6 rounded-full transition-colors ${autoSync ? 'bg-indigo-500' : 'bg-slate-600'}`}></div>
-              <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${autoSync ? 'transform translate-x-4' : ''}`}></div>
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={autoSync}
+                onChange={() => setAutoSync(!autoSync)}
+              />
+              <div
+                className={`block w-10 h-6 rounded-full transition-colors ${autoSync ? 'bg-indigo-500' : 'bg-slate-600'}`}
+              ></div>
+              <div
+                className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${autoSync ? 'transform translate-x-4' : ''}`}
+              ></div>
             </div>
             <div className="ml-3 text-sm font-medium text-slate-300">
               Auto-Sync {autoSync ? '(ON)' : '(OFF)'}
             </div>
           </label>
-          <button 
+          <button
             onClick={() => setIsApiSettingsOpen(true)}
             className="px-3 py-1.5 text-xs font-semibold bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-1 shadow-sm border border-slate-600"
           >
@@ -75,7 +92,7 @@ const PlayerToolbar = ({
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {/* ปุ่ม ซิงก์ และ Refresh */}
-          <button 
+          <button
             onClick={async () => {
               await handleBulkCheck();
               fetchPlayers();
@@ -83,47 +100,66 @@ const PlayerToolbar = ({
             disabled={isCheckingBulk}
             className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-sky-200 shadow-sm text-sm font-medium rounded-lg text-sky-700 bg-sky-50 hover:bg-sky-100 hover:border-sky-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors"
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${isCheckingBulk ? 'animate-spin' : ''}`} /> ซิงก์ และ Refresh
+            <RefreshCw className={`w-4 h-4 mr-2 ${isCheckingBulk ? 'animate-spin' : ''}`} /> ซิงก์
+            และ Refresh
           </button>
 
           {/* ปุ่มเช็คอัปเดตแบบกลุ่ม (ทั้งหมด) */}
-          <button 
-            onClick={handleBulkCheck} 
+          <button
+            onClick={handleBulkCheck}
             disabled={isCheckingBulk}
             className={`flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 shadow-sm text-sm font-bold rounded-lg transition-all
-              ${bulkUpdatesList.length > 0 
-                ? 'bg-emerald-500 hover:bg-emerald-600 text-white border border-emerald-600 animate-pulse' 
-                : 'border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100'}`}
+              ${
+                bulkUpdatesList.length > 0
+                  ? 'bg-emerald-500 hover:bg-emerald-600 text-white border border-emerald-600 animate-pulse'
+                  : 'border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100'
+              }`}
           >
             {isCheckingBulk ? (
               <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
             ) : (
               <DatabaseZap className="w-4 h-4 mr-2" />
             )}
-            {bulkUpdatesList.length > 0 
+            {bulkUpdatesList.length > 0
               ? `(${bulkUpdatesList.length} รายการใหม่) รอการอัปเดต`
               : `อัปเดตข้อมูลล่าสุดทั้งหมด`}
           </button>
 
-          <button onClick={fetchPlayers} className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 hover:rotate-180 rounded-lg transition-all duration-500" title="รีเฟรชข้อมูล">
+          <button
+            onClick={fetchPlayers}
+            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 hover:rotate-180 rounded-lg transition-all duration-500"
+            title="รีเฟรชข้อมูล"
+          >
             <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
 
           {/* 🌟 เพิ่มปุ่ม นำเข้า Excel ที่เคยหายไป */}
-          <button onClick={onImportExcel} className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-emerald-200 shadow-sm text-sm font-medium rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors">
+          <button
+            onClick={onImportExcel}
+            className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-emerald-200 shadow-sm text-sm font-medium rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors"
+          >
             <FileSpreadsheet className="w-4 h-4 mr-2" /> นำเข้าชุดข้อมูล
           </button>
 
           {/* ปุ่มไปหน้าตรวจสอบข้อมูลซ้ำซ้อน */}
-          <button onClick={() => navigate('/players/overlap')} className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-rose-200 shadow-sm text-sm font-medium rounded-lg text-rose-700 bg-rose-50 hover:bg-rose-100 hover:border-rose-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-colors">
+          <button
+            onClick={() => navigate('/players/overlap')}
+            className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-rose-200 shadow-sm text-sm font-medium rounded-lg text-rose-700 bg-rose-50 hover:bg-rose-100 hover:border-rose-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-colors"
+          >
             <ShieldAlert className="w-4 h-4 mr-2" /> ตรวจสอบข้อมูลซ้ำซ้อน
           </button>
 
-          <button onClick={onAddManual} className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5 transform duration-200">
+          <button
+            onClick={onAddManual}
+            className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5 transform duration-200"
+          >
             <Plus className="w-4 h-4 mr-2" /> เพิ่มนักเตะ
           </button>
 
-          <button onClick={handleDeleteAll} className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors hover:shadow-lg hover:shadow-red-500/30 hover:-translate-y-0.5 transform duration-200">
+          <button
+            onClick={handleDeleteAll}
+            className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors hover:shadow-lg hover:shadow-red-500/30 hover:-translate-y-0.5 transform duration-200"
+          >
             <Trash2 className="w-4 h-4 mr-2" /> ลบทั้งหมด
           </button>
         </div>

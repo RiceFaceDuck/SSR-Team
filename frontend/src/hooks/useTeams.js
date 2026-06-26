@@ -11,7 +11,7 @@ export function useTeams() {
       const fetchedTeams = await teamDatabase.getAllTeams();
       setTeams(fetchedTeams);
     } catch (error) {
-      console.error("Failed to fetch teams:", error);
+      console.error('Failed to fetch teams:', error);
     } finally {
       setLoading(false);
     }

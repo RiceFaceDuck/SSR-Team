@@ -6,20 +6,23 @@ import { useUserStore } from '../../../store/useUserStore';
 export const useAchievements = () => {
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  const userData = useUserStore(state => state.userData);
-  const clubData = useUserStore(state => state.clubData);
-  const mySquad = useUserStore(state => state.mySquad); // Or currentStreak if it exists
-  const currentStreak = useUserStore(state => state.currentStreak) || 0; // Check state or fallback to 0
+
+  const userData = useUserStore((state) => state.userData);
+  const clubData = useUserStore((state) => state.clubData);
+  const mySquad = useUserStore((state) => state.mySquad); // Or currentStreak if it exists
+  const currentStreak = useUserStore((state) => state.currentStreak) || 0; // Check state or fallback to 0
 
   useEffect(() => {
     const fetchAchievements = async () => {
       setLoading(true);
       try {
-        const q = query(collection(db, 'public_data/achievements/list'), where('isActive', '==', true));
+        const q = query(
+          collection(db, 'public_data/achievements/list'),
+          where('isActive', '==', true)
+        );
         const snap = await getDocs(q);
-        
-        const list = snap.docs.map(doc => {
+
+        const list = snap.docs.map((doc) => {
           const data = doc.data();
           let unlocked = false;
 
@@ -56,7 +59,7 @@ export const useAchievements = () => {
           return {
             id: doc.id,
             ...data,
-            unlocked
+            unlocked,
           };
         });
 
@@ -68,7 +71,7 @@ export const useAchievements = () => {
 
         setAchievements(list);
       } catch (error) {
-        console.error("Error fetching achievements for user:", error);
+        console.error('Error fetching achievements for user:', error);
       } finally {
         setLoading(false);
       }

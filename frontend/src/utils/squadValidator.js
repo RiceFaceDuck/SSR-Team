@@ -11,25 +11,46 @@ const SQUAD_RULES = {
     GK: 2, // ผู้รักษาประตู 2 คน
     DF: 5, // กองหลัง 5 คน
     MF: 5, // กองกลาง 5 คน
-    FW: 3  // กองหน้า 3 คน
-  }
+    FW: 3, // กองหน้า 3 คน
+  },
 };
 
 /**
  * ฟังก์ชันตัวช่วย: แปลงตำแหน่งเฉพาะทาง ให้เป็น 4 กลุ่มหลัก (FW, MF, DF, GK)
  */
 export const normalizePosition = (rawPos) => {
-  const pos = String(rawPos || '').toUpperCase().trim();
+  const pos = String(rawPos || '')
+    .toUpperCase()
+    .trim();
   const map = {
-    'ST': 'FW', 'CF': 'FW', 'LW': 'FW', 'RW': 'FW', 'LF': 'FW', 'RF': 'FW',
-    'CM': 'MF', 'CDM': 'MF', 'CAM': 'MF', 'LM': 'MF', 'RM': 'MF', 'AM': 'MF',
-    'CB': 'DF', 'LB': 'DF', 'RB': 'DF', 'LWB': 'DF', 'RWB': 'DF',
-    'GK': 'GK'
+    ST: 'FW',
+    CF: 'FW',
+    LW: 'FW',
+    RW: 'FW',
+    LF: 'FW',
+    RF: 'FW',
+    CM: 'MF',
+    CDM: 'MF',
+    CAM: 'MF',
+    LM: 'MF',
+    RM: 'MF',
+    AM: 'MF',
+    CB: 'DF',
+    LB: 'DF',
+    RB: 'DF',
+    LWB: 'DF',
+    RWB: 'DF',
+    GK: 'GK',
   };
   return map[pos] || pos;
 };
 
-export const validateBuyPlayer = (playerToBuy, currentSquadObjects, currentBudget, dynamicRules = null) => {
+export const validateBuyPlayer = (
+  playerToBuy,
+  currentSquadObjects,
+  currentBudget,
+  dynamicRules = null
+) => {
   if (!playerToBuy || !playerToBuy.sku) {
     return { isValid: false, message: 'ข้อมูลนักเตะไม่ถูกต้อง หรือเซิร์ฟเวอร์ขัดข้อง' };
   }
@@ -39,7 +60,7 @@ export const validateBuyPlayer = (playerToBuy, currentSquadObjects, currentBudge
   const maxSameTeam = dynamicRules?.maxPlayersPerTeam?.value || SQUAD_RULES.MAX_PLAYERS_SAME_TEAM;
   const posLimits = dynamicRules?.positionLimits || SQUAD_RULES.POSITION_LIMITS;
 
-  const isAlreadyInSquad = currentSquadObjects.some(p => p.sku === playerToBuy.sku);
+  const isAlreadyInSquad = currentSquadObjects.some((p) => p.sku === playerToBuy.sku);
   if (isAlreadyInSquad) {
     return { isValid: false, message: 'คุณมีนักเตะคนนี้อยู่ในทีมแล้ว' };
   }
@@ -49,17 +70,25 @@ export const validateBuyPlayer = (playerToBuy, currentSquadObjects, currentBudge
   }
 
   if (currentSquadObjects.length >= maxTotal) {
-    return { isValid: false, message: `โควต้าทีมเต็มแล้ว (สูงสุด ${maxTotal} คน) กรุณาขายนักเตะออกก่อน` };
+    return {
+      isValid: false,
+      message: `โควต้าทีมเต็มแล้ว (สูงสุด ${maxTotal} คน) กรุณาขายนักเตะออกก่อน`,
+    };
   }
 
   // ใช้ Normalize แปลง CM ให้เป็น MF ก่อนตรวจสอบ
   const normalizedPos = normalizePosition(playerToBuy.position);
 
-  const positionCount = currentSquadObjects.filter(p => normalizePosition(p.position) === normalizedPos).length;
+  const positionCount = currentSquadObjects.filter(
+    (p) => normalizePosition(p.position) === normalizedPos
+  ).length;
   const maxForPosition = posLimits[normalizedPos] || 0;
-  
+
   if (maxForPosition === 0) {
-    return { isValid: false, message: `ไม่สามารถซื้อได้: ตำแหน่งนักเตะไม่ถูกต้อง (${playerToBuy.position})` };
+    return {
+      isValid: false,
+      message: `ไม่สามารถซื้อได้: ตำแหน่งนักเตะไม่ถูกต้อง (${playerToBuy.position})`,
+    };
   }
 
   if (positionCount >= maxForPosition) {
@@ -68,9 +97,12 @@ export const validateBuyPlayer = (playerToBuy, currentSquadObjects, currentBudge
     return { isValid: false, message: `โควต้า${posNameTh}เต็มแล้ว (สูงสุด ${maxForPosition} คน)` };
   }
 
-  const teamCount = currentSquadObjects.filter(p => p.team === playerToBuy.team).length;
+  const teamCount = currentSquadObjects.filter((p) => p.team === playerToBuy.team).length;
   if (teamCount >= maxSameTeam) {
-    return { isValid: false, message: `คุณมีนักเตะจาก ${playerToBuy.team} ครบโควต้าแล้ว (สูงสุด ${maxSameTeam} คน)` };
+    return {
+      isValid: false,
+      message: `คุณมีนักเตะจาก ${playerToBuy.team} ครบโควต้าแล้ว (สูงสุด ${maxSameTeam} คน)`,
+    };
   }
 
   return { isValid: true, message: 'ตรวจสอบผ่าน สามารถซื้อได้' };
@@ -81,7 +113,7 @@ export const validateSellPlayer = (playerToSell, currentSquadObjects) => {
     return { isValid: false, message: 'ข้อมูลนักเตะไม่ถูกต้อง' };
   }
 
-  const isAlreadyInSquad = currentSquadObjects.some(p => p.sku === playerToSell.sku);
+  const isAlreadyInSquad = currentSquadObjects.some((p) => p.sku === playerToSell.sku);
   if (!isAlreadyInSquad) {
     return { isValid: false, message: 'ไม่พบนักเตะคนนี้ในทีมของคุณ ไม่สามารถขายได้' };
   }
@@ -93,9 +125,9 @@ export const validateSquadReadyForSave = (currentSquadObjects, dynamicRules = nu
   const maxTotal = dynamicRules?.maxPlayersTotal?.value || SQUAD_RULES.MAX_PLAYERS_TOTAL;
 
   if (currentSquadObjects.length < maxTotal) {
-    return { 
+    return {
       isReady: false,
-      message: `คุณจัดทีมไปแล้ว ${currentSquadObjects.length}/${maxTotal} คน` 
+      message: `คุณจัดทีมไปแล้ว ${currentSquadObjects.length}/${maxTotal} คน`,
     };
   }
   return { isReady: true, message: 'ทีมของคุณพร้อมลุยแล้ว!' };

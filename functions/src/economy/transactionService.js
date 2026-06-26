@@ -10,8 +10,8 @@ const db = admin.firestore();
  * @returns {Promise<Object>}
  */
 exports.processTransaction = async (userId, amount, source, description) => {
-    if (!userId || typeof amount !== 'number') {
-        throw new Error('Invalid transaction parameters');
+    if (!userId || typeof amount !== 'number' || !Number.isFinite(amount) || !Number.isInteger(amount)) {
+        throw new Error('Invalid transaction parameters: amount must be a finite integer');
     }
 
     const userRef = db.collection('users').doc(userId);

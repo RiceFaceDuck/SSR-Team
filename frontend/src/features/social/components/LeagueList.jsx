@@ -43,37 +43,39 @@ export default function LeagueList({ refreshTrigger, onLeaguesLoaded }) {
   return (
     <>
       <div className="mt-2 space-y-3">
-          {leagues.map((league) => (
-            <div 
-              key={league.id} 
-              className={`${STYLES.card} !p-4 hover:border-indigo-300 transition-all cursor-pointer active:scale-[0.98] shadow-sm hover:shadow-md`}
-              onClick={() => setSelectedLeague(league)}
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="font-bold text-slate-800 text-base">{league.name}</h4>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1">
-                      <Key size={10} /> {league.code}
-                    </span>
-                    <span className="text-xs text-slate-500 font-medium">
-                      สมาชิก {league.members?.length || 0} คน
-                    </span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="block text-[10px] font-bold text-slate-400 uppercase">อันดับของคุณ</span>
-                  <span className="font-black text-xl text-indigo-600">-</span>
+        {leagues.map((league) => (
+          <div
+            key={league.id}
+            className={`${STYLES.card} !p-4 hover:border-indigo-300 transition-all cursor-pointer active:scale-[0.98] shadow-sm hover:shadow-md`}
+            onClick={() => setSelectedLeague(league)}
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <h4 className="font-bold text-slate-800 text-base">{league.name}</h4>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1">
+                    <Key size={10} /> {league.code}
+                  </span>
+                  <span className="text-xs text-slate-500 font-medium">
+                    สมาชิก {league.members?.length || 0} คน
+                  </span>
                 </div>
               </div>
+              <div className="text-right">
+                <span className="block text-[10px] font-bold text-slate-400 uppercase">
+                  อันดับของคุณ
+                </span>
+                <span className="font-black text-xl text-indigo-600">-</span>
+              </div>
             </div>
-          ))}
+          </div>
+        ))}
       </div>
 
       {/* เรียกใช้งาน Modal */}
       {selectedLeague && (
-        <LeagueDetailsModal 
-          league={selectedLeague} 
+        <LeagueDetailsModal
+          league={selectedLeague}
           onClose={() => setSelectedLeague(null)}
           onLeagueUpdated={() => {
             setSelectedLeague(null);

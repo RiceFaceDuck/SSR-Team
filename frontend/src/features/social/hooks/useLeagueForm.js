@@ -28,7 +28,7 @@ export const useLeagueForm = (userData, onLeagueAdded) => {
 
     setLoading(true);
     let result;
-    
+
     try {
       if (modalType === 'create') {
         result = await leagueService.createLeague(userData, inputValue, { mode, customRules });
@@ -67,6 +67,6 @@ export const useLeagueForm = (userData, onLeagueAdded) => {
     setCustomRules,
     openModal,
     closeModal,
-    handleAction
+    handleAction,
   };
 };

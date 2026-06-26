@@ -11,13 +11,13 @@ import { formatShortName, formatPrice, formatPosition } from './formatters';
 const getValue = (row, possibleKeys) => {
   for (const rawKey in row) {
     if (!Object.prototype.hasOwnProperty.call(row, rawKey)) continue;
-    
+
     // คลีน Key ของ Excel: ลบอักขระพิเศษ เว้นวรรค วงเล็บ BOM ทิ้งหมด เหลือแค่ตัวอักษรและตัวเลข
     const cleanKey = rawKey.replace(/[^a-zA-Zก-๙0-9]/g, '').toLowerCase();
-    
+
     for (const pk of possibleKeys) {
       const cleanPk = pk.replace(/[^a-zA-Zก-๙0-9]/g, '').toLowerCase();
-      
+
       // ถ้า Key ที่คลีนแล้ว ตรงกับหรือครอบคลุมคำที่ค้นหา ให้ดึงค่านั้นมาเลย
       if (cleanKey === cleanPk || cleanKey.includes(cleanPk)) {
         let value = row[rawKey];
@@ -65,12 +65,11 @@ export const parseExcelFile = (file) => {
 
         // ตรวจสอบว่ามีข้อมูลหรือไม่
         if (!jsonData || jsonData.length === 0) {
-           return resolve([]);
+          return resolve([]);
         }
 
         const formattedPlayers = jsonData.map((row, index) => {
-          
-          // ดึงข้อมูลผ่าน Robust Matcher 
+          // ดึงข้อมูลผ่าน Robust Matcher
           const rawName = getValue(row, ['name', 'fullname', 'player', 'ชื่อ']);
           const shortName = rawName ? formatShortName(rawName) : '';
 
@@ -78,32 +77,45 @@ export const parseExcelFile = (file) => {
           const priceValue = parseFloat(rawPrice) || 0.0;
 
           return {
-            sku: String(getValue(row, ['sku']) || `EXCEL-${Date.now()}-${index}`), 
-            name: shortName, 
-            fullName: rawName, 
-            
+            sku: String(getValue(row, ['sku']) || `EXCEL-${Date.now()}-${index}`),
+            name: shortName,
+            fullName: rawName,
+
             position: formatPosition(getValue(row, ['position', 'pos', 'ตำแหน่ง'])),
-            
+
             team: (() => {
               const rawTeam = getValue(row, ['team', 'club', 'ทีม', 'สโมสร']) || 'Unknown';
               const teamMap = {
-                'MUN': 'Manchester United', 'ARS': 'Arsenal', 'MCI': 'Manchester City',
-                'LIV': 'Liverpool', 'CHE': 'Chelsea', 'TOT': 'Tottenham Hotspur',
-                'NEW': 'Newcastle United', 'AVL': 'Aston Villa', 'BHA': 'Brighton',
-                'WHU': 'West Ham United', 'CRY': 'Crystal Palace', 'FUL': 'Fulham',
-                'BOU': 'Bournemouth', 'WOL': 'Wolverhampton Wanderers', 'EVE': 'Everton',
-                'BRE': 'Brentford', 'NFO': 'Nottingham Forest', 'SOU': 'Southampton',
-                'LEI': 'Leicester City', 'IPS': 'Ipswich Town'
+                MUN: 'Manchester United',
+                ARS: 'Arsenal',
+                MCI: 'Manchester City',
+                LIV: 'Liverpool',
+                CHE: 'Chelsea',
+                TOT: 'Tottenham Hotspur',
+                NEW: 'Newcastle United',
+                AVL: 'Aston Villa',
+                BHA: 'Brighton',
+                WHU: 'West Ham United',
+                CRY: 'Crystal Palace',
+                FUL: 'Fulham',
+                BOU: 'Bournemouth',
+                WOL: 'Wolverhampton Wanderers',
+                EVE: 'Everton',
+                BRE: 'Brentford',
+                NFO: 'Nottingham Forest',
+                SOU: 'Southampton',
+                LEI: 'Leicester City',
+                IPS: 'Ipswich Town',
               };
               return teamMap[rawTeam.toUpperCase()] || rawTeam;
             })(),
-            
+
             price: priceValue,
             displayPrice: formatPrice(priceValue),
             totalPoints: parseInt(getValue(row, ['points', 'คะแนน']) || 0, 10) || 0,
-            
-            status: String(getValue(row, ['status', 'สถานะ']) || 'active').toLowerCase(), 
-            
+
+            status: String(getValue(row, ['status', 'สถานะ']) || 'active').toLowerCase(),
+
             stats: {
               goals: parseInt(getValue(row, ['goals', 'ประตู']) || 0, 10) || 0,
               assists: parseInt(getValue(row, ['assists', 'แอสซิสต์']) || 0, 10) || 0,
@@ -111,13 +123,13 @@ export const parseExcelFile = (file) => {
               yellowCards: parseInt(getValue(row, ['yellowcards', 'ใบเหลือง']) || 0, 10) || 0,
               redCards: parseInt(getValue(row, ['redcards', 'ใบแดง']) || 0, 10) || 0,
             },
-            
-            updatedAt: new Date().toISOString()
+
+            updatedAt: new Date().toISOString(),
           };
         });
 
         // 🔥 กรองแถวที่ไม่มีชื่อออก
-        const validPlayers = formattedPlayers.filter(p => p.fullName !== '');
+        const validPlayers = formattedPlayers.filter((p) => p.fullName !== '');
 
         resolve(validPlayers);
       } catch (error) {

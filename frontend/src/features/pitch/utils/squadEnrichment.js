@@ -13,16 +13,19 @@ export const enrichSquadData = (
   isMarketOpen
 ) => {
   if (!mySquad || !Array.isArray(mySquad)) return { enrichedStarters: [], enrichedBench: [] };
-  
+
   // DEBUG LOG
-  console.log("🔍 DEBUG ENRICHMENT:");
-  console.log("➡️ mySquad (first 3):", JSON.stringify(mySquad.slice(0, 3)));
-  console.log("➡️ marketPlayers (first 3):", JSON.stringify(marketPlayers.slice(0, 3).map(p => ({ sku: p.sku, name: p.name }))));
-  
-  const enriched = mySquad.map(squadPlayer => {
-    const fullData = marketPlayers.find(p => String(p.sku) === String(squadPlayer.playerId));
-    const appliedCard = availableCards.find(c => c.id === squadPlayer.appliedCardId);
-    
+  console.log('🔍 DEBUG ENRICHMENT:');
+  console.log('➡️ mySquad (first 3):', JSON.stringify(mySquad.slice(0, 3)));
+  console.log(
+    '➡️ marketPlayers (first 3):',
+    JSON.stringify(marketPlayers.slice(0, 3).map((p) => ({ sku: p.sku, name: p.name })))
+  );
+
+  const enriched = mySquad.map((squadPlayer) => {
+    const fullData = marketPlayers.find((p) => String(p.sku) === String(squadPlayer.playerId));
+    const appliedCard = availableCards.find((c) => c.id === squadPlayer.appliedCardId);
+
     // ช่วง "เปิดลงทะเบียนเข้าแข่งขัน" (isMarketOpen = true): ใช้สถิติฤดูกาลล่าสุด (totalPoints) หรือผลงานเดิม
     // ช่วง ปิด "เปิดลงทะเบียนเข้าแข่งขัน" (isMarketOpen = false): ใช้สถิติ Live ของสัปดาห์นี้ที่กำลังเข้ามาใหม่ (liveGwStats)
     let liveStats = null;
@@ -30,7 +33,7 @@ export const enrichSquadData = (
       liveStats = liveGwStats[squadPlayer.playerId];
     }
 
-    const basePoints = liveStats ? (liveStats.gwPoints || 0) : (fullData?.totalPoints || 0);
+    const basePoints = liveStats ? liveStats.gwPoints || 0 : fullData?.totalPoints || 0;
     let displayPoints = basePoints;
 
     // กติกา 2 แบบ: ตัวจริง vs ม้านั่งสำรอง
@@ -49,7 +52,7 @@ export const enrichSquadData = (
     }
 
     return {
-      id: String(squadPlayer.slotIndex), 
+      id: String(squadPlayer.slotIndex),
       playerId: squadPlayer.playerId,
       name: fullData?.name || fullData?.fullName || 'Unknown',
       team: fullData?.team || 'UNK',
@@ -59,19 +62,24 @@ export const enrichSquadData = (
       imageUrl: fullData?.imageUrl || null,
       totalPoints: basePoints,
       displayPoints: displayPoints,
-      role: captainId === squadPlayer.playerId ? 'C' : (viceCaptainId === squadPlayer.playerId ? 'VC' : null),
+      role:
+        captainId === squadPlayer.playerId
+          ? 'C'
+          : viceCaptainId === squadPlayer.playerId
+            ? 'VC'
+            : null,
       isStarting: squadPlayer.isStarting,
       appliedCardId: squadPlayer.appliedCardId,
       appliedCardIcon: appliedCard?.icon || null,
       appliedCard: appliedCard || null,
       fullData: fullData,
       stats: fullData?.stats || null,
-      liveStats: liveStats // เก็บสถิติ Live เข้าไปใน Object เพื่อให้ PlayerNode เอาไปใช้งาน
+      liveStats: liveStats, // เก็บสถิติ Live เข้าไปใน Object เพื่อให้ PlayerNode เอาไปใช้งาน
     };
   });
 
   return {
-    enrichedStarters: enriched.filter(p => p.isStarting),
-    enrichedBench: enriched.filter(p => !p.isStarting)
+    enrichedStarters: enriched.filter((p) => p.isStarting),
+    enrichedBench: enriched.filter((p) => !p.isStarting),
   };
 };

@@ -24,9 +24,9 @@ export function useRewardCard(reward, onSuccess) {
 
     const calculateTimeLeft = () => {
       const difference = new Date(reward.flashSaleEndTime).getTime() - new Date().getTime();
-      
+
       if (difference > 0) {
-        const hours = Math.floor((difference / (1000 * 60 * 60)));
+        const hours = Math.floor(difference / (1000 * 60 * 60));
         const minutes = Math.floor((difference / 1000 / 60) % 60);
         const seconds = Math.floor((difference / 1000) % 60);
         setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
@@ -77,10 +77,10 @@ export function useRewardCard(reward, onSuccess) {
       setStep('loading');
       try {
         const result = await redeemReward(userData.uid, reward);
-        setStep('success'); 
-        
+        setStep('success');
+
         if (onSuccess) onSuccess(result);
-        
+
         setTimeout(() => setStep('idle'), 3000);
       } catch (error) {
         setErrorMessage(error.message);
@@ -91,18 +91,42 @@ export function useRewardCard(reward, onSuccess) {
 
   const getButtonUI = () => {
     if (isOutOfStock) {
-      return { text: 'Sold Out', classes: 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200' };
+      return {
+        text: 'Sold Out',
+        classes: 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200',
+      };
     }
     if (isNotEnoughBalls && step === 'idle') {
-      return { text: 'ไม่พอ', classes: 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 opacity-70' };
+      return {
+        text: 'ไม่พอ',
+        classes:
+          'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 opacity-70',
+      };
     }
-    
+
     switch (step) {
-      case 'confirm': return { text: 'กดยืนยันอีกครั้ง!', classes: 'bg-amber-500 hover:bg-amber-600 text-white animate-pulse shadow-lg shadow-amber-500/40 border border-amber-400' };
-      case 'loading': return { text: 'กำลังตรวจสอบ...', classes: 'bg-slate-100 text-slate-500 cursor-wait' };
-      case 'success': return { text: 'รับสำเร็จ! 🎉', classes: 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 scale-105 border border-emerald-400' };
-      case 'error': return { text: '❌ พลาด', classes: 'bg-red-500 text-white border border-red-600' };
-      default: return { text: 'แลกรับรางวัล', classes: 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md active:scale-95 transition-all duration-200' };
+      case 'confirm':
+        return {
+          text: 'กดยืนยันอีกครั้ง!',
+          classes:
+            'bg-amber-500 hover:bg-amber-600 text-white animate-pulse shadow-lg shadow-amber-500/40 border border-amber-400',
+        };
+      case 'loading':
+        return { text: 'กำลังตรวจสอบ...', classes: 'bg-slate-100 text-slate-500 cursor-wait' };
+      case 'success':
+        return {
+          text: 'รับสำเร็จ! 🎉',
+          classes:
+            'bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 scale-105 border border-emerald-400',
+        };
+      case 'error':
+        return { text: '❌ พลาด', classes: 'bg-red-500 text-white border border-red-600' };
+      default:
+        return {
+          text: 'แลกรับรางวัล',
+          classes:
+            'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md active:scale-95 transition-all duration-200',
+        };
     }
   };
 
@@ -116,6 +140,6 @@ export function useRewardCard(reward, onSuccess) {
     isOutOfStock,
     isNotEnoughBalls,
     handleRedeemClick,
-    buttonState: getButtonUI()
+    buttonState: getButtonUI(),
   };
 }

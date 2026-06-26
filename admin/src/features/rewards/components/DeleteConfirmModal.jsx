@@ -13,7 +13,10 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, itemName, isDeleting }
           </div>
           <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">ยืนยันการลบ?</h3>
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-            คุณแน่ใจหรือไม่ว่าต้องการลบ <span className="font-semibold text-slate-700 dark:text-slate-300">"{itemName}"</span>? <br/>การกระทำนี้ไม่สามารถย้อนกลับได้
+            คุณแน่ใจหรือไม่ว่าต้องการลบ{' '}
+            <span className="font-semibold text-slate-700 dark:text-slate-300">"{itemName}"</span>?{' '}
+            <br />
+            การกระทำนี้ไม่สามารถย้อนกลับได้
           </p>
           <div className="flex gap-3 justify-center">
             <button
@@ -28,11 +31,7 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, itemName, isDeleting }
               disabled={isDeleting}
               className="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors flex items-center gap-2 disabled:opacity-50"
             >
-              {isDeleting ? (
-                <RefreshCw size={16} className="animate-spin" />
-              ) : (
-                <Trash2 size={16} />
-              )}
+              {isDeleting ? <RefreshCw size={16} className="animate-spin" /> : <Trash2 size={16} />}
               {isDeleting ? 'กำลังลบ...' : 'ลบข้อมูล'}
             </button>
           </div>

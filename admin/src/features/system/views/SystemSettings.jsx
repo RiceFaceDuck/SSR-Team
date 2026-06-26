@@ -46,28 +46,30 @@ export default function SystemSettings() {
   };
 
   const handleInputChange = (field, value) => {
-    setConfig(prev => ({ ...prev, [field]: value }));
+    setConfig((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleThemeChange = (field, value) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
       themeConfig: {
         ...(prev.themeConfig || {}),
-        [field]: value
-      }
+        [field]: value,
+      },
     }));
   };
 
   const handleSetDefaultTheme = () => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
       themeConfig: {
         ...(prev.themeConfig || {}),
-        loginBackgroundUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2000',
-        marketBackgroundUrl: 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000',
-        floatingObjectUrl: ''
-      }
+        loginBackgroundUrl:
+          'https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2000',
+        marketBackgroundUrl:
+          'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000',
+        floatingObjectUrl: '',
+      },
     }));
     alert('โหลดค่า Default Theme เรียบร้อย กรุณากดปุ่มบันทึก');
   };
@@ -106,7 +108,11 @@ export default function SystemSettings() {
       {config && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <GameSettings config={config} handleInputChange={handleInputChange} />
-          <ThemeSettings config={config} handleThemeChange={handleThemeChange} handleSetDefaultTheme={handleSetDefaultTheme} />
+          <ThemeSettings
+            config={config}
+            handleThemeChange={handleThemeChange}
+            handleSetDefaultTheme={handleSetDefaultTheme}
+          />
         </div>
       )}
     </div>

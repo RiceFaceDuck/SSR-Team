@@ -1,4 +1,14 @@
-import { collection, addDoc, query, where, getDocs, updateDoc, doc, serverTimestamp, increment } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  doc,
+  serverTimestamp,
+  increment,
+} from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { showToast } from '../../utils/toast';
 
@@ -17,12 +27,12 @@ export const referralService = {
     try {
       // เช็คก่อนว่าเคยให้รางวัลคู่นี้ไปแล้วหรือยัง เพื่อป้องกันการให้ซ้ำ
       const q = query(
-        collection(db, REFERRALS_COL), 
+        collection(db, REFERRALS_COL),
         where('referrerId', '==', referrerId),
         where('referredId', '==', referredId)
       );
       const snap = await getDocs(q);
-      
+
       if (!snap.empty) {
         return; // เคยบันทึกไปแล้ว
       }
@@ -33,7 +43,7 @@ export const referralService = {
         referredId,
         balls: rewardBalls,
         claimed: false,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
       });
       console.log('✅ บันทึกรางวัลชวนเพื่อนสำเร็จ (รอผู้ชวนเข้าเกม)');
     } catch (err) {
@@ -51,7 +61,7 @@ export const referralService = {
     try {
       const { httpsCallable } = require('firebase/functions');
       const { functions } = require('../../config/firebase');
-      
+
       const claimReferralRewardsFn = httpsCallable(functions, 'claimReferralRewards');
       const response = await claimReferralRewardsFn();
       const totalBalls = response.data;
@@ -65,5 +75,5 @@ export const referralService = {
       console.error('Error claiming referral rewards:', err);
       return 0;
     }
-  }
+  },
 };

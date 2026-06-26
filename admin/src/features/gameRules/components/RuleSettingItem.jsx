@@ -11,7 +11,7 @@ export default function RuleSettingItem({
   inputLabel,
   inputValue,
   onInputChange,
-  inputStep = "1"
+  inputStep = '1',
 }) {
   return (
     <div className="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 flex flex-col md:flex-row justify-between md:items-center gap-4 hover:bg-slate-100 hover:scale-[1.01] transition-all duration-300 mt-4 shadow-sm hover:shadow-md">

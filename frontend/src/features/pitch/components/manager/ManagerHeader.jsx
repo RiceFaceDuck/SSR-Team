@@ -13,21 +13,24 @@ const ManagerHeader = ({ balls, activeTab, setActiveTab, onClose, ownedCount }) 
             <span className="text-amber-500 text-xs font-bold">🪙</span>
             <span className="text-amber-400 font-bold">{balls} Balls</span>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-full p-1.5">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-full p-1.5"
+          >
             <X size={20} />
           </button>
         </div>
       </div>
-      
+
       {/* Tabs */}
       <div className="flex gap-2 bg-[#040f1d] p-1 rounded-lg">
-        <button 
+        <button
           onClick={() => setActiveTab('INVENTORY')}
           className={`flex-1 py-2 font-bold text-sm rounded-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'INVENTORY' ? 'bg-[#3b82f6] text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
         >
           <User size={16} /> คลังของคุณ ({ownedCount})
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab('SHOP')}
           className={`flex-1 py-2 font-bold text-sm rounded-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'SHOP' ? 'bg-[#3b82f6] text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
         >

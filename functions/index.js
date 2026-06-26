@@ -24,15 +24,18 @@ const adminRoutes = require('./src/api/adminRoutes');
 const engineRoutes = require('./src/api/engineRoutes');
 const economyRoutes = require('./src/api/economyRoutes');
 const socialRoutes = require('./src/api/socialRoutes');
+const footballApiRoutes = require('./src/api/footballApiRoutes');
 
 // 2. Admin Callables
 exports.adminSyncPlayers = adminRoutes.adminSyncPlayers;
 exports.setAdminClaim = adminRoutes.setAdminClaim;
+exports.syncPlayersBulk = adminRoutes.syncPlayersBulk;
 
 // 3. Engine Functions
 exports.processGameweek = engineRoutes.processGameweek;
 exports.previewPlayerValues = engineRoutes.previewPlayerValues;
 exports.commitPlayerValues = engineRoutes.commitPlayerValues;
+exports.fetchApiFootballData = footballApiRoutes.fetchApiFootballData;
 
 // 4. Economy & Market Functions
 exports.claimQuestReward = economyRoutes.claimQuestReward;

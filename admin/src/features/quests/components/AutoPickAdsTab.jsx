@@ -6,7 +6,7 @@ import { Save, AlertCircle, Hand } from 'lucide-react';
 const AVAILABLE_BUTTONS = [
   { id: 'autoPick', label: 'ปุ่มสุ่มทีมอัตโนมัติ (Auto Pick)' },
   { id: 'reset', label: 'ปุ่มล้างทีม (Reset)' },
-  { id: 'saveTeam', label: 'ปุ่มบันทึกทีม (Save Team)' }
+  { id: 'saveTeam', label: 'ปุ่มบันทึกทีม (Save Team)' },
 ];
 
 export default function AutoPickAdsTab() {
@@ -51,12 +51,12 @@ export default function AutoPickAdsTab() {
   };
 
   const handleChange = (btnId, field, value) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
       [btnId]: {
         ...(prev[btnId] || {}),
-        [field]: value
-      }
+        [field]: value,
+      },
     }));
   };
 
@@ -69,7 +69,9 @@ export default function AutoPickAdsTab() {
           <Hand className="text-indigo-500" />
           ฝังโฆษณาตามปุ่ม (Button Ads)
         </h2>
-        <p className="text-sm text-slate-500 mt-1">ตั้งค่าลิงก์โฆษณาและระยะเวลารอ (Cooldown) สำหรับปุ่มที่มีในระบบ</p>
+        <p className="text-sm text-slate-500 mt-1">
+          ตั้งค่าลิงก์โฆษณาและระยะเวลารอ (Cooldown) สำหรับปุ่มที่มีในระบบ
+        </p>
       </div>
 
       {error && (
@@ -79,26 +81,35 @@ export default function AutoPickAdsTab() {
       )}
 
       <div className="space-y-4">
-        {AVAILABLE_BUTTONS.map(btn => {
+        {AVAILABLE_BUTTONS.map((btn) => {
           const btnConfig = config[btn.id] || { cooldownSeconds: 0, adLinkUrl: '' };
           return (
-            <div key={btn.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <div
+              key={btn.id}
+              className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-50 p-4 rounded-xl border border-slate-100"
+            >
               <div className="md:col-span-4">
                 <p className="font-bold text-slate-700">{btn.label}</p>
                 <p className="text-xs text-slate-500">ID: {btn.id}</p>
               </div>
               <div className="md:col-span-3">
-                <label className="block text-[10px] font-bold text-slate-500 mb-1">Cooldown (วินาที)</label>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1">
+                  Cooldown (วินาที)
+                </label>
                 <input
                   type="number"
                   value={btnConfig.cooldownSeconds !== undefined ? btnConfig.cooldownSeconds : 0}
-                  onChange={(e) => handleChange(btn.id, 'cooldownSeconds', parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    handleChange(btn.id, 'cooldownSeconds', parseInt(e.target.value) || 0)
+                  }
                   className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                   placeholder="0 = ไม่ติดคูลดาวน์"
                 />
               </div>
               <div className="md:col-span-5">
-                <label className="block text-[10px] font-bold text-slate-500 mb-1">ลิงก์โฆษณา (Ad URL)</label>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1">
+                  ลิงก์โฆษณา (Ad URL)
+                </label>
                 <input
                   type="text"
                   value={btnConfig.adLinkUrl || ''}

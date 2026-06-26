@@ -11,10 +11,10 @@ export const managerService = {
     try {
       const q = query(getManagersColRef(), where('isActive', '==', true));
       const snap = await getDocs(q);
-      return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
-      console.error("❌ [ManagerService] Error fetching managers:", error);
+      console.error('❌ [ManagerService] Error fetching managers:', error);
       return [];
     }
-  }
+  },
 };

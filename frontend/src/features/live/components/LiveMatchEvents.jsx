@@ -30,11 +30,17 @@ export default function LiveMatchEvents({ events }) {
       </h4>
       <div className="flex flex-col gap-1 max-h-24 overflow-y-auto custom-scrollbar pr-1">
         {recentEvents.map((ev, index) => (
-          <div key={index} className="flex items-center gap-2 text-[10px] bg-slate-50 rounded px-2 py-1">
-            <span className="font-bold text-slate-400 w-6 text-right shrink-0">{ev.time.elapsed}'</span>
+          <div
+            key={index}
+            className="flex items-center gap-2 text-[10px] bg-slate-50 rounded px-2 py-1"
+          >
+            <span className="font-bold text-slate-400 w-6 text-right shrink-0">
+              {ev.time.elapsed}'
+            </span>
             <span className="text-[12px] shrink-0">{getEventIcon(ev)}</span>
             <span className="truncate font-medium text-slate-700">
-              {formatPlayerName(ev.player?.name)} {ev.assist?.name ? `(${formatPlayerName(ev.assist.name)})` : ''}
+              {formatPlayerName(ev.player?.name)}{' '}
+              {ev.assist?.name ? `(${formatPlayerName(ev.assist.name)})` : ''}
             </span>
             <span className="ml-auto text-slate-400 text-[9px] truncate max-w-[60px] text-right uppercase">
               {formatTeamShortName(ev.team?.name)}

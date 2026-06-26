@@ -9,16 +9,20 @@ export const liveMatchService = {
    */
   subscribeToLiveMatch(callback) {
     const docRef = doc(db, 'public_data', LIVE_MATCH_DOC_ID);
-    return onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        callback(docSnap.data());
-      } else {
+    return onSnapshot(
+      docRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          callback(docSnap.data());
+        } else {
+          callback(null);
+        }
+      },
+      (error) => {
+        console.error('Live match subscription error:', error);
         callback(null);
       }
-    }, (error) => {
-      console.error("Live match subscription error:", error);
-      callback(null);
-    });
+    );
   },
 
   /**
@@ -27,16 +31,20 @@ export const liveMatchService = {
   subscribeToLiveEvents(callback) {
     const eventsRef = collection(db, 'public_data', LIVE_MATCH_DOC_ID, 'events');
     const q = query(eventsRef, orderBy('timestamp', 'desc'), limit(50));
-    
-    return onSnapshot(q, (snapshot) => {
-      const events = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      callback(events);
-    }, (error) => {
-      console.error("Live events subscription error:", error);
-      callback([]);
-    });
-  }
+
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const events = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        callback(events);
+      },
+      (error) => {
+        console.error('Live events subscription error:', error);
+        callback([]);
+      }
+    );
+  },
 };

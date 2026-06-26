@@ -15,11 +15,27 @@ export const sanitizePlayerMarketData = (docId, data) => {
   const calculateFallbackPoints = (stats, position) => {
     if (!stats) return 0;
     let points = 0;
-    const hasPlayed = stats.minutes > 0 || stats.played > 0 || stats.goals > 0 || stats.assists > 0 || stats.yellowCards > 0 || stats.redCards > 0 || stats.cleanSheets > 0;
+    const hasPlayed =
+      stats.minutes > 0 ||
+      stats.played > 0 ||
+      stats.goals > 0 ||
+      stats.assists > 0 ||
+      stats.yellowCards > 0 ||
+      stats.redCards > 0 ||
+      stats.cleanSheets > 0;
     if (hasPlayed) points += 200; // playBase
 
     if (stats.goals) {
-      const goalVal = position === 'FW' ? 800 : position === 'MF' ? 1000 : position === 'DF' ? 1200 : position === 'GK' ? 1500 : 800;
+      const goalVal =
+        position === 'FW'
+          ? 800
+          : position === 'MF'
+            ? 1000
+            : position === 'DF'
+              ? 1200
+              : position === 'GK'
+                ? 1500
+                : 800;
       points += stats.goals * goalVal;
     }
     if (stats.assists) points += stats.assists * 600;
@@ -30,7 +46,7 @@ export const sanitizePlayerMarketData = (docId, data) => {
     if (stats.yellowCards) points += stats.yellowCards * -200;
     if (stats.redCards) points += stats.redCards * -600;
     if (stats.saves) points += Math.floor(stats.saves) * 50;
-    
+
     return points;
   };
 
@@ -63,13 +79,13 @@ export const sanitizePlayerMarketData = (docId, data) => {
     fullName: data.fullName || data.name || 'Unknown',
     position: normPos,
     team: data.team || data.club || 'Free Agent',
-    price: (Number(data.price) > 1000) ? (Number(data.price) / 1000000) : (Number(data.price) || 0.0),
+    price: Number(data.price) > 1000 ? Number(data.price) / 1000000 : Number(data.price) || 0.0,
     oldPrice: Number(data.oldPrice) || 0.0,
     priceDiff: Number(data.priceDiff) || 0.0,
     totalPoints: finalPoints,
-    imageUrl: typeof data.imageUrl === 'string' ? data.imageUrl.trim() : (data.image || null), 
+    imageUrl: typeof data.imageUrl === 'string' ? data.imageUrl.trim() : data.image || null,
     status: data.status || 'active',
     dataSource: data.dataSource || (data.sku?.startsWith('API-') ? 'API' : 'MANUAL'),
-    stats: parsedStats
+    stats: parsedStats,
   };
 };

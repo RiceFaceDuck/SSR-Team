@@ -12,23 +12,24 @@ const PlayerStatsDetailModal = ({ isOpen, onClose, player }) => {
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/80 backdrop-blur-md" 
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
 
       {/* Modal Content */}
       <div className="relative w-full max-w-md bg-slate-900 border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-        
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900/80 sticky top-0 z-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-slate-800 overflow-hidden border border-slate-700 flex items-center justify-center">
-              <img 
-                src={getOptimizedImageUrl(player.imageUrl || player.image) || '/assets/default-avatar.png'} 
+              <img
+                src={
+                  getOptimizedImageUrl(player.imageUrl || player.image) ||
+                  '/assets/default-avatar.png'
+                }
                 alt={player.name}
                 className="w-full h-full object-cover"
-                onError={(e) => { e.target.src = '/assets/default-avatar.png' }}
+                onError={(e) => {
+                  e.target.src = '/assets/default-avatar.png';
+                }}
               />
             </div>
             <div>
@@ -36,7 +37,7 @@ const PlayerStatsDetailModal = ({ isOpen, onClose, player }) => {
               <p className="text-xs text-slate-400 mt-1">Detailed Statistics</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 rounded-full bg-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-700 transition-all"
           >
@@ -46,7 +47,6 @@ const PlayerStatsDetailModal = ({ isOpen, onClose, player }) => {
 
         {/* Content (Scrollable) */}
         <div className="p-4 overflow-y-auto custom-scrollbar">
-          
           {/* Fantasy Points Overview */}
           <div className="bg-slate-800/40 rounded-xl p-4 mb-4 border border-slate-700/50">
             <h4 className="text-sm font-bold text-slate-300 flex items-center gap-2 mb-3">
@@ -106,7 +106,6 @@ const PlayerStatsDetailModal = ({ isOpen, onClose, player }) => {
               <StatRow label="Red Cards" value={s.redCards || 0} />
             </div>
           </div>
-
         </div>
       </div>
     </div>

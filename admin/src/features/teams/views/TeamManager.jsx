@@ -14,7 +14,12 @@ const TeamManager = () => {
 
   const handleEdit = (team) => {
     setEditingTeam(team.id);
-    setFormData({ id: team.id, name: team.name, shortName: team.shortName || '', logo: team.logo || '' });
+    setFormData({
+      id: team.id,
+      name: team.name,
+      shortName: team.shortName || '',
+      logo: team.logo || '',
+    });
   };
 
   const handleAddNew = () => {
@@ -33,7 +38,7 @@ const TeamManager = () => {
       await fetchTeams(); // Will fetch fresh data because cache is invalidated
       handleCancel();
     } catch (err) {
-      alert("เกิดข้อผิดพลาดในการบันทึก: " + err.message);
+      alert('เกิดข้อผิดพลาดในการบันทึก: ' + err.message);
     }
   };
 
@@ -43,7 +48,7 @@ const TeamManager = () => {
         await teamDatabase.deleteTeam(id);
         await fetchTeams();
       } catch (err) {
-        alert("เกิดข้อผิดพลาดในการลบ: " + err.message);
+        alert('เกิดข้อผิดพลาดในการลบ: ' + err.message);
       }
     }
   };
@@ -53,18 +58,20 @@ const TeamManager = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button 
-            onClick={() => navigate(-1)} 
+          <button
+            onClick={() => navigate(-1)}
             className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 text-gray-600 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">จัดการทีมสโมสร (Team Management)</h1>
-            <p className="text-sm text-gray-500">ตั้งค่าชื่อและโลโก้สโมสร สำหรับใช้งานในตารางและระบบ</p>
+            <p className="text-sm text-gray-500">
+              ตั้งค่าชื่อและโลโก้สโมสร สำหรับใช้งานในตารางและระบบ
+            </p>
           </div>
         </div>
-        <button 
+        <button
           onClick={handleAddNew}
           className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 shadow-md shadow-indigo-500/20 transition-all"
         >
@@ -74,7 +81,7 @@ const TeamManager = () => {
 
       {/* Editor Modal */}
       {editingTeam && (
-        <TeamFormModal 
+        <TeamFormModal
           editingTeam={editingTeam}
           initialData={formData}
           onSave={handleSave}
@@ -83,12 +90,7 @@ const TeamManager = () => {
       )}
 
       {/* Team List */}
-      <TeamList 
-        teams={teams}
-        isLoading={isLoading}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <TeamList teams={teams} isLoading={isLoading} onEdit={handleEdit} onDelete={handleDelete} />
     </div>
   );
 };

@@ -8,16 +8,16 @@ const defaultRules = {
   goal: { FWD: 800, MID: 1000, DEF: 1200, GK: 1500, isActive: true },
   assist: { value: 600, isActive: true },
   cleanSheet: { DEF: 500, GK: 500, MID: 200, FWD: 0, isActive: true },
-  
+
   // Defensive
-  tackles: { value: 100, per: 3, isActive: true, desc: "ทุกๆ 3 แทคเกิล" },
-  blocks: { value: 100, per: 2, isActive: true, desc: "ทุกๆ 2 บล็อค" },
-  saves: { value: 50, per: 1, isActive: true, desc: "GK ทุกๆ 1 เซฟ" },
-  
+  tackles: { value: 100, per: 3, isActive: true, desc: 'ทุกๆ 3 แทคเกิล' },
+  blocks: { value: 100, per: 2, isActive: true, desc: 'ทุกๆ 2 บล็อค' },
+  saves: { value: 50, per: 1, isActive: true, desc: 'GK ทุกๆ 1 เซฟ' },
+
   // Offensive
-  keyPasses: { value: 100, per: 3, isActive: true, desc: "ทุกๆ 3 Key Passes" },
-  dribbles: { value: 100, per: 3, isActive: true, desc: "ทุกๆ 3 Dribbles" },
-  
+  keyPasses: { value: 100, per: 3, isActive: true, desc: 'ทุกๆ 3 Key Passes' },
+  dribbles: { value: 100, per: 3, isActive: true, desc: 'ทุกๆ 3 Dribbles' },
+
   // Special/Negative
   penaltySaved: { value: 1000, isActive: true },
   penaltyMissed: { value: -500, isActive: true },
@@ -25,7 +25,7 @@ const defaultRules = {
   penaltyCommitted: { value: -400, isActive: true },
   yellowCard: { value: -200, isActive: true },
   redCard: { value: -600, isActive: true },
-  ownGoal: { value: -800, isActive: true }
+  ownGoal: { value: -800, isActive: true },
 };
 
 export const useScoreRulesManager = () => {
@@ -67,12 +67,12 @@ export const useScoreRulesManager = () => {
   };
 
   const updateRule = (key, field, value) => {
-    setRules(prev => ({
+    setRules((prev) => ({
       ...prev,
       [key]: {
         ...prev[key],
-        [field]: value
-      }
+        [field]: value,
+      },
     }));
   };
 
@@ -82,6 +82,6 @@ export const useScoreRulesManager = () => {
     isSaving,
     error,
     handleSave,
-    updateRule
+    updateRule,
   };
 };

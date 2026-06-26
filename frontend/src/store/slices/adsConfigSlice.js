@@ -3,7 +3,7 @@ import { adsConfigDatabase } from '../../services/firebase/adsConfigDatabase';
 export const createAdsConfigSlice = (set) => ({
   adsConfig: {
     adLinks: [],
-    googleAdsense: { clientId: '', slotId: '', isActive: false }
+    googleAdsense: { clientId: '', slotId: '', isActive: false },
   },
   isAdsLoading: false,
 
@@ -12,15 +12,17 @@ export const createAdsConfigSlice = (set) => ({
     try {
       const data = await adsConfigDatabase.getAdsConfig();
       if (data) {
-        set({ adsConfig: {
-          adLinks: data.adLinks || [],
-          googleAdsense: data.googleAdsense || { clientId: '', slotId: '', isActive: false }
-        }});
+        set({
+          adsConfig: {
+            adLinks: data.adLinks || [],
+            googleAdsense: data.googleAdsense || { clientId: '', slotId: '', isActive: false },
+          },
+        });
       }
     } catch (error) {
-      console.error("fetchAdsConfig error:", error);
+      console.error('fetchAdsConfig error:', error);
     } finally {
       set({ isAdsLoading: false });
     }
-  }
+  },
 });

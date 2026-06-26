@@ -4,9 +4,10 @@ import { ArrowRight, Search } from 'lucide-react';
 export default function PlayerValuePreviewTable({ previews, isLoading }) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filtered = previews.filter(p => 
-    p.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.team?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = previews.filter(
+    (p) =>
+      p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.team?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {
@@ -32,16 +33,16 @@ export default function PlayerValuePreviewTable({ previews, isLoading }) {
         <h3 className="font-bold text-slate-800">ผลการจำลองราคา (Preview)</h3>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-          <input 
-            type="text" 
-            placeholder="ค้นหานักเตะ / ทีม..." 
+          <input
+            type="text"
+            placeholder="ค้นหานักเตะ / ทีม..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none w-64"
           />
         </div>
       </div>
-      
+
       <div className="overflow-x-auto max-h-[500px]">
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-50 text-slate-500 sticky top-0 shadow-sm z-10">
@@ -56,22 +57,39 @@ export default function PlayerValuePreviewTable({ previews, isLoading }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {filtered.map(p => {
+            {filtered.map((p) => {
               const diff = p.priceDiff;
               const isUp = diff > 0;
               const isDown = diff < 0;
               const stats = p.stats || {};
-              let avg = Math.round((Number(stats.pace) + Number(stats.shooting) + Number(stats.passing) + Number(stats.dribbling) + Number(stats.defending) + Number(stats.physical)) / 6) || 0;
+              let avg =
+                Math.round(
+                  (Number(stats.pace) +
+                    Number(stats.shooting) +
+                    Number(stats.passing) +
+                    Number(stats.dribbling) +
+                    Number(stats.defending) +
+                    Number(stats.physical)) /
+                    6
+                ) || 0;
               if (avg === 0 && stats.rating) {
                 avg = Math.round((stats.rating / 10) * 100);
               }
-              
+
               return (
                 <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-slate-200 overflow-hidden shrink-0">
-                        {p.imageUrl ? <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover"/> : <div className="w-full h-full bg-indigo-100"></div>}
+                        {p.imageUrl ? (
+                          <img
+                            src={p.imageUrl}
+                            alt={p.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-indigo-100"></div>
+                        )}
                       </div>
                       <div>
                         <div className="font-bold text-slate-800">{p.name}</div>
@@ -81,17 +99,24 @@ export default function PlayerValuePreviewTable({ previews, isLoading }) {
                   </td>
                   <td className="px-4 py-3 text-center font-medium text-slate-600">{p.position}</td>
                   <td className="px-4 py-3 text-center">
-                    <span className="inline-block px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-bold">{avg}</span>
+                    <span className="inline-block px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-bold">
+                      {avg}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-right text-slate-500">{p.oldPrice.toFixed(1)}m</td>
                   <td className="px-4 py-3 text-center text-slate-300">
                     <ArrowRight className="w-4 h-4 mx-auto" />
                   </td>
-                  <td className="px-4 py-3 text-right font-black text-slate-800">{p.newPrice.toFixed(1)}m</td>
+                  <td className="px-4 py-3 text-right font-black text-slate-800">
+                    {p.newPrice.toFixed(1)}m
+                  </td>
                   <td className="px-4 py-3 text-right">
                     {diff !== 0 ? (
-                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${isUp ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                        {isUp ? '+' : ''}{diff.toFixed(1)}m
+                      <span
+                        className={`text-xs font-bold px-2 py-1 rounded-full ${isUp ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}
+                      >
+                        {isUp ? '+' : ''}
+                        {diff.toFixed(1)}m
                       </span>
                     ) : (
                       <span className="text-xs font-medium text-slate-400">-</span>

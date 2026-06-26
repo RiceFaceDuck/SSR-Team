@@ -4,7 +4,9 @@ export default function QuestBasicInputs({ formData, handleChange }) {
   return (
     <>
       <div className="md:col-span-2">
-        <label className="block text-sm font-medium text-gray-300 mb-1">หัวข้อโปรโมชั่น (Title)</label>
+        <label className="block text-sm font-medium text-gray-300 mb-1">
+          หัวข้อโปรโมชั่น (Title)
+        </label>
         <input
           type="text"
           name="title"
@@ -17,7 +19,9 @@ export default function QuestBasicInputs({ formData, handleChange }) {
       </div>
 
       <div className="md:col-span-2">
-        <label className="block text-sm font-medium text-gray-300 mb-1">รายละเอียดเงื่อนไข (Description)</label>
+        <label className="block text-sm font-medium text-gray-300 mb-1">
+          รายละเอียดเงื่อนไข (Description)
+        </label>
         <textarea
           name="description"
           rows="2"
@@ -29,7 +33,9 @@ export default function QuestBasicInputs({ formData, handleChange }) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-1">ป้ายกำกับที่มา (Platform)</label>
+        <label className="block text-sm font-medium text-gray-300 mb-1">
+          ป้ายกำกับที่มา (Platform)
+        </label>
         <select
           name="platform"
           value={formData.platform}
@@ -47,9 +53,11 @@ export default function QuestBasicInputs({ formData, handleChange }) {
           <option value="Other">🏷️ Other</option>
         </select>
       </div>
-      
+
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-1">ลิงก์ปลายทาง (Target URL)</label>
+        <label className="block text-sm font-medium text-gray-300 mb-1">
+          ลิงก์ปลายทาง (Target URL)
+        </label>
         <input
           type="url"
           name="targetUrl"

@@ -10,13 +10,13 @@ export function useFixtures(gameweekNumber) {
     if (!gameweekNumber) return;
 
     let isMounted = true;
-    
+
     const loadFixtures = async () => {
       setLoading(true);
       setError(null);
-      
+
       const cacheKey = `fixtures_gw_${gameweekNumber}`;
-      
+
       try {
         // 1. Check Session Storage Cache
         const cachedData = sessionStorage.getItem(cacheKey);
@@ -31,7 +31,7 @@ export function useFixtures(gameweekNumber) {
 
         // 2. Fetch from API
         const data = await apiFootballService.fetchFixtures(gameweekNumber);
-        
+
         if (isMounted) {
           setFixtures(data);
           // Save to cache
@@ -39,7 +39,7 @@ export function useFixtures(gameweekNumber) {
           setLoading(false);
         }
       } catch (err) {
-        console.error("Error loading fixtures:", err);
+        console.error('Error loading fixtures:', err);
         if (isMounted) {
           setError(err.message || 'ไม่สามารถโหลดตารางการแข่งขันได้');
           setLoading(false);

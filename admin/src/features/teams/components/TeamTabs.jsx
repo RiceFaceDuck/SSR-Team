@@ -18,7 +18,7 @@ const TeamTabs = ({ selectedTeam, onSelectTeam }) => {
           <h3 className="text-sm font-bold text-gray-800">รายชื่อสโมสรทั้งหมด (Teams)</h3>
           <p className="text-xs text-gray-500">เรียงตามลำดับการอัปเดตล่าสุด</p>
         </div>
-        <button 
+        <button
           onClick={() => navigate('/teams')}
           title="จัดการรายชื่อสโมสร"
           className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-lg transition-colors border border-gray-200"
@@ -32,8 +32,8 @@ const TeamTabs = ({ selectedTeam, onSelectTeam }) => {
         <button
           onClick={() => onSelectTeam('All')}
           className={`flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-full border transition-all duration-300 ${
-            selectedTeam === 'All' 
-              ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/30 hover:bg-blue-700' 
+            selectedTeam === 'All'
+              ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/30 hover:bg-blue-700'
               : 'bg-white border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50 hover:shadow-sm'
           }`}
         >
@@ -51,13 +51,20 @@ const TeamTabs = ({ selectedTeam, onSelectTeam }) => {
             }`}
           >
             {team.logo ? (
-              <img src={team.logo} alt={team.name} className="w-6 h-6 object-contain drop-shadow-sm group-hover:scale-110 transition-transform" />
+              <img
+                src={team.logo}
+                alt={team.name}
+                className="w-6 h-6 object-contain drop-shadow-sm group-hover:scale-110 transition-transform"
+              />
             ) : (
               <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">
                 {team.name.charAt(0)}
               </div>
             )}
-            <span className={`text-xs font-medium ${selectedTeam === team.name ? 'font-bold' : ''}`} title={team.name}>
+            <span
+              className={`text-xs font-medium ${selectedTeam === team.name ? 'font-bold' : ''}`}
+              title={team.name}
+            >
               {team.shortName || team.name}
             </span>
           </button>

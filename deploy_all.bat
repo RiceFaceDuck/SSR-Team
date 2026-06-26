@@ -1,4 +1,5 @@
 @echo off
+setlocal
 title SSR Team - Build and Deploy System
 color 0A
 
@@ -7,13 +8,13 @@ echo    SSR TEAM : ONE-CLICK DEPLOY SCRIPT
 echo =========================================
 echo.
 
-:: 1. ตรวจสอบว่าอยู่ในโฟลเดอร์ที่ถูกต้องหรือไม่
+:: 1. ตรวจสอบที่อยู่ไฟล์
 if not exist "firebase.json" (
     color 0C
     echo [ERROR] Cannot find firebase.json!
     echo Please make sure this file is placed in "C:\SSR Team" folder.
     echo.
-    pause
+    if /I "%~1" neq "--auto" pause
     exit /b 1
 )
 
@@ -26,7 +27,7 @@ if %ERRORLEVEL% neq 0 (
     echo.
     echo [ERROR] Frontend build failed! Please check your code.
     cd ..
-    pause
+    if /I "%~1" neq "--auto" pause
     exit /b %ERRORLEVEL%
 )
 cd ..
@@ -42,7 +43,7 @@ if %ERRORLEVEL% neq 0 (
     echo.
     echo [ERROR] Admin build failed! Please check your code.
     cd ..
-    pause
+    if /I "%~1" neq "--auto" pause
     exit /b %ERRORLEVEL%
 )
 cd ..
@@ -56,7 +57,7 @@ if %ERRORLEVEL% neq 0 (
     color 0C
     echo.
     echo [ERROR] Firebase deploy failed! Please check your connection or login status.
-    pause
+    if /I "%~1" neq "--auto" pause
     exit /b %ERRORLEVEL%
 )
 
@@ -68,4 +69,5 @@ echo    DEPLOYMENT COMPLETED SUCCESSFULLY!
 echo =========================================
 echo Both Frontend and Admin sites are now live.
 echo.
-pause
+if /I "%~1" neq "--auto" pause
+exit /b 0

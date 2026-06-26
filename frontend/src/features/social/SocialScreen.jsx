@@ -7,19 +7,21 @@ import LeagueList from './components/LeagueList';
 import FriendManager from './components/FriendManager';
 
 export default function SocialScreen() {
-  const themeConfig = useGameStore(state => state.themeConfig);
+  const themeConfig = useGameStore((state) => state.themeConfig);
   const [refreshLeagues, setRefreshLeagues] = useState(0);
   const [leagueCount, setLeagueCount] = useState(0);
   const [activeTab, setActiveTab] = useState('leagues'); // 'leagues' | 'friends'
 
   const handleLeagueAdded = () => {
-    setRefreshLeagues(prev => prev + 1);
+    setRefreshLeagues((prev) => prev + 1);
   };
 
   return (
-    <div 
+    <div
       className="p-3 animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-screen pb-24 bg-cover bg-center bg-fixed relative flex flex-col"
-      style={{ backgroundImage: `url(${themeConfig?.marketBackgroundUrl || 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000'})` }}
+      style={{
+        backgroundImage: `url(${themeConfig?.marketBackgroundUrl || 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000'})`,
+      }}
     >
       {/* Blurred overlay */}
       <div className="absolute inset-0 bg-slate-50/80 backdrop-blur-md pointer-events-none"></div>
@@ -32,7 +34,9 @@ export default function SocialScreen() {
               <Users className="text-indigo-600" size={32} /> SOCIAL.
             </h2>
             <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-300 shadow-md px-3 py-1.5 rounded-lg flex flex-col items-end">
-              <span className="text-[10px] text-slate-500 font-bold leading-none uppercase">คอมมูนิตี้</span>
+              <span className="text-[10px] text-slate-500 font-bold leading-none uppercase">
+                คอมมูนิตี้
+              </span>
               <span className="text-sm font-black text-indigo-600 leading-none mt-1">LEAGUES</span>
             </div>
           </div>
@@ -43,13 +47,13 @@ export default function SocialScreen() {
 
         {/* Tab Navigation */}
         <div className="flex bg-white/80 backdrop-blur-md rounded-xl p-1 mb-4 shadow-sm border border-slate-200">
-          <button 
+          <button
             onClick={() => setActiveTab('leagues')}
             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'leagues' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
           >
             ลีก & การดวล
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('friends')}
             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'friends' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
           >
@@ -68,7 +72,6 @@ export default function SocialScreen() {
         ) : (
           <FriendManager />
         )}
-
       </div>
     </div>
   );

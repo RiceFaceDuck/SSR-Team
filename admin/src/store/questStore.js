@@ -25,11 +25,11 @@ export const useQuestStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const newQuest = await questService.createQuest(questData);
-      
+
       // เอาโฆษณาใหม่แทรกไว้บนสุดของ Array
-      set((state) => ({ 
-        quests: [newQuest, ...state.quests], 
-        isLoading: false 
+      set((state) => ({
+        quests: [newQuest, ...state.quests],
+        isLoading: false,
       }));
       return { success: true };
     } catch (error) {
@@ -43,13 +43,13 @@ export const useQuestStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await questService.updateQuest(id, updateData);
-      
+
       // อัปเดตข้อมูลก้อนใหม่เข้าไปใน Array เดิมโดยไม่ต้องดึง Database ใหม่
       set((state) => ({
-        quests: state.quests.map((q) => 
+        quests: state.quests.map((q) =>
           q.id === id ? { ...q, ...updateData, updatedAt: new Date().toISOString() } : q
         ),
-        isLoading: false
+        isLoading: false,
       }));
       return { success: true };
     } catch (error) {
@@ -63,11 +63,11 @@ export const useQuestStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await questService.deleteQuest(id);
-      
+
       // คัดกรองเอา ID ที่ถูกลบออกจาก Array
       set((state) => ({
         quests: state.quests.filter((q) => q.id !== id),
-        isLoading: false
+        isLoading: false,
       }));
       return { success: true };
     } catch (error) {
@@ -81,16 +81,16 @@ export const useQuestStore = create((set, get) => ({
     // ฟังก์ชันนี้จงใจไม่ครอบ isLoading: true เพื่อให้ Toggle Switch บน UI กดแล้วลื่นไหล ไม่กระตุก
     try {
       const newStatus = await questService.toggleQuestStatus(id, currentStatus);
-      
+
       set((state) => ({
-        quests: state.quests.map((q) => 
+        quests: state.quests.map((q) =>
           q.id === id ? { ...q, isActive: newStatus, updatedAt: new Date().toISOString() } : q
-        )
+        ),
       }));
       return { success: true, newStatus };
     } catch (error) {
       set({ error: error.message });
       return { success: false, message: error.message };
     }
-  }
+  },
 }));

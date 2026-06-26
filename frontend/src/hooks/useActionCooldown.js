@@ -7,8 +7,8 @@ import { useGameStore } from '../store/useGameStore';
  */
 export const useActionCooldown = (initialCooldowns = { autoPick: 0, reset: 0, saveTeam: 0 }) => {
   const [cooldowns, setCooldowns] = useState(initialCooldowns);
-  const buttonAdsConfig = useGameStore(state => state.buttonAdsConfig);
-  const isNoAdsMode = useGameStore(state => state.isNoAdsMode);
+  const buttonAdsConfig = useGameStore((state) => state.buttonAdsConfig);
+  const isNoAdsMode = useGameStore((state) => state.isNoAdsMode);
 
   useEffect(() => {
     const checkCooldowns = () => {
@@ -17,7 +17,7 @@ export const useActionCooldown = (initialCooldowns = { autoPick: 0, reset: 0, sa
       let newCooldowns = { ...cooldowns };
       let changed = false;
 
-      btnIds.forEach(id => {
+      btnIds.forEach((id) => {
         const endTime = parseInt(localStorage.getItem(`btnCooldownEnd_${id}`) || '0');
         if (endTime > now) {
           const remain = Math.ceil((endTime - now) / 1000);
@@ -33,35 +33,38 @@ export const useActionCooldown = (initialCooldowns = { autoPick: 0, reset: 0, sa
 
       if (changed) setCooldowns(newCooldowns);
     };
-    
+
     checkCooldowns();
     const interval = setInterval(checkCooldowns, 1000);
     return () => clearInterval(interval);
   }, [cooldowns, initialCooldowns]);
 
-  const executeActionWithCooldown = useCallback((btnId, actionFn) => {
-    const config = buttonAdsConfig?.[btnId] || {};
-    const cd = cooldowns[btnId];
+  const executeActionWithCooldown = useCallback(
+    (btnId, actionFn) => {
+      const config = buttonAdsConfig?.[btnId] || {};
+      const cd = cooldowns[btnId];
 
-    if (cd > 0 && config.adLinkUrl && !isNoAdsMode) {
-      window.open(config.adLinkUrl, '_blank');
-      // แก้บั๊ก: หลังจากผู้เล่นยอมกดเปิดดูโฆษณาแล้ว ต้องเคลียร์คูลดาวน์ให้ทันที
-      localStorage.removeItem(`btnCooldownEnd_${btnId}`);
-      setCooldowns(prev => ({ ...prev, [btnId]: 0 }));
-      return;
-    }
-
-    actionFn();
-
-    if (!isNoAdsMode) {
-      const cdSeconds = config.cooldownSeconds || 0;
-      if (cdSeconds > 0) {
-        const endTime = Date.now() + (cdSeconds * 1000);
-        localStorage.setItem(`btnCooldownEnd_${btnId}`, endTime.toString());
-        setCooldowns(prev => ({ ...prev, [btnId]: cdSeconds }));
+      if (cd > 0 && config.adLinkUrl && !isNoAdsMode) {
+        window.open(config.adLinkUrl, '_blank');
+        // แก้บั๊ก: หลังจากผู้เล่นยอมกดเปิดดูโฆษณาแล้ว ต้องเคลียร์คูลดาวน์ให้ทันที
+        localStorage.removeItem(`btnCooldownEnd_${btnId}`);
+        setCooldowns((prev) => ({ ...prev, [btnId]: 0 }));
+        return;
       }
-    }
-  }, [cooldowns, buttonAdsConfig, isNoAdsMode]);
+
+      actionFn();
+
+      if (!isNoAdsMode) {
+        const cdSeconds = config.cooldownSeconds || 0;
+        if (cdSeconds > 0) {
+          const endTime = Date.now() + cdSeconds * 1000;
+          localStorage.setItem(`btnCooldownEnd_${btnId}`, endTime.toString());
+          setCooldowns((prev) => ({ ...prev, [btnId]: cdSeconds }));
+        }
+      }
+    },
+    [cooldowns, buttonAdsConfig, isNoAdsMode]
+  );
 
   return { cooldowns, executeActionWithCooldown, isNoAdsMode };
 };

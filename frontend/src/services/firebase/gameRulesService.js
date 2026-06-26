@@ -12,28 +12,31 @@ export const gameRulesService = {
         if (cached) {
           const { data, timestamp } = JSON.parse(cached);
           if (Date.now() - timestamp < CACHE_TTL_MS) {
-            console.log("✅ [GameRulesService] Loaded from cache");
+            console.log('✅ [GameRulesService] Loaded from cache');
             return data;
           }
         }
       }
 
-      console.log("🔄 [GameRulesService] Fetching from Firestore...");
+      console.log('🔄 [GameRulesService] Fetching from Firestore...');
       const docRef = doc(db, 'public_data', 'game_rules');
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         const rules = docSnap.data();
         // Save to cache
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
-          data: rules,
-          timestamp: Date.now()
-        }));
+        localStorage.setItem(
+          CACHE_KEY,
+          JSON.stringify({
+            data: rules,
+            timestamp: Date.now(),
+          })
+        );
         return rules;
       }
       return null;
     } catch (error) {
-      console.error("❌ [GameRulesService] Error fetching game_rules:", error);
+      console.error('❌ [GameRulesService] Error fetching game_rules:', error);
       // Fallback to cache if error
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
@@ -41,5 +44,5 @@ export const gameRulesService = {
       }
       return null;
     }
-  }
+  },
 };

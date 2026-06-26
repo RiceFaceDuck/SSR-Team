@@ -6,17 +6,24 @@ import PowerCardPopup from '../PowerCardPopup';
 import ConfettiEffect from '../../../components/common/ConfettiEffect';
 
 export default function PitchModals({
-  isSaveModalOpen, setIsSaveModalOpen, handleConfirmSave,
-  isManagerModalOpen, setIsManagerModalOpen,
-  popupPlayer, setPopupPlayer, handlePopupAction,
-  powerCardPlayer, setPowerCardPlayer,
-  showConfetti, setShowConfetti
+  isSaveModalOpen,
+  setIsSaveModalOpen,
+  handleConfirmSave,
+  isManagerModalOpen,
+  setIsManagerModalOpen,
+  popupPlayer,
+  setPopupPlayer,
+  handlePopupAction,
+  powerCardPlayer,
+  setPowerCardPlayer,
+  showConfetti,
+  setShowConfetti,
 }) {
   return (
     <>
-      <SaveSquadManager 
-        isOpen={isSaveModalOpen} 
-        onClose={() => setIsSaveModalOpen(false)} 
+      <SaveSquadManager
+        isOpen={isSaveModalOpen}
+        onClose={() => setIsSaveModalOpen(false)}
         onConfirmSave={handleConfirmSave}
       />
       <ManagerSelectionModal
@@ -24,21 +31,21 @@ export default function PitchModals({
         onClose={() => setIsManagerModalOpen(false)}
       />
       {popupPlayer && (
-        <PlayerActionPopup 
-          player={popupPlayer} 
+        <PlayerActionPopup
+          player={popupPlayer}
           onClose={() => setPopupPlayer(null)}
           onAction={handlePopupAction}
         />
       )}
-      <PowerCardPopup 
+      <PowerCardPopup
         isOpen={!!powerCardPlayer}
         onClose={() => setPowerCardPlayer(null)}
         player={powerCardPlayer}
       />
-      <ConfettiEffect 
-        isActive={showConfetti} 
-        onComplete={() => setShowConfetti(false)} 
-        type="burst" 
+      <ConfettiEffect
+        isActive={showConfetti}
+        onComplete={() => setShowConfetti(false)}
+        type="burst"
       />
     </>
   );

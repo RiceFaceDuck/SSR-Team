@@ -9,14 +9,13 @@ import { Loader2, Inbox } from 'lucide-react';
  * @param {boolean} isLoading - สถานะกำลังโหลดข้อมูล
  * @param {string} emptyMessage - ข้อความที่จะแสดงเมื่อไม่มีข้อมูล
  */
-const DataTable = ({ 
-  columns = [], 
-  data = [], 
-  isLoading = false, 
-  emptyMessage = "ไม่พบข้อมูล",
-  onRowClick
+const DataTable = ({
+  columns = [],
+  data = [],
+  isLoading = false,
+  emptyMessage = 'ไม่พบข้อมูล',
+  onRowClick,
 }) => {
-
   return (
     <div className="w-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
@@ -24,9 +23,9 @@ const DataTable = ({
           <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
             <tr>
               {columns.map((col, index) => (
-                <th 
-                  key={index} 
-                  scope="col" 
+                <th
+                  key={index}
+                  scope="col"
                   className={`px-6 py-4 font-medium tracking-wider ${col.className || ''}`}
                 >
                   {col.header}
@@ -60,25 +59,27 @@ const DataTable = ({
             )}
 
             {/* สถานะ: มีข้อมูล นำมาวนลูปแสดงผล */}
-            {!isLoading && data.length > 0 && data.map((row, rowIndex) => (
-              <tr 
-                key={row.id || rowIndex} 
-                className={`hover:bg-gray-50 transition-colors duration-150 ${onRowClick ? 'cursor-pointer' : ''}`}
-                onClick={() => onRowClick && onRowClick(row)}
-              >
-                {columns.map((col, colIndex) => (
-                  <td 
-                    key={`${rowIndex}-${colIndex}`} 
-                    className={`px-6 py-4 whitespace-nowrap ${col.className || ''}`}
-                  >
-                    {/* ถ้ามีการส่งฟังก์ชัน cell มาให้ใช้ฟังก์ชันนั้นเรนเดอร์ (เช่น สร้างปุ่ม)
+            {!isLoading &&
+              data.length > 0 &&
+              data.map((row, rowIndex) => (
+                <tr
+                  key={row.id || rowIndex}
+                  className={`hover:bg-gray-50 transition-colors duration-150 ${onRowClick ? 'cursor-pointer' : ''}`}
+                  onClick={() => onRowClick && onRowClick(row)}
+                >
+                  {columns.map((col, colIndex) => (
+                    <td
+                      key={`${rowIndex}-${colIndex}`}
+                      className={`px-6 py-4 whitespace-nowrap ${col.className || ''}`}
+                    >
+                      {/* ถ้ามีการส่งฟังก์ชัน cell มาให้ใช้ฟังก์ชันนั้นเรนเดอร์ (เช่น สร้างปุ่ม)
                       ถ้าไม่มี ให้ดึงค่าจาก accessorKey ตรงๆ 
                     */}
-                    {col.cell ? col.cell(row) : row[col.accessorKey] || '-'}
-                  </td>
-                ))}
-              </tr>
-            ))}
+                      {col.cell ? col.cell(row) : row[col.accessorKey] || '-'}
+                    </td>
+                  ))}
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>

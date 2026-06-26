@@ -11,7 +11,7 @@ export default function ToggleSwitch({ label, description, info, checked, onChan
           <div className="flex items-center gap-2">
             <p className="font-bold text-slate-800">{label}</p>
             {info && (
-              <div 
+              <div
                 className="relative"
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}
@@ -30,8 +30,8 @@ export default function ToggleSwitch({ label, description, info, checked, onChan
           {description && <p className="text-xs text-slate-500 mt-0.5">{description}</p>}
         </div>
         <label className="relative inline-flex items-center cursor-pointer flex-shrink-0 ml-4">
-          <input 
-            type="checkbox" 
+          <input
+            type="checkbox"
             className="sr-only peer"
             checked={checked || false}
             onChange={(e) => onChange(e.target.checked)}

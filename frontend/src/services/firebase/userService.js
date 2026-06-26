@@ -12,7 +12,7 @@ export const updateUserProfile = async (uid, updates) => {
     const userRef = doc(db, 'users', uid);
     await updateDoc(userRef, {
       ...updates,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
     return true;
   } catch (error) {

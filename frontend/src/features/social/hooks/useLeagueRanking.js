@@ -15,7 +15,7 @@ export const useLeagueRanking = (members, userData) => {
       if (ptsB !== ptsA) {
         return ptsB - ptsA;
       }
-      
+
       // 2. Tie-breaker: หากคะแนนเท่ากัน ให้ดูการตั้งค่างบประมาณ (ถ้าเปิดใช้งาน) ใครใช้น้อยกว่าชนะ
       if (gameRules?.budgetTieBreaker?.isActive) {
         const budgetA = Number(a.budgetUsed) || 0;
@@ -24,11 +24,11 @@ export const useLeagueRanking = (members, userData) => {
           return budgetA - budgetB; // น้อยไปมาก (ใครใช้น้อยกว่า อยู่อันดับดีกว่า)
         }
       }
-      
+
       // 3. Tie-breaker: ดูเวลาที่ Save ทีมล่าสุด (updatedAt) ใคร save ก่อน (เวลาน้อยกว่า) ชนะ
-      const timeA = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : (a.updatedAt || Infinity);
-      const timeB = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : (b.updatedAt || Infinity);
-      
+      const timeA = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : a.updatedAt || Infinity;
+      const timeB = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : b.updatedAt || Infinity;
+
       return timeA - timeB; // น้อยไปมาก
     });
 
@@ -41,36 +41,40 @@ export const useLeagueRanking = (members, userData) => {
     return sorted.map((member, index) => {
       const pts = Number(member.userPoints) || 0;
       const budget = Number(member.budgetUsed) || 0;
-      const time = member.updatedAt?.toMillis ? member.updatedAt.toMillis() : (member.updatedAt || Infinity);
-      
+      const time = member.updatedAt?.toMillis
+        ? member.updatedAt.toMillis()
+        : member.updatedAt || Infinity;
+
       const checkBudget = gameRules?.budgetTieBreaker?.isActive;
-      
+
       // ถ้าเงื่อนไขใดๆ ไม่เท่ากับคนก่อนหน้า ให้อันดับเปลี่ยนตาม index
-      if (
-        pts !== prevPts || 
-        (checkBudget && budget !== prevBudget) || 
-        time !== prevTime
-      ) {
+      if (pts !== prevPts || (checkBudget && budget !== prevBudget) || time !== prevTime) {
         currentRank = index + 1;
       }
-      
+
       prevPts = pts;
       prevBudget = budget;
       prevTime = time;
 
-      const trend = member.prevRank ? (member.prevRank > currentRank ? 'up' : (member.prevRank < currentRank ? 'down' : 'same')) : 'same';
+      const trend = member.prevRank
+        ? member.prevRank > currentRank
+          ? 'up'
+          : member.prevRank < currentRank
+            ? 'down'
+            : 'same'
+        : 'same';
 
       return {
         ...member,
         rank: currentRank,
-        trend
+        trend,
       };
     });
   }, [members, gameRules]);
 
   const myRank = useMemo(() => {
     if (!userData) return null;
-    return rankedMembers.find(m => m.id === userData.uid)?.rank || null;
+    return rankedMembers.find((m) => m.id === userData.uid)?.rank || null;
   }, [rankedMembers, userData]);
 
   return { rankedMembers, myRank };

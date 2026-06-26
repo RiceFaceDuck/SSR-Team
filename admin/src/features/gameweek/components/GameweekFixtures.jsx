@@ -34,23 +34,41 @@ export default function GameweekFixtures({ gameweekId }) {
 
   const getStatusColor = (statusShort) => {
     switch (statusShort) {
-      case 'FT': case 'AET': case 'PEN': return 'text-emerald-600 bg-emerald-50';
-      case '1H': case '2H': case 'HT': case 'ET': return 'text-red-600 bg-red-50 animate-pulse';
-      case 'NS': return 'text-slate-500 bg-slate-100';
-      case 'PST': case 'CANC': return 'text-amber-600 bg-amber-50';
-      default: return 'text-slate-500 bg-slate-50';
+      case 'FT':
+      case 'AET':
+      case 'PEN':
+        return 'text-emerald-600 bg-emerald-50';
+      case '1H':
+      case '2H':
+      case 'HT':
+      case 'ET':
+        return 'text-red-600 bg-red-50 animate-pulse';
+      case 'NS':
+        return 'text-slate-500 bg-slate-100';
+      case 'PST':
+      case 'CANC':
+        return 'text-amber-600 bg-amber-50';
+      default:
+        return 'text-slate-500 bg-slate-50';
     }
   };
 
   const getStatusText = (statusShort) => {
     switch (statusShort) {
-      case 'FT': return 'จบการแข่งขัน';
-      case 'NS': return 'ยังไม่เริ่ม';
-      case '1H': return 'ครึ่งแรก';
-      case '2H': return 'ครึ่งหลัง';
-      case 'HT': return 'พักครึ่ง';
-      case 'PST': return 'เลื่อนการแข่งขัน';
-      default: return statusShort;
+      case 'FT':
+        return 'จบการแข่งขัน';
+      case 'NS':
+        return 'ยังไม่เริ่ม';
+      case '1H':
+        return 'ครึ่งแรก';
+      case '2H':
+        return 'ครึ่งหลัง';
+      case 'HT':
+        return 'พักครึ่ง';
+      case 'PST':
+        return 'เลื่อนการแข่งขัน';
+      default:
+        return statusShort;
     }
   };
 
@@ -65,7 +83,7 @@ export default function GameweekFixtures({ gameweekId }) {
             โปรแกรมฟุตบอลสำหรับสัปดาห์ <strong>{gameweekId}</strong>
           </p>
         </div>
-        <button 
+        <button
           onClick={loadFixtures}
           disabled={loading}
           className="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg text-sm font-bold transition-colors disabled:opacity-50"
@@ -95,19 +113,23 @@ export default function GameweekFixtures({ gameweekId }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {fixtures.map((match) => (
-          <div key={match.fixture.id} className="border border-slate-100 rounded-xl p-4 hover:shadow-md transition-shadow bg-slate-50/50">
-            
+          <div
+            key={match.fixture.id}
+            className="border border-slate-100 rounded-xl p-4 hover:shadow-md transition-shadow bg-slate-50/50"
+          >
             <div className="flex justify-between items-center mb-3 text-xs font-semibold">
               <span className="text-slate-500">
-                {new Date(match.fixture.date).toLocaleString('th-TH', { 
-                  weekday: 'short', 
-                  day: 'numeric', 
-                  month: 'short', 
-                  hour: '2-digit', 
-                  minute: '2-digit' 
+                {new Date(match.fixture.date).toLocaleString('th-TH', {
+                  weekday: 'short',
+                  day: 'numeric',
+                  month: 'short',
+                  hour: '2-digit',
+                  minute: '2-digit',
                 })}
               </span>
-              <span className={`px-2 py-1 rounded-md ${getStatusColor(match.fixture.status.short)}`}>
+              <span
+                className={`px-2 py-1 rounded-md ${getStatusColor(match.fixture.status.short)}`}
+              >
                 {getStatusText(match.fixture.status.short)}
               </span>
             </div>
@@ -115,8 +137,14 @@ export default function GameweekFixtures({ gameweekId }) {
             <div className="flex items-center justify-between">
               {/* Home Team */}
               <div className="flex flex-col items-center flex-1">
-                <img src={match.teams.home.logo} alt={match.teams.home.name} className="w-10 h-10 mb-2 object-contain" />
-                <span className="text-sm font-bold text-slate-800 text-center line-clamp-1">{match.teams.home.name}</span>
+                <img
+                  src={match.teams.home.logo}
+                  alt={match.teams.home.name}
+                  className="w-10 h-10 mb-2 object-contain"
+                />
+                <span className="text-sm font-bold text-slate-800 text-center line-clamp-1">
+                  {match.teams.home.name}
+                </span>
               </div>
 
               {/* Score */}
@@ -125,17 +153,24 @@ export default function GameweekFixtures({ gameweekId }) {
                   {match.goals.home ?? '-'} : {match.goals.away ?? '-'}
                 </div>
                 {match.fixture.status.short === '1H' || match.fixture.status.short === '2H' ? (
-                  <span className="text-xs font-bold text-red-500 mt-1 animate-pulse">{match.fixture.status.elapsed}'</span>
+                  <span className="text-xs font-bold text-red-500 mt-1 animate-pulse">
+                    {match.fixture.status.elapsed}'
+                  </span>
                 ) : null}
               </div>
 
               {/* Away Team */}
               <div className="flex flex-col items-center flex-1">
-                <img src={match.teams.away.logo} alt={match.teams.away.name} className="w-10 h-10 mb-2 object-contain" />
-                <span className="text-sm font-bold text-slate-800 text-center line-clamp-1">{match.teams.away.name}</span>
+                <img
+                  src={match.teams.away.logo}
+                  alt={match.teams.away.name}
+                  className="w-10 h-10 mb-2 object-contain"
+                />
+                <span className="text-sm font-bold text-slate-800 text-center line-clamp-1">
+                  {match.teams.away.name}
+                </span>
               </div>
             </div>
-
           </div>
         ))}
       </div>

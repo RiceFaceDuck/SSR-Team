@@ -5,13 +5,7 @@ import { useMarketStore } from '../../../store/useMarketStore';
 import { useGameStore } from '../../../store/useGameStore';
 
 export const usePitchEnrichment = () => {
-  const { 
-    mySquad, 
-    captainId,
-    viceCaptainId,
-    availableCards,
-    liveGwStats
-  } = useUserStore();
+  const { mySquad, captainId, viceCaptainId, availableCards, liveGwStats } = useUserStore();
 
   const { players: marketPlayers } = useMarketStore();
   const { isMarketOpen } = useGameStore();
@@ -25,12 +19,12 @@ export const usePitchEnrichment = () => {
 
   const { enrichedStarters, enrichedBench } = useMemo(() => {
     return enrichSquadData(
-      mySquad, 
-      marketPlayers, 
-      captainId, 
+      mySquad,
+      marketPlayers,
+      captainId,
       viceCaptainId,
-      availableCards, 
-      liveGwStats, 
+      availableCards,
+      liveGwStats,
       isMarketOpen
     );
   }, [mySquad, marketPlayers, captainId, viceCaptainId, availableCards, liveGwStats, isMarketOpen]);

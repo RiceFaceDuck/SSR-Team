@@ -9,9 +9,9 @@ export const useManagerFormLogic = (initialData, onSaved) => {
     description: '',
     price: 0,
     isActive: true,
-    effectLogic: '{\n  "type": "UNKNOWN_BONUS"\n}'
+    effectLogic: '{\n  "type": "UNKNOWN_BONUS"\n}',
   });
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -26,16 +26,18 @@ export const useManagerFormLogic = (initialData, onSaved) => {
         description: initialData.description || '',
         price: initialData.price || 0,
         isActive: initialData.isActive !== false,
-        effectLogic: initialData.effectLogic ? JSON.stringify(initialData.effectLogic, null, 2) : '{\n  "type": "UNKNOWN_BONUS"\n}'
+        effectLogic: initialData.effectLogic
+          ? JSON.stringify(initialData.effectLogic, null, 2)
+          : '{\n  "type": "UNKNOWN_BONUS"\n}',
       });
     }
   }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -50,10 +52,10 @@ export const useManagerFormLogic = (initialData, onSaved) => {
       }
       return;
     }
-    
+
     setError('');
     let recommendedPrice = 50; // Base Manager Price
-    
+
     const type = parsedLogic.type;
     if (type === 'BUDGET_BONUS') {
       const val = parseFloat(parsedLogic.value) || 0;
@@ -66,10 +68,10 @@ export const useManagerFormLogic = (initialData, onSaved) => {
       recommendedPrice += 50; // Generic bonus
     }
 
-    setFormData(prev => ({ ...prev, price: recommendedPrice }));
-    
+    setFormData((prev) => ({ ...prev, price: recommendedPrice }));
+
     if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-        window.navigator.vibrate([20, 30, 20]);
+      window.navigator.vibrate([20, 30, 20]);
     }
   }, [formData.effectLogic]);
 
@@ -100,7 +102,7 @@ export const useManagerFormLogic = (initialData, onSaved) => {
         description: formData.description,
         price: Number(formData.price) || 0,
         isActive: formData.isActive,
-        effectLogic: parsedLogic
+        effectLogic: parsedLogic,
       });
       onSaved();
     } catch (err) {
@@ -117,6 +119,6 @@ export const useManagerFormLogic = (initialData, onSaved) => {
     isEditing,
     handleChange,
     calculateSmartPrice,
-    handleSubmit
+    handleSubmit,
   };
 };

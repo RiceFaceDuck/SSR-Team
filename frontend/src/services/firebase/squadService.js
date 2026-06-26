@@ -23,8 +23,8 @@ const getSquadDocRef = (userId) => {
 };
 
 export const squadService = {
-  saveSquad: async (userId, { mySquad, budgetLeft, formation, manager, captainId }) => {
-    if (!userId) throw new Error("เซิร์ฟเวอร์ปฏิเสธการเข้าถึง: ไม่พบรหัสผู้ใช้งาน (UID)");
+  saveSquad: async (userId, { mySquad, budgetLeft, formation, manager, captainId, watchlist }) => {
+    if (!userId) throw new Error('เซิร์ฟเวอร์ปฏิเสธการเข้าถึง: ไม่พบรหัสผู้ใช้งาน (UID)');
 
     try {
       const dataToSave = {
@@ -32,16 +32,17 @@ export const squadService = {
         budgetLeft: parseFloat(budgetLeft) || 0,
         formation: formation || '4-4-2',
         manager: manager || null,
-        captainId: captainId || null
+        captainId: captainId || null,
+        watchlist: watchlist || [],
       };
 
       const { httpsCallable } = require('firebase/functions');
       const { functions } = require('../../config/firebase');
-      
+
       const saveSquadFn = httpsCallable(functions, 'saveSquad');
       await saveSquadFn({ userId, squadData: dataToSave });
       console.log('💾 [SquadService] บันทึกทีมขึ้น Cloud สำเร็จ!');
-      
+
       // อัปเดต Cache ทันทีหลังบันทึก
       cachedSquad = dataToSave;
       lastFetchTime = Date.now();
@@ -49,7 +50,7 @@ export const squadService = {
 
       const participationStatus = await participationService.checkUserParticipation(userId);
       const hasAlreadyJoined = participationStatus.hasJoined;
-      
+
       if (!hasAlreadyJoined) {
         await participationService.registerParticipation(userId);
 
@@ -63,10 +64,9 @@ export const squadService = {
       }
 
       return true;
-
     } catch (error) {
-      console.error("❌ [SquadService] เกิดข้อผิดพลาดในการบันทึกทีม:", error);
-      throw new Error("ไม่สามารถบันทึกข้อมูลทีมได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต");
+      console.error('❌ [SquadService] เกิดข้อผิดพลาดในการบันทึกทีม:', error);
+      throw new Error('ไม่สามารถบันทึกข้อมูลทีมได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
     }
   },
 
@@ -76,8 +76,11 @@ export const squadService = {
     const now = Date.now();
 
     // 1. ตรวจสอบ Cache ใน Memory
-    if (!forceRefresh && cachedSquad && (now - lastFetchTime < CACHE_TTL)) {
-      console.log('%c📦 [SquadService] เสิร์ฟข้อมูลทีมจาก Memory Cache', 'color: #10b981; font-weight: bold;');
+    if (!forceRefresh && cachedSquad && now - lastFetchTime < CACHE_TTL) {
+      console.log(
+        '%c📦 [SquadService] เสิร์ฟข้อมูลทีมจาก Memory Cache',
+        'color: #10b981; font-weight: bold;'
+      );
       return cachedSquad;
     }
 
@@ -95,30 +98,32 @@ export const squadService = {
         if (docSnap.exists()) {
           console.log('☁️ [SquadService] โหลดข้อมูลทีมจาก Cloud สำเร็จ!');
           const data = docSnap.data();
-          
+
           cachedSquad = data;
           lastFetchTime = Date.now();
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-          
+
           return data;
         }
-        
-        return null; 
 
+        return null;
       } catch (error) {
-        console.error("❌ [SquadService] เกิดข้อผิดพลาดในการดึงข้อมูลทีม:", error);
-        
+        console.error('❌ [SquadService] เกิดข้อผิดพลาดในการดึงข้อมูลทีม:', error);
+
         try {
           const backup = localStorage.getItem(LOCAL_STORAGE_KEY);
           if (backup) {
-            console.log('%c🔄 [SquadService] ใช้งาน Offline Mode', 'color: #f97316; font-weight: bold;');
+            console.log(
+              '%c🔄 [SquadService] ใช้งาน Offline Mode',
+              'color: #f97316; font-weight: bold;'
+            );
             return JSON.parse(backup);
           }
         } catch (fallbackError) {
           console.error('❌ ไม่สามารถกู้ข้อมูลจาก Local Backup ได้');
         }
-        
-        return null; 
+
+        return null;
       } finally {
         fetchPromise = null;
       }
@@ -132,5 +137,5 @@ export const squadService = {
     lastFetchTime = 0;
     fetchPromise = null;
     localStorage.removeItem(LOCAL_STORAGE_KEY);
-  }
+  },
 };

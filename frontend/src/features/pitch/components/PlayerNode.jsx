@@ -2,7 +2,11 @@ import React from 'react';
 import { Lock } from 'lucide-react';
 import EmptyNode from './EmptyNode';
 import PlayerStatsBar from './PlayerStatsBar';
-import { formatPlayerName, formatTeamShortName } from '../../../utils/formatters';
+import {
+  formatPlayerName,
+  formatTeamShortName,
+  getOptimizedImageUrl,
+} from '../../../utils/formatters';
 
 /**
  * PlayerNode - Displays an individual player on the pitch.
@@ -12,8 +16,11 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench, isSynergyHi
   if (!player) return <EmptyNode expectedPosition={expectedPosition} isBench={isBench} />;
 
   // Mocks for image and team abbreviation
-  const defaultSilhouette = "https://cdn.discordapp.com/attachments/1182283993883832360/1218206584284577832/player-silhouette.png?ex=65e1dd91&is=65cf6891&hm=4a70b20cb374a24c2ed55c2f37e174eb";
-  const playerImage = player.imageUrl || player.fullData?.imageUrl || player.fullData?.image || defaultSilhouette;
+  const defaultSilhouette =
+    'https://cdn.discordapp.com/attachments/1182283993883832360/1218206584284577832/player-silhouette.png?ex=65e1dd91&is=65cf6891&hm=4a70b20cb374a24c2ed55c2f37e174eb';
+  const rawImage =
+    player.imageUrl || player.fullData?.imageUrl || player.fullData?.image || defaultSilhouette;
+  const playerImage = getOptimizedImageUrl(rawImage);
   const teamAbbr = player.team || 'UNK';
   const role = player.role || ''; // e.g. (C) or (VC)
   const isCaptain = role === 'C';
@@ -21,8 +28,9 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench, isSynergyHi
   const cardIcon = player.appliedCardIcon;
 
   return (
-    <div className={`flex flex-col items-center justify-end w-[48px] sm:w-[55px] lg:w-[65px] group relative cursor-pointer active-press hover-lift transition-all duration-300 ${isSelected ? '-translate-y-2' : ''}`}>
-      
+    <div
+      className={`flex flex-col items-center justify-end w-[48px] sm:w-[55px] lg:w-[65px] group relative cursor-pointer active-press hover-lift transition-all duration-300 ${isSelected ? '-translate-y-2' : ''}`}
+    >
       {/* 🌟 Glowing effect when selected */}
       {isSelected && (
         <div className="absolute inset-0 blur-md rounded-md opacity-60 animate-pulse z-[-1] bg-[#fbbf24]" />
@@ -40,17 +48,21 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench, isSynergyHi
       <div className="relative w-full h-10 sm:h-12 lg:h-14 flex justify-center items-end mb-[1px]">
         {/* Placeholder for player face / shirt */}
         <div className="w-full h-10 sm:h-12 lg:h-14 bg-white rounded-t-md shadow-sm border border-b-0 border-slate-300 overflow-hidden relative flex items-end justify-center">
-          <img 
-            src={playerImage} 
-            alt={player.name} 
-            className="w-full h-full object-cover" 
-            onError={(e) => { e.target.src = defaultSilhouette; }}
+          <img
+            src={playerImage}
+            alt={player.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.src = defaultSilhouette;
+            }}
           />
-          
+
           {/* Captain / Vice Captain Indicator */}
           {(isCaptain || isViceCaptain) && (
             <div className="absolute bottom-0 left-0 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-white/80 backdrop-blur-sm rounded-tr-lg flex items-center justify-center shadow-sm z-10 border-t border-r border-slate-200">
-              <span className={`text-[8px] sm:text-[9px] font-black ${isViceCaptain ? 'text-orange-500' : 'text-slate-800'}`}>
+              <span
+                className={`text-[8px] sm:text-[9px] font-black ${isViceCaptain ? 'text-orange-500' : 'text-slate-800'}`}
+              >
                 {role}
               </span>
             </div>
@@ -65,9 +77,12 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench, isSynergyHi
 
           {/* Gameweek Points Badge */}
           <div className="absolute top-0.5 left-1 flex items-center justify-center z-10">
-            <span 
+            <span
               className="text-[10px] sm:text-[12px] font-black text-[#0f284e]"
-              style={{ textShadow: '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0px 2px 3px rgba(0,0,0,0.5)' }}
+              style={{
+                textShadow:
+                  '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0px 2px 3px rgba(0,0,0,0.5)',
+              }}
             >
               {player.displayPoints ?? (player.liveStats?.gwPoints || player.totalPoints || 0)}
             </span>
@@ -83,8 +98,9 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench, isSynergyHi
       </div>
 
       {/* Info Card (Bottom part) */}
-      <div className={`w-full bg-white rounded-b-md shadow-md overflow-hidden flex flex-col z-10 transition-colors ${isSelected ? 'border-2 border-[#fbbf24]' : 'border border-slate-300'}`}>
-        
+      <div
+        className={`w-full bg-white rounded-b-md shadow-md overflow-hidden flex flex-col z-10 transition-colors ${isSelected ? 'border-2 border-[#fbbf24]' : 'border border-slate-300'}`}
+      >
         {/* Name and Team/Role */}
         <div className="bg-white px-1 py-0.5 flex flex-row items-center justify-start min-h-[20px] w-full overflow-hidden">
           {/* Position Badge in Name Panel */}
@@ -96,7 +112,8 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench, isSynergyHi
               {formatPlayerName(player.name)}
             </span>
             <span className="text-[6px] sm:text-[7px] font-semibold text-slate-500 leading-none mt-0.5 text-left truncate w-full">
-              {formatTeamShortName(teamAbbr)} {role && <span className="font-bold text-slate-800">({role})</span>}
+              {formatTeamShortName(teamAbbr)}{' '}
+              {role && <span className="font-bold text-slate-800">({role})</span>}
             </span>
           </div>
         </div>
@@ -111,7 +128,6 @@ const PlayerNode = ({ player, expectedPosition, isSelected, isBench, isSynergyHi
             <span className="text-[#1e293b] text-[9px] font-black">+</span>
           </div>
         </div>
-
       </div>
     </div>
   );

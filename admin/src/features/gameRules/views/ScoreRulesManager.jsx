@@ -17,7 +17,6 @@ export default function ScoreRulesManager({ isEmbedded = false }) {
     );
   }
 
-
   return (
     <div className="max-w-4xl space-y-6 pb-20">
       {!isEmbedded && (
@@ -55,48 +54,143 @@ export default function ScoreRulesManager({ isEmbedded = false }) {
 
           {/* Basic Stats */}
           <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
-            <h2 className="text-lg font-bold text-slate-800 border-b pb-3 mb-4">คะแนนพื้นฐาน (Basic Stats)</h2>
-            
-            <ScoreStatItem ruleKey="playUnder60" label="ลงเล่นน้อยกว่า 60 นาที" ruleData={rules.playUnder60} onUpdate={updateRule} />
-            <ScoreStatItem ruleKey="playOver60" label="ลงเล่นตั้งแต่ 60 นาทีขึ้นไป" ruleData={rules.playOver60} onUpdate={updateRule} />
-            <ScoreStatItem ruleKey="assist" label="แอสซิสต์ (Assist)" ruleData={rules.assist} onUpdate={updateRule} />
+            <h2 className="text-lg font-bold text-slate-800 border-b pb-3 mb-4">
+              คะแนนพื้นฐาน (Basic Stats)
+            </h2>
+
+            <ScoreStatItem
+              ruleKey="playUnder60"
+              label="ลงเล่นน้อยกว่า 60 นาที"
+              ruleData={rules.playUnder60}
+              onUpdate={updateRule}
+            />
+            <ScoreStatItem
+              ruleKey="playOver60"
+              label="ลงเล่นตั้งแต่ 60 นาทีขึ้นไป"
+              ruleData={rules.playOver60}
+              onUpdate={updateRule}
+            />
+            <ScoreStatItem
+              ruleKey="assist"
+              label="แอสซิสต์ (Assist)"
+              ruleData={rules.assist}
+              onUpdate={updateRule}
+            />
 
             {/* Goals (Position Based) */}
-            <PositionScoreCard ruleKey="goal" label="การทำประตู (Goals)" desc="คะแนนแยกตามตำแหน่ง" ruleData={rules.goal} onUpdate={updateRule} />
+            <PositionScoreCard
+              ruleKey="goal"
+              label="การทำประตู (Goals)"
+              desc="คะแนนแยกตามตำแหน่ง"
+              ruleData={rules.goal}
+              onUpdate={updateRule}
+            />
 
             {/* Clean Sheets (Position Based) */}
             <div className="mt-4">
-              <PositionScoreCard ruleKey="cleanSheet" label="คลีนชีต (Clean Sheets)" desc="คะแนนแยกตามตำแหน่ง (มักจะให้เฉพาะ DEF/GK/MID)" ruleData={rules.cleanSheet} onUpdate={updateRule} />
+              <PositionScoreCard
+                ruleKey="cleanSheet"
+                label="คลีนชีต (Clean Sheets)"
+                desc="คะแนนแยกตามตำแหน่ง (มักจะให้เฉพาะ DEF/GK/MID)"
+                ruleData={rules.cleanSheet}
+                onUpdate={updateRule}
+              />
             </div>
           </div>
 
           {/* Defensive & Offensive Stats */}
           <div className="space-y-6">
             <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200">
-              <h2 className="text-lg font-bold text-slate-800 border-b pb-3 mb-4">สถิติเกมรับ (Defensive)</h2>
-              <ScoreStatItem ruleKey="tackles" label="แทคเกิล (Tackles)" ruleData={rules.tackles} onUpdate={updateRule} />
-              <ScoreStatItem ruleKey="blocks" label="บล็อคลูกยิง (Blocks)" ruleData={rules.blocks} onUpdate={updateRule} />
-              <ScoreStatItem ruleKey="saves" label="เซฟประตู (Saves)" ruleData={rules.saves} onUpdate={updateRule} />
+              <h2 className="text-lg font-bold text-slate-800 border-b pb-3 mb-4">
+                สถิติเกมรับ (Defensive)
+              </h2>
+              <ScoreStatItem
+                ruleKey="tackles"
+                label="แทคเกิล (Tackles)"
+                ruleData={rules.tackles}
+                onUpdate={updateRule}
+              />
+              <ScoreStatItem
+                ruleKey="blocks"
+                label="บล็อคลูกยิง (Blocks)"
+                ruleData={rules.blocks}
+                onUpdate={updateRule}
+              />
+              <ScoreStatItem
+                ruleKey="saves"
+                label="เซฟประตู (Saves)"
+                ruleData={rules.saves}
+                onUpdate={updateRule}
+              />
             </div>
 
             <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200">
-              <h2 className="text-lg font-bold text-slate-800 border-b pb-3 mb-4">สถิติเกมรุก (Offensive)</h2>
-              <ScoreStatItem ruleKey="keyPasses" label="จ่ายบอลสำคัญ (Key Passes)" ruleData={rules.keyPasses} onUpdate={updateRule} />
-              <ScoreStatItem ruleKey="dribbles" label="เลี้ยงผ่านคู่แข่ง (Dribbles)" ruleData={rules.dribbles} onUpdate={updateRule} />
+              <h2 className="text-lg font-bold text-slate-800 border-b pb-3 mb-4">
+                สถิติเกมรุก (Offensive)
+              </h2>
+              <ScoreStatItem
+                ruleKey="keyPasses"
+                label="จ่ายบอลสำคัญ (Key Passes)"
+                ruleData={rules.keyPasses}
+                onUpdate={updateRule}
+              />
+              <ScoreStatItem
+                ruleKey="dribbles"
+                label="เลี้ยงผ่านคู่แข่ง (Dribbles)"
+                ruleData={rules.dribbles}
+                onUpdate={updateRule}
+              />
             </div>
           </div>
 
           {/* Special Events */}
           <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 mt-6 mb-6">
-            <h2 className="text-lg font-bold text-slate-800 border-b pb-3 mb-4">เหตุการณ์พิเศษและบทลงโทษ</h2>
+            <h2 className="text-lg font-bold text-slate-800 border-b pb-3 mb-4">
+              เหตุการณ์พิเศษและบทลงโทษ
+            </h2>
             <div className="space-y-3">
-              <ScoreStatItem ruleKey="penaltySaved" label="เซฟจุดโทษ (GK)" ruleData={rules.penaltySaved} onUpdate={updateRule} />
-              <ScoreStatItem ruleKey="penaltyMissed" label="ยิงจุดโทษพลาด" ruleData={rules.penaltyMissed} onUpdate={updateRule} />
-              <ScoreStatItem ruleKey="penaltyWon" label="เรียกจุดโทษได้" ruleData={rules.penaltyWon} onUpdate={updateRule} />
-              <ScoreStatItem ruleKey="penaltyCommitted" label="ทำเสียจุดโทษ" ruleData={rules.penaltyCommitted} onUpdate={updateRule} />
-              <ScoreStatItem ruleKey="yellowCard" label="โดนใบเหลือง" ruleData={rules.yellowCard} onUpdate={updateRule} />
-              <ScoreStatItem ruleKey="redCard" label="โดนใบแดง" ruleData={rules.redCard} onUpdate={updateRule} />
-              <ScoreStatItem ruleKey="ownGoal" label="ทำเข้าประตูตัวเอง" ruleData={rules.ownGoal} onUpdate={updateRule} />
+              <ScoreStatItem
+                ruleKey="penaltySaved"
+                label="เซฟจุดโทษ (GK)"
+                ruleData={rules.penaltySaved}
+                onUpdate={updateRule}
+              />
+              <ScoreStatItem
+                ruleKey="penaltyMissed"
+                label="ยิงจุดโทษพลาด"
+                ruleData={rules.penaltyMissed}
+                onUpdate={updateRule}
+              />
+              <ScoreStatItem
+                ruleKey="penaltyWon"
+                label="เรียกจุดโทษได้"
+                ruleData={rules.penaltyWon}
+                onUpdate={updateRule}
+              />
+              <ScoreStatItem
+                ruleKey="penaltyCommitted"
+                label="ทำเสียจุดโทษ"
+                ruleData={rules.penaltyCommitted}
+                onUpdate={updateRule}
+              />
+              <ScoreStatItem
+                ruleKey="yellowCard"
+                label="โดนใบเหลือง"
+                ruleData={rules.yellowCard}
+                onUpdate={updateRule}
+              />
+              <ScoreStatItem
+                ruleKey="redCard"
+                label="โดนใบแดง"
+                ruleData={rules.redCard}
+                onUpdate={updateRule}
+              />
+              <ScoreStatItem
+                ruleKey="ownGoal"
+                label="ทำเข้าประตูตัวเอง"
+                ruleData={rules.ownGoal}
+                onUpdate={updateRule}
+              />
             </div>
           </div>
 

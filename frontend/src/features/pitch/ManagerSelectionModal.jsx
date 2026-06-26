@@ -10,8 +10,17 @@ export default function ManagerSelectionModal({ isOpen, onClose }) {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('INVENTORY'); // 'INVENTORY' | 'SHOP'
   const [isProcessing, setIsProcessing] = useState(false);
-  
-  const { userData, balls, manager, setManager, ownedManagers, isInventoryLoaded, loadInventory, buyManager } = useUserStore();
+
+  const {
+    userData,
+    balls,
+    manager,
+    setManager,
+    ownedManagers,
+    isInventoryLoaded,
+    loadInventory,
+    buyManager,
+  } = useUserStore();
   const uid = userData?.uid;
 
   useEffect(() => {
@@ -45,11 +54,11 @@ export default function ManagerSelectionModal({ isOpen, onClose }) {
       toast.error('Balls ของคุณไม่เพียงพอ!');
       return;
     }
-    
+
     setIsProcessing(true);
     const result = await buyManager(uid, managerObj.id, managerObj.price || 0);
     setIsProcessing(false);
-    
+
     if (result.success) {
       toast.success(`ซื้อ ${managerObj.name} เข้าคลังสำเร็จ!`);
       // Optionally switch to INVENTORY tab
@@ -59,17 +68,16 @@ export default function ManagerSelectionModal({ isOpen, onClose }) {
     }
   };
 
-  const ownedMList = activeManagers.filter(m => ownedManagers.includes(m.id));
-  const shopMList = activeManagers.filter(m => !ownedManagers.includes(m.id));
+  const ownedMList = activeManagers.filter((m) => ownedManagers.includes(m.id));
+  const shopMList = activeManagers.filter((m) => !ownedManagers.includes(m.id));
 
   const displayList = activeTab === 'INVENTORY' ? ownedMList : shopMList;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#040f1d]/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-[#0a192f] border border-[#1e3a8a] rounded-2xl w-full max-w-2xl shadow-[0_0_40px_rgba(30,58,138,0.5)] overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-300">
-        
         {/* Header */}
-        <ManagerHeader 
+        <ManagerHeader
           balls={balls}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -79,7 +87,7 @@ export default function ManagerSelectionModal({ isOpen, onClose }) {
 
         {/* Content */}
         <div className="p-4 overflow-y-auto flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#0a192f]">
-          <ManagerList 
+          <ManagerList
             isLoading={isLoading}
             displayList={displayList}
             activeTab={activeTab}
@@ -90,7 +98,6 @@ export default function ManagerSelectionModal({ isOpen, onClose }) {
             handleBuy={handleBuy}
           />
         </div>
-
       </div>
     </div>
   );

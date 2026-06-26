@@ -9,7 +9,7 @@ const defaultRules = {
   viceCaptainSystem: { isActive: true },
   budgetCarryOver: { percent: 50, isActive: true },
   synergyBonus: { sameTeamThreshold: 3, sameNationThreshold: 4, bonusPercent: 5, isActive: true },
-  playStreaks: { streakTarget: 3, rewardType: "budget", rewardValue: 5, isActive: true }
+  playStreaks: { streakTarget: 3, rewardType: 'budget', rewardValue: 5, isActive: true },
 };
 
 export const useGameRulesManager = () => {
@@ -51,12 +51,12 @@ export const useGameRulesManager = () => {
   };
 
   const updateRule = (key, field, value) => {
-    setRules(prev => ({
+    setRules((prev) => ({
       ...prev,
       [key]: {
         ...prev[key],
-        [field]: value
-      }
+        [field]: value,
+      },
     }));
   };
 
@@ -66,6 +66,6 @@ export const useGameRulesManager = () => {
     isSaving,
     error,
     handleSave,
-    updateRule
+    updateRule,
   };
 };

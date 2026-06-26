@@ -6,9 +6,9 @@ export const playerFetchService = {
     try {
       const q = query(getCollectionRef(), limit(1500)); // Safety limit
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
-      console.error("Error fetching players:", error);
+      console.error('Error fetching players:', error);
       throw error;
     }
   },
@@ -21,8 +21,8 @@ export const playerFetchService = {
       }
       return null;
     } catch (error) {
-      console.error("Error fetching player by ID:", error);
+      console.error('Error fetching player by ID:', error);
       throw error;
     }
-  }
+  },
 };

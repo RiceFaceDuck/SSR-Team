@@ -23,11 +23,11 @@ export function useQuestCooldown(quest, record) {
         if (now < nextAvailableTime) {
           setIsCooldown(true);
           const diff = nextAvailableTime - now;
-          
+
           const h = Math.floor(diff / (1000 * 60 * 60));
           const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
           const s = Math.floor((diff % (1000 * 60)) / 1000);
-          
+
           const formatTime = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
           setTimeLeft(formatTime);
         } else {
@@ -38,7 +38,7 @@ export function useQuestCooldown(quest, record) {
 
       checkCooldown();
       const intervalId = setInterval(checkCooldown, 1000);
-      
+
       return () => clearInterval(intervalId);
     } else {
       setIsMaxed(false);

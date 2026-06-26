@@ -3,15 +3,15 @@ import { useUserStore } from '../../../store/useUserStore';
 import { useMarketStore } from '../../../store/useMarketStore';
 
 export const usePitchDataLoad = () => {
-  const { 
+  const {
     userData,
-    mySquad, 
+    mySquad,
     fetchCards,
     isCardsFetched,
     startListeningLiveStats,
     stopListeningLiveStats,
     loadInventory,
-    isInventoryLoaded
+    isInventoryLoaded,
   } = useUserStore();
 
   const { fetchMarketPlayers, isDataFetched } = useMarketStore();
@@ -21,21 +21,22 @@ export const usePitchDataLoad = () => {
     if (!isDataFetched) fetchMarketPlayers();
     if (!isCardsFetched) fetchCards();
     if (!isInventoryLoaded && userData?.uid) loadInventory(userData.uid);
-    
+
     // Listen to live stats in real-time
     if (mySquad?.length > 0) {
       startListeningLiveStats();
     }
 
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-    
     return () => {
-      clearTimeout(timer);
       stopListeningLiveStats();
     };
-  }, [userData?.uid, mySquad?.length]);
+  }, [userData?.uid, mySquad?.length, isDataFetched, isCardsFetched, isInventoryLoaded]);
+
+  useEffect(() => {
+    if (isDataFetched) {
+      setIsLoading(false);
+    }
+  }, [isDataFetched]);
 
   return { isLoading };
 };

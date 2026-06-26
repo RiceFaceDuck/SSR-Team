@@ -8,12 +8,12 @@ import PlayerListModals from './PlayerListModals';
 
 const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
   const { players, isLoading, fetchPlayers, removePlayer } = usePlayers();
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTeam, setSelectedTeam] = useState('All');
-  
+
   const [detailModalPlayer, setDetailModalPlayer] = useState(null);
-  
+
   // States สำหรับ Settings & Auto-sync
   const [isApiSettingsOpen, setIsApiSettingsOpen] = useState(false);
   const [autoSync, setAutoSync] = useState(false);
@@ -34,7 +34,7 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
     let result = players;
     if (selectedTeam !== 'All') {
       const selected = selectedTeam.toLowerCase();
-      result = result.filter(p => {
+      result = result.filter((p) => {
         if (!p.team) return false;
         const pt = p.team.toLowerCase();
         return pt === selected || pt.includes(selected) || selected.includes(pt);
@@ -42,10 +42,11 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
     }
     if (searchTerm) {
       const lowerSearch = searchTerm.toLowerCase();
-      result = result.filter(player => 
-        (player.name && player.name.toLowerCase().includes(lowerSearch)) ||
-        (player.fullName && player.fullName.toLowerCase().includes(lowerSearch)) ||
-        (player.sku && String(player.sku).toLowerCase().includes(lowerSearch))
+      result = result.filter(
+        (player) =>
+          (player.name && player.name.toLowerCase().includes(lowerSearch)) ||
+          (player.fullName && player.fullName.toLowerCase().includes(lowerSearch)) ||
+          (player.sku && String(player.sku).toLowerCase().includes(lowerSearch))
       );
     }
     return result;
@@ -53,7 +54,7 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
 
   const handleDeleteAll = async () => {
     const isAll = selectedTeam === 'All' && !searchTerm;
-    const msg = isAll 
+    const msg = isAll
       ? `🚨 คำเตือน: คุณแน่ใจหรือไม่ว่าต้องการ "ลบนักเตะทั้งหมดในระบบ" (${filteredPlayers.length} คน)?\nการกระทำนี้ไม่สามารถกู้คืนได้!`
       : `คุณแน่ใจหรือไม่ว่าต้องการ "ลบนักเตะที่กำลังแสดงผลอยู่ (${filteredPlayers.length} คน)"?`;
 
@@ -81,12 +82,12 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
     isCheckingBulk,
     handleRowSync,
     handleConfirmSync,
-    handleBulkCheck
+    handleBulkCheck,
   } = usePlayerSyncActions(players, filteredPlayers, selectedTeam);
 
   return (
     <div className="space-y-4">
-      <PlayerToolbar 
+      <PlayerToolbar
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         selectedTeam={selectedTeam}
@@ -104,7 +105,7 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
         handleDeleteAll={handleDeleteAll}
       />
 
-      <PlayerTable 
+      <PlayerTable
         players={filteredPlayers}
         isLoading={isLoading}
         searchTerm={searchTerm}
@@ -117,7 +118,7 @@ const PlayerList = ({ onAddManual, onImportExcel, onEditPlayer }) => {
       />
 
       {/* 🌟 แสดง Modals ทั้งหมดที่ถูก Refactor ออกไป (แยกเป็นอีก Component) */}
-      <PlayerListModals 
+      <PlayerListModals
         syncModal={syncModal}
         setSyncModal={setSyncModal}
         handleConfirmSync={handleConfirmSync}

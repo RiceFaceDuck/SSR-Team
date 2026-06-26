@@ -33,16 +33,16 @@ export const useTeams = () => {
     setIsLoading(true);
     try {
       let data = await teamDatabase.getAllTeams();
-      
+
       // Auto Seed ถ้ายังไม่มีข้อมูลใน Database
       if (data.length === 0) {
-        console.log("Seeding teams data...");
+        console.log('Seeding teams data...');
         for (const team of SEED_TEAMS) {
           await teamDatabase.saveTeam(team);
         }
         data = await teamDatabase.getAllTeams();
       }
-      
+
       setTeams(data);
     } catch (error) {
       console.error(error);

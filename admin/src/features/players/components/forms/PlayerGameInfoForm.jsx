@@ -5,7 +5,9 @@ const PlayerGameInfoForm = ({ formData, handleChange }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-        <div className="p-1.5 bg-green-50 text-green-600 rounded-lg"><Activity size={16} /></div>
+        <div className="p-1.5 bg-green-50 text-green-600 rounded-lg">
+          <Activity size={16} />
+        </div>
         <h3 className="font-semibold text-gray-700">ข้อมูลลีค (Fantasy)</h3>
       </div>
 

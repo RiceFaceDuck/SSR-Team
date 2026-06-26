@@ -25,7 +25,7 @@ export const useDashboardData = () => {
     try {
       setIsLoadingApiGw(true);
       const rounds = await apiFootballService.fetchAvailableGameweeks();
-      const formattedRounds = rounds.map(r => {
+      const formattedRounds = rounds.map((r) => {
         const match = r.match(/\d+/);
         const num = match ? match[0] : '';
         return num ? `GW${num}` : r;
@@ -51,7 +51,7 @@ export const useDashboardData = () => {
       const q = query(historyRef);
       const snap = await getDocs(q);
       const historyData = [];
-      snap.forEach(doc => {
+      snap.forEach((doc) => {
         historyData.push({ id: doc.id, ...doc.data() });
       });
       historyData.sort((a, b) => b.id.localeCompare(a.id));
@@ -81,7 +81,7 @@ export const useDashboardData = () => {
     try {
       const docRef = doc(db, 'public_data', 'system_config');
       await updateDoc(docRef, { [field]: value });
-      setConfig(prev => ({ ...prev, [field]: value }));
+      setConfig((prev) => ({ ...prev, [field]: value }));
     } catch (err) {
       console.error('Error updating state:', err);
       alert('เกิดข้อผิดพลาดในการอัปเดตสถานะ');
@@ -92,8 +92,13 @@ export const useDashboardData = () => {
 
   const handleProcessGameweek = async (processGwId) => {
     if (!processGwId) return alert('กรุณาระบุ Gameweek ที่ต้องการบันทึก');
-    if (!window.confirm(`คุณแน่ใจหรือไม่ว่าจะประมวลผลคะแนนและบันทึกผลของ ${processGwId}? (การกระทำนี้จะเปลี่ยนอันดับผู้เล่น)`)) return;
-    
+    if (
+      !window.confirm(
+        `คุณแน่ใจหรือไม่ว่าจะประมวลผลคะแนนและบันทึกผลของ ${processGwId}? (การกระทำนี้จะเปลี่ยนอันดับผู้เล่น)`
+      )
+    )
+      return;
+
     try {
       setIsProcessing(true);
       const { httpsCallable } = require('firebase/functions');
@@ -101,7 +106,7 @@ export const useDashboardData = () => {
       const processGameweekFn = httpsCallable(functions, 'processGameweek');
       await processGameweekFn({ gameweekId: processGwId });
       alert(`บันทึกผลการแข่งขัน ${processGwId} สำเร็จ!`);
-      fetchHistory(); 
+      fetchHistory();
     } catch (error) {
       console.error(error);
       alert('เกิดข้อผิดพลาดในการคำนวณและบันทึก กรุณาดู Console');
@@ -122,6 +127,6 @@ export const useDashboardData = () => {
     isAutoMode,
     setIsAutoMode,
     updateSystemState,
-    handleProcessGameweek
+    handleProcessGameweek,
   };
 };

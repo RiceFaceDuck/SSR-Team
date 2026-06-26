@@ -14,7 +14,7 @@ export default function Toast() {
     // ฟังก์ชันดักจับ Event 'SHOW_TOAST' จากที่ต่างๆ ในแอป
     const handleShowToast = (event) => {
       const { message, type = 'info', duration = 3000 } = event.detail;
-      
+
       const newToast = {
         id: Date.now() + Math.random(), // สร้าง ID ไม่ซ้ำกัน
         message,
@@ -31,7 +31,7 @@ export default function Toast() {
 
     // สมัครรับฟัง Event เมื่อ Component ถูก Mount
     window.addEventListener('SHOW_TOAST', handleShowToast);
-    
+
     // คืนค่าฟังก์ชันทำความสะอาดเมื่อ Component ถูก Unmount
     return () => window.removeEventListener('SHOW_TOAST', handleShowToast);
   }, []);
@@ -52,10 +52,11 @@ export default function Toast() {
         const isError = toast.type === 'error';
 
         // กำหนดสไตล์ Glassmorphism ตามประเภทของการแจ้งเตือน (Success, Error, Info)
-        const baseStyle = "w-full flex items-center justify-between p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] backdrop-blur-xl border pointer-events-auto animate-in slide-in-from-top-4 fade-in duration-300 hover:scale-[1.02] transition-transform";
-        const successStyle = "bg-emerald-50/80 border-emerald-200/60 text-emerald-800";
-        const errorStyle = "bg-rose-50/80 border-rose-200/60 text-rose-800";
-        const infoStyle = "bg-white/80 border-slate-200/60 text-slate-800";
+        const baseStyle =
+          'w-full flex items-center justify-between p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] backdrop-blur-xl border pointer-events-auto animate-in slide-in-from-top-4 fade-in duration-300 hover:scale-[1.02] transition-transform';
+        const successStyle = 'bg-emerald-50/80 border-emerald-200/60 text-emerald-800';
+        const errorStyle = 'bg-rose-50/80 border-rose-200/60 text-rose-800';
+        const infoStyle = 'bg-white/80 border-slate-200/60 text-slate-800';
 
         return (
           <div
@@ -67,11 +68,11 @@ export default function Toast() {
               {isSuccess && <CheckCircle className="text-emerald-500 shrink-0" size={22} />}
               {isError && <AlertCircle className="text-rose-500 shrink-0" size={22} />}
               {!isSuccess && !isError && <Info className="text-indigo-500 shrink-0" size={22} />}
-              
+
               {/* ข้อความแจ้งเตือน */}
               <p className="text-sm font-bold tracking-tight">{toast.message}</p>
             </div>
-            
+
             {/* ปุ่มปิด (X) */}
             <button
               onClick={() => removeToast(toast.id)}

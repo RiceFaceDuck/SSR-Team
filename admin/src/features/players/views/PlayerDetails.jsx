@@ -1,16 +1,16 @@
 import React from 'react';
-import { 
-  X, 
-  Edit, 
-  User, 
-  Shield, 
-  Target, 
-  Activity, 
-  AlertTriangle, 
-  Hash, 
-  MapPin, 
-  Coins, 
-  Star 
+import {
+  X,
+  Edit,
+  User,
+  Shield,
+  Target,
+  Activity,
+  AlertTriangle,
+  Hash,
+  MapPin,
+  Coins,
+  Star,
 } from 'lucide-react';
 import StatusBadge from '../../../components/ui/StatusBadge';
 import { getOptimizedImageUrl } from '../utils/formatters';
@@ -27,11 +27,10 @@ const PlayerDetails = ({ player, onClose, onEdit }) => {
 
   return (
     <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-auto overflow-hidden flex flex-col max-h-[90vh]">
-      
       {/* ส่วนหัว (Header Profile) */}
       <div className="relative bg-gradient-to-r from-blue-700 to-blue-900 p-6 sm:p-8 flex justify-between items-start text-white">
         {/* ปุ่มปิด - วางไว้มุมขวาบน */}
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 rounded-full backdrop-blur-sm transition-colors text-white/80 hover:text-white"
         >
@@ -41,7 +40,11 @@ const PlayerDetails = ({ player, onClose, onEdit }) => {
         <div className="flex items-center gap-5">
           <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/30 shadow-inner overflow-hidden">
             {player.imageUrl ? (
-              <img src={getOptimizedImageUrl(player.imageUrl)} alt={player.name} className="w-full h-full object-cover" />
+              <img
+                src={getOptimizedImageUrl(player.imageUrl)}
+                alt={player.name}
+                className="w-full h-full object-cover"
+              />
             ) : (
               <User className="w-10 h-10 text-white" />
             )}
@@ -50,7 +53,10 @@ const PlayerDetails = ({ player, onClose, onEdit }) => {
             <h2 className="text-2xl font-bold tracking-wide">{player.name}</h2>
             <p className="text-blue-100 mt-1 text-sm">{player.fullName}</p>
             <div className="mt-3">
-              <StatusBadge status={player.status} className="bg-white/10 text-white border-white/20" />
+              <StatusBadge
+                status={player.status}
+                className="bg-white/10 text-white border-white/20"
+              />
             </div>
           </div>
         </div>
@@ -58,7 +64,6 @@ const PlayerDetails = ({ player, onClose, onEdit }) => {
 
       {/* ส่วนเนื้อหา (Body Scrollable) */}
       <div className="p-6 overflow-y-auto bg-gray-50 flex-1">
-        
         {/* ข้อมูลทั่วไป (General Info) */}
         <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 mb-6">
           <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">
@@ -101,10 +106,14 @@ const PlayerDetails = ({ player, onClose, onEdit }) => {
               </div>
               <div>
                 <p className="text-xs font-medium text-green-800">ราคาปัจจุบัน</p>
-                <p className="text-2xl font-bold text-green-700">{player.displayPrice ? String(player.displayPrice).replace('£', '') : `${player.price || 0}m`}</p>
+                <p className="text-2xl font-bold text-green-700">
+                  {player.displayPrice
+                    ? String(player.displayPrice).replace('£', '')
+                    : `${player.price || 0}m`}
+                </p>
               </div>
             </div>
-            
+
             <div className="bg-blue-50 rounded-lg p-4 flex items-center border border-blue-100">
               <div className="p-3 bg-blue-100 rounded-full text-blue-600 mr-4">
                 <Star className="w-6 h-6" />
@@ -141,7 +150,10 @@ const PlayerDetails = ({ player, onClose, onEdit }) => {
               </div>
               <div className="p-3 bg-gray-50 rounded-lg flex flex-col items-center justify-center">
                 <div className="flex gap-1 mb-1">
-                  <div className="w-3.5 h-4.5 bg-yellow-400 rounded-sm shadow-sm" title="ใบเหลือง"></div>
+                  <div
+                    className="w-3.5 h-4.5 bg-yellow-400 rounded-sm shadow-sm"
+                    title="ใบเหลือง"
+                  ></div>
                   <div className="w-3.5 h-4.5 bg-red-500 rounded-sm shadow-sm" title="ใบแดง"></div>
                 </div>
                 <p className="text-xl font-bold text-gray-800">
@@ -172,7 +184,6 @@ const PlayerDetails = ({ player, onClose, onEdit }) => {
           </button>
         )}
       </div>
-
     </div>
   );
 };

@@ -29,7 +29,7 @@ export const useHapticFeedback = () => {
           window.navigator.vibrate(15);
       }
     } catch (error) {
-      console.warn("Haptic feedback error:", error);
+      console.warn('Haptic feedback error:', error);
     }
   }, []);
 

@@ -20,14 +20,14 @@ export const previewPlayerValues = async (config) => {
     // 1. ดึงข้อมูลนักเตะปัจจุบันทั้งหมด
     const playersRef = collection(db, `artifacts/${APP_ID}/public/data/players`);
     const snapshot = await getDocs(playersRef);
-    
+
     // 2. ดึงข้อมูลสถิติในอดีต (Historical Data) เพื่อนำมาเป็น Baseline
     const historyRef = collection(db, 'historical_players');
     const historySnapshot = await getDocs(historyRef);
     const historicalMap = new Map();
-    
+
     // Map สถิติอดีตด้วย SKU เพื่อความรวดเร็ว O(1)
-    historySnapshot.forEach(doc => {
+    historySnapshot.forEach((doc) => {
       const hData = doc.data();
       if (hData.sku && hData.stats) {
         historicalMap.set(hData.sku, hData.stats);
@@ -35,7 +35,7 @@ export const previewPlayerValues = async (config) => {
     });
 
     const previews = [];
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc) => {
       const data = doc.data();
       const hStats = historicalMap.get(data.sku) || {};
 
@@ -44,8 +44,8 @@ export const previewPlayerValues = async (config) => {
         ...data,
         stats: {
           ...data.stats,
-          ...hStats // เอาสถิติอดีต (rating, played, goals, assists) มารวมไว้ใช้คำนวณ
-        }
+          ...hStats, // เอาสถิติอดีต (rating, played, goals, assists) มารวมไว้ใช้คำนวณ
+        },
       };
 
       const newPrice = calculateSinglePlayerPrice(mergedPlayer, config);
@@ -54,10 +54,10 @@ export const previewPlayerValues = async (config) => {
         ...mergedPlayer, // ใช้ mergedPlayer เพื่อให้ตาราง preview สามารถแสดงสถิติได้ (ถ้าต้องการ)
         oldPrice: Number(data.price) || 0,
         newPrice: newPrice,
-        priceDiff: newPrice - (Number(data.price) || 0)
+        priceDiff: newPrice - (Number(data.price) || 0),
       });
     });
-    
+
     // เรียงจากแพงไปถูก
     return previews.sort((a, b) => b.newPrice - a.newPrice);
   } catch (error) {

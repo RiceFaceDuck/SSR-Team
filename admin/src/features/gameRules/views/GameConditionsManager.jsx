@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Sliders, Save, AlertCircle } from 'lucide-react';
 import ToggleSwitch from '../components/ToggleSwitch';
-import { getGameConditions, updateGameConditions } from '../../../services/firebase/gameRulesDatabase';
+import {
+  getGameConditions,
+  updateGameConditions,
+} from '../../../services/firebase/gameRulesDatabase';
 
 export default function GameConditionsManager({ isEmbedded = false }) {
   const [conditions, setConditions] = useState(null);
@@ -23,9 +26,9 @@ export default function GameConditionsManager({ isEmbedded = false }) {
         '4-4-2': true,
         '4-5-1': true,
         '5-3-2': true,
-        '5-4-1': true
-      }
-    }
+        '5-4-1': true,
+      },
+    },
   };
 
   useEffect(() => {
@@ -61,25 +64,25 @@ export default function GameConditionsManager({ isEmbedded = false }) {
   };
 
   const updateCondition = (key, field, value) => {
-    setConditions(prev => ({
+    setConditions((prev) => ({
       ...prev,
       [key]: {
         ...prev[key],
-        [field]: value
-      }
+        [field]: value,
+      },
     }));
   };
 
   const toggleFormation = (formation) => {
-    setConditions(prev => ({
+    setConditions((prev) => ({
       ...prev,
       allowedFormations: {
         ...prev.allowedFormations,
         formations: {
           ...prev.allowedFormations.formations,
-          [formation]: !prev.allowedFormations.formations[formation]
-        }
-      }
+          [formation]: !prev.allowedFormations.formations[formation],
+        },
+      },
     }));
   };
 
@@ -102,7 +105,9 @@ export default function GameConditionsManager({ isEmbedded = false }) {
             </div>
             <div>
               <h1 className="text-2xl font-black text-slate-800">เงื่อนไขการเล่นเกม</h1>
-              <p className="text-slate-500 font-medium">จัดการขอบเขตการเล่นและข้อจำกัดต่างๆ ภายในเกม</p>
+              <p className="text-slate-500 font-medium">
+                จัดการขอบเขตการเล่นและข้อจำกัดต่างๆ ภายในเกม
+              </p>
             </div>
           </div>
           <button
@@ -125,8 +130,10 @@ export default function GameConditionsManager({ isEmbedded = false }) {
 
       {conditions && (
         <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-6">
-          <h2 className="text-lg font-bold text-slate-800 border-b pb-3">สภาพแวดล้อม (Environment)</h2>
-          
+          <h2 className="text-lg font-bold text-slate-800 border-b pb-3">
+            สภาพแวดล้อม (Environment)
+          </h2>
+
           <div className="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 flex flex-col md:flex-row justify-between md:items-center gap-4 hover:bg-slate-100 transition-colors">
             <ToggleSwitch
               label="กำหนดระยะเวลาปิดตลาดล่วงหน้า"
@@ -140,7 +147,9 @@ export default function GameConditionsManager({ isEmbedded = false }) {
                 <input
                   type="number"
                   value={conditions.deadlineOffsetMinutes?.value || 0}
-                  onChange={(e) => updateCondition('deadlineOffsetMinutes', 'value', parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    updateCondition('deadlineOffsetMinutes', 'value', parseInt(e.target.value) || 0)
+                  }
                   className="w-24 border border-slate-300 rounded-lg px-3 py-1.5 focus:border-emerald-500 outline-none text-center"
                 />
               </div>
@@ -160,7 +169,9 @@ export default function GameConditionsManager({ isEmbedded = false }) {
                 <input
                   type="number"
                   value={conditions.cardLimitPerGW?.value || 0}
-                  onChange={(e) => updateCondition('cardLimitPerGW', 'value', parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    updateCondition('cardLimitPerGW', 'value', parseInt(e.target.value) || 0)
+                  }
                   className="w-24 border border-slate-300 rounded-lg px-3 py-1.5 focus:border-emerald-500 outline-none text-center"
                 />
               </div>
@@ -171,8 +182,12 @@ export default function GameConditionsManager({ isEmbedded = false }) {
           <div className="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 transition-colors">
             <div className="flex items-center justify-between mb-4 border-b border-slate-200 pb-4">
               <div>
-                <h3 className="font-bold text-slate-800">แผนการเล่นที่อนุญาต (Available Formations)</h3>
-                <p className="text-sm text-slate-500 mt-1">เปิด/ปิด แผนการเล่นที่ให้ผู้เล่นจัดได้</p>
+                <h3 className="font-bold text-slate-800">
+                  แผนการเล่นที่อนุญาต (Available Formations)
+                </h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  เปิด/ปิด แผนการเล่นที่ให้ผู้เล่นจัดได้
+                </p>
               </div>
               <ToggleSwitch
                 label=""
@@ -183,15 +198,15 @@ export default function GameConditionsManager({ isEmbedded = false }) {
 
             {conditions.allowedFormations?.isActive && (
               <div className="flex flex-wrap gap-3 mt-4">
-                {availableFormations.map(formation => {
+                {availableFormations.map((formation) => {
                   const isEnabled = conditions.allowedFormations.formations?.[formation];
                   return (
                     <button
                       key={formation}
                       onClick={() => toggleFormation(formation)}
                       className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                        isEnabled 
-                          ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' 
+                        isEnabled
+                          ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
                           : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-100'
                       }`}
                     >

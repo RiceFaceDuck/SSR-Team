@@ -5,15 +5,21 @@ const OverlapPlayerItem = ({ player, onDelete, disabled }) => {
   const isApi = player.sku?.startsWith('API-');
 
   return (
-    <div className={`p-4 rounded-xl border shadow-sm flex flex-col transition-colors ${
-      isApi ? 'bg-emerald-50/30 border-emerald-200' : 'bg-white border-rose-100 hover:border-rose-300'
-    }`}>
+    <div
+      className={`p-4 rounded-xl border shadow-sm flex flex-col transition-colors ${
+        isApi
+          ? 'bg-emerald-50/30 border-emerald-200'
+          : 'bg-white border-rose-100 hover:border-rose-300'
+      }`}
+    >
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center gap-3">
-          <img 
-            src={player.imageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} 
-            alt={player.name} 
-            className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200" 
+          <img
+            src={
+              player.imageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`
+            }
+            alt={player.name}
+            className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200"
           />
           <div>
             <p className="font-bold text-gray-900 text-sm flex items-center gap-1">
@@ -37,15 +43,19 @@ const OverlapPlayerItem = ({ player, onDelete, disabled }) => {
         </div>
         <div className="flex justify-between text-xs">
           <span className="text-gray-500">ทีม/ตำแหน่ง:</span>
-          <span className="font-medium text-gray-700">{player.team} - {player.position}</span>
+          <span className="font-medium text-gray-700">
+            {player.team} - {player.position}
+          </span>
         </div>
         <div className="flex justify-between text-xs">
           <span className="text-gray-500">Document ID:</span>
-          <span className="font-mono text-gray-400 text-[10px] truncate max-w-[100px]">{player.id}</span>
+          <span className="font-mono text-gray-400 text-[10px] truncate max-w-[100px]">
+            {player.id}
+          </span>
         </div>
       </div>
-      <button 
-        onClick={() => onDelete(player.id)} 
+      <button
+        onClick={() => onDelete(player.id)}
         disabled={disabled}
         className="flex items-center justify-center gap-2 w-full py-2 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 rounded-lg text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       >

@@ -29,7 +29,7 @@ export default function PositionBadge({ position = 'UK', className = '' }) {
   }
 
   return (
-    <span 
+    <span
       className={`inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-black tracking-wider uppercase rounded-md border shadow-sm ${badgeStyle} ${className}`}
     >
       {position}

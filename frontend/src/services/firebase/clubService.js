@@ -14,7 +14,7 @@ const DEFAULT_CLUB_DATA = {
   gymLevel: 1,
   youthAcademyLevel: 1,
   spentExp: 0,
-  updatedAt: new Date()
+  updatedAt: new Date(),
 };
 
 /**

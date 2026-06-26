@@ -3,13 +3,7 @@ import { useRewardStore } from '../../store/rewardStore';
 import RewardFormModal from './RewardFormModal';
 import RewardTable from './components/RewardTable';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
-import { 
-  Plus, 
-  Search, 
-  PackageOpen, 
-  RefreshCw,
-  Box
-} from 'lucide-react';
+import { Plus, Search, PackageOpen, RefreshCw, Box } from 'lucide-react';
 
 const RewardManager = () => {
   // ดึง State และ Action จาก Zustand Store
@@ -19,7 +13,7 @@ const RewardManager = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [rewardToEdit, setRewardToEdit] = useState(null);
-  
+
   // State สำหรับ Delete Modal
   const [itemToDelete, setItemToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -32,9 +26,10 @@ const RewardManager = () => {
   // กรองข้อมูลตามคำค้นหา (Search)
   const filteredRewards = useMemo(() => {
     if (!searchQuery) return rewards;
-    return rewards.filter(reward => 
-      reward.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      reward.type.toLowerCase().includes(searchQuery.toLowerCase())
+    return rewards.filter(
+      (reward) =>
+        reward.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        reward.type.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [rewards, searchQuery]);
 
@@ -59,7 +54,7 @@ const RewardManager = () => {
       await deleteReward(itemToDelete.id);
       setItemToDelete(null);
     } catch (err) {
-      console.error("Failed to delete", err);
+      console.error('Failed to delete', err);
       // ในระบบจริงอาจจะโชว์ Toast error ตรงนี้
     } finally {
       setIsDeleting(false);
@@ -68,7 +63,6 @@ const RewardManager = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      
       {/* Header & Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -103,15 +97,16 @@ const RewardManager = () => {
             className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-slate-800 dark:text-white text-sm"
           />
         </div>
-        
+
         <div className="text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">
-          พบของรางวัลทั้งหมด <span className="font-bold text-slate-800 dark:text-white">{filteredRewards.length}</span> รายการ
+          พบของรางวัลทั้งหมด{' '}
+          <span className="font-bold text-slate-800 dark:text-white">{filteredRewards.length}</span>{' '}
+          รายการ
         </div>
       </div>
 
       {/* Table Section */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-        
         {/* Loading State */}
         {isLoading && rewards.length === 0 ? (
           <div className="p-12 flex flex-col items-center justify-center text-slate-400">
@@ -122,40 +117,43 @@ const RewardManager = () => {
           /* Error State */
           <div className="p-8 text-center text-red-500 bg-red-50 dark:bg-red-900/10">
             <p>เกิดข้อผิดพลาด: {error}</p>
-            <button onClick={fetchRewards} className="mt-4 underline hover:text-red-600">ลองใหม่อีกครั้ง</button>
+            <button onClick={fetchRewards} className="mt-4 underline hover:text-red-600">
+              ลองใหม่อีกครั้ง
+            </button>
           </div>
         ) : filteredRewards.length === 0 ? (
           /* Empty State */
           <div className="p-16 flex flex-col items-center justify-center text-slate-400 text-center">
             <Box size={48} className="mb-4 opacity-50" />
-            <p className="text-lg font-medium text-slate-600 dark:text-slate-300">ไม่พบข้อมูลของรางวัล</p>
+            <p className="text-lg font-medium text-slate-600 dark:text-slate-300">
+              ไม่พบข้อมูลของรางวัล
+            </p>
             <p className="text-sm mt-1">ลองเปลี่ยนคำค้นหา หรือเพิ่มของรางวัลใหม่</p>
           </div>
         ) : (
           /* Table Content */
-          <RewardTable 
-            filteredRewards={filteredRewards} 
-            handleEdit={handleEdit} 
-            handleDeleteRequest={handleDeleteRequest} 
+          <RewardTable
+            filteredRewards={filteredRewards}
+            handleEdit={handleEdit}
+            handleDeleteRequest={handleDeleteRequest}
           />
         )}
       </div>
 
       {/* Modals */}
-      <RewardFormModal 
+      <RewardFormModal
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}
         rewardToEdit={rewardToEdit}
       />
 
-      <DeleteConfirmModal 
+      <DeleteConfirmModal
         isOpen={!!itemToDelete}
         onClose={() => setItemToDelete(null)}
         onConfirm={handleConfirmDelete}
         itemName={itemToDelete?.name}
         isDeleting={isDeleting}
       />
-
     </div>
   );
 };

@@ -32,9 +32,9 @@ export const useRewardStore = create((set, get) => ({
     try {
       const newReward = await rewardAdminService.createReward(rewardData);
       // นำของรางวัลใหม่ไปต่อไว้ข้างหน้าสุดของ Array (เพื่อให้เห็นเป็นรายการล่าสุด)
-      set((state) => ({ 
+      set((state) => ({
         rewards: [newReward, ...state.rewards],
-        isLoading: false 
+        isLoading: false,
       }));
       return newReward; // ส่งคืน data เผื่อ Component เอาไปแสดง Toast Success
     } catch (error) {
@@ -53,13 +53,13 @@ export const useRewardStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const updatedReward = await rewardAdminService.updateReward(id, updateData);
-      
+
       set((state) => ({
         // หา Item ที่ตรงกับ ID แล้วแทนที่ด้วยข้อมูลใหม่ ส่วน Item อื่นๆ ปล่อยไว้เหมือนเดิม
-        rewards: state.rewards.map((reward) => 
+        rewards: state.rewards.map((reward) =>
           reward.id === id ? { ...reward, ...updatedReward } : reward
         ),
-        isLoading: false
+        isLoading: false,
       }));
       return updatedReward;
     } catch (error) {
@@ -77,11 +77,11 @@ export const useRewardStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await rewardAdminService.deleteReward(id);
-      
+
       set((state) => ({
         // กรองเอา Item ที่ถูกลบออกจาก Array
         rewards: state.rewards.filter((reward) => reward.id !== id),
-        isLoading: false
+        isLoading: false,
       }));
     } catch (error) {
       console.error('Store deleteReward error:', error);
@@ -99,17 +99,17 @@ export const useRewardStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await rewardAdminService.updateStock(id, newStock);
-      
+
       set((state) => ({
-        rewards: state.rewards.map((reward) => 
+        rewards: state.rewards.map((reward) =>
           reward.id === id ? { ...reward, stock: Number(newStock) } : reward
         ),
-        isLoading: false
+        isLoading: false,
       }));
     } catch (error) {
       console.error('Store updateStock error:', error);
       set({ error: error.message, isLoading: false });
       throw error;
     }
-  }
+  },
 }));

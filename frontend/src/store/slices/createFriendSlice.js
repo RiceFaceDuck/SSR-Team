@@ -1,9 +1,9 @@
-import { 
-  fetchFriends, 
-  sendFriendRequest, 
-  acceptFriendRequest, 
-  removeFriend, 
-  searchUserByUid 
+import {
+  fetchFriends,
+  sendFriendRequest,
+  acceptFriendRequest,
+  removeFriend,
+  searchUserByUid,
 } from '../../services/firebase/friendService';
 
 export const createFriendSlice = (set, get) => ({
@@ -62,5 +62,5 @@ export const createFriendSlice = (set, get) => ({
       console.error('Failed to remove friend:', error);
       return { success: false, error: error.message };
     }
-  }
+  },
 });

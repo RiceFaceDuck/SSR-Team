@@ -4,8 +4,16 @@
  * ใช้ Batch Writes เพื่อลดต้นทุน Reads/Writes
  */
 
-import { collection, doc, writeBatch, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
-import { db } from '../../config/firebase'; 
+import {
+  collection,
+  doc,
+  writeBatch,
+  serverTimestamp,
+  getDocs,
+  query,
+  where,
+} from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 const getHistoricalPlayersCollectionRef = () => {
   return collection(db, 'historical_players');
@@ -29,9 +37,9 @@ export const historyDatabase = {
       playersArray.forEach((player) => {
         // ใช้ ID แบบ 2022_API-1234
         const docRef = doc(getHistoricalPlayersCollectionRef(), String(player.id));
-        
+
         const cleanPlayer = { ...player };
-        Object.keys(cleanPlayer).forEach(key => {
+        Object.keys(cleanPlayer).forEach((key) => {
           if (cleanPlayer[key] === undefined) {
             delete cleanPlayer[key];
           }
@@ -42,7 +50,7 @@ export const historyDatabase = {
         totalSaved++;
 
         // Firestore จำกัด 500 ต่อ 1 Batch
-        if (operationCount >= 490) { 
+        if (operationCount >= 490) {
           batches.push(currentBatch.commit());
           currentBatch = writeBatch(db);
           operationCount = 0;
@@ -56,7 +64,7 @@ export const historyDatabase = {
       await Promise.all(batches);
       return totalSaved;
     } catch (error) {
-      console.error("Error saving historical players bulk:", error);
+      console.error('Error saving historical players bulk:', error);
       throw error;
     }
   },
@@ -71,7 +79,7 @@ export const historyDatabase = {
     try {
       const liveStatsRef = collection(db, 'public_data', 'live_gameweek_stats');
       const statsSnapshot = await getDocs(liveStatsRef);
-      
+
       if (statsSnapshot.empty) {
         return { success: true, message: 'ไม่มีข้อมูลสดให้ Archive' };
       }
@@ -83,31 +91,36 @@ export const historyDatabase = {
       for (const statDoc of statsSnapshot.docs) {
         const data = statDoc.data();
         const playerId = statDoc.id; // usually SKU
-        
+
         const historyId = `${season}_${playerId}`;
         const historyRef = doc(db, 'historical_players', historyId);
-        
-        batch.set(historyRef, {
-          id: historyId,
-          sku: playerId,
-          season: Number(season),
-          updatedAt: serverTimestamp(),
-          [`gw_history.${gameweekId}`]: {
-            goals: data.goals || 0,
-            assists: data.assists || 0,
-            cleanSheets: data.cleanSheets || 0,
-            yellowCards: data.yellowCards || 0,
-            redCards: data.redCards || 0,
-            gwPoints: data.gwPoints || 0,
-            minutes: data.minutes || 0
-          }
-        }, { merge: true });
+
+        batch.set(
+          historyRef,
+          {
+            id: historyId,
+            sku: playerId,
+            season: Number(season),
+            updatedAt: serverTimestamp(),
+            [`gw_history.${gameweekId}`]: {
+              goals: data.goals || 0,
+              assists: data.assists || 0,
+              cleanSheets: data.cleanSheets || 0,
+              yellowCards: data.yellowCards || 0,
+              redCards: data.redCards || 0,
+              gwPoints: data.gwPoints || 0,
+              minutes: data.minutes || 0,
+            },
+          },
+          { merge: true }
+        );
 
         // เคลียร์ข้อมูลสดทิ้ง
         batch.delete(statDoc.ref);
 
         count++;
-        if (count >= 240) { // 2 operations per doc => 240 doc = 480 ops
+        if (count >= 240) {
+          // 2 operations per doc => 240 doc = 480 ops
           await batch.commit();
           batchCount++;
           batch = writeBatch(db);
@@ -133,16 +146,18 @@ export const historyDatabase = {
   saveFetchHistory: async (type, season, status, recordsFetched, adminId) => {
     try {
       const docRef = doc(getFetchHistoryCollectionRef());
-      await writeBatch(db).set(docRef, {
-        type,
-        season: Number(season),
-        status,
-        recordsFetched,
-        timestamp: serverTimestamp(),
-        adminId: adminId || 'unknown'
-      }).commit();
+      await writeBatch(db)
+        .set(docRef, {
+          type,
+          season: Number(season),
+          status,
+          recordsFetched,
+          timestamp: serverTimestamp(),
+          adminId: adminId || 'unknown',
+        })
+        .commit();
     } catch (error) {
-      console.error("Error saving fetch history:", error);
+      console.error('Error saving fetch history:', error);
     }
   },
 
@@ -153,7 +168,7 @@ export const historyDatabase = {
     try {
       const q = query(getFetchHistoryCollectionRef()); // In a real app, you'd orderBy timestamp, but it requires an index
       const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       // Sort in memory instead of requiring an index immediately
       return data.sort((a, b) => {
         const timeA = a.timestamp?.toMillis ? a.timestamp.toMillis() : 0;
@@ -161,8 +176,8 @@ export const historyDatabase = {
         return timeB - timeA;
       });
     } catch (error) {
-      console.error("Error fetching fetch history:", error);
+      console.error('Error fetching fetch history:', error);
       return [];
     }
-  }
+  },
 };

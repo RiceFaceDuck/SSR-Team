@@ -7,7 +7,6 @@ import React from 'react';
  * @param {string} className - คลาส CSS เพิ่มเติมสำหรับปรับแต่ง (ถ้ามี)
  */
 const StatusBadge = ({ status = 'unknown', className = '' }) => {
-  
   // ฟังก์ชันสำหรับกำหนดสีพื้นหลังและสีตัวอักษรตามสถานะ
   const getBadgeStyle = (currentStatus) => {
     switch (currentStatus?.toLowerCase()) {
@@ -41,7 +40,9 @@ const StatusBadge = ({ status = 'unknown', className = '' }) => {
         return 'ถูกแบน';
       default:
         // ถ้าไม่ตรงกับเงื่อนไขใด ให้แสดงข้อความเดิม (Capitalize ตัวแรก)
-        return currentStatus ? currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1) : 'ไม่ระบุ';
+        return currentStatus
+          ? currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)
+          : 'ไม่ระบุ';
     }
   };
 
@@ -49,7 +50,7 @@ const StatusBadge = ({ status = 'unknown', className = '' }) => {
   const badgeText = getStatusText(status);
 
   return (
-    <span 
+    <span
       className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${badgeStyle} ${className}`}
     >
       {badgeText}

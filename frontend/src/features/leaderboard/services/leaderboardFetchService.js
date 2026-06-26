@@ -13,21 +13,21 @@ export const leaderboardFetchService = {
     try {
       const cacheRef = doc(db, 'public_data', 'leaderboard_cache');
       const cacheSnap = await getDoc(cacheRef);
-      
+
       if (cacheSnap.exists()) {
         return cacheSnap.data();
       }
-      
+
       // กรณีไม่มีข้อมูล (เช่น ยังไม่ได้ประมวลผลสัปดาห์แรก)
       return {
         weekly: [],
         season: [],
         club: [],
-        exportDataTxt: 'ยังไม่มีข้อมูลการแข่งขัน'
+        exportDataTxt: 'ยังไม่มีข้อมูลการแข่งขัน',
       };
     } catch (error) {
       console.error('Error fetching leaderboard cache:', error);
       throw error;
     }
-  }
+  },
 };

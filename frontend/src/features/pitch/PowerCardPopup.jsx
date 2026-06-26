@@ -6,9 +6,19 @@ import PowerCardList from './components/powerCard/PowerCardList';
 import { formatPlayerName } from '../../utils/formatters';
 
 export default function PowerCardPopup({ isOpen, onClose, player }) {
-  const { 
-    userData, balls, availableCards, fetchCards, equipCard, removeCard, 
-    ownedCards, isInventoryLoaded, loadInventory, buyCard, consumeCard, restoreCard
+  const {
+    userData,
+    balls,
+    availableCards,
+    fetchCards,
+    equipCard,
+    removeCard,
+    ownedCards,
+    isInventoryLoaded,
+    loadInventory,
+    buyCard,
+    consumeCard,
+    restoreCard,
   } = useUserStore();
   const uid = userData?.uid;
 
@@ -35,11 +45,11 @@ export default function PowerCardPopup({ isOpen, onClose, player }) {
       toast.error('Balls ของคุณไม่เพียงพอ!');
       return;
     }
-    
+
     setIsProcessing(true);
     const result = await buyCard(uid, card.id, card.price || 0);
     setIsProcessing(false);
-    
+
     if (result.success) {
       toast.success(`ซื้อการ์ด ${card.name} สำเร็จ!`);
       setActiveTab('INVENTORY');
@@ -83,7 +93,9 @@ export default function PowerCardPopup({ isOpen, onClose, player }) {
 
   // Filter lists
   // INVENTORY: show active cards that user owns at least 1, OR the currently equipped card
-  const inventoryList = availableCards.filter(c => (ownedCards[c.id] || 0) > 0 || equippedCardId === c.id);
+  const inventoryList = availableCards.filter(
+    (c) => (ownedCards[c.id] || 0) > 0 || equippedCardId === c.id
+  );
   // SHOP: show all active cards
   const shopList = availableCards;
 
@@ -92,9 +104,8 @@ export default function PowerCardPopup({ isOpen, onClose, player }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#040f1d]/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-[#0a192f] border border-purple-500/30 rounded-2xl w-full max-w-md shadow-[0_0_40px_rgba(168,85,247,0.4)] overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-300">
-        
         {/* Header */}
-        <PowerCardHeader 
+        <PowerCardHeader
           balls={balls}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -104,7 +115,7 @@ export default function PowerCardPopup({ isOpen, onClose, player }) {
 
         {/* List Content */}
         <div className="p-4 overflow-y-auto flex-1 space-y-3 bg-[#0a192f]">
-          <PowerCardList 
+          <PowerCardList
             displayList={displayList}
             activeTab={activeTab}
             equippedCardId={equippedCardId}
@@ -116,7 +127,6 @@ export default function PowerCardPopup({ isOpen, onClose, player }) {
             handleBuy={handleBuy}
           />
         </div>
-
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import AdjustBallsModal from './components/AdjustBallsModal';
 
 const UserManager = () => {
   const { users, isLoading, error, fetchUsers, updateUserBallsAction } = useUserStore();
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [amount, setAmount] = useState('');
@@ -37,10 +37,15 @@ const UserManager = () => {
 
     setIsSubmitting(true);
     try {
-      await updateUserBallsAction(selectedUser.id, Number(amount), reason || 'Admin Adjusted', 'admin_123');
+      await updateUserBallsAction(
+        selectedUser.id,
+        Number(amount),
+        reason || 'Admin Adjusted',
+        'admin_123'
+      );
       closeModal();
     } catch (err) {
-      console.error("Failed to adjust balls", err);
+      console.error('Failed to adjust balls', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -56,10 +61,18 @@ const UserManager = () => {
 
   if (error) {
     return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+      <div
+        className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+        role="alert"
+      >
         <strong className="font-bold">เกิดข้อผิดพลาด! </strong>
         <span className="block sm:inline">{error}</span>
-        <button onClick={fetchUsers} className="mt-2 bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700 text-sm">ลองใหม่</button>
+        <button
+          onClick={fetchUsers}
+          className="mt-2 bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700 text-sm"
+        >
+          ลองใหม่
+        </button>
       </div>
     );
   }
@@ -69,20 +82,18 @@ const UserManager = () => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">จัดการผู้เล่นและการเงิน ⚽</h1>
-          <p className="text-sm text-gray-500 mt-1">ดูรายชื่อผู้ใช้งานและปรับยอดเงิน (Balls) ได้ในที่เดียว</p>
+          <p className="text-sm text-gray-500 mt-1">
+            ดูรายชื่อผู้ใช้งานและปรับยอดเงิน (Balls) ได้ในที่เดียว
+          </p>
         </div>
         <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
           จำนวนบัญชีทั้งหมด: <span className="font-bold text-blue-600 text-lg">{users.length}</span>
         </div>
       </div>
 
-      <UserTable 
-        users={users} 
-        isLoading={isLoading} 
-        openAdjustModal={openAdjustModal} 
-      />
+      <UserTable users={users} isLoading={isLoading} openAdjustModal={openAdjustModal} />
 
-      <AdjustBallsModal 
+      <AdjustBallsModal
         isModalOpen={isModalOpen}
         selectedUser={selectedUser}
         closeModal={closeModal}

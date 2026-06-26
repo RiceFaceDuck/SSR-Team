@@ -7,5 +7,5 @@ export const playerDatabase = {
   ...playerFetchService,
   ...playerUpdateService,
   ...playerBulkService,
-  ...playerOverlapService
+  ...playerOverlapService,
 };

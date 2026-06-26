@@ -25,7 +25,7 @@ export const useSessionTimeout = () => {
 
     // ติดตั้ง Event Listeners สำหรับดักจับการเคลื่อนไหวของผู้ใช้
     const events = ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'];
-    events.forEach(event => window.addEventListener(event, updateActivity, { passive: true }));
+    events.forEach((event) => window.addEventListener(event, updateActivity, { passive: true }));
 
     // ฟังก์ชันตรวจสอบเซสชันหมดอายุ
     const checkSession = () => {
@@ -35,7 +35,7 @@ export const useSessionTimeout = () => {
         if (elapsed > SESSION_TIMEOUT_MS) {
           console.warn('Session expired due to inactivity. Logging out automatically.');
           toast.error('เซสชันของคุณหมดอายุเนื่องจากไม่มีการใช้งานเป็นเวลา 30 วัน', 5000);
-          
+
           logoutUser().then(() => {
             clearAuth();
             localStorage.removeItem('lastActivity');
@@ -52,7 +52,7 @@ export const useSessionTimeout = () => {
 
     return () => {
       clearInterval(interval);
-      events.forEach(event => window.removeEventListener(event, updateActivity));
+      events.forEach((event) => window.removeEventListener(event, updateActivity));
     };
   }, [isAuthenticated, clearAuth]);
 };

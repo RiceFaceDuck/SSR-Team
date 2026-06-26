@@ -9,9 +9,9 @@
  */
 export const formatShortName = (fullName) => {
   if (!fullName) return '-';
-  
+
   const parts = fullName.trim().split(' ');
-  
+
   // ถ้ามีแค่ชื่อเดียว (ไม่มีนามสกุล) ให้คืนค่าชื่อนั้นเลย
   if (parts.length === 1) {
     return parts[0];
@@ -19,10 +19,10 @@ export const formatShortName = (fullName) => {
 
   // เอาตัวอักษรแรกของชื่อหน้ามาทำเป็นตัวใหญ่ + จุด
   const firstNameInitial = parts[0].charAt(0).toUpperCase();
-  
+
   // เอานามสกุล (และคำที่เหลือทั้งหมด) มารวมกัน
   const lastName = parts.slice(1).join(' ');
-  
+
   return `${firstNameInitial}. ${lastName}`;
 };
 
@@ -34,13 +34,13 @@ export const formatShortName = (fullName) => {
 export const formatPrice = (price) => {
   const numPrice = Number(price);
   if (isNaN(numPrice)) return '0.0m';
-  
+
   // สมมติว่าถ้าค่ามาเป็นหลักล้าน (เช่น 5500000) ให้หาร 1000000
   // แต่ถ้าค่ามาเป็นทศนิยมอยู่แล้ว (เช่น 5.5) ให้แสดงผลได้เลย
   if (numPrice >= 1000000) {
     return `${(numPrice / 1000000).toFixed(1)}m`;
   }
-  
+
   return `${numPrice.toFixed(1)}m`;
 };
 
@@ -51,13 +51,13 @@ export const formatPrice = (price) => {
  */
 export const formatPosition = (position) => {
   if (!position) return '-';
-  
+
   const posMap = {
-    'Attacker': 'FW',
-    'Forward': 'FW',
-    'Midfielder': 'MF',
-    'Defender': 'DF',
-    'Goalkeeper': 'GK'
+    Attacker: 'FW',
+    Forward: 'FW',
+    Midfielder: 'MF',
+    Defender: 'DF',
+    Goalkeeper: 'GK',
   };
 
   // ค้นหาใน Map ถ้าไม่เจอให้คืนค่าเดิม (เผื่อเป็นตัวย่อมาอยู่แล้ว)
@@ -71,7 +71,7 @@ export const formatPosition = (position) => {
  */
 export const formatDate = (timestamp) => {
   if (!timestamp) return '-';
-  
+
   try {
     const date = new Date(timestamp);
     return new Intl.DateTimeFormat('th-TH', {
@@ -79,7 +79,7 @@ export const formatDate = (timestamp) => {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(date);
   } catch (error) {
     return '-';

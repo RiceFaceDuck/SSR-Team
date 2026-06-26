@@ -44,13 +44,12 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
         onClick={() => !isSaving && onClose()}
       />
 
       <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 fade-in duration-200">
-        
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-2">
@@ -60,7 +59,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
             <h3 className="font-bold text-slate-800 text-lg">การตั้งค่า (Settings)</h3>
           </div>
           {!isSaving && (
-            <button 
+            <button
               onClick={onClose}
               className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
             >
@@ -73,18 +72,20 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
         <div className="p-6 space-y-5">
           <div>
             <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-              <User size={16} className="text-indigo-500"/>
+              <User size={16} className="text-indigo-500" />
               ชื่อทีม / ชื่อผู้เล่น
             </label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="กรอกชื่อทีมของคุณ"
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-semibold text-slate-800"
               maxLength={20}
             />
-            <p className="text-xs text-slate-500 mt-1.5">ความยาวไม่เกิน 20 ตัวอักษร (แสดงในหน้าจัดทีมและตารางคะแนน)</p>
+            <p className="text-xs text-slate-500 mt-1.5">
+              ความยาวไม่เกิน 20 ตัวอักษร (แสดงในหน้าจัดทีมและตารางคะแนน)
+            </p>
           </div>
 
           {/* Placeholder for future settings */}
@@ -97,27 +98,22 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
 
         {/* Footer */}
         <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
-          <button 
+          <button
             onClick={onClose}
             disabled={isSaving}
             className="flex-1 py-3 px-4 rounded-xl font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 active:scale-[0.98] transition-all disabled:opacity-50 shadow-sm"
           >
             ยกเลิก
           </button>
-          <button 
+          <button
             onClick={handleSave}
             disabled={isSaving || !displayName.trim()}
             className="flex-[2] flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-white bg-slate-800 hover:bg-slate-900 active:scale-[0.98] shadow-lg shadow-slate-800/20 transition-all disabled:opacity-50"
           >
-            {isSaving ? (
-              <Loader2 size={18} className="animate-spin" />
-            ) : (
-              <Save size={18} />
-            )}
+            {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
             <span>บันทึกข้อมูล</span>
           </button>
         </div>
-
       </div>
     </div>
   );

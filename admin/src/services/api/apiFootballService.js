@@ -3,45 +3,43 @@
  * @description Service สำหรับเชื่อมต่อ API-Football เพื่อดึงข้อมูลและสถิตินักเตะ
  */
 
-const BASE_URL = "https://v3.football.api-sports.io";
+const BASE_URL = 'https://v3.football.api-sports.io';
 
-const safeGetItem = (key) => typeof window !== 'undefined' && window.localStorage ? localStorage.getItem(key) : null;
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../../config/firebase';
+
+const safeGetItem = (key) =>
+  typeof window !== 'undefined' && window.localStorage ? localStorage.getItem(key) : null;
 const safeGetEnv = (key) => {
   if (typeof process !== 'undefined' && process.env && process.env[key]) return process.env[key];
-  try { return import.meta.env[key]; } catch(e) { return null; }
+  try {
+    return import.meta.env[key];
+  } catch (e) {
+    return null;
+  }
 };
 
 // ค่า Default (ดึงจาก LocalStorage -> Environment Variable -> Hardcode Fallback)
 let currentConfig = {
-  apiKey: safeGetItem('apiFootballKey') || safeGetEnv('VITE_API_FOOTBALL_KEY') || "73f575c169c87a030e5412387f2d3239",
-  leagueId: safeGetItem('apiFootballLeague') || safeGetEnv('VITE_API_FOOTBALL_LEAGUE') || "39", // 39 = Premier League
-  season: safeGetItem('apiFootballSeason') || safeGetEnv('VITE_API_FOOTBALL_SEASON') || "2024" // Free plan supports up to 2024
+  leagueId: safeGetItem('apiFootballLeague') || safeGetEnv('VITE_API_FOOTBALL_LEAGUE') || '39', // 39 = Premier League
+  season: safeGetItem('apiFootballSeason') || safeGetEnv('VITE_API_FOOTBALL_SEASON') || '2024', // Free plan supports up to 2024
 };
 
-const fetchWithFallback = async (url, cacheKey) => {
+const fetchWithFallback = async (endpoint, params, cacheKey) => {
   try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: apiFootballService.getHeaders()
-    });
+    const fetchApiData = httpsCallable(functions, 'fetchApiFootballData');
+    const response = await fetchApiData({ endpoint, params });
+    const data = response.data.response || [];
 
-    const result = await response.json();
-    
-    if (result.errors && Object.keys(result.errors).length > 0) {
-      throw new Error(Object.values(result.errors)[0]);
-    }
-
-    const data = result.response || [];
-    
     // Save to cache on success
     if (typeof window !== 'undefined' && window.localStorage) {
       try {
         localStorage.setItem(cacheKey, JSON.stringify(data));
       } catch (e) {
-        console.warn("Could not save to localStorage (quota exceeded?)", e);
+        console.warn('Could not save to localStorage (quota exceeded?)', e);
       }
     }
-    
+
     return data;
   } catch (error) {
     console.warn(`[API Fallback] Fetch failed for ${cacheKey}:`, error.message);
@@ -52,7 +50,7 @@ const fetchWithFallback = async (url, cacheKey) => {
         try {
           return JSON.parse(cached);
         } catch (e) {
-          console.error("Failed to parse cached data", e);
+          console.error('Failed to parse cached data', e);
         }
       }
     }
@@ -63,11 +61,10 @@ const fetchWithFallback = async (url, cacheKey) => {
 
 export const apiFootballService = {
   /**
-   * ตั้งค่า API ใหม่และบันทึกลง LocalStorage
+   * ตั้งค่า Config (ลบการเก็บ API Key ฝั่ง Client ทิ้ง)
    */
-  setConfig: (apiKey, leagueId, season) => {
-    currentConfig = { apiKey, leagueId, season };
-    localStorage.setItem('apiFootballKey', apiKey);
+  setConfig: (leagueId, season) => {
+    currentConfig = { leagueId, season };
     localStorage.setItem('apiFootballLeague', leagueId);
     localStorage.setItem('apiFootballSeason', season);
   },
@@ -75,20 +72,16 @@ export const apiFootballService = {
   getConfig: () => currentConfig,
 
   /**
-   * สร้าง Header พื้นฐาน
+   * สร้าง Header พื้นฐาน (ถูกลบออกเพราะย้ายไปทำฝั่ง Server)
    */
-  getHeaders: () => ({
-    "x-apisports-key": currentConfig.apiKey,
-    "x-rapidapi-host": "v3.football.api-sports.io"
-  }),
+  getHeaders: () => ({}),
 
   /**
    * ดึงรายการรอบการแข่งขัน (Gameweeks) ที่มีทั้งหมด
    */
   fetchAvailableGameweeks: async () => {
     const { leagueId, season } = currentConfig;
-    const url = `${BASE_URL}/fixtures/rounds?league=${leagueId}&season=${season}`;
-    return await fetchWithFallback(url, `cache_rounds_${leagueId}_${season}`);
+    return await fetchWithFallback('/fixtures/rounds', { league: leagueId, season: season }, `cache_rounds_${leagueId}_${season}`);
   },
 
   /**
@@ -98,8 +91,7 @@ export const apiFootballService = {
   fetchFixtures: async (gameweekNumber) => {
     const { leagueId, season } = currentConfig;
     const roundStr = `Regular Season - ${gameweekNumber}`;
-    const url = `${BASE_URL}/fixtures?league=${leagueId}&season=${season}&round=${encodeURIComponent(roundStr)}`;
-    return await fetchWithFallback(url, `cache_fixtures_${leagueId}_${season}_${gameweekNumber}`);
+    return await fetchWithFallback('/fixtures', { league: leagueId, season: season, round: roundStr }, `cache_fixtures_${leagueId}_${season}_${gameweekNumber}`);
   },
 
   /**
@@ -107,8 +99,7 @@ export const apiFootballService = {
    */
   fetchPlayers: async (query) => {
     const { season } = currentConfig;
-    const url = `${BASE_URL}/players?search=${encodeURIComponent(query)}&season=${season}`;
-    return await fetchWithFallback(url, `cache_players_search_${season}_${query}`);
+    return await fetchWithFallback('/players', { search: query, season: season }, `cache_players_search_${season}_${query}`);
   },
 
   /**
@@ -116,8 +107,7 @@ export const apiFootballService = {
    */
   fetchTeamPlayers: async (teamId) => {
     const { season } = currentConfig;
-    const url = `${BASE_URL}/players?team=${teamId}&season=${season}`;
-    return await fetchWithFallback(url, `cache_players_team_${season}_${teamId}`);
+    return await fetchWithFallback('/players', { team: teamId, season: season }, `cache_players_team_${season}_${teamId}`);
   },
 
   /**
@@ -125,8 +115,7 @@ export const apiFootballService = {
    */
   fetchPlayerById: async (playerId) => {
     const { season } = currentConfig;
-    const url = `${BASE_URL}/players?id=${playerId}&season=${season}`;
-    const data = await fetchWithFallback(url, `cache_player_id_${season}_${playerId}`);
+    const data = await fetchWithFallback('/players', { id: playerId, season: season }, `cache_player_id_${season}_${playerId}`);
     return data && data.length > 0 ? data[0] : null;
   },
 
@@ -135,7 +124,7 @@ export const apiFootballService = {
    */
   mapApiDataToSchema: (apiData) => {
     if (!apiData || !apiData.player) return null;
-    
+
     const p = apiData.player;
     const stat = apiData.statistics?.[0]; // เอาสถิติลีคหลัก
 
@@ -171,7 +160,7 @@ export const apiFootballService = {
         yellowCards: stat?.cards?.yellow || 0,
         redCards: stat?.cards?.red || 0,
       },
-      dataSource: 'API'
+      dataSource: 'API',
     };
-  }
+  },
 };

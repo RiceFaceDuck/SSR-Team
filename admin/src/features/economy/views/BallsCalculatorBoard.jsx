@@ -21,12 +21,13 @@ export default function BallsCalculatorBoard() {
             </div>
             Free-to-Play Economy Simulator
           </h1>
-          <p className="text-slate-500 mt-1">กระดานจำลองความสมดุลของการหาและการใช้งาน Balls สำหรับผู้เล่นสายฟรี</p>
+          <p className="text-slate-500 mt-1">
+            กระดานจำลองความสมดุลของการหาและการใช้งาน Balls สำหรับผู้เล่นสายฟรี
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-        
         {/* Left Column: Settings */}
         <div className="xl:col-span-4">
           <CalculatorInputs calc={calc} />
@@ -36,7 +37,6 @@ export default function BallsCalculatorBoard() {
         <div className="xl:col-span-8">
           <CalculatorResults calc={calc} />
         </div>
-        
       </div>
     </div>
   );

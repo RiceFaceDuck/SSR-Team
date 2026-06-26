@@ -1,5 +1,5 @@
 import { writeBatch, doc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../../config/firebase'; 
+import { db } from '../../../config/firebase';
 import { getCollectionRef, getDocRef, deepClean } from './playerUtils';
 
 export const playerBulkService = {
@@ -12,11 +12,11 @@ export const playerBulkService = {
 
       playersArray.forEach((player) => {
         let docRef;
-        
+
         const cleanPlayer = {
-            ...player,
-            dataSource: player.dataSource || (player.sku?.startsWith('API-') ? 'API' : 'EXCEL'),
-            updatedAt: serverTimestamp()
+          ...player,
+          dataSource: player.dataSource || (player.sku?.startsWith('API-') ? 'API' : 'EXCEL'),
+          updatedAt: serverTimestamp(),
         };
 
         deepClean(cleanPlayer);
@@ -25,16 +25,16 @@ export const playerBulkService = {
           docRef = getDocRef(String(cleanPlayer.sku));
           results.push({ id: String(cleanPlayer.sku), ...cleanPlayer });
         } else {
-          docRef = doc(getCollectionRef()); 
+          docRef = doc(getCollectionRef());
           results.push({ id: docRef.id, ...cleanPlayer });
         }
-        
+
         currentBatch.set(docRef, cleanPlayer, { merge: true });
         operationCount++;
 
-        if (operationCount >= 490) { 
+        if (operationCount >= 490) {
           batches.push(currentBatch.commit());
-          currentBatch = writeBatch(db); 
+          currentBatch = writeBatch(db);
           operationCount = 0;
         }
       });
@@ -44,11 +44,11 @@ export const playerBulkService = {
       }
 
       await Promise.all(batches);
-      
+
       return results;
     } catch (error) {
-      console.error("Error bulk adding players:", error);
+      console.error('Error bulk adding players:', error);
       throw error;
     }
-  }
+  },
 };

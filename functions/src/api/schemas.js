@@ -13,6 +13,29 @@ const commitPlayerValuesSchema = z.object({
     previews: z.array(z.any()).default([])
 });
 
+// Admin Players
+const adminSavePlayerSchema = z.object({
+    id: z.string().optional(),
+    playerData: z.object({
+        sku: z.string().min(1, "SKU is required"),
+        name: z.string().min(1, "Name is required"),
+        fullName: z.string().min(1, "Full Name is required"),
+        imageUrl: z.string().optional(),
+        position: z.enum(["FW", "MF", "DF", "GK"]),
+        team: z.string().min(1, "Team is required"),
+        price: z.number().min(1),
+        totalPoints: z.number().optional().default(0),
+        status: z.string().optional().default('active'),
+        dataSource: z.string().optional().default('MANUAL'),
+        isActive: z.boolean().optional().default(true),
+        stats: z.any().optional()
+    }).passthrough()
+});
+
+const adminDeletePlayerSchema = z.object({
+    playerId: z.string().min(1, "Player ID is required")
+});
+
 // Economy & Market
 const claimQuestRewardSchema = z.object({
     questId: z.string().min(1, "Quest ID is required")
@@ -128,5 +151,7 @@ module.exports = {
     joinLeagueSchema,
     leaveLeagueSchema,
     updateLeagueSettingsSchema,
-    upgradeClubFacilitySchema
+    upgradeClubFacilitySchema,
+    adminSavePlayerSchema,
+    adminDeletePlayerSchema
 };

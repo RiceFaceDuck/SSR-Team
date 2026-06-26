@@ -19,7 +19,7 @@ function useLocalStorage(key, initialValue) {
     try {
       window.localStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
-      console.error("Error saving to localStorage", error);
+      console.error('Error saving to localStorage', error);
     }
   }, [key, value]);
 
@@ -41,29 +41,49 @@ export default function useBallsCalculator() {
   const [ballsPerQuest, setBallsPerQuest] = useLocalStorage('economyCalc_ballsPerQuest', 50);
   const [questsPerDay, setQuestsPerDay] = useLocalStorage('economyCalc_questsPerDay', 5);
   const [dailyLoginBalls, setDailyLoginBalls] = useLocalStorage('economyCalc_dailyLoginBalls', 20);
-  const [weeklyBonusBalls, setWeeklyBonusBalls] = useLocalStorage('economyCalc_weeklyBonusBalls', 100);
+  const [weeklyBonusBalls, setWeeklyBonusBalls] = useLocalStorage(
+    'economyCalc_weeklyBonusBalls',
+    100
+  );
 
   // 4. Expense Variables
   const [selectedCardId, setSelectedCardId] = useLocalStorage('economyCalc_selectedCardId', '');
-  const [selectedManagerId, setSelectedManagerId] = useLocalStorage('economyCalc_selectedManagerId', '');
-  const [cardsBoughtPerWeek, setCardsBoughtPerWeek] = useLocalStorage('economyCalc_cardsBoughtPerWeek', 1);
-  const [managersBoughtPerWeek, setManagersBoughtPerWeek] = useLocalStorage('economyCalc_managersBoughtPerWeek', 1);
+  const [selectedManagerId, setSelectedManagerId] = useLocalStorage(
+    'economyCalc_selectedManagerId',
+    ''
+  );
+  const [cardsBoughtPerWeek, setCardsBoughtPerWeek] = useLocalStorage(
+    'economyCalc_cardsBoughtPerWeek',
+    1
+  );
+  const [managersBoughtPerWeek, setManagersBoughtPerWeek] = useLocalStorage(
+    'economyCalc_managersBoughtPerWeek',
+    1
+  );
   const [chatCostPerWeek, setChatCostPerWeek] = useLocalStorage('economyCalc_chatCostPerWeek', 50);
 
   // Fetch Database Data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const cardsSnap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'cards'));
-        const managersSnap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'managers'));
-        
-        const cards = cardsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(c => c.isActive !== false);
-        const managers = managersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(m => m.isActive !== false);
-        
+        const cardsSnap = await getDocs(
+          collection(db, 'artifacts', appId, 'public', 'data', 'cards')
+        );
+        const managersSnap = await getDocs(
+          collection(db, 'artifacts', appId, 'public', 'data', 'managers')
+        );
+
+        const cards = cardsSnap.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter((c) => c.isActive !== false);
+        const managers = managersSnap.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter((m) => m.isActive !== false);
+
         setAvailableCards(cards);
         setAvailableManagers(managers);
       } catch (error) {
-        console.error("Error fetching items for economy calculator:", error);
+        console.error('Error fetching items for economy calculator:', error);
       } finally {
         setIsLoading(false);
       }
@@ -72,8 +92,8 @@ export default function useBallsCalculator() {
   }, []);
 
   // --- Helpers for Items ---
-  const getSelectedCard = () => availableCards.find(c => c.id === selectedCardId);
-  const getSelectedManager = () => availableManagers.find(m => m.id === selectedManagerId);
+  const getSelectedCard = () => availableCards.find((c) => c.id === selectedCardId);
+  const getSelectedManager = () => availableManagers.find((m) => m.id === selectedManagerId);
 
   const getCardPrice = () => {
     if (selectedCardId) {
@@ -99,21 +119,27 @@ export default function useBallsCalculator() {
 
   // 1. รายรับ (Income)
   const incomePerDay = useMemo(() => {
-    return (ballsPerAd * adsPerDay) + (ballsPerQuest * questsPerDay) + dailyLoginBalls;
+    return ballsPerAd * adsPerDay + ballsPerQuest * questsPerDay + dailyLoginBalls;
   }, [ballsPerAd, adsPerDay, ballsPerQuest, questsPerDay, dailyLoginBalls]);
 
   const incomePerWeek = useMemo(() => {
-    return (incomePerDay * 7) + weeklyBonusBalls;
+    return incomePerDay * 7 + weeklyBonusBalls;
   }, [incomePerDay, weeklyBonusBalls]);
 
   const incomePerMonth = useMemo(() => {
-    return incomePerDay * 30 + (weeklyBonusBalls * 4); // ค่าประมาณ
+    return incomePerDay * 30 + weeklyBonusBalls * 4; // ค่าประมาณ
   }, [incomePerDay, weeklyBonusBalls]);
 
   // 2. รายจ่าย (Expense) คิดเป็น 'ต่อสัปดาห์' ก่อน แล้วหารเป็น 'ต่อวัน'
-  const expenseCardPerWeek = useMemo(() => getCardPrice() * cardsBoughtPerWeek, [getCardPrice, cardsBoughtPerWeek, selectedCardId, availableCards]);
-  const expenseManagerPerWeek = useMemo(() => getManagerPrice() * managersBoughtPerWeek, [getManagerPrice, managersBoughtPerWeek, selectedManagerId, availableManagers]);
-  
+  const expenseCardPerWeek = useMemo(
+    () => getCardPrice() * cardsBoughtPerWeek,
+    [getCardPrice, cardsBoughtPerWeek, selectedCardId, availableCards]
+  );
+  const expenseManagerPerWeek = useMemo(
+    () => getManagerPrice() * managersBoughtPerWeek,
+    [getManagerPrice, managersBoughtPerWeek, selectedManagerId, availableManagers]
+  );
+
   const expensePerWeek = useMemo(() => {
     return expenseCardPerWeek + expenseManagerPerWeek + chatCostPerWeek;
   }, [expenseCardPerWeek, expenseManagerPerWeek, chatCostPerWeek]);
@@ -146,37 +172,49 @@ export default function useBallsCalculator() {
     isLoading,
     availableCards,
     availableManagers,
-    
-    targetBalls, setTargetBalls,
-    
-    ballsPerAd, setBallsPerAd,
-    adsPerDay, setAdsPerDay,
-    ballsPerQuest, setBallsPerQuest,
-    questsPerDay, setQuestsPerDay,
-    dailyLoginBalls, setDailyLoginBalls,
-    weeklyBonusBalls, setWeeklyBonusBalls,
 
-    selectedCardId, setSelectedCardId,
-    selectedManagerId, setSelectedManagerId,
-    cardsBoughtPerWeek, setCardsBoughtPerWeek,
-    managersBoughtPerWeek, setManagersBoughtPerWeek,
-    chatCostPerWeek, setChatCostPerWeek,
+    targetBalls,
+    setTargetBalls,
+
+    ballsPerAd,
+    setBallsPerAd,
+    adsPerDay,
+    setAdsPerDay,
+    ballsPerQuest,
+    setBallsPerQuest,
+    questsPerDay,
+    setQuestsPerDay,
+    dailyLoginBalls,
+    setDailyLoginBalls,
+    weeklyBonusBalls,
+    setWeeklyBonusBalls,
+
+    selectedCardId,
+    setSelectedCardId,
+    selectedManagerId,
+    setSelectedManagerId,
+    cardsBoughtPerWeek,
+    setCardsBoughtPerWeek,
+    managersBoughtPerWeek,
+    setManagersBoughtPerWeek,
+    chatCostPerWeek,
+    setChatCostPerWeek,
 
     // Calculated Results
     getCardPrice,
     getManagerPrice,
     getSelectedCard,
     getSelectedManager,
-    
+
     incomePerDay,
     incomePerWeek,
     incomePerMonth,
-    
+
     expenseCardPerWeek,
     expenseManagerPerWeek,
     expensePerWeek,
     expensePerDay,
-    
+
     netIncomePerDay,
     netIncomePerWeek,
 

@@ -15,10 +15,10 @@ export default function BudgetBar() {
   const getEffectiveBudget = useUserStore((state) => state.getEffectiveBudget);
   const carriedOverBudget = useUserStore((state) => state.carriedOverBudget) || 0;
   const budgetLeft = getEffectiveBudget();
-  
+
   // สมมติว่าทุนเริ่มต้นคือ 100.0M เพื่อนำมาหาเปอร์เซ็นต์ความยาวของหลอด
   const MAX_BUDGET = 100.0;
-  
+
   // คำนวณเปอร์เซ็นต์ (จำกัดช่วงให้อยู่ระหว่าง 0 ถึง 100)
   const percentage = Math.max(0, Math.min(100, (budgetLeft / MAX_BUDGET) * 100));
 
@@ -51,7 +51,9 @@ export default function BudgetBar() {
             <span className="text-xs font-bold text-[#8b9bb4] uppercase tracking-wider block mb-0.5">
               งบประมาณคงเหลือ
             </span>
-            <span className={`text-xl font-black ${textColor} leading-none transition-colors duration-500 flex items-center gap-1`}>
+            <span
+              className={`text-xl font-black ${textColor} leading-none transition-colors duration-500 flex items-center gap-1`}
+            >
               {budgetLeft.toFixed(1)}m
               {carriedOverBudget > 0 && (
                 <span className="text-[10px] text-emerald-400 font-bold ml-1 px-1.5 py-0.5 bg-emerald-500/10 rounded border border-emerald-500/20">
@@ -61,19 +63,17 @@ export default function BudgetBar() {
             </span>
           </div>
         </div>
-        
+
         {/* ข้อความกำกับสัดส่วน */}
         <div className="text-right">
-          <span className="text-[10px] font-bold text-[#8b9bb4]">
-            {percentage.toFixed(0)}%
-          </span>
+          <span className="text-[10px] font-bold text-[#8b9bb4]">{percentage.toFixed(0)}%</span>
         </div>
       </div>
-      
+
       {/* โครงสร้างหลอด Progress Bar */}
       <div className="w-full h-2.5 bg-[#061121] rounded-full overflow-hidden relative shadow-inner border border-[#1e3a8a]">
         {/* แอนิเมชันของหลอดที่วิ่งตามเปอร์เซ็นต์จริง */}
-        <div 
+        <div
           className={`h-full rounded-full transition-all duration-700 ease-out shadow-sm ${barColor}`}
           style={{ width: `${percentage}%` }}
         >

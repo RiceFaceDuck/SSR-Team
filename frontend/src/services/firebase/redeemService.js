@@ -1,4 +1,12 @@
-import { doc, collection, getDocs, query, where, runTransaction, serverTimestamp } from 'firebase/firestore';
+import {
+  doc,
+  collection,
+  getDocs,
+  query,
+  where,
+  runTransaction,
+  serverTimestamp,
+} from 'firebase/firestore';
 import { db } from '../../config/firebase';
 
 const REWARDS_COLLECTION = 'rewards';
@@ -12,19 +20,16 @@ export const redeemService = {
    */
   fetchActiveRewards: async () => {
     try {
-      const q = query(
-        collection(db, REWARDS_COLLECTION),
-        where('isActive', '==', true)
-      );
+      const q = query(collection(db, REWARDS_COLLECTION), where('isActive', '==', true));
       const snapshot = await getDocs(q);
-      
-      return snapshot.docs.map(doc => ({ 
-        id: doc.id, 
-        ...doc.data() 
+
+      return snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
       }));
     } catch (error) {
-      console.error("Error fetching active rewards:", error);
-      throw new Error("ไม่สามารถโหลดข้อมูลหน้าร้านค้าได้ กรุณาลองใหม่อีกครั้ง");
+      console.error('Error fetching active rewards:', error);
+      throw new Error('ไม่สามารถโหลดข้อมูลหน้าร้านค้าได้ กรุณาลองใหม่อีกครั้ง');
     }
   },
 
@@ -38,15 +43,14 @@ export const redeemService = {
     try {
       const { httpsCallable } = require('firebase/functions');
       const { functions } = require('../../config/firebase');
-      
+
       const redeemRewardFn = httpsCallable(functions, 'redeemReward');
       const result = await redeemRewardFn({ rewardId });
 
       return result.data;
-      
     } catch (error) {
-      console.error("Redeem Transaction failed: ", error);
-      throw new Error(error.message || "เกิดข้อผิดพลาดในการแลกของรางวัล");
+      console.error('Redeem Transaction failed: ', error);
+      throw new Error(error.message || 'เกิดข้อผิดพลาดในการแลกของรางวัล');
     }
-  }
+  },
 };

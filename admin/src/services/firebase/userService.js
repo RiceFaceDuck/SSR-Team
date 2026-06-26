@@ -1,15 +1,15 @@
 import { db } from '../../config/firebase';
 // 🌟 FIX: เปลี่ยนการ Import จาก 'firebase/app' มาเป็น 'firebase/firestore' ให้ถูกต้อง
-import { 
-  collection, 
-  getDocs, 
-  doc, 
-  writeBatch, 
-  increment, 
-  serverTimestamp, 
-  query, 
-  orderBy, 
-  limit 
+import {
+  collection,
+  getDocs,
+  doc,
+  writeBatch,
+  increment,
+  serverTimestamp,
+  query,
+  orderBy,
+  limit,
 } from 'firebase/firestore';
 
 /**
@@ -19,20 +19,19 @@ import {
 export const getAllUsers = async () => {
   try {
     const usersRef = collection(db, 'users');
-    
+
     // 🌟 FIX: ปิด query orderBy ออกไปก่อน แล้วดึงข้อมูลตรงๆ เพื่อหลีกเลี่ยงปัญหา Firestore Index
     const snapshot = await getDocs(usersRef);
-    
-    const usersList = snapshot.docs.map(doc => ({
+
+    const usersList = snapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     }));
 
     // 🌟 FIX: นำมาเรียงลำดับ (Sort) ด้วย Javascript แทน
     return usersList.sort((a, b) => (b.balls || 0) - (a.balls || 0));
-
   } catch (error) {
-    console.error("❌ Error fetching users:", error);
+    console.error('❌ Error fetching users:', error);
     // 🌟 FIX: ส่งข้อความ Error จริงๆ ของ Firebase ไปที่ UI เพื่อให้รู้สาเหตุที่แท้จริง
     throw new Error(`ดึงข้อมูลไม่สำเร็จ: ${error.message}`);
   }
@@ -46,9 +45,14 @@ export const getAllUsers = async () => {
  * @param {string} reason - เหตุผล (เช่น "ชดเชยบั๊ก", "ลงโทษโกง")
  * @param {string} adminId - ID ของแอดมินที่ทำรายการ
  */
-export const adjustUserBalls = async (userId, amount, reason = "Admin adjustment", adminId = "system_admin") => {
-  if (!userId) throw new Error("ไม่พบ ID ผู้เล่น");
-  if (amount === 0) throw new Error("จำนวน Balls ⚽ ต้องไม่เท่ากับ 0");
+export const adjustUserBalls = async (
+  userId,
+  amount,
+  reason = 'Admin adjustment',
+  adminId = 'system_admin'
+) => {
+  if (!userId) throw new Error('ไม่พบ ID ผู้เล่น');
+  if (amount === 0) throw new Error('จำนวน Balls ⚽ ต้องไม่เท่ากับ 0');
 
   try {
     const batch = writeBatch(db);
@@ -62,7 +66,7 @@ export const adjustUserBalls = async (userId, amount, reason = "Admin adjustment
     // 3. สั่งอัปเดตยอด Balls ⚽ ทันทีด้วย increment (ประหยัด Reads 100%)
     batch.update(userRef, {
       balls: increment(amount),
-      lastUpdated: serverTimestamp()
+      lastUpdated: serverTimestamp(),
     });
 
     // 4. สั่งบันทึกประวัติ (Audit Log) กันเหนียว
@@ -72,20 +76,19 @@ export const adjustUserBalls = async (userId, amount, reason = "Admin adjustment
       reason: reason,
       adminId: adminId,
       timestamp: serverTimestamp(),
-      status: 'success'
+      status: 'success',
     });
 
     // 5. Commit ยิงขึ้น Firebase รวดเดียว!
     await batch.commit();
 
-    return { 
-      success: true, 
-      message: `อัปเดต Balls ⚽ จำนวน ${amount > 0 ? '+'+amount : amount} ให้ผู้เล่นสำเร็จ!` 
+    return {
+      success: true,
+      message: `อัปเดต Balls ⚽ จำนวน ${amount > 0 ? '+' + amount : amount} ให้ผู้เล่นสำเร็จ!`,
     };
-
   } catch (error) {
-    console.error("❌ Error adjusting user balls:", error);
-    throw new Error("เกิดข้อผิดพลาดในการปรับยอด Balls ⚽ กรุณาลองใหม่");
+    console.error('❌ Error adjusting user balls:', error);
+    throw new Error('เกิดข้อผิดพลาดในการปรับยอด Balls ⚽ กรุณาลองใหม่');
   }
 };
 
@@ -94,7 +97,7 @@ export const adjustUserBalls = async (userId, amount, reason = "Admin adjustment
  * ใช้สำหรับแอดมินตรวจสอบย้อนหลัง หากพบพฤติกรรมน่าสงสัย
  */
 export const getUserTransactions = async (userId, maxLimit = 50) => {
-  if (!userId) throw new Error("ไม่พบ ID ผู้เล่น");
+  if (!userId) throw new Error('ไม่พบ ID ผู้เล่น');
 
   try {
     const q = query(
@@ -103,13 +106,13 @@ export const getUserTransactions = async (userId, maxLimit = 50) => {
       limit(maxLimit)
     );
     const snapshot = await getDocs(q);
-    
-    return snapshot.docs.map(doc => ({
+
+    return snapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     }));
   } catch (error) {
-    console.error("❌ Error fetching user transactions:", error);
-    throw new Error("ไม่สามารถดึงประวัติการได้/เสีย Balls ⚽ ได้");
+    console.error('❌ Error fetching user transactions:', error);
+    throw new Error('ไม่สามารถดึงประวัติการได้/เสีย Balls ⚽ ได้');
   }
 };

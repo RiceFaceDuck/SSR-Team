@@ -10,7 +10,12 @@ export default function ManagerList() {
   const [isSeeding, setIsSeeding] = useState(false);
 
   const handleSeedData = async () => {
-    if (!window.confirm('Are you sure you want to seed the default managers? This will overwrite existing managers with the same IDs.')) return;
+    if (
+      !window.confirm(
+        'Are you sure you want to seed the default managers? This will overwrite existing managers with the same IDs.'
+      )
+    )
+      return;
     setIsSeeding(true);
     try {
       await managerDatabase.seedMockManagers();
@@ -59,7 +64,7 @@ export default function ManagerList() {
         <h1 className="text-2xl font-bold text-gray-800">Manager Management</h1>
         <div className="flex gap-2">
           {managers.length === 0 && (
-            <button 
+            <button
               onClick={handleSeedData}
               disabled={isSeeding}
               className="bg-amber-500 text-white px-4 py-2 rounded shadow hover:bg-amber-600 font-medium disabled:opacity-50"
@@ -67,7 +72,7 @@ export default function ManagerList() {
               {isSeeding ? 'Seeding...' : 'Seed Data'}
             </button>
           )}
-          <button 
+          <button
             onClick={handleCreate}
             className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 font-medium"
           >
@@ -95,14 +100,20 @@ export default function ManagerList() {
             <tbody>
               {managers.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="p-8 text-center text-gray-400">No managers found.</td>
+                  <td colSpan="6" className="p-8 text-center text-gray-400">
+                    No managers found.
+                  </td>
                 </tr>
               )}
-              {managers.map(m => (
+              {managers.map((m) => (
                 <tr key={m.id} className="border-b hover:bg-gray-50 transition-colors">
                   <td className="p-4 font-mono text-xs text-gray-500">{m.id}</td>
                   <td className="p-4">
-                    <img src={m.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.id}`} alt="" className="w-10 h-10 rounded-full border border-gray-200" />
+                    <img
+                      src={m.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.id}`}
+                      alt=""
+                      className="w-10 h-10 rounded-full border border-gray-200"
+                    />
                   </td>
                   <td className="p-4 font-semibold text-gray-800">{m.name}</td>
                   <td className="p-4 font-bold text-amber-500">{m.price || 0}</td>
@@ -119,7 +130,7 @@ export default function ManagerList() {
                     )}
                   </td>
                   <td className="p-4">
-                    <button 
+                    <button
                       onClick={() => handleEdit(m)}
                       className="text-blue-600 hover:text-blue-800 hover:underline font-medium text-sm"
                     >
@@ -134,8 +145,8 @@ export default function ManagerList() {
       )}
 
       {isFormOpen && (
-        <ManagerForm 
-          initialData={editingManager} 
+        <ManagerForm
+          initialData={editingManager}
           onClose={() => setIsFormOpen(false)}
           onSaved={handleSaved}
         />

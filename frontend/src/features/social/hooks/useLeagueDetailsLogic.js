@@ -9,17 +9,17 @@ export const useLeagueDetailsLogic = (league, onClose, onLeagueUpdated) => {
   const [loading, setLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [copied, setCopied] = useState(false);
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(league?.name || '');
-  
+
   // Settings State
   const [editSettings, setEditSettings] = useState({
     mode: league?.mode || 'classic',
     rankBy: league?.rankBy || 'userPoints',
-    customRules: league?.customRules || { captainMultiplier: 2, goal: 800, assist: 600 }
+    customRules: league?.customRules || { captainMultiplier: 2, goal: 800, assist: 600 },
   });
-  
+
   const [actionLoading, setActionLoading] = useState(false);
 
   const isCreator = userData?.uid === league?.creatorId;
@@ -28,11 +28,11 @@ export const useLeagueDetailsLogic = (league, onClose, onLeagueUpdated) => {
     const fetchMembers = async () => {
       setLoading(true);
       const data = await leagueService.getLeagueMembersData(league.members || []);
-      
+
       // Sort members based on league's rankBy setting
       const rankByField = league?.rankBy || 'userPoints';
       data.sort((a, b) => (b[rankByField] || 0) - (a[rankByField] || 0));
-      
+
       const rankedData = data.map((m, index) => ({ ...m, rank: index + 1 }));
       setMembers(rankedData);
       setLoading(false);
@@ -55,9 +55,9 @@ export const useLeagueDetailsLogic = (league, onClose, onLeagueUpdated) => {
     setActionLoading(true);
     const result = await leagueService.updateLeagueSettings(league.id, {
       name: editName,
-      ...editSettings
+      ...editSettings,
     });
-    
+
     if (result.success) {
       showToast('success', 'บันทึกการตั้งค่าสำเร็จ');
       setIsEditing(false);
@@ -83,7 +83,12 @@ export const useLeagueDetailsLogic = (league, onClose, onLeagueUpdated) => {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('คุณต้องการ "ลบลีก" นี้ทิ้งถาวรใช่หรือไม่?\\n(ข้อมูลทั้งหมดจะถูกลบ ไม่สามารถกู้คืนได้)')) return;
+    if (
+      !window.confirm(
+        'คุณต้องการ "ลบลีก" นี้ทิ้งถาวรใช่หรือไม่?\\n(ข้อมูลทั้งหมดจะถูกลบ ไม่สามารถกู้คืนได้)'
+      )
+    )
+      return;
     setActionLoading(true);
     const result = await leagueService.deleteLeague(league.id);
     if (result.success) {
@@ -114,6 +119,6 @@ export const useLeagueDetailsLogic = (league, onClose, onLeagueUpdated) => {
     handleCopyCode,
     handleSaveSettings,
     handleLeave,
-    handleDelete
+    handleDelete,
   };
 };

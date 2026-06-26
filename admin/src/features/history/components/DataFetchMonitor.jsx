@@ -23,7 +23,7 @@ export default function DataFetchMonitor() {
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return new Intl.DateTimeFormat('th-TH', {
       dateStyle: 'medium',
-      timeStyle: 'short'
+      timeStyle: 'short',
     }).format(date);
   };
 
@@ -34,7 +34,7 @@ export default function DataFetchMonitor() {
           <Clock className="text-slate-400" />
           ประวัติการดึงข้อมูลล่าสุด
         </h3>
-        <button 
+        <button
           onClick={fetchLogs}
           className="text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 px-4 py-2 rounded-lg transition-colors"
         >
@@ -84,9 +84,7 @@ export default function DataFetchMonitor() {
                   <td className="px-6 py-4 font-medium text-slate-700">
                     {log.recordsFetched?.toLocaleString() || 0}
                   </td>
-                  <td className="px-6 py-4 text-slate-500 text-xs">
-                    {formatDate(log.timestamp)}
-                  </td>
+                  <td className="px-6 py-4 text-slate-500 text-xs">{formatDate(log.timestamp)}</td>
                 </tr>
               ))}
             </tbody>

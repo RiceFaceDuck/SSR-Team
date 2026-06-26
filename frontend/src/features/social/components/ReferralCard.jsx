@@ -22,7 +22,7 @@ export default function ReferralCard() {
     navigator.clipboard.writeText(inviteLink).then(() => {
       setCopied(true);
       showToast('success', 'คัดลอกลิงก์สำเร็จ!');
-      
+
       // สั่นเตือนเบาๆ
       if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
         window.navigator.vibrate(50);
@@ -36,14 +36,17 @@ export default function ReferralCard() {
     <div className="bg-white border border-slate-100 p-5 rounded-2xl mb-6 relative overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
       <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 rounded-full mix-blend-screen filter blur-[40px] opacity-10"></div>
       <h3 className="font-bold text-slate-800 mb-1 flex items-center gap-2">
-        <Users size={20} className="text-amber-500" /> ชวนเพื่อนรับ {referralRewardBalls || 50} Balls
+        <Users size={20} className="text-amber-500" /> ชวนเพื่อนรับ {referralRewardBalls || 50}{' '}
+        Balls
       </h3>
-      <p className="text-xs text-slate-500 mb-4">ส่งลิงก์ให้เพื่อนสมัครเล่นเกม รับ Balls ฟรีทันทีเมื่อเพื่อนจัดทีมเสร็จ</p>
-      <button 
+      <p className="text-xs text-slate-500 mb-4">
+        ส่งลิงก์ให้เพื่อนสมัครเล่นเกม รับ Balls ฟรีทันทีเมื่อเพื่อนจัดทีมเสร็จ
+      </p>
+      <button
         onClick={handleCopyLink}
         className={`w-full font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm ${
-          copied 
-            ? 'bg-emerald-500 hover:bg-emerald-600 text-white' 
+          copied
+            ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
             : 'bg-indigo-600 hover:bg-indigo-700 text-white'
         }`}
       >

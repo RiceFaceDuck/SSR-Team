@@ -9,9 +9,12 @@ import OverlapGroupCard from '../components/overlap/OverlapGroupCard';
 const DataOverlapManagement = () => {
   const { players, fetchPlayers } = usePlayers();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // ใช้ Hook จัดการ Logic แบบ SRP
-  const { overlaps, isResolving, deleteSinglePlayer, autoResolveAll } = useOverlapLogic(players, fetchPlayers);
+  const { overlaps, isResolving, deleteSinglePlayer, autoResolveAll } = useOverlapLogic(
+    players,
+    fetchPlayers
+  );
 
   useEffect(() => {
     setIsLoading(true);
@@ -20,11 +23,10 @@ const DataOverlapManagement = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      
-      <OverlapHeader 
-        onAutoResolve={autoResolveAll} 
-        isResolving={isResolving} 
-        hasOverlaps={overlaps.length > 0} 
+      <OverlapHeader
+        onAutoResolve={autoResolveAll}
+        isResolving={isResolving}
+        hasOverlaps={overlaps.length > 0}
       />
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 min-h-[400px]">
@@ -43,10 +45,10 @@ const DataOverlapManagement = () => {
         ) : (
           <div className="space-y-6">
             {overlaps.map((group, idx) => (
-              <OverlapGroupCard 
-                key={idx} 
-                group={group} 
-                onDeletePlayer={deleteSinglePlayer} 
+              <OverlapGroupCard
+                key={idx}
+                group={group}
+                onDeletePlayer={deleteSinglePlayer}
                 disabled={isResolving}
               />
             ))}

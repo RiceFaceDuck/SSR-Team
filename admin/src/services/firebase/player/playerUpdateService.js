@@ -1,9 +1,35 @@
-import { addDoc, setDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
-import { getCollectionRef, getDocRef, deepClean } from './playerUtils';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../../../config/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../../../config/firebase';
+import { deepClean } from './playerUtils';
+
+async function resolveTeamId(teamName) {
+  if (!teamName) return null;
+  try {
+    const teamsRef = collection(db, 'teams');
+    let q = query(teamsRef, where('name', '==', teamName));
+    let snap = await getDocs(q);
+    if (snap.empty) {
+      q = query(teamsRef, where('shortName', '==', teamName));
+      snap = await getDocs(q);
+    }
+    if (!snap.empty) {
+      return snap.docs[0].id;
+    }
+  } catch (e) {
+    console.error('Error resolving team:', e);
+  }
+  return null;
+}
 
 export const playerUpdateService = {
   addPlayer: async (playerData) => {
     try {
+      if (playerData.team && !playerData.teamId) {
+        playerData.teamId = (await resolveTeamId(playerData.team)) || null;
+      }
+
       const cleanData = {
         ...playerData,
         stats: {
@@ -14,58 +40,55 @@ export const playerUpdateService = {
           defending: Number(playerData.stats?.defending) || 0,
           physical: Number(playerData.stats?.physical) || 0,
         },
-        dataSource: playerData.dataSource || (playerData.sku?.startsWith('API-') ? 'API' : 'MANUAL'),
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        isActive: playerData.isActive !== undefined ? playerData.isActive : true
+        dataSource:
+          playerData.dataSource || (playerData.sku?.startsWith('API-') ? 'API' : 'MANUAL'),
+        isActive: playerData.isActive !== undefined ? playerData.isActive : true,
       };
 
       deepClean(cleanData);
 
-      if (playerData.sku) {
-        const docRef = getDocRef(String(playerData.sku));
-        await setDoc(docRef, cleanData, { merge: true });
-        return { id: String(playerData.sku), ...cleanData };
-      } else {
-        const docRef = await addDoc(getCollectionRef(), cleanData);
-        return { id: docRef.id, ...cleanData };
-      }
+      const saveFn = httpsCallable(functions, 'adminSavePlayer');
+      const response = await saveFn({ id: playerData.sku, playerData: cleanData });
+      return response.data.data;
     } catch (error) {
-      console.error("Error adding player:", error);
+      console.error('Error adding player:', error);
       throw error;
     }
   },
 
   updatePlayer: async (id, playerData) => {
     try {
-      const docRef = getDocRef(String(id));
-      
+      if (playerData.team && !playerData.teamId) {
+        playerData.teamId = (await resolveTeamId(playerData.team)) || null;
+      }
+
       const cleanUpdate = {
         ...playerData,
-        updatedAt: serverTimestamp()
       };
 
-      Object.keys(cleanUpdate).forEach(key => {
+      Object.keys(cleanUpdate).forEach((key) => {
         if (cleanUpdate[key] === undefined) {
           delete cleanUpdate[key];
         }
       });
 
-      await updateDoc(docRef, cleanUpdate);
-      return { id, ...cleanUpdate };
+      const saveFn = httpsCallable(functions, 'adminSavePlayer');
+      const response = await saveFn({ id: String(id), playerData: cleanUpdate });
+      return response.data.data;
     } catch (error) {
-      console.error("Error updating player:", error);
+      console.error('Error updating player:', error);
       throw error;
     }
   },
 
   deletePlayer: async (id) => {
     try {
-      await deleteDoc(getDocRef(String(id)));
+      const deleteFn = httpsCallable(functions, 'adminDeletePlayer');
+      await deleteFn({ playerId: String(id) });
       return id;
     } catch (error) {
-      console.error("Error deleting player:", error);
+      console.error('Error deleting player:', error);
       throw error;
     }
-  }
+  },
 };

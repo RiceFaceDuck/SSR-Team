@@ -4,8 +4,9 @@ import { useQuestStore } from '../../../store/questStore';
 import QuestFormModal from '../QuestFormModal';
 
 export default function QuestTab() {
-  const { quests, isLoading, fetchQuests, addQuest, updateQuest, deleteQuest, toggleStatus } = useQuestStore();
-  
+  const { quests, isLoading, fetchQuests, addQuest, updateQuest, deleteQuest, toggleStatus } =
+    useQuestStore();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingQuest, setEditingQuest] = useState(null);
 
@@ -53,12 +54,18 @@ export default function QuestTab() {
 
   const getPlatformColor = (platform) => {
     switch (platform) {
-      case 'Shopee': return 'bg-orange-100 text-orange-600 border-orange-200';
-      case 'Lazada': return 'bg-blue-100 text-blue-600 border-blue-200';
-      case 'Facebook': return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'Line': return 'bg-green-100 text-green-600 border-green-200';
-      case 'Official': return 'bg-indigo-100 text-indigo-600 border-indigo-200';
-      default: return 'bg-slate-100 text-slate-600 border-slate-200';
+      case 'Shopee':
+        return 'bg-orange-100 text-orange-600 border-orange-200';
+      case 'Lazada':
+        return 'bg-blue-100 text-blue-600 border-blue-200';
+      case 'Facebook':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'Line':
+        return 'bg-green-100 text-green-600 border-green-200';
+      case 'Official':
+        return 'bg-indigo-100 text-indigo-600 border-indigo-200';
+      default:
+        return 'bg-slate-100 text-slate-600 border-slate-200';
     }
   };
 
@@ -67,9 +74,11 @@ export default function QuestTab() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-xl font-bold text-slate-800">ภารกิจสปอนเซอร์</h2>
-          <p className="text-sm text-slate-500">ระบบเพิ่มโฆษณาและตั้งค่าการแจกรางวัล (Balls ⚽) ให้ผู้เล่น</p>
+          <p className="text-sm text-slate-500">
+            ระบบเพิ่มโฆษณาและตั้งค่าการแจกรางวัล (Balls ⚽) ให้ผู้เล่น
+          </p>
         </div>
-        <button 
+        <button
           onClick={handleCreateNew}
           className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-sm shadow-indigo-200 transition-all hover:scale-105 active:scale-95"
         >
@@ -111,23 +120,42 @@ export default function QuestTab() {
                     <td className="p-4 align-middle">
                       <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
                         {quest.imageUrl ? (
-                          <img src={quest.imageUrl} alt="ad" className="w-full h-full object-cover" />
+                          <img
+                            src={quest.imageUrl}
+                            alt="ad"
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-300 text-xs">No img</div>
+                          <div className="w-full h-full flex items-center justify-center text-slate-300 text-xs">
+                            No img
+                          </div>
                         )}
                       </div>
                     </td>
                     <td className="p-4 align-middle max-w-[200px]">
                       <div className="flex items-center gap-1.5 mb-1">
                         <span className="font-bold text-slate-800 truncate">{quest.title}</span>
-                        {quest.isVerified && <CheckCircle size={14} className="text-blue-500 shrink-0" title="Verified"/>}
+                        {quest.isVerified && (
+                          <CheckCircle
+                            size={14}
+                            className="text-blue-500 shrink-0"
+                            title="Verified"
+                          />
+                        )}
                       </div>
-                      <a href={quest.targetUrl} target="_blank" rel="noreferrer" className="text-xs text-indigo-500 hover:text-indigo-700 flex items-center gap-1 truncate">
+                      <a
+                        href={quest.targetUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-indigo-500 hover:text-indigo-700 flex items-center gap-1 truncate"
+                      >
                         <ExternalLink size={12} /> เยี่ยมชมลิงก์
                       </a>
                     </td>
                     <td className="p-4 align-middle">
-                      <span className={`px-2.5 py-1 rounded-md text-xs font-bold border ${getPlatformColor(quest.platform)}`}>
+                      <span
+                        className={`px-2.5 py-1 rounded-md text-xs font-bold border ${getPlatformColor(quest.platform)}`}
+                      >
                         {quest.platform}
                       </span>
                     </td>
@@ -137,22 +165,37 @@ export default function QuestTab() {
                       </div>
                     </td>
                     <td className="p-4 align-middle text-center text-sm">
-                      <div className="font-semibold text-slate-700">{quest.maxClaimsPerUser} ครั้ง</div>
+                      <div className="font-semibold text-slate-700">
+                        {quest.maxClaimsPerUser} ครั้ง
+                      </div>
                       <div className="text-xs text-slate-400 flex items-center justify-center gap-1 mt-0.5">
                         <Clock size={10} /> รอ {quest.cooldownHours} ชม.
                       </div>
                     </td>
                     <td className="p-4 align-middle text-center">
-                      <button onClick={() => handleToggle(quest.id, quest.isActive)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${quest.isActive ? 'bg-emerald-500' : 'bg-slate-300'}`}>
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${quest.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
+                      <button
+                        onClick={() => handleToggle(quest.id, quest.isActive)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${quest.isActive ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${quest.isActive ? 'translate-x-6' : 'translate-x-1'}`}
+                        />
                       </button>
                     </td>
                     <td className="p-4 align-middle text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => handleEdit(quest)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="แก้ไข">
+                        <button
+                          onClick={() => handleEdit(quest)}
+                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          title="แก้ไข"
+                        >
                           <Edit2 size={16} />
                         </button>
-                        <button onClick={() => handleDelete(quest.id, quest.title)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="ลบ">
+                        <button
+                          onClick={() => handleDelete(quest.id, quest.title)}
+                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="ลบ"
+                        >
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -165,7 +208,7 @@ export default function QuestTab() {
         )}
       </div>
 
-      <QuestFormModal 
+      <QuestFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleModalSubmit}

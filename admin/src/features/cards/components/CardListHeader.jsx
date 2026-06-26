@@ -9,17 +9,19 @@ export default function CardListHeader({ onAddClick, onMockClick }) {
           <Zap className="text-purple-500" />
           ระบบจัดการการ์ดพลัง
         </h2>
-        <p className="text-slate-500 mt-1">จัดการข้อมูลการ์ดเสริมพลัง (Power Cards) ที่ผู้เล่นสามารถนำไปใช้งานได้</p>
+        <p className="text-slate-500 mt-1">
+          จัดการข้อมูลการ์ดเสริมพลัง (Power Cards) ที่ผู้เล่นสามารถนำไปใช้งานได้
+        </p>
       </div>
       <div className="flex gap-2">
-        <button 
+        <button
           onClick={onMockClick}
           className="bg-amber-100 hover:bg-amber-200 text-amber-700 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm"
         >
           <Zap size={18} />
           จำลองข้อมูลการ์ด
         </button>
-        <button 
+        <button
           onClick={onAddClick}
           className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm shadow-blue-600/20"
         >

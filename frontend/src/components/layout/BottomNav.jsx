@@ -16,13 +16,13 @@ export default function BottomNav({ currentPath, onNavigate }) {
       {navItems.map((item) => {
         const isActive = currentPath === item.id;
         const Icon = item.icon;
-        
+
         return (
-          <button 
+          <button
             key={item.id}
-            onClick={() => { 
-              playSound('click'); 
-              onNavigate(item.id); 
+            onClick={() => {
+              playSound('click');
+              onNavigate(item.id);
             }}
             className={`flex flex-col items-center justify-center w-14 h-12 rounded-xl transition-all duration-300 relative ${
               isActive ? 'text-white' : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-50'
@@ -32,7 +32,7 @@ export default function BottomNav({ currentPath, onNavigate }) {
             {isActive && (
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-xl shadow-lg shadow-indigo-500/30 -z-10 animate-in zoom-in duration-200"></div>
             )}
-            
+
             <Icon size={isActive ? 20 : 18} strokeWidth={isActive ? 2.5 : 2} className="mb-0.5" />
             <span className={`text-[9px] ${isActive ? 'font-bold' : 'font-medium'}`}>
               {item.label}

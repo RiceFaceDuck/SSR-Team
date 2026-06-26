@@ -16,24 +16,35 @@ export default function WalletSummaryView({ balls, onOpenHistory, playSound }) {
   }, [balls, prevBalls]);
 
   return (
-    <div className={`bg-white rounded-3xl p-5 mb-8 relative overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 transition-all duration-300 ${isAnimating ? 'scale-[1.02] shadow-amber-500/20 ring-2 ring-amber-400/50' : ''}`}>
-      
+    <div
+      className={`bg-white rounded-3xl p-5 mb-8 relative overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 transition-all duration-300 ${isAnimating ? 'scale-[1.02] shadow-amber-500/20 ring-2 ring-amber-400/50' : ''}`}
+    >
       {/* Background Elements */}
-      <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl -mr-10 -mt-10 transition-colors duration-500 ${isAnimating ? 'bg-amber-400/30' : 'bg-indigo-500/10'}`}></div>
-      <div className={`absolute bottom-0 left-0 w-24 h-24 rounded-full blur-xl -ml-5 -mb-5 transition-colors duration-500 ${isAnimating ? 'bg-orange-500/20' : 'bg-amber-500/10'}`}></div>
+      <div
+        className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl -mr-10 -mt-10 transition-colors duration-500 ${isAnimating ? 'bg-amber-400/30' : 'bg-indigo-500/10'}`}
+      ></div>
+      <div
+        className={`absolute bottom-0 left-0 w-24 h-24 rounded-full blur-xl -ml-5 -mb-5 transition-colors duration-500 ${isAnimating ? 'bg-orange-500/20' : 'bg-amber-500/10'}`}
+      ></div>
 
       <div className="flex justify-between items-center relative z-10">
         <div>
           <p className="text-slate-500 text-xs font-medium mb-1 tracking-wide">ยอด Balls คงเหลือ</p>
           <div className="flex items-baseline gap-2">
-            <h3 className={`text-3xl font-black tracking-tight transition-colors duration-300 ${isAnimating ? 'text-amber-600' : 'text-slate-800'}`}>
+            <h3
+              className={`text-3xl font-black tracking-tight transition-colors duration-300 ${isAnimating ? 'text-amber-600' : 'text-slate-800'}`}
+            >
               <CountUp start={prevBalls} end={balls || 0} duration={1.5} separator="," />
             </h3>
-            <span className={`text-xl drop-shadow-sm transition-transform duration-500 ${isAnimating ? 'scale-125 text-amber-400' : 'text-amber-500'}`}>⚽</span>
+            <span
+              className={`text-xl drop-shadow-sm transition-transform duration-500 ${isAnimating ? 'scale-125 text-amber-400' : 'text-amber-500'}`}
+            >
+              ⚽
+            </span>
           </div>
         </div>
-        
-        <button 
+
+        <button
           onClick={() => {
             playSound('click');
             window.dispatchEvent(new CustomEvent('switchTab', { detail: 'quest' }));
@@ -50,7 +61,7 @@ export default function WalletSummaryView({ balls, onOpenHistory, playSound }) {
         <p className="text-[10px] text-slate-500 font-medium max-w-[60%] leading-relaxed">
           ใช้ Balls สำหรับแลกของรางวัล หรือทำกิจกรรมต่างๆ
         </p>
-        <button 
+        <button
           onClick={() => {
             playSound('click');
             onOpenHistory();

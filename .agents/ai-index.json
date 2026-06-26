@@ -1,0 +1,1138 @@
+{
+  "frontend/src/App.jsx": [
+    "default: App"
+  ],
+  "frontend/src/components/ads/GoogleAdWrapper.jsx": [
+    "default: GoogleAdWrapper"
+  ],
+  "frontend/src/components/ads/SponsorBanner.jsx": [
+    "default: SponsorBanner"
+  ],
+  "frontend/src/components/common/badges/ArsBadge.jsx": [
+    "default: ArsBadge"
+  ],
+  "frontend/src/components/common/BudgetBar.jsx": [
+    "default: BudgetBar"
+  ],
+  "frontend/src/components/common/Button.jsx": [
+    "default: Button"
+  ],
+  "frontend/src/components/common/ConfettiEffect.jsx": [
+    "default: ConfettiEffect"
+  ],
+  "frontend/src/components/common/CountdownTimer.jsx": [
+    "default: CountdownTimer"
+  ],
+  "frontend/src/components/common/ErrorBoundary.jsx": [
+    "default: ErrorBoundary"
+  ],
+  "frontend/src/components/common/GlassCard.jsx": [
+    "default: GlassCard"
+  ],
+  "frontend/src/components/common/SkeletonLoader.jsx": [
+    "default: SkeletonLoader"
+  ],
+  "frontend/src/components/common/TeamBadge.jsx": [
+    "getTeamInfo",
+    "default: TeamBadge"
+  ],
+  "frontend/src/components/common/Toast.jsx": [
+    "default: Toast"
+  ],
+  "frontend/src/components/common/TransactionHistory.jsx": [
+    "default: TransactionHistory"
+  ],
+  "frontend/src/components/layout/BottomNav.jsx": [
+    "default: BottomNav"
+  ],
+  "frontend/src/components/layout/MobileLayout.jsx": [
+    "default: MobileLayout"
+  ],
+  "frontend/src/components/layout/TopHeader.jsx": [
+    "default: TopHeader"
+  ],
+  "frontend/src/components/pitch/PlacementBanner.jsx": [
+    "default: PlacementBanner"
+  ],
+  "frontend/src/components/player/BottomSheetHighlights.jsx": [
+    "default: BottomSheetHighlights"
+  ],
+  "frontend/src/components/player/FloatingDragAvatar.jsx": [
+    "default: FloatingDragAvatar"
+  ],
+  "frontend/src/components/player/PlayerActionModal.jsx": [
+    "default: PlayerActionModal"
+  ],
+  "frontend/src/components/player/PlayerBottomSheet.jsx": [
+    "default: PlayerBottomSheet"
+  ],
+  "frontend/src/components/player/PlayerSlot.jsx": [
+    "default: PlayerSlot"
+  ],
+  "frontend/src/components/player/PlayerStatsDetailModal.jsx": [
+    "default: PlayerStatsDetailModal"
+  ],
+  "frontend/src/components/player/PositionBadge.jsx": [
+    "default: PositionBadge"
+  ],
+  "frontend/src/components/tutorial/TutorialOverlay.jsx": [
+    "default: TutorialOverlay"
+  ],
+  "frontend/src/config/firebase.js": [
+    "auth",
+    "db",
+    "analytics",
+    "functions",
+    "default: app"
+  ],
+  "frontend/src/config/queryClient.js": [
+    "queryClient"
+  ],
+  "frontend/src/config/theme.js": [
+    "STYLES",
+    "playSound"
+  ],
+  "frontend/src/features/auth/authService.js": [
+    "signInWithGoogle",
+    "logoutUser",
+    "updateTutorialState"
+  ],
+  "frontend/src/features/auth/LoginScreen.jsx": [
+    "default: LoginScreen"
+  ],
+  "frontend/src/features/auth/StartGameScreen.jsx": [
+    "default: StartGameScreen"
+  ],
+  "frontend/src/features/club/components/ClubHeader.jsx": [
+    "default: ClubHeader"
+  ],
+  "frontend/src/features/club/components/ClubManagerModal.jsx": [
+    "default: ClubManagerModal"
+  ],
+  "frontend/src/features/club/components/FacilityCard.jsx": [
+    "default: FacilityCard"
+  ],
+  "frontend/src/features/club/components/FacilityList.jsx": [
+    "default: FacilityList"
+  ],
+  "frontend/src/features/fixtures/components/FixtureDateGroup.jsx": [
+    "default: FixtureDateGroup"
+  ],
+  "frontend/src/features/fixtures/components/FixtureItem.jsx": [
+    "default: FixtureItem"
+  ],
+  "frontend/src/features/fixtures/FixturesScreen.jsx": [
+    "default: FixturesScreen"
+  ],
+  "frontend/src/features/fixtures/hooks/useFixtures.js": [
+    "useFixtures"
+  ],
+  "frontend/src/features/leaderboard/components/LeaderboardItem.jsx": [
+    "default: LeaderboardItem"
+  ],
+  "frontend/src/features/leaderboard/components/LeaderboardList.jsx": [
+    "default: LeaderboardList"
+  ],
+  "frontend/src/features/leaderboard/components/LeaderboardPodium.jsx": [
+    "default: LeaderboardPodium"
+  ],
+  "frontend/src/features/leaderboard/components/LeaderboardTabs.jsx": [
+    "default: LeaderboardTabs"
+  ],
+  "frontend/src/features/leaderboard/components/SponsorBanner.jsx": [
+    "default: SponsorBanner"
+  ],
+  "frontend/src/features/leaderboard/hooks/useLeaderboardData.js": [
+    "useLeaderboardData"
+  ],
+  "frontend/src/features/leaderboard/LeaderboardScreen.jsx": [
+    "default: LeaderboardScreen"
+  ],
+  "frontend/src/features/leaderboard/services/leaderboardFetchService.js": [
+    "leaderboardFetchService"
+  ],
+  "frontend/src/features/live/components/chat/NormalMessageItem.jsx": [
+    "default: NormalMessageItem"
+  ],
+  "frontend/src/features/live/components/ChatMessageInput.jsx": [
+    "default: ChatMessageInput"
+  ],
+  "frontend/src/features/live/components/ChatMessageList.jsx": [
+    "default: ChatMessageList"
+  ],
+  "frontend/src/features/live/components/LiveChatContainer.jsx": [
+    "default: LiveChatContainer"
+  ],
+  "frontend/src/features/live/components/LiveEventsModal.jsx": [
+    "default: LiveEventsModal"
+  ],
+  "frontend/src/features/live/components/LiveLatestEvent.jsx": [
+    "default: LiveLatestEvent"
+  ],
+  "frontend/src/features/live/components/LiveMatchContainer.jsx": [
+    "default: LiveMatchContainer"
+  ],
+  "frontend/src/features/live/components/LiveMatchEvents.jsx": [
+    "default: LiveMatchEvents"
+  ],
+  "frontend/src/features/live/components/LiveMatchScore.jsx": [
+    "default: LiveMatchScore"
+  ],
+  "frontend/src/features/live/hooks/useLiveMatchData.js": [
+    "useLiveMatchData"
+  ],
+  "frontend/src/features/live/LiveScoreScreen.jsx": [
+    "default: LiveScoreScreen"
+  ],
+  "frontend/src/features/market/components/MarketFilter.jsx": [
+    "default: MarketFilter"
+  ],
+  "frontend/src/features/market/components/MarketFilters.jsx": [
+    "default: MarketFilters"
+  ],
+  "frontend/src/features/market/components/MarketHeader.jsx": [
+    "default: MarketHeader"
+  ],
+  "frontend/src/features/market/components/MarketPlayerList.jsx": [
+    "default: MarketPlayerList"
+  ],
+  "frontend/src/features/market/components/PlayerRow.jsx": [
+    "default: PlayerRow"
+  ],
+  "frontend/src/features/market/hooks/useMarketFilters.js": [
+    "useMarketFilters"
+  ],
+  "frontend/src/features/market/MarketScreen.jsx": [
+    "default: MarketScreen"
+  ],
+  "frontend/src/features/pitch/components/EmptyNode.jsx": [
+    "default: EmptyNode"
+  ],
+  "frontend/src/features/pitch/components/FloatingActionBar.jsx": [
+    "default: FloatingActionBar"
+  ],
+  "frontend/src/features/pitch/components/FullscreenToggle.jsx": [
+    "default: FullscreenToggle"
+  ],
+  "frontend/src/features/pitch/components/manager/ManagerCard.jsx": [
+    "default: ManagerCard"
+  ],
+  "frontend/src/features/pitch/components/manager/ManagerHeader.jsx": [
+    "default: ManagerHeader"
+  ],
+  "frontend/src/features/pitch/components/manager/ManagerList.jsx": [
+    "default: ManagerList"
+  ],
+  "frontend/src/features/pitch/components/Pitch.jsx": [
+    "default: Pitch"
+  ],
+  "frontend/src/features/pitch/components/PitchBenchArea.jsx": [
+    "default: PitchBenchArea"
+  ],
+  "frontend/src/features/pitch/components/PitchModals.jsx": [
+    "default: PitchModals"
+  ],
+  "frontend/src/features/pitch/components/PlayerActionPopup.jsx": [
+    "default: PlayerActionPopup"
+  ],
+  "frontend/src/features/pitch/components/PlayerNode.jsx": [
+    "default: PlayerNode"
+  ],
+  "frontend/src/features/pitch/components/PlayerStatsBar.jsx": [
+    "default: PlayerStatsBar"
+  ],
+  "frontend/src/features/pitch/components/popup/PopupActions.jsx": [
+    "default: PopupActions"
+  ],
+  "frontend/src/features/pitch/components/popup/PopupHeader.jsx": [
+    "default: PopupHeader"
+  ],
+  "frontend/src/features/pitch/components/popup/PopupStats.jsx": [
+    "default: PopupStats"
+  ],
+  "frontend/src/features/pitch/components/powerCard/PowerCardHeader.jsx": [
+    "default: PowerCardHeader"
+  ],
+  "frontend/src/features/pitch/components/powerCard/PowerCardItem.jsx": [
+    "default: PowerCardItem"
+  ],
+  "frontend/src/features/pitch/components/powerCard/PowerCardList.jsx": [
+    "default: PowerCardList"
+  ],
+  "frontend/src/features/pitch/components/save/AdSponsorView.jsx": [
+    "default: AdSponsorView"
+  ],
+  "frontend/src/features/pitch/components/save/SaveSquadManager.jsx": [
+    "default: SaveSquadManager"
+  ],
+  "frontend/src/features/pitch/components/save/SquadSummaryView.jsx": [
+    "default: SquadSummaryView"
+  ],
+  "frontend/src/features/pitch/components/SquadActions.jsx": [
+    "default: SquadActions"
+  ],
+  "frontend/src/features/pitch/components/SquadBottomNav.jsx": [
+    "default: SquadBottomNav"
+  ],
+  "frontend/src/features/pitch/components/SquadHeader.jsx": [
+    "default: SquadHeader"
+  ],
+  "frontend/src/features/pitch/components/SynergyIndicator.jsx": [
+    "default: SynergyIndicator"
+  ],
+  "frontend/src/features/pitch/FormationSelector.jsx": [
+    "default: FormationSelector"
+  ],
+  "frontend/src/features/pitch/hooks/usePitchActions.js": [
+    "usePitchActions"
+  ],
+  "frontend/src/features/pitch/hooks/usePitchDataLoad.js": [
+    "usePitchDataLoad"
+  ],
+  "frontend/src/features/pitch/hooks/usePitchEnrichment.js": [
+    "usePitchEnrichment"
+  ],
+  "frontend/src/features/pitch/hooks/usePitchHandlers.js": [
+    "usePitchHandlers"
+  ],
+  "frontend/src/features/pitch/hooks/usePitchLogic.js": [
+    "usePitchLogic"
+  ],
+  "frontend/src/features/pitch/ManagerSelectionModal.jsx": [
+    "default: ManagerSelectionModal"
+  ],
+  "frontend/src/features/pitch/PitchScreen.jsx": [
+    "default: PitchScreen"
+  ],
+  "frontend/src/features/pitch/PowerCardPopup.jsx": [
+    "default: PowerCardPopup"
+  ],
+  "frontend/src/features/pitch/utils/autofill/AutoFillOrchestrator.js": [
+    "runAutoFillEngine"
+  ],
+  "frontend/src/features/pitch/utils/autofill/strategies/budgetOptimizer.js": [
+    "budgetOptimizer"
+  ],
+  "frontend/src/features/pitch/utils/autofill/strategies/starterAssigner.js": [
+    "starterAssigner"
+  ],
+  "frontend/src/features/pitch/utils/autofill/strategies/synergyAnalyzer.js": [
+    "synergyAnalyzer"
+  ],
+  "frontend/src/features/pitch/utils/squadEnrichment.js": [
+    "enrichSquadData"
+  ],
+  "frontend/src/features/profile/components/AchievementManager.jsx": [
+    "default: AchievementManager"
+  ],
+  "frontend/src/features/profile/components/GameweekHistory.jsx": [
+    "default: GameweekHistory"
+  ],
+  "frontend/src/features/profile/components/ProfileHeaderCard.jsx": [
+    "default: ProfileHeaderCard"
+  ],
+  "frontend/src/features/profile/components/ProfileSettingsModal.jsx": [
+    "default: ProfileSettingsModal"
+  ],
+  "frontend/src/features/profile/components/TransactionHistoryPreview.jsx": [
+    "default: TransactionHistoryPreview"
+  ],
+  "frontend/src/features/profile/components/WalletSummaryView.jsx": [
+    "default: WalletSummaryView"
+  ],
+  "frontend/src/features/profile/data/rulesSectionsData.jsx": [
+    "rulesSectionsData"
+  ],
+  "frontend/src/features/profile/hooks/useAchievements.js": [
+    "useAchievements"
+  ],
+  "frontend/src/features/profile/ProfileScreen.jsx": [
+    "default: ProfileScreen"
+  ],
+  "frontend/src/features/profile/RulesScreen.jsx": [
+    "default: RulesScreen"
+  ],
+  "frontend/src/features/quests/DailyCheckIn.jsx": [
+    "default: DailyCheckIn"
+  ],
+  "frontend/src/features/quests/hooks/useQuestCooldown.js": [
+    "useQuestCooldown"
+  ],
+  "frontend/src/features/quests/QuestScreen.jsx": [
+    "default: QuestScreen"
+  ],
+  "frontend/src/features/quests/SponsorAdCard.jsx": [
+    "default: SponsorAdCard"
+  ],
+  "frontend/src/features/redeem/components/RedeemHeader.jsx": [
+    "default: RedeemHeader"
+  ],
+  "frontend/src/features/redeem/components/WonItemModal.jsx": [
+    "default: WonItemModal"
+  ],
+  "frontend/src/features/redeem/hooks/useRewardCard.js": [
+    "useRewardCard"
+  ],
+  "frontend/src/features/redeem/RedeemScreen.jsx": [
+    "default: RedeemScreen"
+  ],
+  "frontend/src/features/redeem/RewardCard.jsx": [
+    "RewardCard",
+    "default: RewardCard"
+  ],
+  "frontend/src/features/social/components/FriendManager.jsx": [
+    "default: FriendManager"
+  ],
+  "frontend/src/features/social/components/LeagueDetailsModal.jsx": [
+    "default: LeagueDetailsModal"
+  ],
+  "frontend/src/features/social/components/LeagueHeader.jsx": [
+    "default: LeagueHeader"
+  ],
+  "frontend/src/features/social/components/LeagueLeaderboard.jsx": [
+    "default: LeagueLeaderboard"
+  ],
+  "frontend/src/features/social/components/LeagueList.jsx": [
+    "default: LeagueList"
+  ],
+  "frontend/src/features/social/components/LeagueManager.jsx": [
+    "default: LeagueManager"
+  ],
+  "frontend/src/features/social/components/LeagueSettings.jsx": [
+    "default: LeagueSettings"
+  ],
+  "frontend/src/features/social/components/ReferralCard.jsx": [
+    "default: ReferralCard"
+  ],
+  "frontend/src/features/social/hooks/useLeagueDetailsLogic.js": [
+    "useLeagueDetailsLogic"
+  ],
+  "frontend/src/features/social/hooks/useLeagueForm.js": [
+    "useLeagueForm"
+  ],
+  "frontend/src/features/social/hooks/useLeagueRanking.js": [
+    "useLeagueRanking"
+  ],
+  "frontend/src/features/social/SocialScreen.jsx": [
+    "default: SocialScreen"
+  ],
+  "frontend/src/hooks/useActionCooldown.js": [
+    "useActionCooldown"
+  ],
+  "frontend/src/hooks/useAuthSync.js": [
+    "useAuthSync"
+  ],
+  "frontend/src/hooks/useHapticFeedback.js": [
+    "useHapticFeedback"
+  ],
+  "frontend/src/hooks/useLongPressDrag.js": [
+    "useLongPressDrag"
+  ],
+  "frontend/src/hooks/useSessionTimeout.js": [
+    "useSessionTimeout"
+  ],
+  "frontend/src/hooks/useTeams.js": [
+    "useTeams"
+  ],
+  "frontend/src/services/api/apiFootballService.js": [
+    "apiFootballService"
+  ],
+  "frontend/src/services/fcmService.js": [
+    "requestNotificationPermission",
+    "listenForForegroundMessages"
+  ],
+  "frontend/src/services/firebase/adsConfigDatabase.js": [
+    "adsConfigDatabase"
+  ],
+  "frontend/src/services/firebase/cardService.js": [
+    "cardService"
+  ],
+  "frontend/src/services/firebase/chatService.js": [
+    "chatService"
+  ],
+  "frontend/src/services/firebase/clubService.js": [
+    "fetchClubData"
+  ],
+  "frontend/src/services/firebase/friendService.js": [
+    "searchUserByUid",
+    "fetchFriends",
+    "sendFriendRequest",
+    "acceptFriendRequest",
+    "removeFriend"
+  ],
+  "frontend/src/services/firebase/gameRulesService.js": [
+    "gameRulesService"
+  ],
+  "frontend/src/services/firebase/inventoryService.js": [
+    "inventoryService"
+  ],
+  "frontend/src/services/firebase/leagueService.js": [
+    "leagueService"
+  ],
+  "frontend/src/services/firebase/liveMatchService.js": [
+    "liveMatchService"
+  ],
+  "frontend/src/services/firebase/liveStatsService.js": [
+    "liveStatsService"
+  ],
+  "frontend/src/services/firebase/managerService.js": [
+    "managerService"
+  ],
+  "frontend/src/services/firebase/market/marketFetchService.js": [
+    "marketFetchService"
+  ],
+  "frontend/src/services/firebase/market/marketTransactionService.js": [
+    "marketTransactionService"
+  ],
+  "frontend/src/services/firebase/marketDataParser.js": [
+    "sanitizePlayerMarketData"
+  ],
+  "frontend/src/services/firebase/participationService.js": [
+    "participationService"
+  ],
+  "frontend/src/services/firebase/questService.js": [
+    "questService"
+  ],
+  "frontend/src/services/firebase/redeemService.js": [
+    "redeemService"
+  ],
+  "frontend/src/services/firebase/referralService.js": [
+    "referralService"
+  ],
+  "frontend/src/services/firebase/squadService.js": [
+    "squadService"
+  ],
+  "frontend/src/services/firebase/teamDatabase.js": [
+    "teamDatabase"
+  ],
+  "frontend/src/services/firebase/transactionService.js": [
+    "fetchUserTransactionHistory"
+  ],
+  "frontend/src/services/firebase/userService.js": [
+    "updateUserProfile"
+  ],
+  "frontend/src/store/slices/adsConfigSlice.js": [
+    "createAdsConfigSlice"
+  ],
+  "frontend/src/store/slices/createAuthSlice.js": [
+    "createAuthSlice"
+  ],
+  "frontend/src/store/slices/createClubSlice.js": [
+    "createClubSlice"
+  ],
+  "frontend/src/store/slices/createFriendSlice.js": [
+    "createFriendSlice"
+  ],
+  "frontend/src/store/slices/createWalletSlice.js": [
+    "createWalletSlice"
+  ],
+  "frontend/src/store/slices/inventorySlice.js": [
+    "inventorySlice"
+  ],
+  "frontend/src/store/slices/liveStatsSlice.js": [
+    "liveStatsSlice"
+  ],
+  "frontend/src/store/slices/squadActionSlice.js": [
+    "squadActionSlice"
+  ],
+  "frontend/src/store/slices/squadAutoFillSlice.js": [
+    "squadAutoFillSlice"
+  ],
+  "frontend/src/store/slices/squadCardSlice.js": [
+    "squadCardSlice"
+  ],
+  "frontend/src/store/slices/squadCoreSlice.js": [
+    "squadCoreSlice"
+  ],
+  "frontend/src/store/slices/squadFormationSlice.js": [
+    "squadFormationSlice"
+  ],
+  "frontend/src/store/slices/squadMarketSlice.js": [
+    "squadMarketSlice"
+  ],
+  "frontend/src/store/slices/squadPitchSlice.js": [
+    "squadPitchSlice"
+  ],
+  "frontend/src/store/slices/squadPlacementSlice.js": [
+    "squadPlacementSlice"
+  ],
+  "frontend/src/store/slices/tutorialSlice.js": [
+    "createTutorialSlice"
+  ],
+  "frontend/src/store/useDragStore.js": [
+    "useDragStore"
+  ],
+  "frontend/src/store/useGameStore.js": [
+    "useGameStore"
+  ],
+  "frontend/src/store/useMarketStore.js": [
+    "useMarketStore"
+  ],
+  "frontend/src/store/useQuestStore.js": [
+    "useQuestStore"
+  ],
+  "frontend/src/store/useRedeemStore.js": [
+    "useRedeemStore"
+  ],
+  "frontend/src/store/useUserStore.js": [
+    "useUserStore"
+  ],
+  "frontend/src/utils/formationUtils.js": [
+    "FORMATION_REGISTRY",
+    "getFormationData",
+    "getAllFormations",
+    "getPositionLimits"
+  ],
+  "frontend/src/utils/formatters.js": [
+    "formatPlayerName",
+    "formatTeamShortName",
+    "getOptimizedImageUrl"
+  ],
+  "frontend/src/utils/squadValidator.js": [
+    "normalizePosition",
+    "validateBuyPlayer",
+    "validateSellPlayer",
+    "validateSquadReadyForSave"
+  ],
+  "frontend/src/utils/toast.js": [
+    "showToast",
+    "toast"
+  ],
+  "admin/src/App.jsx": [
+    "default: App"
+  ],
+  "admin/src/components/common/DataTable.jsx": [
+    "default: DataTable"
+  ],
+  "admin/src/components/common/ErrorBoundary.jsx": [
+    "default: ErrorBoundary"
+  ],
+  "admin/src/components/common/TeamBadge.jsx": [
+    "getTeamInfo",
+    "default: TeamBadge"
+  ],
+  "admin/src/components/layout/AdminLayout.jsx": [
+    "default: AdminLayout"
+  ],
+  "admin/src/components/layout/Sidebar.jsx": [
+    "default: Sidebar"
+  ],
+  "admin/src/components/ui/DataTable.jsx": [
+    "default: DataTable"
+  ],
+  "admin/src/components/ui/Dropzone.jsx": [
+    "default: Dropzone"
+  ],
+  "admin/src/components/ui/StatusBadge.jsx": [
+    "default: StatusBadge"
+  ],
+  "admin/src/config/firebase.js": [
+    "auth",
+    "db",
+    "functions",
+    "default: app"
+  ],
+  "admin/src/features/achievements/components/AchievementForm.jsx": [
+    "default: AchievementForm"
+  ],
+  "admin/src/features/achievements/hooks/useAchievementsAdmin.js": [
+    "useAchievementsAdmin"
+  ],
+  "admin/src/features/achievements/views/AchievementManager.jsx": [
+    "default: AchievementManager"
+  ],
+  "admin/src/features/cards/components/CardBasicInfoFields.jsx": [
+    "default: CardBasicInfoFields"
+  ],
+  "admin/src/features/cards/components/CardEffectConfigurator.jsx": [
+    "default: CardEffectConfigurator"
+  ],
+  "admin/src/features/cards/components/CardForm.jsx": [
+    "default: CardForm"
+  ],
+  "admin/src/features/cards/components/CardItem.jsx": [
+    "default: CardItem"
+  ],
+  "admin/src/features/cards/components/CardListHeader.jsx": [
+    "default: CardListHeader"
+  ],
+  "admin/src/features/cards/hooks/useCardFormLogic.js": [
+    "useCardFormLogic"
+  ],
+  "admin/src/features/cards/views/CardList.jsx": [
+    "default: CardList"
+  ],
+  "admin/src/features/dashboard/components/GameweekPipeline.jsx": [
+    "default: GameweekPipeline"
+  ],
+  "admin/src/features/dashboard/components/GameweekProcessForm.jsx": [
+    "default: GameweekProcessForm"
+  ],
+  "admin/src/features/dashboard/components/GameweekStatusCard.jsx": [
+    "default: GameweekStatusCard"
+  ],
+  "admin/src/features/dashboard/components/PipelineStep.jsx": [
+    "default: PipelineStep"
+  ],
+  "admin/src/features/dashboard/components/QuotaAnalyzerCard.jsx": [
+    "default: QuotaAnalyzerCard"
+  ],
+  "admin/src/features/dashboard/hooks/useDashboardData.js": [
+    "useDashboardData"
+  ],
+  "admin/src/features/dashboard/hooks/useQuotaAnalyzer.js": [
+    "useQuotaAnalyzer"
+  ],
+  "admin/src/features/dashboard/views/Dashboard.jsx": [
+    "default: Dashboard"
+  ],
+  "admin/src/features/economy/components/CalculatorInputs.jsx": [
+    "default: CalculatorInputs"
+  ],
+  "admin/src/features/economy/components/CalculatorResults.jsx": [
+    "default: CalculatorResults"
+  ],
+  "admin/src/features/economy/hooks/useBallsCalculator.js": [
+    "default: useBallsCalculator"
+  ],
+  "admin/src/features/economy/views/BallsCalculatorBoard.jsx": [
+    "default: BallsCalculatorBoard"
+  ],
+  "admin/src/features/gameRules/components/PositionScoreCard.jsx": [
+    "default: PositionScoreCard"
+  ],
+  "admin/src/features/gameRules/components/RuleSettingItem.jsx": [
+    "default: RuleSettingItem"
+  ],
+  "admin/src/features/gameRules/components/ScoreCalculatorPreview.jsx": [
+    "default: ScoreCalculatorPreview"
+  ],
+  "admin/src/features/gameRules/components/ScoreStatItem.jsx": [
+    "default: ScoreStatItem"
+  ],
+  "admin/src/features/gameRules/components/ToggleSwitch.jsx": [
+    "default: ToggleSwitch"
+  ],
+  "admin/src/features/gameRules/hooks/useGameRulesManager.js": [
+    "useGameRulesManager"
+  ],
+  "admin/src/features/gameRules/hooks/useScoreRulesManager.js": [
+    "useScoreRulesManager"
+  ],
+  "admin/src/features/gameRules/views/GameConditionsManager.jsx": [
+    "default: GameConditionsManager"
+  ],
+  "admin/src/features/gameRules/views/GameRulesDashboard.jsx": [
+    "default: GameRulesDashboard"
+  ],
+  "admin/src/features/gameRules/views/GameRulesManager.jsx": [
+    "default: GameRulesManager"
+  ],
+  "admin/src/features/gameRules/views/ScoreRulesManager.jsx": [
+    "default: ScoreRulesManager"
+  ],
+  "admin/src/features/gameweek/components/ApiSettingsPanel.jsx": [
+    "default: ApiSettingsPanel"
+  ],
+  "admin/src/features/gameweek/components/GameweekFixtures.jsx": [
+    "default: GameweekFixtures"
+  ],
+  "admin/src/features/gameweek/components/GameweekProcessPanel.jsx": [
+    "default: GameweekProcessPanel"
+  ],
+  "admin/src/features/gameweek/components/LiveMatchController.jsx": [
+    "default: LiveMatchController"
+  ],
+  "admin/src/features/gameweek/components/PlayerStatsEntry.jsx": [
+    "default: PlayerStatsEntry"
+  ],
+  "admin/src/features/gameweek/components/PlayerStatsTable.jsx": [
+    "default: PlayerStatsTable"
+  ],
+  "admin/src/features/gameweek/components/PlayerStatsToolbar.jsx": [
+    "default: PlayerStatsToolbar"
+  ],
+  "admin/src/features/gameweek/NoAdsToggle.jsx": [
+    "default: NoAdsToggle"
+  ],
+  "admin/src/features/gameweek/TimeController.jsx": [
+    "default: TimeController"
+  ],
+  "admin/src/features/gameweek/views/GameweekDashboard.jsx": [
+    "default: GameweekDashboard"
+  ],
+  "admin/src/features/history/components/DataFetchMonitor.jsx": [
+    "default: DataFetchMonitor"
+  ],
+  "admin/src/features/history/components/HistoricalApiConfig.jsx": [
+    "default: HistoricalApiConfig"
+  ],
+  "admin/src/features/history/hooks/useArchiveManager.js": [
+    "useArchiveManager"
+  ],
+  "admin/src/features/history/views/HistoryArchive.jsx": [
+    "default: HistoryArchive"
+  ],
+  "admin/src/features/managers/components/ManagerForm.jsx": [
+    "default: ManagerForm"
+  ],
+  "admin/src/features/managers/hooks/useManagerFormLogic.js": [
+    "useManagerFormLogic"
+  ],
+  "admin/src/features/managers/views/ManagerList.jsx": [
+    "default: ManagerList"
+  ],
+  "admin/src/features/matches/components/LivePreviewBoard.jsx": [
+    "default: LivePreviewBoard"
+  ],
+  "admin/src/features/matches/components/MatchConfigPanel.jsx": [
+    "default: MatchConfigPanel"
+  ],
+  "admin/src/features/matches/components/MatchEventHistory.jsx": [
+    "default: MatchEventHistory"
+  ],
+  "admin/src/features/matches/components/MatchEventPublisher.jsx": [
+    "default: MatchEventPublisher"
+  ],
+  "admin/src/features/matches/components/MatchScoreController.jsx": [
+    "default: MatchScoreController"
+  ],
+  "admin/src/features/matches/hooks/useLiveMatchAdmin.js": [
+    "useLiveMatchAdmin"
+  ],
+  "admin/src/features/matches/views/MatchDashboard.jsx": [
+    "default: MatchDashboard"
+  ],
+  "admin/src/features/players/components/ExcelPreview.jsx": [
+    "default: ExcelPreview"
+  ],
+  "admin/src/features/players/components/forms/PlayerGameInfoForm.jsx": [
+    "default: PlayerGameInfoForm"
+  ],
+  "admin/src/features/players/components/forms/PlayerIdentityForm.jsx": [
+    "default: PlayerIdentityForm"
+  ],
+  "admin/src/features/players/components/forms/PlayerStatsForm.jsx": [
+    "default: PlayerStatsForm"
+  ],
+  "admin/src/features/players/components/overlap/OverlapGroupCard.jsx": [
+    "default: OverlapGroupCard"
+  ],
+  "admin/src/features/players/components/overlap/OverlapHeader.jsx": [
+    "default: OverlapHeader"
+  ],
+  "admin/src/features/players/components/overlap/OverlapPlayerItem.jsx": [
+    "default: OverlapPlayerItem"
+  ],
+  "admin/src/features/players/components/PlayerManualForm.jsx": [
+    "default: PlayerManualForm"
+  ],
+  "admin/src/features/players/components/PlayerTable.jsx": [
+    "default: PlayerTable"
+  ],
+  "admin/src/features/players/components/PlayerToolbar.jsx": [
+    "default: PlayerToolbar"
+  ],
+  "admin/src/features/players/components/PlayerValueFormulaConfig.jsx": [
+    "default: PlayerValueFormulaConfig"
+  ],
+  "admin/src/features/players/components/PlayerValuePreviewTable.jsx": [
+    "default: PlayerValuePreviewTable"
+  ],
+  "admin/src/features/players/components/SyncPreviewModal.jsx": [
+    "default: SyncPreviewModal"
+  ],
+  "admin/src/features/players/hooks/useOverlapLogic.js": [
+    "useOverlapLogic"
+  ],
+  "admin/src/features/players/hooks/usePlayerImport.js": [
+    "usePlayerImport"
+  ],
+  "admin/src/features/players/hooks/usePlayers.js": [
+    "usePlayers"
+  ],
+  "admin/src/features/players/hooks/usePlayerSync.js": [
+    "usePlayerSync"
+  ],
+  "admin/src/features/players/hooks/usePlayerSyncActions.js": [
+    "usePlayerSyncActions"
+  ],
+  "admin/src/features/players/hooks/usePlayerValueEngine.js": [
+    "usePlayerValueEngine"
+  ],
+  "admin/src/features/players/PlayerFeature.jsx": [
+    "default: PlayerFeature"
+  ],
+  "admin/src/features/players/PlayerManager.jsx": [
+    "default: PlayerManager"
+  ],
+  "admin/src/features/players/utils/excelParser.js": [
+    "parseExcelFile"
+  ],
+  "admin/src/features/players/utils/formatters.js": [
+    "formatShortName",
+    "formatPrice",
+    "formatPosition",
+    "formatDate",
+    "getOptimizedImageUrl"
+  ],
+  "admin/src/features/players/utils/templateUtil.js": [
+    "downloadPlayerTemplate"
+  ],
+  "admin/src/features/players/views/DataOverlapManagement.jsx": [
+    "default: DataOverlapManagement"
+  ],
+  "admin/src/features/players/views/PlayerDetails.jsx": [
+    "default: PlayerDetails"
+  ],
+  "admin/src/features/players/views/PlayerList.jsx": [
+    "default: PlayerList"
+  ],
+  "admin/src/features/players/views/PlayerListModals.jsx": [
+    "default: PlayerListModals"
+  ],
+  "admin/src/features/players/views/PlayerValueManager.jsx": [
+    "default: PlayerValueManager"
+  ],
+  "admin/src/features/quests/components/AdLinksTab.jsx": [
+    "default: AdLinksTab"
+  ],
+  "admin/src/features/quests/components/AdSenseTab.jsx": [
+    "default: AdSenseTab"
+  ],
+  "admin/src/features/quests/components/AutoPickAdsTab.jsx": [
+    "default: AutoPickAdsTab"
+  ],
+  "admin/src/features/quests/components/QuestBasicInputs.jsx": [
+    "default: QuestBasicInputs"
+  ],
+  "admin/src/features/quests/components/QuestImageUploader.jsx": [
+    "default: QuestImageUploader"
+  ],
+  "admin/src/features/quests/components/QuestSettingsInputs.jsx": [
+    "default: QuestSettingsInputs"
+  ],
+  "admin/src/features/quests/components/QuestTab.jsx": [
+    "default: QuestTab"
+  ],
+  "admin/src/features/quests/QuestFormModal.jsx": [
+    "default: QuestFormModal"
+  ],
+  "admin/src/features/quests/QuestManager.jsx": [
+    "default: QuestManager"
+  ],
+  "admin/src/features/rewards/components/DeleteConfirmModal.jsx": [
+    "default: DeleteConfirmModal"
+  ],
+  "admin/src/features/rewards/components/RewardBasicInfo.jsx": [
+    "default: RewardBasicInfo"
+  ],
+  "admin/src/features/rewards/components/RewardEconomy.jsx": [
+    "default: RewardEconomy"
+  ],
+  "admin/src/features/rewards/components/RewardTable.jsx": [
+    "default: RewardTable"
+  ],
+  "admin/src/features/rewards/hooks/useRewardFormLogic.js": [
+    "useRewardFormLogic"
+  ],
+  "admin/src/features/rewards/RewardFormModal.jsx": [
+    "default: RewardFormModal"
+  ],
+  "admin/src/features/rewards/RewardManager.jsx": [
+    "default: RewardManager"
+  ],
+  "admin/src/features/settings/components/ApiSettingsModal.jsx": [
+    "default: ApiSettingsModal"
+  ],
+  "admin/src/features/system/components/GameSettings.jsx": [
+    "default: GameSettings"
+  ],
+  "admin/src/features/system/components/ThemePromptBox.jsx": [
+    "default: ThemePromptBox"
+  ],
+  "admin/src/features/system/components/ThemeSettings.jsx": [
+    "default: ThemeSettings"
+  ],
+  "admin/src/features/system/components/ThemeUploadField.jsx": [
+    "default: ThemeUploadField"
+  ],
+  "admin/src/features/system/hooks/useThemeUploadLogic.js": [
+    "useThemeUploadLogic"
+  ],
+  "admin/src/features/system/views/LogicManual.jsx": [
+    "default: LogicManual"
+  ],
+  "admin/src/features/system/views/SystemSettings.jsx": [
+    "default: SystemSettings"
+  ],
+  "admin/src/features/teams/components/TeamFormModal.jsx": [
+    "default: TeamFormModal"
+  ],
+  "admin/src/features/teams/components/TeamList.jsx": [
+    "default: TeamList"
+  ],
+  "admin/src/features/teams/components/TeamTabs.jsx": [
+    "default: TeamTabs"
+  ],
+  "admin/src/features/teams/hooks/useTeams.js": [
+    "useTeams"
+  ],
+  "admin/src/features/teams/views/TeamManager.jsx": [
+    "default: TeamManager"
+  ],
+  "admin/src/features/theme/components/ThemeUploadField.jsx": [
+    "default: ThemeUploadField"
+  ],
+  "admin/src/features/theme/hooks/useThemeUploadLogic.js": [
+    "useThemeUploadLogic"
+  ],
+  "admin/src/features/theme/ThemeController.jsx": [
+    "default: ThemeController"
+  ],
+  "admin/src/features/users/components/AdjustBallsModal.jsx": [
+    "default: AdjustBallsModal"
+  ],
+  "admin/src/features/users/components/UserTable.jsx": [
+    "default: UserTable"
+  ],
+  "admin/src/features/users/UserManager.jsx": [
+    "default: UserManager"
+  ],
+  "admin/src/features/verify/RedeemLogs.jsx": [
+    "default: RedeemLogs"
+  ],
+  "admin/src/services/api/apiFootballService.js": [
+    "apiFootballService"
+  ],
+  "admin/src/services/api/apiSportsHub.js": [
+    "apiSportsHub"
+  ],
+  "admin/src/services/api/historyApi.js": [
+    "historyApi"
+  ],
+  "admin/src/services/engine/gameweekCalculationService.js": [
+    "gameweekCalculationService"
+  ],
+  "admin/src/services/engine/leaderboardEngine.js": [
+    "leaderboardEngine"
+  ],
+  "admin/src/services/engine/modifiers/ModifierPipeline.js": [
+    "ModifierPipeline"
+  ],
+  "admin/src/services/engine/modifiers/rules/captainRule.js": [
+    "captainRule"
+  ],
+  "admin/src/services/engine/modifiers/rules/managerRule.js": [
+    "managerRule"
+  ],
+  "admin/src/services/engine/modifiers/rules/mvpRule.js": [
+    "mvpRule"
+  ],
+  "admin/src/services/engine/modifiers/rules/powerCardRule.js": [
+    "powerCardRule"
+  ],
+  "admin/src/services/engine/modifiers/rules/synergyRule.js": [
+    "synergyRule"
+  ],
+  "admin/src/services/engine/modifiers/rules/underdogRule.js": [
+    "underdogRule"
+  ],
+  "admin/src/services/engine/playerValueCalculationService.js": [
+    "previewPlayerValues"
+  ],
+  "admin/src/services/engine/utils/pointCalculator.js": [
+    "calculatePlayerPoints",
+    "determineSquadMVP"
+  ],
+  "admin/src/services/engine/utils/squadModifiers.js": [
+    "applyCaptainMultiplier",
+    "calculateSynergyBonus",
+    "calculateManagerBonus",
+    "calculateUnderdogBoost",
+    "applyMVPBonus"
+  ],
+  "admin/src/services/engine/utils/valueFormulaEngine.js": [
+    "calculateSinglePlayerPrice"
+  ],
+  "admin/src/services/engine/utils/valueSyncService.js": [
+    "commitPlayerValues"
+  ],
+  "admin/src/services/firebase/adsConfigDatabase.js": [
+    "adsConfigDatabase"
+  ],
+  "admin/src/services/firebase/cardDatabase.js": [
+    "cardDatabase"
+  ],
+  "admin/src/services/firebase/gameRulesDatabase.js": [
+    "getGameConfigDoc",
+    "updateGameConfigDoc",
+    "getGameRules",
+    "updateGameRules",
+    "getScoringRules",
+    "updateScoringRules",
+    "getGameConditions",
+    "updateGameConditions"
+  ],
+  "admin/src/services/firebase/historyDatabase.js": [
+    "historyDatabase"
+  ],
+  "admin/src/services/firebase/liveMatchAdminService.js": [
+    "liveMatchAdminService"
+  ],
+  "admin/src/services/firebase/managerDatabase.js": [
+    "managerDatabase"
+  ],
+  "admin/src/services/firebase/player/playerBulkService.js": [
+    "playerBulkService"
+  ],
+  "admin/src/services/firebase/player/playerFetchService.js": [
+    "playerFetchService"
+  ],
+  "admin/src/services/firebase/player/playerOverlapService.js": [
+    "playerOverlapService"
+  ],
+  "admin/src/services/firebase/player/playerUpdateService.js": [
+    "playerUpdateService"
+  ],
+  "admin/src/services/firebase/player/playerUtils.js": [
+    "getCollectionRef",
+    "getDocRef",
+    "deepClean"
+  ],
+  "admin/src/services/firebase/playerDatabase.js": [
+    "playerDatabase"
+  ],
+  "admin/src/services/firebase/questService.js": [
+    "questService"
+  ],
+  "admin/src/services/firebase/rewardAdminService.js": [
+    "rewardAdminService"
+  ],
+  "admin/src/services/firebase/teamDatabase.js": [
+    "teamDatabase"
+  ],
+  "admin/src/services/firebase/userService.js": [
+    "getAllUsers",
+    "adjustUserBalls",
+    "getUserTransactions"
+  ],
+  "admin/src/store/adsStore.js": [
+    "useAdsStore"
+  ],
+  "admin/src/store/playerStore.js": [
+    "usePlayerStore"
+  ],
+  "admin/src/store/questStore.js": [
+    "useQuestStore"
+  ],
+  "admin/src/store/rewardStore.js": [
+    "useRewardStore"
+  ],
+  "admin/src/store/userStore.js": [
+    "default: useUserStore"
+  ],
+  "admin/src/utils/googleDriveUploader.js": [
+    "uploadImageToDrive"
+  ]
+}

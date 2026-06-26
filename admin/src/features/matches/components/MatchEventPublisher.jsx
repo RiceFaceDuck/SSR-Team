@@ -14,38 +14,38 @@ export default function MatchEventPublisher({ match, onPublish, isUpdating }) {
   const [eventData, setEventData] = useState({
     minute: '',
     primaryDetail: '',
-    secondaryDetail: ''
+    secondaryDetail: '',
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setEventData(prev => ({ ...prev, [name]: value }));
+    setEventData((prev) => ({ ...prev, [name]: value }));
   };
 
   const applyTemplate = (template) => {
-    setEventData(prev => ({
+    setEventData((prev) => ({
       ...prev,
       primaryDetail: template.primary,
       secondaryDetail: template.secondary,
-      minute: match?.minute || ''
+      minute: match?.minute || '',
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!eventData.primaryDetail) return;
-    
+
     onPublish({
       minute: eventData.minute || match?.minute || '0',
       primaryDetail: eventData.primaryDetail,
-      secondaryDetail: eventData.secondaryDetail
+      secondaryDetail: eventData.secondaryDetail,
     });
 
     // Clear form after publish
     setEventData({
       minute: '',
       primaryDetail: '',
-      secondaryDetail: ''
+      secondaryDetail: '',
     });
   };
 
@@ -60,7 +60,9 @@ export default function MatchEventPublisher({ match, onPublish, isUpdating }) {
       <div className="p-6">
         {/* Templates Gimmick */}
         <div className="mb-6">
-          <p className="text-xs font-bold text-slate-400 uppercase mb-3">คีย์ลัด (Quick Templates)</p>
+          <p className="text-xs font-bold text-slate-400 uppercase mb-3">
+            คีย์ลัด (Quick Templates)
+          </p>
           <div className="flex flex-wrap gap-2">
             {EVENT_TEMPLATES.map((tpl, idx) => (
               <button
@@ -81,44 +83,48 @@ export default function MatchEventPublisher({ match, onPublish, isUpdating }) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-1">
               <label className="block text-xs font-medium text-slate-500 mb-1">นาที (Minute)</label>
-              <input 
-                type="text" 
-                name="minute" 
-                value={eventData.minute} 
-                onChange={handleChange} 
-                placeholder={match?.minute || "e.g. 45'"} 
+              <input
+                type="text"
+                name="minute"
+                value={eventData.minute}
+                onChange={handleChange}
+                placeholder={match?.minute || "e.g. 45'"}
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
               />
             </div>
             <div className="md:col-span-3">
-              <label className="block text-xs font-medium text-slate-500 mb-1">รายละเอียดหลัก (หัวข้อ) <span className="text-red-500">*</span></label>
-              <input 
-                type="text" 
-                name="primaryDetail" 
-                value={eventData.primaryDetail} 
-                onChange={handleChange} 
-                placeholder="เช่น B. Saka Goal ⚽" 
+              <label className="block text-xs font-medium text-slate-500 mb-1">
+                รายละเอียดหลัก (หัวข้อ) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="primaryDetail"
+                value={eventData.primaryDetail}
+                onChange={handleChange}
+                placeholder="เช่น B. Saka Goal ⚽"
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 outline-none font-medium"
                 required
               />
             </div>
           </div>
-          
+
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">รายละเอียดรอง (คำอธิบายเพิ่มเติม)</label>
-            <input 
-              type="text" 
-              name="secondaryDetail" 
-              value={eventData.secondaryDetail} 
-              onChange={handleChange} 
-              placeholder="เช่น Assist by M. Odegaard" 
+            <label className="block text-xs font-medium text-slate-500 mb-1">
+              รายละเอียดรอง (คำอธิบายเพิ่มเติม)
+            </label>
+            <input
+              type="text"
+              name="secondaryDetail"
+              value={eventData.secondaryDetail}
+              onChange={handleChange}
+              placeholder="เช่น Assist by M. Odegaard"
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-slate-600"
             />
           </div>
 
           <div className="pt-2">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={isUpdating || !eventData.primaryDetail}
               className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white px-6 py-3 rounded-lg font-bold transition-all disabled:opacity-50 shadow-md shadow-orange-500/20"
             >

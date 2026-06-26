@@ -8,7 +8,7 @@ export const useCardFormLogic = (initialData, onSave) => {
     rarity: 'COMMON',
     effectLogic: { type: 'NONE', value: '' },
     price: 0,
-    isActive: true
+    isActive: true,
   });
 
   useEffect(() => {
@@ -17,23 +17,23 @@ export const useCardFormLogic = (initialData, onSave) => {
         ...initialData,
         rarity: initialData.rarity || 'COMMON',
         price: initialData.price || 0,
-        effectLogic: initialData.effectLogic || { type: 'NONE', value: '' }
+        effectLogic: initialData.effectLogic || { type: 'NONE', value: '' },
       });
     }
   }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const handleLogicChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      effectLogic: { ...prev.effectLogic, [field]: value }
+      effectLogic: { ...prev.effectLogic, [field]: value },
     }));
   };
 
@@ -43,11 +43,20 @@ export const useCardFormLogic = (initialData, onSave) => {
 
     // Rarity Base Price
     switch (rarity) {
-      case 'COMMON': basePrice = 15; break;
-      case 'RARE': basePrice = 40; break;
-      case 'EPIC': basePrice = 80; break;
-      case 'LEGENDARY': basePrice = 180; break;
-      default: basePrice = 10;
+      case 'COMMON':
+        basePrice = 15;
+        break;
+      case 'RARE':
+        basePrice = 40;
+        break;
+      case 'EPIC':
+        basePrice = 80;
+        break;
+      case 'LEGENDARY':
+        basePrice = 180;
+        break;
+      default:
+        basePrice = 10;
     }
 
     // Effect Logic Modifier
@@ -59,18 +68,18 @@ export const useCardFormLogic = (initialData, onSave) => {
     else if (type === 'PRICE_REDUCTION') effectPrice = 40;
     else if (type === 'NOT_SUBBED_BONUS') effectPrice = 30;
     else if (type === 'POINTS_MULTIPLIER') {
-        const val = parseFloat(effectLogic.value) || 1;
-        effectPrice = val > 2 ? 100 : 50;
+      const val = parseFloat(effectLogic.value) || 1;
+      effectPrice = val > 2 ? 100 : 50;
     }
 
     const recommendedPrice = basePrice + effectPrice;
-    
-    setFormData(prev => ({ ...prev, price: recommendedPrice }));
-    
+
+    setFormData((prev) => ({ ...prev, price: recommendedPrice }));
+
     if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-        window.navigator.vibrate([20, 30, 20]);
+      window.navigator.vibrate([20, 30, 20]);
     }
-    
+
     return recommendedPrice;
   }, [formData]);
 
@@ -89,6 +98,6 @@ export const useCardFormLogic = (initialData, onSave) => {
     handleChange,
     handleLogicChange,
     calculateSmartPrice,
-    handleSubmit
+    handleSubmit,
   };
 };

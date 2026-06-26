@@ -25,7 +25,9 @@ export default function GameRulesManager({ isEmbedded = false }) {
             </div>
             <div>
               <h1 className="text-2xl font-black text-slate-800">จัดการกติกาเกม</h1>
-              <p className="text-slate-500 font-medium">ตั้งค่ากติกาพื้นฐานสำหรับการจัดทีมและการเล่น</p>
+              <p className="text-slate-500 font-medium">
+                ตั้งค่ากติกาพื้นฐานสำหรับการจัดทีมและการเล่น
+              </p>
             </div>
           </div>
           <button
@@ -48,8 +50,10 @@ export default function GameRulesManager({ isEmbedded = false }) {
 
       {rules && (
         <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-6">
-          <h2 className="text-lg font-bold text-slate-800 border-b pb-3">กติกาการจัดทีม (Team Building Rules)</h2>
-          
+          <h2 className="text-lg font-bold text-slate-800 border-b pb-3">
+            กติกาการจัดทีม (Team Building Rules)
+          </h2>
+
           <RuleSettingItem
             label="งบประมาณเริ่มต้น (Starting Budget)"
             description="เปิด/ปิด การจำกัดงบในการสร้างทีม"

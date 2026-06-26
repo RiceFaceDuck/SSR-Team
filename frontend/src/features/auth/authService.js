@@ -3,52 +3,51 @@ import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * ฟังก์ชันเข้าสู่ระบบด้วย Google 
+ * ฟังก์ชันเข้าสู่ระบบด้วย Google
  * พร้อมสร้าง Profile พื้นฐานถ้าเป็นการล็อกอินครั้งแรก
  */
 export const signInWithGoogle = async () => {
-    try {
-        const provider = new GoogleAuthProvider();
-        
-        // เปิดหน้าต่าง Pop-up ให้เลือกบัญชี Google
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
+  try {
+    const provider = new GoogleAuthProvider();
 
-        // ไม่ต้องดึงและเขียน Firestore ที่นี่ ปล่อยให้ onAuthStateChanged ใน useAuthSync จัดการ
-        // เพื่อป้องกันการซ้ำซ้อนของ Read/Write โควต้า Firebase
+    // เปิดหน้าต่าง Pop-up ให้เลือกบัญชี Google
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
 
-        return {
-            success: true,
-            user: { uid: user.uid } // ส่งกลับแค่ status พอ เพราะ App จะหมุนไปตาม state
-        };
+    // ไม่ต้องดึงและเขียน Firestore ที่นี่ ปล่อยให้ onAuthStateChanged ใน useAuthSync จัดการ
+    // เพื่อป้องกันการซ้ำซ้อนของ Read/Write โควต้า Firebase
 
-    } catch (error) {
-        console.error("เกิดข้อผิดพลาดในการล็อกอิน:", error);
-        
-        // จัดการ Error กรณีผู้ใช้กดปิดหน้าต่างเอง (ไม่ถือว่าระบบพัง)
-        if (error.code === 'auth/popup-closed-by-user') {
-             return { success: false, message: 'คุณได้ยกเลิกการล็อกอิน' };
-        }
-        
-        return { 
-            success: false, 
-            message: 'เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง' 
-        };
+    return {
+      success: true,
+      user: { uid: user.uid }, // ส่งกลับแค่ status พอ เพราะ App จะหมุนไปตาม state
+    };
+  } catch (error) {
+    console.error('เกิดข้อผิดพลาดในการล็อกอิน:', error);
+
+    // จัดการ Error กรณีผู้ใช้กดปิดหน้าต่างเอง (ไม่ถือว่าระบบพัง)
+    if (error.code === 'auth/popup-closed-by-user') {
+      return { success: false, message: 'คุณได้ยกเลิกการล็อกอิน' };
     }
+
+    return {
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง',
+    };
+  }
 };
 
 /**
  * ฟังก์ชันออกจากระบบ (Logout)
  */
 export const logoutUser = async () => {
-    try {
-        await signOut(auth);
-        console.log("ออกจากระบบเรียบร้อย");
-        return { success: true };
-    } catch (error) {
-        console.error("เกิดข้อผิดพลาดในการออกจากระบบ:", error);
-        return { success: false, message: 'ไม่สามารถออกจากระบบได้ในขณะนี้' };
-    }
+  try {
+    await signOut(auth);
+    console.log('ออกจากระบบเรียบร้อย');
+    return { success: true };
+  } catch (error) {
+    console.error('เกิดข้อผิดพลาดในการออกจากระบบ:', error);
+    return { success: false, message: 'ไม่สามารถออกจากระบบได้ในขณะนี้' };
+  }
 };
 
 /**
@@ -57,15 +56,19 @@ export const logoutUser = async () => {
  * @param {string} step - หน้าจอที่ดูจบแล้ว (เช่น 'market', 'pitch')
  */
 export const updateTutorialState = async (userId, step) => {
-    try {
-        const userDocRef = doc(db, 'users', userId);
-        const updateField = `tutorialState.hasSeen${step.charAt(0).toUpperCase() + step.slice(1)}`;
-        await setDoc(userDocRef, {
-            [updateField]: true
-        }, { merge: true });
-        return { success: true };
-    } catch (error) {
-        console.error("เกิดข้อผิดพลาดในการอัปเดตสถานะ Tutorial:", error);
-        return { success: false, error };
-    }
+  try {
+    const userDocRef = doc(db, 'users', userId);
+    const updateField = `tutorialState.hasSeen${step.charAt(0).toUpperCase() + step.slice(1)}`;
+    await setDoc(
+      userDocRef,
+      {
+        [updateField]: true,
+      },
+      { merge: true }
+    );
+    return { success: true };
+  } catch (error) {
+    console.error('เกิดข้อผิดพลาดในการอัปเดตสถานะ Tutorial:', error);
+    return { success: false, error };
+  }
 };

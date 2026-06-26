@@ -10,12 +10,12 @@ export const liveStatsSlice = (set, get) => ({
   startListeningLiveStats: () => {
     const { mySquad } = get();
     if (!mySquad || mySquad.length === 0) return;
-    
+
     // Cleanup previous listeners if any
-    liveStatsUnsubscribes.forEach(unsub => unsub());
+    liveStatsUnsubscribes.forEach((unsub) => unsub());
     liveStatsUnsubscribes = [];
 
-    const playerIds = mySquad.map(p => p.playerId);
+    const playerIds = mySquad.map((p) => p.playerId);
     if (playerIds.length === 0) return;
 
     set({ isLiveStatsLoading: true });
@@ -26,29 +26,36 @@ export const liveStatsSlice = (set, get) => ({
       chunks.push(playerIds.slice(i, i + 30));
     }
 
-    chunks.forEach(chunk => {
-      const q = query(collection(db, 'public_data/live_gameweek_stats/players'), where(documentId(), 'in', chunk));
-      
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const { liveGwStats } = get();
-        const newStats = { ...liveGwStats };
-        
-        snapshot.forEach(doc => {
-          newStats[doc.id] = doc.data();
-        });
-        
-        set({ liveGwStats: newStats, isLiveStatsLoading: false });
-      }, (error) => {
-        console.error("Live stats subscription error:", error);
-        set({ isLiveStatsLoading: false });
-      });
-      
+    chunks.forEach((chunk) => {
+      const q = query(
+        collection(db, 'public_data/live_gameweek_stats/players'),
+        where(documentId(), 'in', chunk)
+      );
+
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          const { liveGwStats } = get();
+          const newStats = { ...liveGwStats };
+
+          snapshot.forEach((doc) => {
+            newStats[doc.id] = doc.data();
+          });
+
+          set({ liveGwStats: newStats, isLiveStatsLoading: false });
+        },
+        (error) => {
+          console.error('Live stats subscription error:', error);
+          set({ isLiveStatsLoading: false });
+        }
+      );
+
       liveStatsUnsubscribes.push(unsubscribe);
     });
   },
 
   stopListeningLiveStats: () => {
-    liveStatsUnsubscribes.forEach(unsub => unsub());
+    liveStatsUnsubscribes.forEach((unsub) => unsub());
     liveStatsUnsubscribes = [];
-  }
+  },
 });

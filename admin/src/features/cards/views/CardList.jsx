@@ -31,10 +31,10 @@ export default function CardList() {
   const handleSaveCard = async (cardData) => {
     try {
       const savedCard = await cardDatabase.saveCard(cardData);
-      
+
       // ✅ ใช้วิธีอัปเดต State โดยตรง ไม่เรียก fetchCards() ใหม่ เพื่อประหยัด Firebase Reads
-      setCards(prev => {
-        const index = prev.findIndex(c => c.id === savedCard.id);
+      setCards((prev) => {
+        const index = prev.findIndex((c) => c.id === savedCard.id);
         if (index >= 0) {
           const newCards = [...prev];
           newCards[index] = savedCard;
@@ -56,7 +56,7 @@ export default function CardList() {
       try {
         await cardDatabase.deleteCard(cardId);
         // ✅ ใช้วิธีลบจาก State ทันที ไม่ต้อง Fetch ใหม่
-        setCards(prev => prev.filter(c => c.id !== cardId));
+        setCards((prev) => prev.filter((c) => c.id !== cardId));
       } catch (error) {
         console.error(error);
         alert('ลบข้อมูลล้มเหลว');
@@ -69,7 +69,7 @@ export default function CardList() {
       try {
         setIsLoading(true);
         const newSavedCards = await cardDatabase.seedMockCards();
-        setCards(prev => [...prev, ...newSavedCards]);
+        setCards((prev) => [...prev, ...newSavedCards]);
         alert('สร้างการ์ดจำลองสำเร็จ!');
       } catch (error) {
         console.error(error);
@@ -82,10 +82,12 @@ export default function CardList() {
 
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 flex flex-col h-[calc(100vh-8rem)]">
-      
       {/* Header (แยก Component ตามหลัก SRP) */}
-      <CardListHeader 
-        onAddClick={() => { setEditingCard(null); setIsFormOpen(true); }}
+      <CardListHeader
+        onAddClick={() => {
+          setEditingCard(null);
+          setIsFormOpen(true);
+        }}
         onMockClick={handleMockCards}
       />
 
@@ -101,16 +103,21 @@ export default function CardList() {
           <div className="text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
             <Zap className="mx-auto text-slate-300 mb-3" size={48} />
             <h3 className="text-lg font-bold text-slate-600 mb-1">ยังไม่มีการ์ดในระบบ</h3>
-            <p className="text-sm text-slate-400">กดปุ่ม "เพิ่มการ์ดใหม่" เพื่อสร้างการ์ดใบแรกของคุณ</p>
+            <p className="text-sm text-slate-400">
+              กดปุ่ม "เพิ่มการ์ดใหม่" เพื่อสร้างการ์ดใบแรกของคุณ
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {cards.map(card => (
-              <CardItem 
-                key={card.id} 
-                card={card} 
-                onEdit={(c) => { setEditingCard(c); setIsFormOpen(true); }} 
-                onDelete={handleDeleteCard} 
+            {cards.map((card) => (
+              <CardItem
+                key={card.id}
+                card={card}
+                onEdit={(c) => {
+                  setEditingCard(c);
+                  setIsFormOpen(true);
+                }}
+                onDelete={handleDeleteCard}
               />
             ))}
           </div>
@@ -118,10 +125,13 @@ export default function CardList() {
       </div>
 
       {isFormOpen && (
-        <CardForm 
-          initialData={editingCard} 
-          onSave={handleSaveCard} 
-          onCancel={() => { setIsFormOpen(false); setEditingCard(null); }} 
+        <CardForm
+          initialData={editingCard}
+          onSave={handleSaveCard}
+          onCancel={() => {
+            setIsFormOpen(false);
+            setEditingCard(null);
+          }}
         />
       )}
     </div>

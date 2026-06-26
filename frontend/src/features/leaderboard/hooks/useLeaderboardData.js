@@ -14,7 +14,7 @@ export const useLeaderboardData = () => {
     queryKey: ['leaderboardCache'],
     queryFn: leaderboardFetchService.getLeaderboardCache,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    retry: 1
+    retry: 1,
   });
 
   // เลือก Array ที่จะแสดงตาม Tab
@@ -36,9 +36,9 @@ export const useLeaderboardData = () => {
           const usersRef = collection(db, 'users');
           const q = query(usersRef, limit(100)); // ดึงมาแค่ 100 คนป้องกัน read เยอะเกินไป
           const snap = await getDocs(q);
-          
+
           const usersArray = [];
-          snap.forEach(doc => {
+          snap.forEach((doc) => {
             const data = doc.data();
             usersArray.push({
               id: doc.id,
@@ -47,7 +47,7 @@ export const useLeaderboardData = () => {
               photoURL: data.photoURL || '',
               userPoints: data.userPoints || 0,
               lastGameweekPoints: data.lastGameweekPoints || 0,
-              clubSpentExp: data.clubSpentExp || 0
+              clubSpentExp: data.clubSpentExp || 0,
             });
           });
 
@@ -61,10 +61,10 @@ export const useLeaderboardData = () => {
           }
 
           // ใส่ Rank
-          const rankedUsers = usersArray.map((u, i) => ({...u, displayRank: i + 1}));
+          const rankedUsers = usersArray.map((u, i) => ({ ...u, displayRank: i + 1 }));
           setFallbackLeaders(rankedUsers);
         } catch (err) {
-          console.error("Fallback fetch error:", err);
+          console.error('Fallback fetch error:', err);
         }
       };
       fetchFallback();
@@ -74,8 +74,12 @@ export const useLeaderboardData = () => {
   const exportCompetitorData = async () => {
     setIsExporting(true);
     try {
-      if (!cacheData || !cacheData.exportDataTxt || cacheData.exportDataTxt === 'ยังไม่มีข้อมูลการแข่งขัน') {
-        throw new Error("ยังไม่มีข้อมูล Export หรือระบบยังไม่ได้คำนวณจากหลังบ้าน");
+      if (
+        !cacheData ||
+        !cacheData.exportDataTxt ||
+        cacheData.exportDataTxt === 'ยังไม่มีข้อมูลการแข่งขัน'
+      ) {
+        throw new Error('ยังไม่มีข้อมูล Export หรือระบบยังไม่ได้คำนวณจากหลังบ้าน');
       }
 
       const txtContent = cacheData.exportDataTxt;
@@ -83,19 +87,26 @@ export const useLeaderboardData = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `competitors_squad_data_${new Date().toISOString().split('T')[0]}.txt`);
+      link.setAttribute(
+        'download',
+        `competitors_squad_data_${new Date().toISOString().split('T')[0]}.txt`
+      );
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      window.dispatchEvent(new CustomEvent('SHOW_TOAST', {
-        detail: { message: 'ดาวน์โหลดข้อมูลสำเร็จ!', type: 'success' }
-      }));
+      window.dispatchEvent(
+        new CustomEvent('SHOW_TOAST', {
+          detail: { message: 'ดาวน์โหลดข้อมูลสำเร็จ!', type: 'success' },
+        })
+      );
     } catch (error) {
-      console.error("Error exporting data:", error);
-      window.dispatchEvent(new CustomEvent('SHOW_TOAST', {
-        detail: { message: error.message || 'เกิดข้อผิดพลาดในการดาวน์โหลดข้อมูล', type: 'error' }
-      }));
+      console.error('Error exporting data:', error);
+      window.dispatchEvent(
+        new CustomEvent('SHOW_TOAST', {
+          detail: { message: error.message || 'เกิดข้อผิดพลาดในการดาวน์โหลดข้อมูล', type: 'error' },
+        })
+      );
     } finally {
       setIsExporting(false);
     }
@@ -103,5 +114,3 @@ export const useLeaderboardData = () => {
 
   return { activeTab, setActiveTab, leaders, loading, exportCompetitorData, isExporting };
 };
-
-

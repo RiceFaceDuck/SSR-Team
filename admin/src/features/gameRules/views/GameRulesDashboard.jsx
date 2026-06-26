@@ -16,19 +16,19 @@ export default function GameRulesDashboard() {
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-2 md:gap-4 border-b border-slate-200 mb-6">
-        <button 
+        <button
           onClick={() => setActiveTab('rules')}
           className={`pb-3 px-2 md:px-4 font-bold transition-colors flex items-center gap-2 ${activeTab === 'rules' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
         >
           <ScrollText size={18} /> กติกาพื้นฐาน
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab('scoring')}
           className={`pb-3 px-2 md:px-4 font-bold transition-colors flex items-center gap-2 ${activeTab === 'scoring' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
         >
           <Target size={18} /> กติกาการคิดคะแนน
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab('conditions')}
           className={`pb-3 px-2 md:px-4 font-bold transition-colors flex items-center gap-2 ${activeTab === 'conditions' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-slate-500 hover:text-slate-700'}`}
         >

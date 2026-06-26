@@ -25,25 +25,32 @@ export const useLiveMatchData = (playerIds = []) => {
     const unsubscribes = [];
     const statsMap = {};
 
-    chunks.forEach(chunk => {
-      const q = query(collection(db, 'public_data/live_gameweek_stats/players'), where(documentId(), 'in', chunk));
-      
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        snapshot.forEach(doc => {
-          statsMap[doc.id] = doc.data();
-        });
-        setLiveStats({ ...statsMap });
-        setLoading(false);
-      }, (error) => {
-        console.error("Live stats subscription error:", error);
-        setLoading(false);
-      });
-      
+    chunks.forEach((chunk) => {
+      const q = query(
+        collection(db, 'public_data/live_gameweek_stats/players'),
+        where(documentId(), 'in', chunk)
+      );
+
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          snapshot.forEach((doc) => {
+            statsMap[doc.id] = doc.data();
+          });
+          setLiveStats({ ...statsMap });
+          setLoading(false);
+        },
+        (error) => {
+          console.error('Live stats subscription error:', error);
+          setLoading(false);
+        }
+      );
+
       unsubscribes.push(unsubscribe);
     });
 
     return () => {
-      unsubscribes.forEach(unsub => unsub());
+      unsubscribes.forEach((unsub) => unsub());
     };
   }, [JSON.stringify(playerIds)]);
 

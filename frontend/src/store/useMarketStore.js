@@ -37,7 +37,7 @@ export const useMarketStore = create((set, get) => ({
       if (forceRefresh) {
         queryClient.invalidateQueries({ queryKey: ['marketPlayers'] });
       }
-      
+
       const fetchedPlayers = await queryClient.fetchQuery({
         queryKey: ['marketPlayers'],
         queryFn: () => marketFetchService.getPlayers(forceRefresh),
@@ -45,17 +45,16 @@ export const useMarketStore = create((set, get) => ({
       });
 
       // 4. บันทึกข้อมูลลง Store สำเร็จ พร้อมล็อก Flag ว่ามีข้อมูลแล้ว
-      set({ 
-        players: fetchedPlayers, 
-        isLoading: false, 
-        isDataFetched: true 
+      set({
+        players: fetchedPlayers,
+        isLoading: false,
+        isDataFetched: true,
       });
-
     } catch (error) {
-      console.error("❌ [MarketStore] ดึงข้อมูลตลาดนักเตะล้มเหลว:", error);
-      set({ 
-        error: error.message || 'ไม่สามารถโหลดข้อมูลนักเตะได้', 
-        isLoading: false 
+      console.error('❌ [MarketStore] ดึงข้อมูลตลาดนักเตะล้มเหลว:', error);
+      set({
+        error: error.message || 'ไม่สามารถโหลดข้อมูลนักเตะได้',
+        isLoading: false,
       });
     }
   },
@@ -70,7 +69,7 @@ export const useMarketStore = create((set, get) => ({
       players: [],
       isLoading: false,
       error: null,
-      isDataFetched: false
+      isDataFetched: false,
     });
   },
 
@@ -85,9 +84,9 @@ export const useMarketStore = create((set, get) => ({
    */
   getPlayerBySku: (sku) => {
     const allPlayers = get().players;
-    return allPlayers.find(p => String(p.sku) === String(sku));
+    return allPlayers.find((p) => String(p.sku) === String(sku));
   },
-  
+
   /**
    * (ลูกเล่นเสริม) ดึงนักเตะราคาแพง/คะแนนสูง มาโปรโมตหน้าร้าน
    */
@@ -95,5 +94,5 @@ export const useMarketStore = create((set, get) => ({
     const allPlayers = [...get().players];
     // เรียงตามคะแนน หรือ ราคา
     return allPlayers.sort((a, b) => b.totalPoints - a.totalPoints).slice(0, limitCount);
-  }
+  },
 }));

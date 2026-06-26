@@ -25,15 +25,21 @@ exports.claimQuestReward = async (userId, questId) => {
         const dailyQuests = userData.dailyQuests || {};
         let questRecord = dailyQuests[questId] || { uses: 0, lastClaimed: null };
 
+        // Helper function แปลงเป็นเวลาไทย (UTC+7)
+        const getBkkDate = (d) => new Date(d.getTime() + (7 * 60 * 60 * 1000));
+
         if (questRecord.lastClaimed) {
             const lastClaimedDate = questRecord.lastClaimed.toDate 
                 ? questRecord.lastClaimed.toDate() 
                 : new Date(questRecord.lastClaimed);
                 
+            const bkkLastClaimed = getBkkDate(lastClaimedDate);
+            const bkkNow = getBkkDate(now);
+                
             if (
-                lastClaimedDate.getDate() !== now.getDate() ||
-                lastClaimedDate.getMonth() !== now.getMonth() ||
-                lastClaimedDate.getFullYear() !== now.getFullYear()
+                bkkLastClaimed.getUTCDate() !== bkkNow.getUTCDate() ||
+                bkkLastClaimed.getUTCMonth() !== bkkNow.getUTCMonth() ||
+                bkkLastClaimed.getUTCFullYear() !== bkkNow.getUTCFullYear()
             ) {
                 questRecord.uses = 0; 
             }
@@ -67,10 +73,12 @@ exports.claimQuestReward = async (userId, questId) => {
         const rewardBalls = serverQuest.rewardBalls || 0;
         const currentBalls = userData.balls || 0;
 
-        transaction.update(userRef, {
-            [`dailyQuests.${questId}`]: questRecord,
+        transaction.set(userRef, {
+            dailyQuests: {
+                [questId]: questRecord
+            },
             balls: currentBalls + rewardBalls
-        });
+        }, { merge: true });
 
         if (rewardBalls > 0) {
             const txRef = userRef.collection('transactions').doc();

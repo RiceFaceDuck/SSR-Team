@@ -1,5 +1,13 @@
-import { collection, doc, addDoc, updateDoc, deleteDoc, getDocs, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../config/firebase'; 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'ssr-team';
 
@@ -13,13 +21,12 @@ const getQuestDoc = (id) => {
 };
 
 export const questService = {
-  
   // 1. ดึงข้อมูลโฆษณาทั้งหมด
   getAllQuests: async () => {
     try {
       const snapshot = await getDocs(getQuestsCollection());
-      
-      const quests = snapshot.docs.map(doc => ({
+
+      const quests = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate().toISOString() || null,
@@ -32,10 +39,9 @@ export const questService = {
         const timeB = new Date(b.createdAt || 0).getTime();
         return timeB - timeA;
       });
-
     } catch (error) {
-      console.error("❌ Error fetching quests:", error);
-      throw new Error("ไม่สามารถดึงข้อมูลโฆษณาได้ กรุณาลองใหม่อีกครั้ง");
+      console.error('❌ Error fetching quests:', error);
+      throw new Error('ไม่สามารถดึงข้อมูลโฆษณาได้ กรุณาลองใหม่อีกครั้ง');
     }
   },
 
@@ -59,16 +65,16 @@ export const questService = {
 
       // 🎯 บันทึกลง Path ที่ถูกต้อง
       const docRef = await addDoc(getQuestsCollection(), newQuest);
-      
-      return { 
-        id: docRef.id, 
+
+      return {
+        id: docRef.id,
         ...newQuest,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
     } catch (error) {
-      console.error("❌ Error creating quest:", error);
-      throw new Error("เกิดข้อผิดพลาดในการสร้างโฆษณา (Permission Denied)");
+      console.error('❌ Error creating quest:', error);
+      throw new Error('เกิดข้อผิดพลาดในการสร้างโฆษณา (Permission Denied)');
     }
   },
 
@@ -78,14 +84,14 @@ export const questService = {
       const docRef = getQuestDoc(id);
       const dataToUpdate = {
         ...updateData,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
-      
+
       await updateDoc(docRef, dataToUpdate);
       return true;
     } catch (error) {
-      console.error("❌ Error updating quest:", error);
-      throw new Error("เกิดข้อผิดพลาดในการอัปเดตข้อมูล");
+      console.error('❌ Error updating quest:', error);
+      throw new Error('เกิดข้อผิดพลาดในการอัปเดตข้อมูล');
     }
   },
 
@@ -96,23 +102,23 @@ export const questService = {
       await deleteDoc(docRef);
       return true;
     } catch (error) {
-      console.error("❌ Error deleting quest:", error);
-      throw new Error("เกิดข้อผิดพลาดในการลบโฆษณา");
+      console.error('❌ Error deleting quest:', error);
+      throw new Error('เกิดข้อผิดพลาดในการลบโฆษณา');
     }
   },
 
-  // 5. สลับสถานะ เปิด/ปิด 
+  // 5. สลับสถานะ เปิด/ปิด
   toggleQuestStatus: async (id, currentStatus) => {
     try {
       const docRef = getQuestDoc(id);
       await updateDoc(docRef, {
         isActive: !currentStatus,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
       return !currentStatus;
     } catch (error) {
-      console.error("❌ Error toggling quest status:", error);
-      throw new Error("ไม่สามารถเปลี่ยนสถานะได้");
+      console.error('❌ Error toggling quest status:', error);
+      throw new Error('ไม่สามารถเปลี่ยนสถานะได้');
     }
-  }
+  },
 };

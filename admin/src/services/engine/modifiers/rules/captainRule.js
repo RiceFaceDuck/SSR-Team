@@ -5,7 +5,7 @@ export const captainRule = {
     let captainPlayed = false;
 
     // First pass: check if captain played
-    squad.forEach(p => {
+    squad.forEach((p) => {
       if (p.isStarting && p.playerId === captainId) {
         if (p.basePoints > 0 || p.hasPlayed) {
           captainPlayed = true;
@@ -14,7 +14,7 @@ export const captainRule = {
     });
 
     // Second pass: apply multipliers
-    return squad.map(p => {
+    return squad.map((p) => {
       if (p.isStarting) {
         // ถ้านักเตะคนนี้มีการ์ด TRIPLE_CAPTAIN ทำงานอยู่แล้ว จะไม่รับผลจากกัปตันปกติ
         if (p.hasTripleCaptain) return p;
@@ -33,5 +33,5 @@ export const captainRule = {
       }
       return p;
     });
-  }
+  },
 };

@@ -1,4 +1,13 @@
-import { collection, doc, getDocs, setDoc, deleteDoc, serverTimestamp, query, limit } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDocs,
+  setDoc,
+  deleteDoc,
+  serverTimestamp,
+  query,
+  limit,
+} from 'firebase/firestore';
 import { db } from '../../config/firebase';
 
 const getCollectionRef = () => {
@@ -23,19 +32,25 @@ export const teamDatabase = {
 
       const q = query(getCollectionRef(), limit(100)); // Safety limit
       const snapshot = await getDocs(q);
-      const teams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => {
-        // จัดเรียงตามการเกิดเหตุการณ์อัพเดท (updatedAt) ล่าสุดขึ้นก่อน
-        const timeA = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : (new Date(a.updatedAt || 0).getTime());
-        const timeB = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : (new Date(b.updatedAt || 0).getTime());
-        // ถ้าเวลาเท่ากัน ให้เรียงตามชื่อทีม
-        if (timeB === timeA) return a.name.localeCompare(b.name);
-        return timeB - timeA;
-      });
+      const teams = snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => {
+          // จัดเรียงตามการเกิดเหตุการณ์อัพเดท (updatedAt) ล่าสุดขึ้นก่อน
+          const timeA = a.updatedAt?.toMillis
+            ? a.updatedAt.toMillis()
+            : new Date(a.updatedAt || 0).getTime();
+          const timeB = b.updatedAt?.toMillis
+            ? b.updatedAt.toMillis()
+            : new Date(b.updatedAt || 0).getTime();
+          // ถ้าเวลาเท่ากัน ให้เรียงตามชื่อทีม
+          if (timeB === timeA) return a.name.localeCompare(b.name);
+          return timeB - timeA;
+        });
 
       teamsCache = teams;
       return [...teamsCache];
     } catch (error) {
-      console.error("Error fetching teams:", error);
+      console.error('Error fetching teams:', error);
       throw error;
     }
   },
@@ -44,9 +59,10 @@ export const teamDatabase = {
     try {
       const teamId = teamData.id || teamData.name.replace(/\s+/g, '-').toLowerCase();
       const docRef = getDocRef(teamId);
-      
+
       const cleanData = {
         name: teamData.name,
+        apiTeamId: teamData.apiTeamId ? Number(teamData.apiTeamId) : null,
         shortName: teamData.shortName || teamData.name.substring(0, 3).toUpperCase(),
         logo: teamData.logo || '',
         updatedAt: serverTimestamp(),
@@ -56,7 +72,7 @@ export const teamDatabase = {
       teamsCache = null; // Invalidate cache so next fetch gets updated data
       return { id: teamId, ...cleanData };
     } catch (error) {
-      console.error("Error saving team:", error);
+      console.error('Error saving team:', error);
       throw error;
     }
   },
@@ -67,8 +83,8 @@ export const teamDatabase = {
       teamsCache = null; // Invalidate cache
       return id;
     } catch (error) {
-      console.error("Error deleting team:", error);
+      console.error('Error deleting team:', error);
       throw error;
     }
-  }
+  },
 };

@@ -1,15 +1,15 @@
 import React from 'react';
 
-export default function AdjustBallsModal({ 
-  isModalOpen, 
-  selectedUser, 
-  closeModal, 
-  handleSubmit, 
-  amount, 
-  setAmount, 
-  reason, 
-  setReason, 
-  isSubmitting 
+export default function AdjustBallsModal({
+  isModalOpen,
+  selectedUser,
+  closeModal,
+  handleSubmit,
+  amount,
+  setAmount,
+  reason,
+  setReason,
+  isSubmitting,
 }) {
   if (!isModalOpen || !selectedUser) return null;
 
@@ -17,11 +17,8 @@ export default function AdjustBallsModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none bg-black bg-opacity-50 transition-opacity">
       <div className="relative w-full max-w-md mx-auto my-6">
         <div className="relative flex flex-col w-full bg-white border-0 rounded-xl shadow-2xl outline-none focus:outline-none">
-          
           <div className="flex items-start justify-between p-5 border-b border-solid border-gray-200 rounded-t">
-            <h3 className="text-xl font-bold text-gray-800">
-              ปรับยอด Balls ⚽
-            </h3>
+            <h3 className="text-xl font-bold text-gray-800">ปรับยอด Balls ⚽</h3>
             <button
               className="p-1 ml-auto bg-transparent border-0 text-gray-400 hover:text-gray-900 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
               onClick={closeModal}
@@ -33,10 +30,18 @@ export default function AdjustBallsModal({
           <form onSubmit={handleSubmit}>
             <div className="relative p-6 flex-auto">
               <p className="mb-4 text-gray-600 text-sm">
-                กำลังปรับยอดให้ผู้เล่น: <strong className="text-gray-900">{selectedUser.displayName || selectedUser.username || selectedUser.id}</strong>
-                <br />ยอดปัจจุบัน: <strong className="text-green-600">{selectedUser.balls?.toLocaleString() || 0}</strong> ⚽
+                กำลังปรับยอดให้ผู้เล่น:{' '}
+                <strong className="text-gray-900">
+                  {selectedUser.displayName || selectedUser.username || selectedUser.id}
+                </strong>
+                <br />
+                ยอดปัจจุบัน:{' '}
+                <strong className="text-green-600">
+                  {selectedUser.balls?.toLocaleString() || 0}
+                </strong>{' '}
+                ⚽
               </p>
-              
+
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="amount">
                   จำนวน (+ เพื่อเพิ่ม, - เพื่อลด)

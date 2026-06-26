@@ -3,7 +3,7 @@ import ToggleSwitch from './ToggleSwitch';
 
 export default function ScoreStatItem({ ruleKey, label, desc, ruleData, onUpdate }) {
   const data = ruleData || {};
-  
+
   return (
     <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-3 hover:bg-slate-100 transition-colors">
       <div className="mb-3">

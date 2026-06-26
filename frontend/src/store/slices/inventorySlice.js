@@ -9,10 +9,10 @@ export const inventorySlice = (set, get) => ({
     if (!userId) return;
     const inv = await inventoryService.fetchInventory(userId);
     if (inv) {
-      set({ 
-        ownedManagers: inv.ownedManagers || [], 
+      set({
+        ownedManagers: inv.ownedManagers || [],
         ownedCards: inv.ownedCards || {},
-        isInventoryLoaded: true
+        isInventoryLoaded: true,
       });
     }
   },
@@ -63,5 +63,5 @@ export const inventorySlice = (set, get) => ({
     } catch (error) {
       return { success: false, message: error.message };
     }
-  }
+  },
 });

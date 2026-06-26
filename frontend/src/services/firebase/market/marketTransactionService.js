@@ -21,14 +21,17 @@ export const marketTransactionService = {
    * บันทึกการเปลี่ยนแปลงของตลาด (ซื้อ/ขาย) ลง Database แบบ Atomic Transaction
    */
   saveMarketChanges: async (userId, squadData) => {
-    console.log('%c💸 [MarketTransaction] เริ่มกระบวนการบันทึกการเปลี่ยนแปลงตลาด (Secure Transaction)...', 'color: #8b5cf6; font-weight: bold;');
-    
-    if (!userId) throw new Error("เซิร์ฟเวอร์ปฏิเสธการเข้าถึง: ไม่พบรหัสผู้ใช้งาน (UID)");
+    console.log(
+      '%c💸 [MarketTransaction] เริ่มกระบวนการบันทึกการเปลี่ยนแปลงตลาด (Secure Transaction)...',
+      'color: #8b5cf6; font-weight: bold;'
+    );
+
+    if (!userId) throw new Error('เซิร์ฟเวอร์ปฏิเสธการเข้าถึง: ไม่พบรหัสผู้ใช้งาน (UID)');
 
     try {
       const { httpsCallable } = require('firebase/functions');
       const { functions } = require('../../config/firebase');
-      
+
       const saveSquadFn = httpsCallable(functions, 'saveSquad');
       const result = await saveSquadFn({ userId, squadData });
 
@@ -47,15 +50,22 @@ export const marketTransactionService = {
         await participationService.syncAndRepairCounter(userId);
       }
 
-      return { success: true, message: "บันทึกทีมและทำรายการตลาดสำเร็จ!" };
-
+      return { success: true, message: 'บันทึกทีมและทำรายการตลาดสำเร็จ!' };
     } catch (error) {
-      console.error("❌ [MarketTransaction] Transaction failed: ", error);
-      return { success: false, message: error.message || "การทำรายการถูกยกเลิกเนื่องจากความปลอดภัย" };
+      console.error('❌ [MarketTransaction] Transaction failed: ', error);
+      return {
+        success: false,
+        message: error.message || 'การทำรายการถูกยกเลิกเนื่องจากความปลอดภัย',
+      };
     }
   },
 
   buyPowerCard: async (userId, cardId, price) => {
-    return await transactionService.spendBalls(userId, price, 'buy_card', `ซื้อการ์ดไอดี: ${cardId}`);
-  }
+    return await transactionService.spendBalls(
+      userId,
+      price,
+      'buy_card',
+      `ซื้อการ์ดไอดี: ${cardId}`
+    );
+  },
 };

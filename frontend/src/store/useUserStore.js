@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware'; 
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 import { createAuthSlice } from './slices/createAuthSlice';
 import { createWalletSlice } from './slices/createWalletSlice';
@@ -37,12 +37,12 @@ export const useUserStore = create(
       ...createTutorialSlice(set, get),
     }),
     {
-      name: 'fantasy-team-draft', 
+      name: 'fantasy-team-draft',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ 
-        mySquad: state.mySquad, 
+      partialize: (state) => ({
+        mySquad: state.mySquad,
         formation: state.formation,
-        hasUnsavedChanges: state.hasUnsavedChanges 
+        hasUnsavedChanges: state.hasUnsavedChanges,
       }),
     }
   )

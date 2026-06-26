@@ -1,6 +1,11 @@
 import React from 'react';
 
-export default function FloatingActionBar({ pendingPlacement, selectedPlayer, cancelPlacement, setSelectedPlayer }) {
+export default function FloatingActionBar({
+  pendingPlacement,
+  selectedPlayer,
+  cancelPlacement,
+  setSelectedPlayer,
+}) {
   if (!pendingPlacement && !selectedPlayer) return null;
 
   return (
@@ -14,11 +19,13 @@ export default function FloatingActionBar({ pendingPlacement, selectedPlayer, ca
             {pendingPlacement ? 'กำลังจัดวางลงสนาม' : 'โหมดสลับตำแหน่ง'}
           </span>
           <span className="text-[#fbbf24] text-[10px] font-semibold">
-            {pendingPlacement ? `แตะที่ตำแหน่งว่างเพื่อวาง ${pendingPlacement.name}` : 'แตะที่นักเตะอีกคน หรือตำแหน่งว่าง'}
+            {pendingPlacement
+              ? `แตะที่ตำแหน่งว่างเพื่อวาง ${pendingPlacement.name}`
+              : 'แตะที่นักเตะอีกคน หรือตำแหน่งว่าง'}
           </span>
         </div>
       </div>
-      <button 
+      <button
         onClick={() => {
           if (pendingPlacement) cancelPlacement();
           setSelectedPlayer(null);

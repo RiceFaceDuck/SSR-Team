@@ -8,11 +8,7 @@ import { UploadCloud, FileSpreadsheet, Loader2 } from 'lucide-react';
  * @param {string} accept - ประเภทไฟล์ที่อนุญาต เช่น ".xlsx, .xls, .csv"
  * @param {boolean} isLoading - สถานะกำลังประมวลผลไฟล์ ปิดการใช้งานปุ่มถ้าเป็น true
  */
-const Dropzone = ({ 
-  onFileSelected, 
-  accept = ".xlsx, .xls, .csv", 
-  isLoading = false 
-}) => {
+const Dropzone = ({ onFileSelected, accept = '.xlsx, .xls, .csv', isLoading = false }) => {
   const [isDragActive, setIsDragActive] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState(null);
   const fileInputRef = useRef(null);
@@ -31,7 +27,7 @@ const Dropzone = ({
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragActive(false);
-    
+
     if (isLoading) return;
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
@@ -94,7 +90,9 @@ const Dropzone = ({
               <div className="flex flex-col items-center text-green-600">
                 <FileSpreadsheet className="w-12 h-12 mb-4" />
                 <p className="text-base font-semibold text-gray-800">{selectedFileName}</p>
-                <p className="text-sm text-gray-500 mt-1">คลิกหรือลากไฟล์ใหม่มาวางเพื่อเปลี่ยนไฟล์</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  คลิกหรือลากไฟล์ใหม่มาวางเพื่อเปลี่ยนไฟล์
+                </p>
               </div>
             ) : (
               <div className="flex flex-col items-center text-gray-500">
@@ -102,11 +100,10 @@ const Dropzone = ({
                   <UploadCloud className="w-8 h-8 text-blue-500" />
                 </div>
                 <p className="text-base font-medium text-gray-700 mb-1">
-                  คลิกเพื่ออัปโหลด <span className="font-normal text-gray-500">หรือลากไฟล์มาวางที่นี่</span>
+                  คลิกเพื่ออัปโหลด{' '}
+                  <span className="font-normal text-gray-500">หรือลากไฟล์มาวางที่นี่</span>
                 </p>
-                <p className="text-xs text-gray-400">
-                  รองรับไฟล์ {accept}
-                </p>
+                <p className="text-xs text-gray-400">รองรับไฟล์ {accept}</p>
               </div>
             )}
           </>

@@ -12,17 +12,17 @@ export const cardService = {
       const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'cards');
       const q = query(colRef, where('isActive', '==', true));
       const snapshot = await getDocs(q);
-      
-      const cards = snapshot.docs.map(doc => ({
+
+      const cards = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
-      
+
       console.log('⚡ [CardService] ดึงข้อมูลการ์ดเสริมพลังสำเร็จ:', cards.length, 'ใบ');
       return cards;
     } catch (error) {
       console.error('❌ [CardService] เกิดข้อผิดพลาดในการดึงข้อมูลการ์ด:', error);
       return [];
     }
-  }
+  },
 };

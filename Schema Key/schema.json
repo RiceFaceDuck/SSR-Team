@@ -1,0 +1,1406 @@
+{
+  "_generatedAt": "2026-06-26T02:44:09.433Z",
+  "_noteForAI": "Use this JSON for quick schema lookups instead of parsing markdown.",
+  "schemas": {
+    "README.md": [
+      {
+        "ระดับ": "🔴 CRITICAL",
+        "ไฟล์": "schema-critical.md",
+        "ใช้เมื่อไหร่": "แก้ไขระบบคะแนน, กติกา, ธุรกรรมเงิน, Security, Cloud Functions"
+      },
+      {
+        "ระดับ": "🟡 CORE",
+        "ไฟล์": "schema-core.md",
+        "ใช้เมื่อไหร่": "แก้ไขข้อมูลนักเตะ, ทีม, ผู้เล่น, Squad, การ์ด, Inventory"
+      },
+      {
+        "ระดับ": "🟢 SUPPORT",
+        "ไฟล์": "schema-support.md",
+        "ใช้เมื่อไหร่": "แก้ไขแชท, ลีก, Live Match, ฉายา, ข้อมูลในอดีต, โฆษณา"
+      },
+      {
+        "ระดับ": "Firestore Path",
+        "ไฟล์": "Schema",
+        "ใช้เมื่อไหร่": "ไฟล์"
+      },
+      {
+        "ระดับ": "`artifacts/{appId}/public/data/players/{sku}`",
+        "ไฟล์": "Player + Stats",
+        "ใช้เมื่อไหร่": "🟡 CORE B1"
+      },
+      {
+        "ระดับ": "`artifacts/{appId}/public/data/teams/{teamId}`",
+        "ไฟล์": "Team",
+        "ใช้เมื่อไหร่": "🟡 CORE B2"
+      },
+      {
+        "ระดับ": "`artifacts/{appId}/users/{userId}/game_data/squad`",
+        "ไฟล์": "Squad",
+        "ใช้เมื่อไหร่": "🟡 CORE B3"
+      },
+      {
+        "ระดับ": "`artifacts/{appId}/public/data/managers/{managerId}`",
+        "ไฟล์": "Manager",
+        "ใช้เมื่อไหร่": "🟡 CORE B4"
+      },
+      {
+        "ระดับ": "`artifacts/{appId}/public/data/cards/{cardId}`",
+        "ไฟล์": "Card",
+        "ใช้เมื่อไหร่": "🟡 CORE B5"
+      },
+      {
+        "ระดับ": "`users/{userId}`",
+        "ไฟล์": "User",
+        "ใช้เมื่อไหร่": "🟡 CORE B6"
+      },
+      {
+        "ระดับ": "`users/{userId}/private/fcm_tokens`",
+        "ไฟล์": "FCM Tokens",
+        "ใช้เมื่อไหร่": "🟡 CORE B6.1"
+      },
+      {
+        "ระดับ": "`users/{userId}/game_data/inventory`",
+        "ไฟล์": "Inventory",
+        "ใช้เมื่อไหร่": "🟡 CORE B7"
+      },
+      {
+        "ระดับ": "`public_data/system_config`",
+        "ไฟล์": "System Config",
+        "ใช้เมื่อไหร่": "🔴 CRITICAL C1"
+      },
+      {
+        "ระดับ": "`public_data/gameweeks/weeks/{gameweekId}`",
+        "ไฟล์": "Gameweek Config",
+        "ใช้เมื่อไหร่": "🔴 CRITICAL C2"
+      },
+      {
+        "ระดับ": "`public_data/game_rules`",
+        "ไฟล์": "Game Rules",
+        "ใช้เมื่อไหร่": "🔴 CRITICAL C3"
+      },
+      {
+        "ระดับ": "`public_data/scoring_rules`",
+        "ไฟล์": "Scoring Rules",
+        "ใช้เมื่อไหร่": "🔴 CRITICAL C4"
+      },
+      {
+        "ระดับ": "`public_data/game_conditions`",
+        "ไฟล์": "Game Conditions",
+        "ใช้เมื่อไหร่": "🔴 CRITICAL C5"
+      },
+      {
+        "ระดับ": "`users/{userId}/gameweek_history/{gameweekId}`",
+        "ไฟล์": "Gameweek History",
+        "ใช้เมื่อไหร่": "🔴 CRITICAL C6"
+      },
+      {
+        "ระดับ": "`users/{userId}/transactions/{transactionId}`",
+        "ไฟล์": "Transactions",
+        "ใช้เมื่อไหร่": "🔴 CRITICAL C7"
+      },
+      {
+        "ระดับ": "`users/{userId}/game_data/club`",
+        "ไฟล์": "Club Upgrades",
+        "ใช้เมื่อไหร่": "🔴 CRITICAL C8"
+      },
+      {
+        "ระดับ": "`public_data/achievements/list/{achievementId}`",
+        "ไฟล์": "Achievement",
+        "ใช้เมื่อไหร่": "🟢 SUPPORT S1"
+      },
+      {
+        "ระดับ": "`global_chat/{messageId}`",
+        "ไฟล์": "Global Chat",
+        "ใช้เมื่อไหร่": "🟢 SUPPORT S2"
+      },
+      {
+        "ระดับ": "`leagues/{leagueId}`",
+        "ไฟล์": "League",
+        "ใช้เมื่อไหร่": "🟢 SUPPORT S3"
+      },
+      {
+        "ระดับ": "`public_data/live_match`",
+        "ไฟล์": "Live Match",
+        "ใช้เมื่อไหร่": "🟢 SUPPORT S4"
+      },
+      {
+        "ระดับ": "`public_data/live_match/events/{eventId}`",
+        "ไฟล์": "Live Match Events",
+        "ใช้เมื่อไหร่": "🟢 SUPPORT S4.1"
+      },
+      {
+        "ระดับ": "`public_data/live_gameweek_stats/players/{playerId}`",
+        "ไฟล์": "Live Gameweek Stats",
+        "ใช้เมื่อไหร่": "🟢 SUPPORT S4.2"
+      },
+      {
+        "ระดับ": "`users/{userId}/friends/{friendId}`",
+        "ไฟล์": "Friends",
+        "ใช้เมื่อไหร่": "🟢 SUPPORT S5"
+      },
+      {
+        "ระดับ": "`public_data/historical_players/{season_sku}`",
+        "ไฟล์": "Historical Players",
+        "ใช้เมื่อไหร่": "🟢 SUPPORT S6.1"
+      },
+      {
+        "ระดับ": "`public_data/historical_teams/{season_teamId}`",
+        "ไฟล์": "Historical Teams",
+        "ใช้เมื่อไหร่": "🟢 SUPPORT S6.2"
+      },
+      {
+        "ระดับ": "`admin_data/api_fetch_history/{fetchId}`",
+        "ไฟล์": "API Fetch History",
+        "ใช้เมื่อไหร่": "🟢 SUPPORT S6.3"
+      },
+      {
+        "ระดับ": "`public_data/ads_config`",
+        "ไฟล์": "Ads Config",
+        "ใช้เมื่อไหร่": "🟢 SUPPORT S7"
+      },
+      {
+        "ระดับ": "`public_data/leaderboard_cache`",
+        "ไฟล์": "Leaderboard Cache",
+        "ใช้เมื่อไหร่": "🟢 SUPPORT S8"
+      },
+      {
+        "ระดับ": "ถ้าแก้ Schema นี้...",
+        "ไฟล์": "ต้องเช็ค Schema เหล่านี้ด้วย"
+      },
+      {
+        "ระดับ": "Player (B1)",
+        "ไฟล์": "Squad (B3), Live Stats (S4.2), Historical (S6), Scoring Rules (C4)"
+      },
+      {
+        "ระดับ": "Squad (B3)",
+        "ไฟล์": "Player (B1), Manager (B4), Card (B5), Game Rules (C3), Gameweek History (C6)"
+      },
+      {
+        "ระดับ": "User (B6)",
+        "ไฟล์": "Transactions (C7), Club Upgrades (C8), Friends (S5), Leaderboard (S8)"
+      },
+      {
+        "ระดับ": "Scoring Rules (C4)",
+        "ไฟล์": "Gameweek History (C6), Live Stats (S4.2), Player (B1)"
+      },
+      {
+        "ระดับ": "Game Rules (C3)",
+        "ไฟล์": "Squad (B3), Inventory (B7)"
+      },
+      {
+        "ระดับ": "System Config (C1)",
+        "ไฟล์": "Gameweek Config (C2), Game Conditions (C5)"
+      },
+      {
+        "ระดับ": "Transactions (C7)",
+        "ไฟล์": "User.balls (B6), Inventory (B7)"
+      },
+      {
+        "ระดับ": "Manager (B4)",
+        "ไฟล์": "Squad.managerId (B3), Inventory.ownedManagers (B7)"
+      },
+      {
+        "ระดับ": "Card (B5)",
+        "ไฟล์": "Squad.appliedCardId (B3), Inventory.ownedCards (B7), Game Conditions (C5)"
+      }
+    ],
+    "schema-core.md": [
+      {
+        "Schema": "B1. Player",
+        "Fields": "12 + 11 stats",
+        "Sub-collections": "—",
+        "เชื่อมกับ": "Squad (B3), Scoring (C4), Live Stats (S4.2)"
+      },
+      {
+        "Schema": "B2. Team",
+        "Fields": "5",
+        "Sub-collections": "—",
+        "เชื่อมกับ": "Player.team (B1)"
+      },
+      {
+        "Schema": "B3. Squad",
+        "Fields": "10",
+        "Sub-collections": "—",
+        "เชื่อมกับ": "Player (B1), Manager (B4), Card (B5), Game Rules (C3)"
+      },
+      {
+        "Schema": "B4. Manager",
+        "Fields": "7",
+        "Sub-collections": "—",
+        "เชื่อมกับ": "Squad.managerId (B3), Inventory (B7)"
+      },
+      {
+        "Schema": "B5. Card",
+        "Fields": "6",
+        "Sub-collections": "—",
+        "เชื่อมกับ": "Squad.appliedCardId (B3), Inventory (B7)"
+      },
+      {
+        "Schema": "B6. User",
+        "Fields": "14",
+        "Sub-collections": "Private (B6.1)",
+        "เชื่อมกับ": "Transactions (C7), Club (C8), Friends (S5)"
+      },
+      {
+        "Schema": "B7. Inventory",
+        "Fields": "3",
+        "Sub-collections": "—",
+        "เชื่อมกับ": "Manager (B4), Card (B5)"
+      },
+      {
+        "Schema": "Field",
+        "Fields": "Type",
+        "Sub-collections": "Description"
+      },
+      {
+        "Schema": "`sku`",
+        "Fields": "String",
+        "Sub-collections": "Unique identifier (e.g. 'API-1234' or 'EXCEL-...'). **[IMMUTABLE]** ห้ามเปลี่ยนค่าเด็ดขาดเพราะเป็น Document ID. (กฏ Data Overlap: `API-` คือ Foundation เสมอ)"
+      },
+      {
+        "Schema": "`name`",
+        "Fields": "String",
+        "Sub-collections": "Short name used in game UI (e.g. 'Saka')"
+      },
+      {
+        "Schema": "`fullName`",
+        "Fields": "String",
+        "Sub-collections": "Full name of the player"
+      },
+      {
+        "Schema": "`imageUrl`",
+        "Fields": "String",
+        "Sub-collections": "URL to the player's photo"
+      },
+      {
+        "Schema": "`position`",
+        "Fields": "String",
+        "Sub-collections": "FWD, MID, DEF, GK"
+      },
+      {
+        "Schema": "`team`",
+        "Fields": "String",
+        "Sub-collections": "Club name (e.g. 'Arsenal')"
+      },
+      {
+        "Schema": "`price`",
+        "Fields": "Number",
+        "Sub-collections": "Fantasy price (e.g. 12.5)"
+      },
+      {
+        "Schema": "`totalPoints`",
+        "Fields": "Number",
+        "Sub-collections": "Total fantasy points accumulated"
+      },
+      {
+        "Schema": "`status`",
+        "Fields": "String",
+        "Sub-collections": "'active', 'injured', or 'suspended'"
+      },
+      {
+        "Schema": "`dataSource`",
+        "Fields": "String",
+        "Sub-collections": "Source of data: 'API', 'EXCEL', 'MANUAL'"
+      },
+      {
+        "Schema": "`createdAt`",
+        "Fields": "Timestamp",
+        "Sub-collections": "Firestore server timestamp"
+      },
+      {
+        "Schema": "`updatedAt`",
+        "Fields": "Timestamp",
+        "Sub-collections": "Firestore server timestamp"
+      },
+      {
+        "Schema": "`isActive`",
+        "Fields": "Boolean",
+        "Sub-collections": "Logical deletion flag"
+      },
+      {
+        "Schema": "Field",
+        "Fields": "Type",
+        "Sub-collections": "Description"
+      },
+      {
+        "Schema": "`pace`",
+        "Fields": "Number",
+        "Sub-collections": "0-99 speed rating"
+      },
+      {
+        "Schema": "`shooting`",
+        "Fields": "Number",
+        "Sub-collections": "0-99 shooting rating"
+      },
+      {
+        "Schema": "`passing`",
+        "Fields": "Number",
+        "Sub-collections": "0-99 passing rating"
+      },
+      {
+        "Schema": "`dribbling`",
+        "Fields": "Number",
+        "Sub-collections": "0-99 dribbling rating"
+      },
+      {
+        "Schema": "`defending`",
+        "Fields": "Number",
+        "Sub-collections": "0-99 defending rating"
+      },
+      {
+        "Schema": "`physical`",
+        "Fields": "Number",
+        "Sub-collections": "0-99 physical rating"
+      },
+      {
+        "Schema": "`goals`",
+        "Fields": "Number",
+        "Sub-collections": "Real-world goals"
+      },
+      {
+        "Schema": "`assists`",
+        "Fields": "Number",
+        "Sub-collections": "Real-world assists"
+      },
+      {
+        "Schema": "`cleanSheets`",
+        "Fields": "Number",
+        "Sub-collections": "Real-world clean sheets"
+      },
+      {
+        "Schema": "`yellowCards`",
+        "Fields": "Number",
+        "Sub-collections": "Real-world yellow cards"
+      },
+      {
+        "Schema": "`redCards`",
+        "Fields": "Number",
+        "Sub-collections": "Real-world red cards"
+      },
+      {
+        "Schema": "Field",
+        "Fields": "Type",
+        "Sub-collections": "Description"
+      },
+      {
+        "Schema": "`id`",
+        "Fields": "String",
+        "Sub-collections": "รหัสทีม หรืออ้างอิง Slug (เช่น 'arsenal') **[IMMUTABLE]**"
+      },
+      {
+        "Schema": "`name`",
+        "Fields": "String",
+        "Sub-collections": "ชื่อทีมแบบเต็ม (เช่น 'Arsenal')"
+      },
+      {
+        "Schema": "`shortName`",
+        "Fields": "String",
+        "Sub-collections": "ชื่อย่อตัวพิมพ์ใหญ่ 3-4 ตัว (เช่น 'ARS') ใช้สำหรับ UI"
+      },
+      {
+        "Schema": "`logo`",
+        "Fields": "String",
+        "Sub-collections": "URL รูปภาพโลโก้สโมสร"
+      },
+      {
+        "Schema": "`updatedAt`",
+        "Fields": "Timestamp",
+        "Sub-collections": "วันเวลาที่อัปเดตข้อมูลล่าสุด"
+      },
+      {
+        "Schema": "Field",
+        "Fields": "Type",
+        "Sub-collections": "Description"
+      },
+      {
+        "Schema": "`mySquad`",
+        "Fields": "Array",
+        "Sub-collections": "เก็บนักเตะ `[{ playerId, position, isStarting, slotIndex, appliedCardId, appliedCard, isLocked }]` **(Secure: ผ่านการ Validate ด้วย Zod Schema อย่างเข้มงวด เมื่อประมวลผล Gameweek เสร็จ appliedCard จะถูกลบทิ้งอัตโนมัติ)**"
+      },
+      {
+        "Schema": "`budgetLeft`",
+        "Fields": "Number",
+        "Sub-collections": "งบประมาณที่เหลืออยู่ (Base + Carried Over) **[Secured by Client-side Transaction]**"
+      },
+      {
+        "Schema": "`carriedOverBudget`",
+        "Fields": "Number",
+        "Sub-collections": "งบประมาณโบนัสที่ยกยอดมาจากสัปดาห์ก่อนหน้า (ถ้ามี)"
+      },
+      {
+        "Schema": "`formation`",
+        "Fields": "String",
+        "Sub-collections": "แผนการเล่นปัจจุบัน (เช่น '4-4-2')"
+      },
+      {
+        "Schema": "`managerId`",
+        "Fields": "String",
+        "Sub-collections": "รหัสผู้จัดการทีมที่เลือกใช้งาน"
+      },
+      {
+        "Schema": "`captainId`",
+        "Fields": "String",
+        "Sub-collections": "รหัสผู้เล่น (playerId) ที่เป็นกัปตันทีม"
+      },
+      {
+        "Schema": "`viceCaptainId`",
+        "Fields": "String",
+        "Sub-collections": "รหัสผู้เล่น (playerId) ที่เป็นรองกัปตันทีม (สำรองกรณีกัปตันไม่ได้ลง)"
+      },
+      {
+        "Schema": "`currentStreak`",
+        "Fields": "Number",
+        "Sub-collections": "จำนวนสัปดาห์ที่ส่งทีมติดต่อกัน (Streak)"
+      },
+      {
+        "Schema": "`updatedAt`",
+        "Fields": "Timestamp",
+        "Sub-collections": "Firestore server timestamp"
+      },
+      {
+        "Schema": "Field",
+        "Fields": "Type",
+        "Sub-collections": "Description"
+      },
+      {
+        "Schema": "`name`",
+        "Fields": "String",
+        "Sub-collections": "ชื่อผู้จัดการทีม"
+      },
+      {
+        "Schema": "`avatarUrl`",
+        "Fields": "String",
+        "Sub-collections": "ลิงก์รูปภาพของผู้จัดการทีม"
+      },
+      {
+        "Schema": "`description`",
+        "Fields": "String",
+        "Sub-collections": "คำอธิบายความสามารถ (แสดงผลให้ผู้ใช้เห็น)"
+      },
+      {
+        "Schema": "`effectLogic`",
+        "Fields": "Object",
+        "Sub-collections": "JSON Object กำหนดความสามารถพิเศษ เช่น `{\"type\":\"BUDGET_BONUS\", \"value\":25}` หรือ `{\"type\":\"UNLOCK_FORMATION\", \"formations\":[\"3-3-4\"]}`"
+      },
+      {
+        "Schema": "`price`",
+        "Fields": "Number",
+        "Sub-collections": "ราคาในการซื้อ (Balls)"
+      },
+      {
+        "Schema": "`isActive`",
+        "Fields": "Boolean",
+        "Sub-collections": "สถานะเปิด/ปิดการใช้งาน"
+      },
+      {
+        "Schema": "`updatedAt`",
+        "Fields": "Timestamp",
+        "Sub-collections": "Firestore server timestamp"
+      },
+      {
+        "Schema": "Field",
+        "Fields": "Type",
+        "Sub-collections": "Description"
+      },
+      {
+        "Schema": "`name`",
+        "Fields": "String",
+        "Sub-collections": "ชื่อการ์ด (เช่น 'รอดพ้นใบเหลือง')"
+      },
+      {
+        "Schema": "`description`",
+        "Fields": "String",
+        "Sub-collections": "คำอธิบายความสามารถ"
+      },
+      {
+        "Schema": "`icon`",
+        "Fields": "String",
+        "Sub-collections": "Emoji ไอคอน (เช่น '🛡️')"
+      },
+      {
+        "Schema": "`rarity`",
+        "Fields": "String",
+        "Sub-collections": "ระดับความหายาก ('COMMON', 'RARE', 'EPIC', 'LEGENDARY')"
+      },
+      {
+        "Schema": "`effectLogic`",
+        "Fields": "Object",
+        "Sub-collections": "`{\"type\":\"IMMUNE_YELLOW\"}`"
+      },
+      {
+        "Schema": "`price`",
+        "Fields": "Number",
+        "Sub-collections": "ราคาในการซื้อ (Balls)"
+      },
+      {
+        "Schema": "`isActive`",
+        "Fields": "Boolean",
+        "Sub-collections": "เปิด/ปิดการ์ดในเกม"
+      },
+      {
+        "Schema": "Field",
+        "Fields": "Type",
+        "Sub-collections": "Description"
+      },
+      {
+        "Schema": "`uid`",
+        "Fields": "String",
+        "Sub-collections": "รหัสผู้ใช้งาน"
+      },
+      {
+        "Schema": "`displayName`",
+        "Fields": "String",
+        "Sub-collections": "ชื่อที่แสดงผล"
+      },
+      {
+        "Schema": "`teamName`",
+        "Fields": "String",
+        "Sub-collections": "ชื่อทีมของผู้เล่น (แสดงใน Leaderboard และ Profile)"
+      },
+      {
+        "Schema": "`email`",
+        "Fields": "String",
+        "Sub-collections": "อีเมล"
+      },
+      {
+        "Schema": "`photoURL`",
+        "Fields": "String",
+        "Sub-collections": "URL รูปภาพโปรไฟล์"
+      },
+      {
+        "Schema": "`role`",
+        "Fields": "String",
+        "Sub-collections": "บทบาท ('player', 'admin')"
+      },
+      {
+        "Schema": "`hasJoinedGame`",
+        "Fields": "Boolean",
+        "Sub-collections": "สถานะเข้าร่วมเกม (จัดทีมครั้งแรกสำเร็จ) ใช้กรองใน Leaderboard"
+      },
+      {
+        "Schema": "`balls`",
+        "Fields": "Number",
+        "Sub-collections": "เหรียญ/แต้มสำหรับใช้ทำกิจกรรม (แชท, สุ่มกาชา)"
+      },
+      {
+        "Schema": "`userPoints`",
+        "Fields": "Number",
+        "Sub-collections": "คะแนนสะสมโดยรวมของผู้เล่น"
+      },
+      {
+        "Schema": "`lastGameweekPoints`",
+        "Fields": "Number",
+        "Sub-collections": "คะแนนที่ได้ใน Gameweek ล่าสุด (ใช้จัดอันดับประจำสัปดาห์)"
+      },
+      {
+        "Schema": "`clubSpentExp`",
+        "Fields": "Number",
+        "Sub-collections": "จำนวน EXP รวมที่ใช้อัพเกรดสโมสร (ใช้จัดอันดับ MY CLUB)"
+      },
+      {
+        "Schema": "`equippedTitle`",
+        "Fields": "String",
+        "Sub-collections": "ฉายาที่ผู้เล่นเลือกแสดงผลข้างชื่อ"
+      },
+      {
+        "Schema": "`createdAt`",
+        "Fields": "Timestamp",
+        "Sub-collections": "วันเวลาที่สร้างบัญชี"
+      },
+      {
+        "Schema": "`lastLoginAt`",
+        "Fields": "Timestamp",
+        "Sub-collections": "วันเวลาที่ล็อกอินล่าสุด **(Indexed: ใช้ประเมิน DAU สำหรับ Quota Analyzer)**"
+      },
+      {
+        "Schema": "`lastFreeChatAt`",
+        "Fields": "Timestamp",
+        "Sub-collections": "วันเวลาที่ส่งแชทฟรีครั้งล่าสุด"
+      },
+      {
+        "Schema": "`tutorialState`",
+        "Fields": "Object",
+        "Sub-collections": "สถานะการดูสอนเล่น เช่น `{\"hasSeenMarket\": true, \"hasSeenPitch\": false}`"
+      },
+      {
+        "Schema": "Field",
+        "Fields": "Type",
+        "Sub-collections": "Description"
+      },
+      {
+        "Schema": "`{token}`",
+        "Fields": "Boolean",
+        "Sub-collections": "Token FCM ของอุปกรณ์ (ค่าเป็น `true` หากยังใช้งานได้)"
+      },
+      {
+        "Schema": "Field",
+        "Fields": "Type",
+        "Sub-collections": "Description"
+      },
+      {
+        "Schema": "`ownedManagers`",
+        "Fields": "Array",
+        "Sub-collections": "รายการ ID ของผู้จัดการทีมที่ซื้อไว้ (เช่น `['A', 'C']`)"
+      },
+      {
+        "Schema": "`ownedCards`",
+        "Fields": "Object",
+        "Sub-collections": "จำนวนการ์ดแต่ละชนิดที่มีในคลัง (เช่น `{\"CARD_01\": 2, \"CARD_02\": 1}`)"
+      },
+      {
+        "Schema": "`lastUpdatedGW`",
+        "Fields": "String",
+        "Sub-collections": "รหัสสัปดาห์ล่าสุดที่มีการอัปเดต (ใช้เพื่อ Reset เมื่อเปลี่ยนสัปดาห์)"
+      }
+    ],
+    "schema-critical.md": [
+      {
+        "Field": "`currentGameweek`",
+        "Type": "String",
+        "Description": "สัปดาห์การแข่งขันปัจจุบัน (เช่น 'GW1')"
+      },
+      {
+        "Field": "`isMarketOpen`",
+        "Type": "Boolean",
+        "Description": "สถานะตลาดซื้อขาย (เปิด = true, ปิด = false)"
+      },
+      {
+        "Field": "`totalJoinedTeams`",
+        "Type": "Number",
+        "Description": "จำนวนทีมที่เข้าร่วมแล้ว (16 คนครบ)"
+      },
+      {
+        "Field": "`isNoAdsMode`",
+        "Type": "Boolean",
+        "Description": "โหมดปิดโฆษณา"
+      },
+      {
+        "Field": "`themeConfig`",
+        "Type": "Object",
+        "Description": "`{\"loginBackgroundUrl\":\"\", \"floatingObjectUrl\":\"\", \"marketBackgroundUrl\":\"\"}`"
+      },
+      {
+        "Field": "`buttonAdsConfig`",
+        "Type": "Object",
+        "Description": "`{ \"autoPick\": {cooldownSeconds: 15, adLinkUrl: \"\"}, \"reset\": {...} }`"
+      },
+      {
+        "Field": "`chatConfig`",
+        "Type": "Object",
+        "Description": "`{\"normalChatCost\":2, \"superChatCost\":15, \"superChatDuration\":30, \"superChatCostIncrement\":5, \"superChatResetTime\":60, \"normalChatFreeInterval\":300}`"
+      },
+      {
+        "Field": "`latestSuperChatEndTime`",
+        "Type": "Timestamp",
+        "Description": "เวลาสิ้นสุดของ Super Chat ตัวสุดท้าย (ใช้คำนวณคิว)"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`gameweekId`",
+        "Type": "String",
+        "Description": "รหัสสัปดาห์ (เช่น 'GW1')"
+      },
+      {
+        "Field": "`status`",
+        "Type": "String",
+        "Description": "'upcoming', 'active', 'completed'"
+      },
+      {
+        "Field": "`deadlineAt`",
+        "Type": "Timestamp",
+        "Description": "เวลาปิดรับการจัดทีม"
+      },
+      {
+        "Field": "`updatedAt`",
+        "Type": "Timestamp",
+        "Description": "วันที่อัปเดต"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`maxPlayersTotal`",
+        "Type": "Object",
+        "Description": "`{\"value\": 15, \"isActive\": true}` (เพิ่มใหม่เพื่อใช้แทน Hardcode)"
+      },
+      {
+        "Field": "`positionLimits`",
+        "Type": "Object",
+        "Description": "`{\"GK\": 2, \"DF\": 5, \"MF\": 5, \"FW\": 3, \"isActive\": true}` (เพิ่มใหม่เพื่อความยืดหยุ่น)"
+      },
+      {
+        "Field": "`startingBudget`",
+        "Type": "Object",
+        "Description": "`{\"value\": 100, \"isActive\": true}`"
+      },
+      {
+        "Field": "`maxPlayersPerTeam`",
+        "Type": "Object",
+        "Description": "`{\"value\": 3, \"isActive\": true}`"
+      },
+      {
+        "Field": "`freeTransfers`",
+        "Type": "Object",
+        "Description": "`{\"value\": 1, \"isActive\": true}`"
+      },
+      {
+        "Field": "`captainMultiplier`",
+        "Type": "Object",
+        "Description": "`{\"value\": 2, \"isActive\": true}`"
+      },
+      {
+        "Field": "`viceCaptainSystem`",
+        "Type": "Object",
+        "Description": "`{\"isActive\": true}` เปิดใช้งานระบบรองกัปตัน"
+      },
+      {
+        "Field": "`budgetCarryOver`",
+        "Type": "Object",
+        "Description": "`{\"percent\": 50, \"isActive\": true}` หักเปอรเซ็นต์เงินคงเหลือยกยอดไปสัปดาห์หน้า"
+      },
+      {
+        "Field": "`synergyBonus`",
+        "Type": "Object",
+        "Description": "`{\"sameTeamThreshold\": 3, \"sameNationThreshold\": 4, \"bonusPercent\": 5, \"isActive\": true}` เปิดใช้งานโบนัสทีม/ชาติเดียวกัน"
+      },
+      {
+        "Field": "`playStreaks`",
+        "Type": "Object",
+        "Description": "`{\"streakTarget\": 3, \"rewardType\": \"budget\", \"rewardValue\": 5, \"isActive\": true}` เปิดใช้งานแจกรางวัลคนส่งทีมต่อเนื่อง"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`playBase`",
+        "Type": "Object",
+        "Description": "`{\"value\": 200, \"isActive\": true}`"
+      },
+      {
+        "Field": "`goal`",
+        "Type": "Object",
+        "Description": "`{\"FWD\": 800, \"MID\": 1000, \"DEF\": 1200, \"GK\": 1500, \"isActive\": true}`"
+      },
+      {
+        "Field": "`assist`",
+        "Type": "Object",
+        "Description": "`{\"value\": 600, \"isActive\": true}`"
+      },
+      {
+        "Field": "`cleanSheet`",
+        "Type": "Object",
+        "Description": "`{\"DEF\": 500, \"GK\": 500, \"MID\": 200, \"FWD\": 0, \"isActive\": true}`"
+      },
+      {
+        "Field": "`yellowCard`",
+        "Type": "Object",
+        "Description": "`{\"value\": -200, \"isActive\": true}`"
+      },
+      {
+        "Field": "`redCard`",
+        "Type": "Object",
+        "Description": "`{\"value\": -600, \"isActive\": true}`"
+      },
+      {
+        "Field": "`saves`",
+        "Type": "Object",
+        "Description": "`{\"value\": 50, \"per\": 1, \"isActive\": true}`"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`cardLimitPerGW`",
+        "Type": "Object",
+        "Description": "`{\"value\": 1, \"isActive\": true}`"
+      },
+      {
+        "Field": "`deadlineOffsetMinutes`",
+        "Type": "Object",
+        "Description": "`{\"value\": 90, \"isActive\": true}`"
+      },
+      {
+        "Field": "`allowedFormations`",
+        "Type": "Object",
+        "Description": "`{\"isActive\": true, \"formations\": {\"4-4-2\": true, \"3-5-2\": false}}`"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`gameweekId`",
+        "Type": "String",
+        "Description": "รหัสสัปดาห์ (เช่น 'GW1')"
+      },
+      {
+        "Field": "`squad`",
+        "Type": "Array",
+        "Description": "Snapshot ทีมในสัปดาห์นั้น `[{ playerId, position, isStarting, pointsEarned }]`"
+      },
+      {
+        "Field": "`managerId`",
+        "Type": "String",
+        "Description": "ผู้จัดการทีมที่ใช้"
+      },
+      {
+        "Field": "`captainId`",
+        "Type": "String",
+        "Description": "กัปตันทีม"
+      },
+      {
+        "Field": "`mvpId`",
+        "Type": "String",
+        "Description": "ผู้เล่นที่ได้ MVP ประจำสัปดาห์"
+      },
+      {
+        "Field": "`points`",
+        "Type": "Number",
+        "Description": "คะแนนรวมที่ได้ในสัปดาห์นี้"
+      },
+      {
+        "Field": "`createdAt`",
+        "Type": "Timestamp",
+        "Description": "วันที่บันทึก"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`amount`",
+        "Type": "Number",
+        "Description": "ยอดเงินที่ทำรายการ (บวก/ลบ)"
+      },
+      {
+        "Field": "`type`",
+        "Type": "String",
+        "Description": "'earn' หรือ 'spend'"
+      },
+      {
+        "Field": "`source`",
+        "Type": "String",
+        "Description": "แหล่งที่มา (เช่น 'daily_login', 'sponsor_ad')"
+      },
+      {
+        "Field": "`description`",
+        "Type": "String",
+        "Description": "คำอธิบายรายการสำหรับ UI"
+      },
+      {
+        "Field": "`timestamp`",
+        "Type": "Timestamp",
+        "Description": "วันเวลาที่ทำรายการ"
+      },
+      {
+        "Field": "`status`",
+        "Type": "String",
+        "Description": "สถานะ (เช่น 'success')"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`stadiumLevel`",
+        "Type": "Number",
+        "Description": "เลเวลของสนามแข่ง (1-10)"
+      },
+      {
+        "Field": "`trainingGroundLevel`",
+        "Type": "Number",
+        "Description": "เลเวลของสนามฝึกซ้อม (1-10)"
+      },
+      {
+        "Field": "`hospitalLevel`",
+        "Type": "Number",
+        "Description": "เลเวลของโรงพยาบาล (1-10)"
+      },
+      {
+        "Field": "`gymLevel`",
+        "Type": "Number",
+        "Description": "เลเวลของยิม (1-10)"
+      },
+      {
+        "Field": "`youthAcademyLevel`",
+        "Type": "Number",
+        "Description": "เลเวลของศูนย์ฝึกเยาวชน (1-10)"
+      },
+      {
+        "Field": "`spentExp`",
+        "Type": "Number",
+        "Description": "แต้มสะสมรวมที่ถูกใช้ไปเพื่ออัพเกรด"
+      },
+      {
+        "Field": "`updatedAt`",
+        "Type": "Timestamp",
+        "Description": "เวลาอัปเดตล่าสุด"
+      }
+    ],
+    "schema-support.md": [
+      {
+        "Field": "`title`",
+        "Type": "String",
+        "Description": "ชื่อฉายา (เช่น 'ROOKIE')"
+      },
+      {
+        "Field": "`desc`",
+        "Type": "String",
+        "Description": "คำอธิบายการปลดล็อค"
+      },
+      {
+        "Field": "`iconType`",
+        "Type": "String",
+        "Description": "ชื่อไอคอนสำหรับ UI (เช่น 'Star', 'Shield', 'Trophy', 'Award')"
+      },
+      {
+        "Field": "`rarity`",
+        "Type": "String",
+        "Description": "ระดับความหายาก ('common', 'rare', 'epic', 'legendary')"
+      },
+      {
+        "Field": "`conditionType`",
+        "Type": "String",
+        "Description": "ตัวแปรเงื่อนไข ('userPoints', 'lastGameweekPoints', 'balls', 'clubSpentExp', 'stadiumLevel', 'streak', 'admin', 'none')"
+      },
+      {
+        "Field": "`conditionValue`",
+        "Type": "Number",
+        "Description": "ค่าที่ต้องผ่านเงื่อนไขถึงจะปลดล็อค"
+      },
+      {
+        "Field": "`isActive`",
+        "Type": "Boolean",
+        "Description": "สถานะการเปิดใช้งาน"
+      },
+      {
+        "Field": "`createdAt`",
+        "Type": "Timestamp",
+        "Description": "เวลาที่สร้าง"
+      },
+      {
+        "Field": "`updatedAt`",
+        "Type": "Timestamp",
+        "Description": "เวลาที่อัปเดต"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`userId`",
+        "Type": "String",
+        "Description": "รหัสผู้ส่ง"
+      },
+      {
+        "Field": "`userName`",
+        "Type": "String",
+        "Description": "ชื่อผู้ส่ง"
+      },
+      {
+        "Field": "`userPhoto`",
+        "Type": "String",
+        "Description": "รูปโปรไฟล์ผู้ส่ง"
+      },
+      {
+        "Field": "`text`",
+        "Type": "String",
+        "Description": "ข้อความแชท"
+      },
+      {
+        "Field": "`createdAt`",
+        "Type": "Timestamp",
+        "Description": "วันที่ส่ง"
+      },
+      {
+        "Field": "`isSystem`",
+        "Type": "Boolean",
+        "Description": "เป็นข้อความระบบหรือไม่"
+      },
+      {
+        "Field": "`isSuperChat`",
+        "Type": "Boolean",
+        "Description": "เป็นข้อความพิเศษหรือไม่ (หัก Balls เยอะกว่า)"
+      },
+      {
+        "Field": "`startTime`",
+        "Type": "Timestamp",
+        "Description": "เวลาที่เริ่มแสดง Super Chat (ตามคิว)"
+      },
+      {
+        "Field": "`pinnedUntil`",
+        "Type": "Timestamp",
+        "Description": "เวลาที่สิ้นสุดการปักหมุดข้อความ (สำหรับ Super Chat)"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`name`",
+        "Type": "String",
+        "Description": "ชื่อลีกหรือการดวล"
+      },
+      {
+        "Field": "`code`",
+        "Type": "String",
+        "Description": "รหัส 6 หลักสำหรับเข้าร่วม"
+      },
+      {
+        "Field": "`creatorId`",
+        "Type": "String",
+        "Description": "รหัสผู้สร้างลีก"
+      },
+      {
+        "Field": "`mode`",
+        "Type": "String",
+        "Description": "'classic' หรือ 'duel'"
+      },
+      {
+        "Field": "`customRules`",
+        "Type": "Object",
+        "Description": "กติกาพิเศษ เช่น `{ captainMultiplier: 2, goal: 800, assist: 600 }`"
+      },
+      {
+        "Field": "`members`",
+        "Type": "Array",
+        "Description": "เก็บข้อมูลผู้เข้าร่วม `[{ id, displayName, photoURL, teamName, userPoints, updatedAt }]` (updatedAt ใช้ทำ Tie-breaker)"
+      },
+      {
+        "Field": "`createdAt`",
+        "Type": "Timestamp",
+        "Description": "วันที่สร้าง"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`homeTeam`",
+        "Type": "Object",
+        "Description": "`{\"code\":\"MUN\", \"logo\":\"url\", \"name\":\"Manchester United\"}`"
+      },
+      {
+        "Field": "`awayTeam`",
+        "Type": "Object",
+        "Description": "`{\"code\":\"LIV\", \"logo\":\"url\", \"name\":\"Liverpool\"}`"
+      },
+      {
+        "Field": "`homeScore`",
+        "Type": "Number",
+        "Description": "คะแนนทีมเย้า"
+      },
+      {
+        "Field": "`awayScore`",
+        "Type": "Number",
+        "Description": "คะแนนทีมเยือน"
+      },
+      {
+        "Field": "`minute`",
+        "Type": "String",
+        "Description": "นาทีของการแข่งขัน (เช่น '47', 'HT', 'FT')"
+      },
+      {
+        "Field": "`status`",
+        "Type": "String",
+        "Description": "'upcoming', 'LIVE', 'FT'"
+      },
+      {
+        "Field": "`latestEvent`",
+        "Type": "Object",
+        "Description": "เก็บเหตุการณ์ล่าสุด (`primaryDetail`, `secondaryDetail`, `timestamp`) เพื่อความประหยัด Reads"
+      },
+      {
+        "Field": "`updatedAt`",
+        "Type": "Timestamp",
+        "Description": "เวลาอัปเดตล่าสุด"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`homeScore`",
+        "Type": "Number",
+        "Description": "คะแนนขณะเกิดเหตุการณ์"
+      },
+      {
+        "Field": "`awayScore`",
+        "Type": "Number",
+        "Description": "คะแนนขณะเกิดเหตุการณ์"
+      },
+      {
+        "Field": "`minute`",
+        "Type": "String",
+        "Description": "นาที"
+      },
+      {
+        "Field": "`primaryDetail`",
+        "Type": "String",
+        "Description": "เช่น 'B. Sesko Goal ⚽'"
+      },
+      {
+        "Field": "`secondaryDetail`",
+        "Type": "String",
+        "Description": "เช่น 'B. Fernandes Assist 👟'"
+      },
+      {
+        "Field": "`timestamp`",
+        "Type": "Timestamp",
+        "Description": "เวลาเกิดเหตุการณ์"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`goals`",
+        "Type": "Number",
+        "Description": "จำนวนประตูที่ทำได้ในสัปดาห์นี้"
+      },
+      {
+        "Field": "`assists`",
+        "Type": "Number",
+        "Description": "จำนวนแอสซิสต์ในสัปดาห์นี้"
+      },
+      {
+        "Field": "`cleanSheets`",
+        "Type": "Number",
+        "Description": "จำนวนคลีนชีตในสัปดาห์นี้"
+      },
+      {
+        "Field": "`yellowCards`",
+        "Type": "Number",
+        "Description": "จำนวนใบเหลืองในสัปดาห์นี้"
+      },
+      {
+        "Field": "`redCards`",
+        "Type": "Number",
+        "Description": "จำนวนใบแดงในสัปดาห์นี้"
+      },
+      {
+        "Field": "`gwPoints`",
+        "Type": "Number",
+        "Description": "คะแนนรวมที่ทำได้ในสัปดาห์นี้"
+      },
+      {
+        "Field": "`updatedAt`",
+        "Type": "Timestamp",
+        "Description": "เวลาอัปเดตล่าสุด"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`uid`",
+        "Type": "String",
+        "Description": "รหัสผู้ใช้งานของเพื่อน"
+      },
+      {
+        "Field": "`displayName`",
+        "Type": "String",
+        "Description": "ชื่อเพื่อน"
+      },
+      {
+        "Field": "`photoURL`",
+        "Type": "String",
+        "Description": "รูปเพื่อน"
+      },
+      {
+        "Field": "`status`",
+        "Type": "String",
+        "Description": "สถานะ: 'pending' (รอรับ), 'requested' (ส่งคำขอไปแล้ว), 'accepted' (เป็นเพื่อนกันแล้ว)"
+      },
+      {
+        "Field": "`createdAt`",
+        "Type": "Timestamp",
+        "Description": "วันที่บันทึก"
+      },
+      {
+        "Field": "`updatedAt`",
+        "Type": "Timestamp",
+        "Description": "เวลาอัปเดตสถานะล่าสุด"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`id`",
+        "Type": "String",
+        "Description": "ID ที่รวม Season และ Player ID (เช่น '2022_API-1234')"
+      },
+      {
+        "Field": "`sku`",
+        "Type": "String",
+        "Description": "รหัสอ้างอิงดั้งเดิม ('API-1234')"
+      },
+      {
+        "Field": "`season`",
+        "Type": "Number",
+        "Description": "ปีฤดูกาล (เช่น 2022)"
+      },
+      {
+        "Field": "`name`",
+        "Type": "String",
+        "Description": "ชื่อนักเตะ"
+      },
+      {
+        "Field": "`team`",
+        "Type": "String",
+        "Description": "ชื่อทีม"
+      },
+      {
+        "Field": "`position`",
+        "Type": "String",
+        "Description": "ตำแหน่งหลักในฤดูกาลนั้น"
+      },
+      {
+        "Field": "`stats`",
+        "Type": "Object",
+        "Description": "สถิติรวมของฤดูกาลนั้น (goals, assists, cleanSheets ฯลฯ)"
+      },
+      {
+        "Field": "`updatedAt`",
+        "Type": "Timestamp",
+        "Description": "เวลาที่ดึงข้อมูล"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`id`",
+        "Type": "String",
+        "Description": "ID ที่รวม Season และ Team ID (เช่น '2022_33')"
+      },
+      {
+        "Field": "`teamId`",
+        "Type": "String",
+        "Description": "รหัสทีม ('33' = Man Utd)"
+      },
+      {
+        "Field": "`season`",
+        "Type": "Number",
+        "Description": "ปีฤดูกาล"
+      },
+      {
+        "Field": "`name`",
+        "Type": "String",
+        "Description": "ชื่อทีม"
+      },
+      {
+        "Field": "`stats`",
+        "Type": "Object",
+        "Description": "สถิติรวมของทีม (played, wins, draws, loses, goalsFor, goalsAgainst)"
+      },
+      {
+        "Field": "`updatedAt`",
+        "Type": "Timestamp",
+        "Description": "เวลาที่ดึงข้อมูล"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`type`",
+        "Type": "String",
+        "Description": "'PLAYERS', 'TEAMS', 'FIXTURES'"
+      },
+      {
+        "Field": "`season`",
+        "Type": "Number",
+        "Description": "ปีฤดูกาลที่ดึง"
+      },
+      {
+        "Field": "`status`",
+        "Type": "String",
+        "Description": "'SUCCESS', 'FAILED', 'IN_PROGRESS'"
+      },
+      {
+        "Field": "`recordsFetched`",
+        "Type": "Number",
+        "Description": "จำนวนที่ดึงมาได้"
+      },
+      {
+        "Field": "`timestamp`",
+        "Type": "Timestamp",
+        "Description": "เวลาที่ทำการดึง"
+      },
+      {
+        "Field": "`adminId`",
+        "Type": "String",
+        "Description": "UID แอดมินที่สั่งดึง"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`adLinks`",
+        "Type": "Array",
+        "Description": "รายการโฆษณาแบบกำหนดเอง `[{ id, position, imageUrl, linkUrl, isActive }]`"
+      },
+      {
+        "Field": "`googleAdsense`",
+        "Type": "Object",
+        "Description": "การตั้งค่า Google AdSense `{\"clientId\": \"\", \"slotId\": \"\", \"isActive\": false}`"
+      },
+      {
+        "Field": "Field",
+        "Type": "Type",
+        "Description": "Description"
+      },
+      {
+        "Field": "`weekly`",
+        "Type": "Array",
+        "Description": "รายชื่อ Top 100 ผู้เล่นที่คะแนน `lastGameweekPoints` สูงสุด `[{ id, displayName, teamName, photoURL, lastGameweekPoints, displayRank }]`"
+      },
+      {
+        "Field": "`season`",
+        "Type": "Array",
+        "Description": "รายชื่อ Top 100 ผู้เล่นที่คะแนน `userPoints` สูงสุด `[{ id, displayName, teamName, photoURL, userPoints, displayRank }]`"
+      },
+      {
+        "Field": "`club`",
+        "Type": "Array",
+        "Description": "รายชื่อ Top 100 ผู้เล่นที่ใช้ `clubSpentExp` สูงสุด `[{ id, displayName, teamName, photoURL, clubSpentExp, displayRank }]`"
+      },
+      {
+        "Field": "`exportDataTxt`",
+        "Type": "String",
+        "Description": "ข้อมูล String (.txt) ที่ถูกสร้างไว้แล้วล่วงหน้า สำหรับดาวน์โหลดทีมของ Top 50 ผู้เข้าแข่งขัน"
+      },
+      {
+        "Field": "`updatedAt`",
+        "Type": "Timestamp",
+        "Description": "เวลาที่ประมวลผลการจัดอันดับครั้งล่าสุด"
+      }
+    ]
+  }
+}

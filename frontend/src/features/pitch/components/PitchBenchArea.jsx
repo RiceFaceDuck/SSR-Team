@@ -2,38 +2,41 @@ import React from 'react';
 import PlayerNode from './PlayerNode';
 import { normalizePosition } from '../../../utils/squadValidator';
 
-export default function PitchBenchArea({ 
-  enrichedBench, 
-  pendingPlacement, 
-  selectedPlayer, 
+export default function PitchBenchArea({
+  enrichedBench,
+  pendingPlacement,
+  selectedPlayer,
   manager,
-  handleBenchSlotClick, 
+  handleBenchSlotClick,
   handlePlayerClick,
-  onManagerClick 
+  onManagerClick,
 }) {
   return (
     <div className="h-[100px] sm:h-[120px] lg:h-[135px] py-1 sm:py-2 bg-[#0a192f] border-t-2 border-[#fbbf24] flex items-center justify-evenly px-2 sm:px-6 relative z-10 w-full overflow-x-hidden">
       <div className="absolute top-0 left-0 bg-[#fbbf24] text-[#0a192f] text-[8px] font-bold px-1.5 py-0.5 rounded-br-md z-20">
         BENCH
       </div>
-      
+
       {/* Render 4 Bench Slots */}
       {['GK', 'DF', 'MF', 'FW'].map((pos, index) => {
         const player = enrichedBench[index];
-        const isTargetValid = pendingPlacement && normalizePosition(pendingPlacement.position) === pos;
-        const highlightClass = isTargetValid ? 'ring-4 ring-[#fbbf24] shadow-[0_0_20px_rgba(251,191,36,0.8)] rounded-md animate-pulse z-30' : '';
+        const isTargetValid =
+          pendingPlacement && normalizePosition(pendingPlacement.position) === pos;
+        const highlightClass = isTargetValid
+          ? 'ring-4 ring-[#fbbf24] shadow-[0_0_20px_rgba(251,191,36,0.8)] rounded-md animate-pulse z-30'
+          : '';
         return (
-          <div 
-            key={`bench-${index}`} 
+          <div
+            key={`bench-${index}`}
             className={`scale-95 sm:scale-100 flex-shrink-0 cursor-pointer relative transition-all duration-300 ${highlightClass} ${!player ? 'hover:-translate-y-1' : ''}`}
             onClick={() => {
               if (!player) handleBenchSlotClick(pos);
               else handlePlayerClick(player);
             }}
           >
-            <PlayerNode 
-              player={player} 
-              expectedPosition={player?.position || pos} 
+            <PlayerNode
+              player={player}
+              expectedPosition={player?.position || pos}
               isSelected={selectedPlayer && selectedPlayer.playerId === String(player?.playerId)}
               isBench={true}
             />
@@ -46,37 +49,47 @@ export default function PitchBenchArea({
 
       {/* Manager Slot (Right side) */}
       {/* Manager Slot (Right side) */}
-      <div className="flex-shrink-0 w-[55px] sm:w-[65px] lg:w-[80px] cursor-pointer hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center" onClick={onManagerClick}>
-          {manager ? (
-            <div className="w-full flex flex-col items-center justify-center">
-              <div className="w-[48px] sm:w-[55px] lg:w-[65px] flex flex-col items-center justify-center scale-95">
-                {/* Top part: Image */}
-                <div className="relative w-full h-10 sm:h-12 lg:h-14 flex justify-center items-end mb-[1px]">
-                  <div className="w-full h-10 sm:h-12 lg:h-14 bg-[#0a192f] rounded-t-md shadow-sm border border-b-0 border-[#3b82f6] overflow-hidden relative flex items-end justify-center">
-                    <img src={manager.avatarUrl} alt={manager.name} className="w-full h-full object-cover opacity-90" />
-                  </div>
-                </div>
-                {/* Bottom part: Name */}
-                <div className="w-full bg-gradient-to-b from-[#1e3a8a] to-[#0f284e] rounded-b-md shadow-md overflow-hidden flex flex-col z-10 transition-colors border border-[#3b82f6]">
-                  <div className="px-1 py-1 flex flex-col justify-center items-center min-h-[16px] sm:min-h-[20px] w-full overflow-hidden">
-                    <span className="text-[6px] sm:text-[7px] font-bold text-white text-center leading-none line-clamp-1 w-full">
-                      {manager.name}
-                    </span>
-                  </div>
+      <div
+        className="flex-shrink-0 w-[55px] sm:w-[65px] lg:w-[80px] cursor-pointer hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center"
+        onClick={onManagerClick}
+      >
+        {manager ? (
+          <div className="w-full flex flex-col items-center justify-center">
+            <div className="w-[48px] sm:w-[55px] lg:w-[65px] flex flex-col items-center justify-center scale-95">
+              {/* Top part: Image */}
+              <div className="relative w-full h-10 sm:h-12 lg:h-14 flex justify-center items-end mb-[1px]">
+                <div className="w-full h-10 sm:h-12 lg:h-14 bg-[#0a192f] rounded-t-md shadow-sm border border-b-0 border-[#3b82f6] overflow-hidden relative flex items-end justify-center">
+                  <img
+                    src={manager.avatarUrl}
+                    alt={manager.name}
+                    className="w-full h-full object-cover opacity-90"
+                  />
                 </div>
               </div>
-              {/* Description (Outside Card) */}
-              <div className="mt-1 w-full text-center px-0">
-                <span className="text-yellow-400 text-[9px] sm:text-[10px] lg:text-[11px] font-bold leading-tight line-clamp-2 drop-shadow-md">
-                  {manager.shortDescription || (manager.description && manager.description.includes('คลีนชีต') ? 'DF +2p Clean Sheet' : (manager.description || 'เพิ่มพลังทีม').substring(0, 20))}
-                </span>
+              {/* Bottom part: Name */}
+              <div className="w-full bg-gradient-to-b from-[#1e3a8a] to-[#0f284e] rounded-b-md shadow-md overflow-hidden flex flex-col z-10 transition-colors border border-[#3b82f6]">
+                <div className="px-1 py-1 flex flex-col justify-center items-center min-h-[16px] sm:min-h-[20px] w-full overflow-hidden">
+                  <span className="text-[6px] sm:text-[7px] font-bold text-white text-center leading-none line-clamp-1 w-full">
+                    {manager.name}
+                  </span>
+                </div>
               </div>
             </div>
-          ) : (
-            <div className="w-[48px] sm:w-[55px] lg:w-[65px] scale-95">
-              <PlayerNode player={undefined} expectedPosition="MGR" isBench={true} />
+            {/* Description (Outside Card) */}
+            <div className="mt-1 w-full text-center px-0">
+              <span className="text-yellow-400 text-[9px] sm:text-[10px] lg:text-[11px] font-bold leading-tight line-clamp-2 drop-shadow-md">
+                {manager.shortDescription ||
+                  (manager.description && manager.description.includes('คลีนชีต')
+                    ? 'DF +2p Clean Sheet'
+                    : (manager.description || 'เพิ่มพลังทีม').substring(0, 20))}
+              </span>
             </div>
-          )}
+          </div>
+        ) : (
+          <div className="w-[48px] sm:w-[55px] lg:w-[65px] scale-95">
+            <PlayerNode player={undefined} expectedPosition="MGR" isBench={true} />
+          </div>
+        )}
       </div>
     </div>
   );

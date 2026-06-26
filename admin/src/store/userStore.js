@@ -1,12 +1,16 @@
 import { create } from 'zustand';
-import { getAllUsers, adjustUserBalls, getUserTransactions } from '../services/firebase/userService';
+import {
+  getAllUsers,
+  adjustUserBalls,
+  getUserTransactions,
+} from '../services/firebase/userService';
 
 const useUserStore = create((set, get) => ({
   // --- State Variables ---
   users: [],
   isLoading: false,
   error: null,
-  
+
   // State สำหรับประวัติการทำรายการ (Audit Log)
   transactions: [],
   isTransactionsLoading: false,
@@ -34,19 +38,17 @@ const useUserStore = create((set, get) => ({
     try {
       // 1. ส่งคำสั่งไปประมวลผลที่ Firebase (Backend)
       await adjustUserBalls(userId, amount, reason, adminId);
-      
+
       // 2. อัปเดต State ภายในแอป (Frontend/Admin) ทันที
       set((state) => ({
-        users: state.users.map((user) => 
-          user.id === userId 
-            ? { ...user, balls: (user.balls || 0) + amount } 
-            : user
-        )
+        users: state.users.map((user) =>
+          user.id === userId ? { ...user, balls: (user.balls || 0) + amount } : user
+        ),
       }));
 
       return { success: true };
     } catch (error) {
-      console.error("❌ Store Error adjusting balls:", error);
+      console.error('❌ Store Error adjusting balls:', error);
       throw error;
     }
   },
@@ -60,7 +62,7 @@ const useUserStore = create((set, get) => ({
       const txs = await getUserTransactions(userId);
       set({ transactions: txs, isTransactionsLoading: false });
     } catch (error) {
-      console.error("❌ Fetch transactions error:", error);
+      console.error('❌ Fetch transactions error:', error);
       set({ isTransactionsLoading: false });
       // อาจจะเซ็ต error state เพิ่มเติมถ้าต้องการแสดงใน UI
     }
@@ -69,7 +71,7 @@ const useUserStore = create((set, get) => ({
   /**
    * ล้างข้อมูลประวัติเมื่อปิด Modal/Popup
    */
-  clearTransactions: () => set({ transactions: [], isTransactionsLoading: false })
+  clearTransactions: () => set({ transactions: [], isTransactionsLoading: false }),
 }));
 
 export default useUserStore;

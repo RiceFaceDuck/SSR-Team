@@ -32,12 +32,28 @@ export default function App() {
 
   const [currentPath, setCurrentPath] = useState('pitch');
   const [isGameStarted, setIsGameStarted] = useState(false); // 🌟 State สำหรับคุมหน้า Tap to Start
+  const [isOffline, setIsOffline] = useState(
+    typeof navigator !== 'undefined' ? !navigator.onLine : false
+  );
 
   // 🌟 1. ดึงข้อมูล Auth จาก Firebase แบบอัตโนมัติ (SRP)
   useAuthSync();
-  
+
   // 🌟 2. ระบบเตะออกอัตโนมัติเมื่อครบ 20 นาที
   useSessionTimeout();
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     const unsubscribeTheme = initThemeListener();
@@ -106,25 +122,53 @@ export default function App() {
   }
 
   // เทคนิค Keep-alive DOM เพื่อให้สลับแท็บเร็วขึ้น
-  const getRouteClass = (path) => currentPath === path 
-    ? "flex flex-col flex-1 w-full min-h-0 animate-in fade-in duration-300" 
-    : "fixed -left-[9999px] opacity-0 pointer-events-none";
+  const getRouteClass = (path) =>
+    currentPath === path
+      ? 'flex flex-col flex-1 w-full min-h-0 animate-in fade-in duration-300'
+      : 'fixed -left-[9999px] opacity-0 pointer-events-none';
 
   return (
     <>
-      <Toast /> 
-      
+      <Toast />
+
+      {/* 🌟 Offline Banner */}
+      {isOffline && (
+        <div className="fixed top-0 left-0 w-full bg-red-500 text-white text-xs font-bold text-center py-1.5 z-[9999] shadow-md animate-in slide-in-from-top-2">
+          ไม่มีการเชื่อมต่ออินเทอร์เน็ต
+        </div>
+      )}
+
       <MobileLayout currentPath={currentPath} onNavigate={setCurrentPath} onLogout={handleLogout}>
-        <div className={getRouteClass('pitch')}><PitchScreen /></div>
-        <div className={getRouteClass('market')}><MarketScreen /></div>
-        <div className={getRouteClass('fixtures')}><FixturesScreen /></div>
-        <div className={getRouteClass('quest')}><QuestScreen /></div>
-        <div className={getRouteClass('redeem')}><RedeemScreen /></div>
-        <div className={getRouteClass('profile')}><ProfileScreen /></div>
-        <div className={getRouteClass('leaderboard')}><LeaderboardScreen /></div>
-        <div className={getRouteClass('social')}><SocialScreen /></div>
-        <div className={getRouteClass('live')}><LiveScoreScreen /></div>
-        <div className={getRouteClass('rules')}><RulesScreen /></div>
+        <div className={getRouteClass('pitch')}>
+          <PitchScreen />
+        </div>
+        <div className={getRouteClass('market')}>
+          <MarketScreen />
+        </div>
+        <div className={getRouteClass('fixtures')}>
+          <FixturesScreen />
+        </div>
+        <div className={getRouteClass('quest')}>
+          <QuestScreen />
+        </div>
+        <div className={getRouteClass('redeem')}>
+          <RedeemScreen />
+        </div>
+        <div className={getRouteClass('profile')}>
+          <ProfileScreen />
+        </div>
+        <div className={getRouteClass('leaderboard')}>
+          <LeaderboardScreen />
+        </div>
+        <div className={getRouteClass('social')}>
+          <SocialScreen />
+        </div>
+        <div className={getRouteClass('live')}>
+          <LiveScoreScreen />
+        </div>
+        <div className={getRouteClass('rules')}>
+          <RulesScreen />
+        </div>
       </MobileLayout>
     </>
   );

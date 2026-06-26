@@ -19,21 +19,21 @@ export default function SkeletonLoader({ type = 'row', count = 3 }) {
     return (
       <div className="space-y-3 w-full">
         {skeletons.map((key) => (
-          <div 
-            key={key} 
+          <div
+            key={key}
             className="bg-white p-4 rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-slate-100/50 flex items-center justify-between"
           >
             <div className="flex items-center gap-4">
               {/* รูปโปรไฟล์จำลอง (Avatar) */}
               <div className="w-10 h-10 rounded-full animate-shimmer shrink-0"></div>
-              
+
               {/* ชื่อและตำแหน่งจำลอง (Text) */}
               <div className="space-y-2.5">
                 <div className="h-3.5 rounded-md animate-shimmer w-28"></div>
                 <div className="h-2.5 rounded-md animate-shimmer w-16"></div>
               </div>
             </div>
-            
+
             {/* ราคาและปุ่มจำลอง (Price & Button) */}
             <div className="flex flex-col items-end gap-2.5">
               <div className="h-4 rounded-md animate-shimmer w-14"></div>
@@ -50,8 +50,8 @@ export default function SkeletonLoader({ type = 'row', count = 3 }) {
     return (
       <div className="flex justify-around w-full z-10 px-2 gap-2">
         {skeletons.map((key) => (
-          <div 
-            key={key} 
+          <div
+            key={key}
             className="w-14 h-14 bg-white/40 backdrop-blur-sm rounded-full shadow-md border-2 border-slate-200/50 flex flex-col items-center justify-center animate-pulse"
           >
             <div className="w-6 h-6 bg-slate-300/50 rounded-full mb-1"></div>

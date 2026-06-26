@@ -8,7 +8,7 @@ export default function DailyCheckIn() {
       <div className="relative z-10 flex items-center justify-between">
         <div>
           <h3 className="font-black text-2xl flex items-center gap-2 mb-1">
-            <Target size={28}/> เช็กอินรับแต้ม
+            <Target size={28} /> เช็กอินรับแต้ม
           </h3>
           <p className="opacity-90 text-sm font-medium">กดรับ Pts ฟรีทุกวัน!</p>
         </div>

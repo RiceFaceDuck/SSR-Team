@@ -22,15 +22,14 @@ export default function LeagueDetailsModal({ league, onClose, onLeagueUpdated })
     handleCopyCode,
     handleSaveName,
     handleLeave,
-    handleDelete
+    handleDelete,
   } = useLeagueDetailsLogic(league, onClose, onLeagueUpdated);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
       <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-300 flex flex-col max-h-[85vh]">
-        
         {/* Header */}
-        <LeagueHeader 
+        <LeagueHeader
           league={league}
           membersCount={members.length}
           isEditing={isEditing}
@@ -46,13 +45,13 @@ export default function LeagueDetailsModal({ league, onClose, onLeagueUpdated })
 
         {/* Tab Toggle (Leaderboard / Settings) */}
         <div className="flex border-b border-slate-100 shrink-0">
-          <button 
+          <button
             onClick={() => setShowSettings(false)}
             className={`flex-1 py-3 text-sm font-bold transition-colors ${!showSettings ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/30' : 'text-slate-500 hover:bg-slate-50'}`}
           >
             ตารางคะแนน
           </button>
-          <button 
+          <button
             onClick={() => setShowSettings(true)}
             className={`flex-1 py-3 text-sm font-bold flex justify-center items-center gap-1 transition-colors ${showSettings ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/30' : 'text-slate-500 hover:bg-slate-50'}`}
           >
@@ -63,13 +62,9 @@ export default function LeagueDetailsModal({ league, onClose, onLeagueUpdated })
         {/* Body Content */}
         <div className="overflow-y-auto p-4 flex-1 custom-scrollbar bg-slate-50/50">
           {!showSettings ? (
-            <LeagueLeaderboard 
-              loading={loading}
-              members={members}
-              userData={userData}
-            />
+            <LeagueLeaderboard loading={loading} members={members} userData={userData} />
           ) : (
-            <LeagueSettings 
+            <LeagueSettings
               league={league}
               isCreator={isCreator}
               setIsEditing={setIsEditing}

@@ -6,7 +6,7 @@ export const useAdsStore = create((set, get) => ({
   googleAdsense: {
     clientId: '',
     slotId: '',
-    isActive: false
+    isActive: false,
   },
   isLoading: false,
 
@@ -14,12 +14,12 @@ export const useAdsStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       const data = await adsConfigDatabase.getAdsConfig();
-      set({ 
-        adLinks: data.adLinks || [], 
-        googleAdsense: data.googleAdsense || { clientId: '', slotId: '', isActive: false }
+      set({
+        adLinks: data.adLinks || [],
+        googleAdsense: data.googleAdsense || { clientId: '', slotId: '', isActive: false },
       });
     } catch (error) {
-      console.error("fetchAdsConfig error:", error);
+      console.error('fetchAdsConfig error:', error);
     } finally {
       set({ isLoading: false });
     }
@@ -43,5 +43,5 @@ export const useAdsStore = create((set, get) => ({
       set({ googleAdsense: newAdsenseConfig });
     }
     return res;
-  }
+  },
 }));

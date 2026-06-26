@@ -1,18 +1,21 @@
 import React from 'react';
 import { STYLES } from '../../config/theme';
-import { Trophy, Download } from 'lucide-react';
+import { Trophy, Download, Star } from 'lucide-react';
 import { useGameStore } from '../../store/useGameStore';
 import { useLeaderboardData } from './hooks/useLeaderboardData';
+import { useMyRank } from '../../hooks/useMyRank';
 import LeaderboardTabs from './components/LeaderboardTabs';
 import LeaderboardList from './components/LeaderboardList';
 import SponsorBanner from './components/SponsorBanner';
 
 export default function LeaderboardScreen() {
-  const themeConfig = useGameStore(state => state.themeConfig);
-  const user = useGameStore(state => state.user);
-  
+  const themeConfig = useGameStore((state) => state.themeConfig);
+  const user = useGameStore((state) => state.user);
+
   // Custom hook for SRP
-  const { activeTab, setActiveTab, leaders, loading, exportCompetitorData, isExporting } = useLeaderboardData();
+  const { activeTab, setActiveTab, leaders, loading, exportCompetitorData, isExporting } =
+    useLeaderboardData();
+  const { ranks, loading: rankLoading } = useMyRank();
 
   const getSubTitle = () => {
     if (activeTab === 'weekly') return 'WEEKLY';
@@ -20,10 +23,18 @@ export default function LeaderboardScreen() {
     return 'CLUB';
   };
 
+  const getMyRankDisplay = () => {
+    if (activeTab === 'weekly') return ranks.weekly;
+    if (activeTab === 'season') return ranks.season;
+    return ranks.club;
+  };
+
   return (
-    <div 
+    <div
       className="p-3 animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-screen pb-24 bg-cover bg-center bg-fixed relative flex flex-col"
-      style={{ backgroundImage: `url(${themeConfig?.marketBackgroundUrl || 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000'})` }}
+      style={{
+        backgroundImage: `url(${themeConfig?.marketBackgroundUrl || 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000'})`,
+      }}
     >
       <div className="absolute inset-0 bg-slate-50/80 backdrop-blur-md pointer-events-none"></div>
 
@@ -36,9 +47,15 @@ export default function LeaderboardScreen() {
             </h2>
             <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-300 shadow-md px-3 py-1.5 rounded-lg flex flex-col items-end">
               <span className="text-[10px] text-slate-500 font-bold leading-none uppercase">
-                {activeTab === 'weekly' ? 'สัปดาห์ล่าสุด' : activeTab === 'season' ? 'ซีซั่นนี้' : 'การจัดอันดับ'}
+                {activeTab === 'weekly'
+                  ? 'สัปดาห์ล่าสุด'
+                  : activeTab === 'season'
+                    ? 'ซีซั่นนี้'
+                    : 'การจัดอันดับ'}
               </span>
-              <span className="text-sm font-black text-indigo-600 leading-none mt-1">{getSubTitle()}</span>
+              <span className="text-sm font-black text-indigo-600 leading-none mt-1">
+                {getSubTitle()}
+              </span>
             </div>
           </div>
         </div>
@@ -48,7 +65,7 @@ export default function LeaderboardScreen() {
 
         {/* Download Data Button - Available to everyone before matches */}
         <div className="flex justify-end mb-3">
-          <button 
+          <button
             onClick={exportCompetitorData}
             disabled={isExporting}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-md transition-colors disabled:opacity-50"
@@ -67,13 +84,20 @@ export default function LeaderboardScreen() {
         <div className={STYLES.card}>
           <LeaderboardTabs activeTab={activeTab} setActiveTab={setActiveTab} />
           
-          
-          <LeaderboardList 
-            leaders={leaders} 
-            loading={loading} 
-            user={user} 
-            activeTab={activeTab}
-          />
+          {/* 🌟 My Rank Badge in Leaderboard */}
+          <div className="mx-4 mt-4 mb-2 p-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-between text-white shadow-[0_4px_15px_rgba(99,102,241,0.3)] border border-indigo-400/50">
+            <div className="flex items-center gap-2 font-bold text-sm">
+              <Star size={16} className="text-yellow-300" />
+              <span className="tracking-wide">อันดับของคุณ ({getSubTitle()})</span>
+            </div>
+            <div className="bg-white/20 px-3 py-1 rounded-lg backdrop-blur-md border border-white/10">
+              <span className="font-black text-lg shadow-sm drop-shadow-md">
+                {rankLoading ? '...' : (getMyRankDisplay()?.toLocaleString() || '-')}
+              </span>
+            </div>
+          </div>
+
+          <LeaderboardList leaders={leaders} loading={loading} user={user} activeTab={activeTab} />
         </div>
       </div>
     </div>

@@ -6,9 +6,9 @@ import { usePitchDataLoad } from './usePitchDataLoad';
 import { usePitchEnrichment } from './usePitchEnrichment';
 
 export const usePitchLogic = () => {
-  const { 
-    mySquad, 
-    formation, 
+  const {
+    mySquad,
+    formation,
     setFormation,
     budgetLeft,
     manager,
@@ -28,21 +28,17 @@ export const usePitchLogic = () => {
   const { enrichedStarters, enrichedBench, marketPlayers } = usePitchEnrichment();
 
   const { handleClearPitch, handleAutoFill } = usePitchActions();
-  
-  const {
-    handleSlotClick,
-    handlePlayerClick,
-    handleBenchSlotClick,
-    handlePopupAction
-  } = usePitchHandlers({
-    enrichedStarters,
-    enrichedBench,
-    pendingPlacement,
-    selectedPlayer,
-    setSelectedPlayer,
-    setPopupPlayer,
-    setPowerCardPlayer
-  });
+
+  const { handleSlotClick, handlePlayerClick, handleBenchSlotClick, handlePopupAction } =
+    usePitchHandlers({
+      enrichedStarters,
+      enrichedBench,
+      pendingPlacement,
+      selectedPlayer,
+      setSelectedPlayer,
+      setPopupPlayer,
+      setPowerCardPlayer,
+    });
 
   return {
     isLoading,
@@ -68,12 +64,12 @@ export const usePitchLogic = () => {
       handleAutoPick: () => handleAutoFill(marketPlayers, setIsAutoFilling),
       handleReset: () => handleClearPitch(marketPlayers),
       changeFormation: setFormation,
-      handlePopupAction: (action) => handlePopupAction(action, popupPlayer)
+      handlePopupAction: (action) => handlePopupAction(action, popupPlayer),
     },
     handlers: {
       handleSlotClick,
       handlePlayerClick,
-      handleBenchSlotClick
-    }
+      handleBenchSlotClick,
+    },
   };
 };

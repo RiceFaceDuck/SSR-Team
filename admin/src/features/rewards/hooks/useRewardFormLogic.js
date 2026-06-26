@@ -13,7 +13,7 @@ export const useRewardFormLogic = (isOpen, onClose, rewardToEdit) => {
     type: 'normal',
     isActive: true,
     isFlashSale: false,
-    flashSaleEndTime: ''
+    flashSaleEndTime: '',
   };
 
   const [formData, setFormData] = useState(defaultForm);
@@ -30,10 +30,10 @@ export const useRewardFormLogic = (isOpen, onClose, rewardToEdit) => {
             formattedTime = date.toISOString().slice(0, 16);
           }
         }
-        
+
         setFormData({
           ...rewardToEdit,
-          flashSaleEndTime: formattedTime
+          flashSaleEndTime: formattedTime,
         });
       } else {
         setFormData(defaultForm);
@@ -46,7 +46,7 @@ export const useRewardFormLogic = (isOpen, onClose, rewardToEdit) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -81,6 +81,6 @@ export const useRewardFormLogic = (isOpen, onClose, rewardToEdit) => {
     isSubmitting,
     errorMsg,
     handleChange,
-    handleSubmit
+    handleSubmit,
   };
 };

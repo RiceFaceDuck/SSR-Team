@@ -136,10 +136,7 @@ service cloud.firestore {
     // 📊 ระบบสถิติส่วนกลาง และ การตั้งค่าโฆษณา
     match /public_data/system_config {
       allow read: if true;
-      allow write: if isAdmin() || (
-        request.auth != null && 
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalJoinedTeams'])
-      );
+      allow write: if isAdmin();
     }
     match /public_data/ads_config {
       allow read: if true;

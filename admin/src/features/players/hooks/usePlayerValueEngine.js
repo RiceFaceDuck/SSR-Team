@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
-import { previewPlayerValues, commitPlayerValues } from '../../../services/engine/playerValueCalculationService';
+import {
+  previewPlayerValues,
+  commitPlayerValues,
+} from '../../../services/engine/playerValueCalculationService';
 import { getGameRules } from '../../../services/firebase/gameRulesDatabase';
 
 const DEFAULT_CONFIG = {
   basePrice: 5.0,
   statMultiplier: 10,
   formMultiplier: 20,
-  posModifiers: { FW: 1.2, MF: 1.1, DF: 0.9, GK: 0.8 }
+  posModifiers: { FW: 1.2, MF: 1.1, DF: 0.9, GK: 0.8 },
 };
 
 /**
@@ -29,7 +32,7 @@ export const usePlayerValueEngine = (onClose) => {
       try {
         setConfig(JSON.parse(savedConfig));
       } catch (e) {
-        console.error("Failed to parse saved config", e);
+        console.error('Failed to parse saved config', e);
       }
     }
 
@@ -41,7 +44,7 @@ export const usePlayerValueEngine = (onClose) => {
           setBudgetConfig(Number(rules.startingBudget.value));
         }
       } catch (err) {
-        console.error("Error fetching budget", err);
+        console.error('Error fetching budget', err);
       }
     };
     fetchBudget();
@@ -76,8 +79,10 @@ export const usePlayerValueEngine = (onClose) => {
 
   const handleSave = async () => {
     if (!previews || previews.length === 0) return;
-    
-    const confirmSave = window.confirm(`คุณต้องการบันทึกราคาใหม่สำหรับนักเตะจำนวน ${previews.length} คน ใช่หรือไม่?\nการกระทำนี้จะส่งผลต่อตลาดซื้อขายทันที`);
+
+    const confirmSave = window.confirm(
+      `คุณต้องการบันทึกราคาใหม่สำหรับนักเตะจำนวน ${previews.length} คน ใช่หรือไม่?\nการกระทำนี้จะส่งผลต่อตลาดซื้อขายทันที`
+    );
     if (!confirmSave) return;
 
     setIsSaving(true);
@@ -87,7 +92,7 @@ export const usePlayerValueEngine = (onClose) => {
       const commitFn = httpsCallable(functions, 'commitPlayerValues');
       const res = await commitFn({ previews });
       const result = res.data.result;
-      
+
       setIsSaving(false);
 
       if (result.success) {
@@ -113,6 +118,6 @@ export const usePlayerValueEngine = (onClose) => {
     handleResetDefault,
     handleCalculate,
     handleSave,
-    DEFAULT_CONFIG
+    DEFAULT_CONFIG,
   };
 };

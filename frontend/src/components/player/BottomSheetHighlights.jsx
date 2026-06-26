@@ -6,7 +6,7 @@ export default function BottomSheetHighlights({ player }) {
 
   // ดึงข้อมูลจริงจากระบบ
   const formStatus = player.formStatus || 'NORMAL'; // 'HOT', 'COLD', 'NORMAL'
-  
+
   const lastGwPoints = player.lastGwPoints || player.gwPoints || 0;
   const seasonPoints = player.totalPoints || 0;
   const goals = player.stats?.goals || 0;
@@ -33,7 +33,9 @@ export default function BottomSheetHighlights({ player }) {
       <div className="grid grid-cols-2 gap-3">
         {/* สัปดาห์ล่าสุด */}
         <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-700/30">
-          <div className="text-[10px] text-slate-400 font-bold uppercase mb-1">สัปดาห์ล่าสุด (GW)</div>
+          <div className="text-[10px] text-slate-400 font-bold uppercase mb-1">
+            สัปดาห์ล่าสุด (GW)
+          </div>
           <div className="flex items-end gap-2">
             <span className="text-2xl font-black text-white leading-none">{lastGwPoints}</span>
             <span className="text-xs text-slate-500 font-bold mb-0.5">Pts</span>
@@ -54,11 +56,13 @@ export default function BottomSheetHighlights({ player }) {
       <div className="mt-3 flex gap-4 text-sm bg-slate-900/30 p-2.5 rounded-lg border border-slate-700/30">
         <div className="flex items-center gap-1.5 text-slate-300">
           <Award size={14} className="text-amber-400" />
-          <span className="font-bold">{goals}</span> <span className="text-xs text-slate-500">Goals</span>
+          <span className="font-bold">{goals}</span>{' '}
+          <span className="text-xs text-slate-500">Goals</span>
         </div>
         <div className="flex items-center gap-1.5 text-slate-300">
           <TrendingUp size={14} className="text-emerald-400" />
-          <span className="font-bold">{assists}</span> <span className="text-xs text-slate-500">Assists</span>
+          <span className="font-bold">{assists}</span>{' '}
+          <span className="text-xs text-slate-500">Assists</span>
         </div>
       </div>
     </div>

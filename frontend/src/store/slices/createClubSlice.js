@@ -10,7 +10,7 @@ const getExpRequiredForLevel = (level) => {
   // Lv 9->10: 450
   // Total to max one facility: ~2250 EXP
   if (level >= 10) return 0;
-  return level * 50; 
+  return level * 50;
 };
 
 export const createClubSlice = (set, get) => ({
@@ -24,7 +24,7 @@ export const createClubSlice = (set, get) => ({
       const data = await fetchClubData(userId);
       set({ clubData: data, isClubLoading: false });
     } catch (error) {
-      console.error("❌ Error loading club data:", error);
+      console.error('❌ Error loading club data:', error);
       set({ isClubLoading: false });
     }
   },
@@ -55,8 +55,8 @@ export const createClubSlice = (set, get) => ({
       clubData: {
         ...club,
         [facilityKey]: newLevel,
-        spentExp: newSpentExp
-      }
+        spentExp: newSpentExp,
+      },
     });
 
     try {
@@ -64,18 +64,18 @@ export const createClubSlice = (set, get) => ({
       await upgradeClubFacilityFn({ userId, facilityKey });
       return true;
     } catch (error) {
-      console.error("❌ Error upgrading facility:", error);
+      console.error('❌ Error upgrading facility:', error);
       // Revert on failure
       set({ clubData: club });
       return false;
     }
   },
-  
+
   getAvailableExp: () => {
     const state = get();
     if (!state.clubData) return 0;
     return Math.max(0, (state.userPoints || 0) - (state.clubData.spentExp || 0));
   },
 
-  getExpRequiredForLevel: (level) => getExpRequiredForLevel(level)
+  getExpRequiredForLevel: (level) => getExpRequiredForLevel(level),
 });

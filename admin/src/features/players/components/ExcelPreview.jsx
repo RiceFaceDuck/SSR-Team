@@ -12,65 +12,67 @@ import StatusBadge from '../../../components/ui/StatusBadge';
  * @param {boolean} isLoading - สถานะกำลังบันทึกข้อมูล
  */
 const ExcelPreview = ({ data = [], onConfirm, onCancel, isLoading = false }) => {
-  
   // กำหนดโครงสร้างคอลัมน์สำหรับ DataTable
-  const columns = useMemo(() => [
-    {
-      header: 'SKU',
-      accessorKey: 'sku',
-      className: 'font-mono text-xs text-gray-500 bg-gray-50'
-    },
-    {
-      header: 'ชื่อนักเตะ',
-      // Custom render เพื่อแสดงทั้งชื่อย่อ(ตัวหนา) และชื่อเต็ม(ตัวเล็ก)
-      cell: (row) => (
-        <div className="flex flex-col">
-          <span className="font-bold text-gray-900">{row.name}</span>
-          <span className="text-xs text-gray-500 truncate max-w-[150px]" title={row.fullName}>
-            {row.fullName}
-          </span>
-        </div>
-      )
-    },
-    {
-      header: 'ตำแหน่ง',
-      accessorKey: 'position',
-      // จัดให้อยู่ตรงกลาง และให้ตัวหนา
-      className: 'text-center font-bold text-gray-700'
-    },
-    {
-      header: 'สโมสร',
-      accessorKey: 'team',
-      className: 'font-medium'
-    },
-    {
-      header: 'ราคา',
-      accessorKey: 'displayPrice',
-      // ไฮไลท์ราคาให้ดูชัดเจน
-      className: 'text-right text-emerald-600 font-bold',
-      cell: (row) => row.displayPrice ? String(row.displayPrice).replace('£', '') : '-'
-    },
-    {
-      header: 'คะแนน',
-      // ใส่ลูกเล่นให้คะแนนดูเด่นขึ้น
-      cell: (row) => (
-        <div className="flex justify-center">
-          <span className="bg-blue-50 text-blue-700 font-semibold px-2.5 py-1 rounded-md text-sm border border-blue-100">
-            {row.totalPoints}
-          </span>
-        </div>
-      )
-    },
-    {
-      header: 'สถานะ',
-      // เรียกใช้ StatusBadge Component
-      cell: (row) => (
-        <div className="flex justify-center">
-          <StatusBadge status={row.status} />
-        </div>
-      )
-    }
-  ], []);
+  const columns = useMemo(
+    () => [
+      {
+        header: 'SKU',
+        accessorKey: 'sku',
+        className: 'font-mono text-xs text-gray-500 bg-gray-50',
+      },
+      {
+        header: 'ชื่อนักเตะ',
+        // Custom render เพื่อแสดงทั้งชื่อย่อ(ตัวหนา) และชื่อเต็ม(ตัวเล็ก)
+        cell: (row) => (
+          <div className="flex flex-col">
+            <span className="font-bold text-gray-900">{row.name}</span>
+            <span className="text-xs text-gray-500 truncate max-w-[150px]" title={row.fullName}>
+              {row.fullName}
+            </span>
+          </div>
+        ),
+      },
+      {
+        header: 'ตำแหน่ง',
+        accessorKey: 'position',
+        // จัดให้อยู่ตรงกลาง และให้ตัวหนา
+        className: 'text-center font-bold text-gray-700',
+      },
+      {
+        header: 'สโมสร',
+        accessorKey: 'team',
+        className: 'font-medium',
+      },
+      {
+        header: 'ราคา',
+        accessorKey: 'displayPrice',
+        // ไฮไลท์ราคาให้ดูชัดเจน
+        className: 'text-right text-emerald-600 font-bold',
+        cell: (row) => (row.displayPrice ? String(row.displayPrice).replace('£', '') : '-'),
+      },
+      {
+        header: 'คะแนน',
+        // ใส่ลูกเล่นให้คะแนนดูเด่นขึ้น
+        cell: (row) => (
+          <div className="flex justify-center">
+            <span className="bg-blue-50 text-blue-700 font-semibold px-2.5 py-1 rounded-md text-sm border border-blue-100">
+              {row.totalPoints}
+            </span>
+          </div>
+        ),
+      },
+      {
+        header: 'สถานะ',
+        // เรียกใช้ StatusBadge Component
+        cell: (row) => (
+          <div className="flex justify-center">
+            <StatusBadge status={row.status} />
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
   // 🔥 Smart Empty State: อัปเกรดการแจ้งเตือนกรณีไม่พบข้อมูลให้ดูโปรและมีประโยชน์มากขึ้น
   if (!data || data.length === 0) {
@@ -79,9 +81,13 @@ const ExcelPreview = ({ data = [], onConfirm, onCancel, isLoading = false }) => 
         <div className="mx-auto w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
           <AlertTriangle className="w-8 h-8 text-yellow-600" />
         </div>
-        <h3 className="text-xl font-bold text-gray-800 mb-2">ไม่พบข้อมูล หรือ รูปแบบตารางไม่ถูกต้อง (อัปเดตล่าสุด)</h3>
+        <h3 className="text-xl font-bold text-gray-800 mb-2">
+          ไม่พบข้อมูล หรือ รูปแบบตารางไม่ถูกต้อง (อัปเดตล่าสุด)
+        </h3>
         <p className="text-gray-600 mb-6 max-w-lg mx-auto leading-relaxed">
-          ระบบไม่สามารถดึงข้อมูลนักเตะจากไฟล์ Excel ของคุณได้ กรุณาตรวจสอบว่ามีข้อมูลใน Sheet แรก และมี <span className="font-semibold text-gray-800">หัวตาราง (Header)</span> ตรงตามที่ระบบต้องการอย่างน้อย 4 ช่องด้านล่างนี้:
+          ระบบไม่สามารถดึงข้อมูลนักเตะจากไฟล์ Excel ของคุณได้ กรุณาตรวจสอบว่ามีข้อมูลใน Sheet แรก
+          และมี <span className="font-semibold text-gray-800">หัวตาราง (Header)</span>{' '}
+          ตรงตามที่ระบบต้องการอย่างน้อย 4 ช่องด้านล่างนี้:
         </p>
 
         {/* Required Columns Checklist */}
@@ -90,9 +96,12 @@ const ExcelPreview = ({ data = [], onConfirm, onCancel, isLoading = false }) => 
             { label: 'ชื่อ (Name)', desc: 'ชื่อนักเตะ' },
             { label: 'ตำแหน่ง (Pos)', desc: 'GK, DEF, MID, FWD' },
             { label: 'ทีม (Team)', desc: 'สโมสรต้นสังกัด' },
-            { label: 'ราคา (Price)', desc: 'ราคา (ตัวเลข)' }
+            { label: 'ราคา (Price)', desc: 'ราคา (ตัวเลข)' },
           ].map((col, idx) => (
-            <div key={idx} className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col gap-1">
+            <div
+              key={idx}
+              className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col gap-1"
+            >
               <div className="flex items-center gap-1.5 text-green-600 font-semibold text-sm">
                 <CheckCircle2 className="w-4 h-4" /> {col.label}
               </div>
@@ -123,7 +132,10 @@ const ExcelPreview = ({ data = [], onConfirm, onCancel, isLoading = false }) => 
           <div>
             <h2 className="text-lg font-bold text-gray-800">ตรวจสอบข้อมูลก่อนนำเข้า</h2>
             <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-1">
-              ระบบตรวจสอบพบข้อมูลพร้อมใช้งาน <span className="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded text-xs">{data.length} รายการ</span>
+              ระบบตรวจสอบพบข้อมูลพร้อมใช้งาน{' '}
+              <span className="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded text-xs">
+                {data.length} รายการ
+              </span>
             </p>
           </div>
         </div>
@@ -132,16 +144,15 @@ const ExcelPreview = ({ data = [], onConfirm, onCancel, isLoading = false }) => 
       {/* คำแนะนำสั้นๆ */}
       <div className="bg-blue-50/50 px-5 py-3 border-b border-blue-100 flex items-center gap-2 text-sm text-blue-700">
         <Info className="w-4 h-4 flex-shrink-0" />
-        <p>โปรดตรวจสอบความถูกต้อง โดยเฉพาะ <strong>"ราคา"</strong> และ <strong>"ตำแหน่ง"</strong> หากถูกต้องครบถ้วนแล้ว ให้กดยืนยันด้านล่าง</p>
+        <p>
+          โปรดตรวจสอบความถูกต้อง โดยเฉพาะ <strong>"ราคา"</strong> และ <strong>"ตำแหน่ง"</strong>{' '}
+          หากถูกต้องครบถ้วนแล้ว ให้กดยืนยันด้านล่าง
+        </p>
       </div>
 
       {/* ส่วนตาราง (Preview Table) */}
       <div className="max-h-[450px] overflow-y-auto p-0 bg-white">
-        <DataTable 
-          columns={columns} 
-          data={data} 
-          emptyMessage="ไม่มีข้อมูลที่จะแสดง"
-        />
+        <DataTable columns={columns} data={data} emptyMessage="ไม่มีข้อมูลที่จะแสดง" />
       </div>
 
       {/* ส่วน Footer (Action Buttons) */}
@@ -163,9 +174,25 @@ const ExcelPreview = ({ data = [], onConfirm, onCancel, isLoading = false }) => 
         >
           {isLoading ? (
             <>
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <svg
+                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
               กำลังบันทึกข้อมูล...
             </>

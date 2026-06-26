@@ -23,17 +23,17 @@ export const updateGameConfigDoc = async (docName, data) => {
   try {
     const docRef = doc(db, 'public_data', docName);
     const docSnap = await getDoc(docRef);
-    
+
     if (docSnap.exists()) {
       await updateDoc(docRef, {
         ...data,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
     } else {
       await setDoc(docRef, {
         ...data,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
     }
     return true;

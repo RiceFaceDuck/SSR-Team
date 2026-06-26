@@ -9,5 +9,5 @@ export const managerRule = {
       return Math.round(totalGwPoints * multiplier) - totalGwPoints;
     }
     return 0;
-  }
+  },
 };

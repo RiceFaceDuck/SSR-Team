@@ -4,12 +4,12 @@
  */
 
 // ใช้ค่า API Key จากไฟล์ .env (อย่าลืมตั้งค่า VITE_API_SPORTS_KEY ในไฟล์ .env ด้วย)
-const API_KEY = import.meta.env.VITE_API_SPORTS_KEY || ''; 
+const API_KEY = import.meta.env.VITE_API_SPORTS_KEY || '';
 const BASE_URL = 'https://v3.football.api-sports.io';
 
 const defaultHeaders = {
   'x-apisports-key': API_KEY,
-  'Accept': 'application/json'
+  Accept: 'application/json',
 };
 
 /**
@@ -17,7 +17,9 @@ const defaultHeaders = {
  */
 const fetchApiSports = async (endpoint, options = {}) => {
   if (!API_KEY) {
-    console.warn("⚠️ API_SPORTS_KEY is missing. Please set VITE_API_SPORTS_KEY in your .env file to enable API-Sports integration.");
+    console.warn(
+      '⚠️ API_SPORTS_KEY is missing. Please set VITE_API_SPORTS_KEY in your .env file to enable API-Sports integration.'
+    );
   }
 
   try {
@@ -25,16 +27,16 @@ const fetchApiSports = async (endpoint, options = {}) => {
       ...options,
       headers: {
         ...defaultHeaders,
-        ...options.headers
-      }
+        ...options.headers,
+      },
     });
 
     const data = await response.json();
 
     // ตรวจสอบ Error จากโครงสร้าง Response ของ api-sports.io โดยเฉพาะ
     if (data.errors && Object.keys(data.errors).length > 0) {
-      console.error("API-Sports Error Payload:", data.errors);
-      throw new Error(Object.values(data.errors)[0] || "Failed to fetch data from API-Sports");
+      console.error('API-Sports Error Payload:', data.errors);
+      throw new Error(Object.values(data.errors)[0] || 'Failed to fetch data from API-Sports');
     }
 
     return data.response;
@@ -77,5 +79,5 @@ export const apiSportsHub = {
     // endpoint รูปแบบ: /teams?id={teamId}
     const endpoint = `/teams?id=${teamId}`;
     return await fetchApiSports(endpoint);
-  }
+  },
 };

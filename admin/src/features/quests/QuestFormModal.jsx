@@ -76,7 +76,6 @@ export default function QuestFormModal({ isOpen, onClose, onSubmit, initialData 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
       <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-2xl shadow-2xl my-8">
-        
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-800 flex justify-between items-center bg-gray-800/50 sticky top-0 rounded-t-2xl z-10">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
@@ -84,7 +83,12 @@ export default function QuestFormModal({ isOpen, onClose, onSubmit, initialData 
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -93,7 +97,7 @@ export default function QuestFormModal({ isOpen, onClose, onSubmit, initialData 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <QuestBasicInputs formData={formData} handleChange={handleChange} />
-            <QuestImageUploader 
+            <QuestImageUploader
               imageUrl={formData.imageUrl}
               isUploading={isUploading}
               setIsUploading={setIsUploading}
@@ -122,7 +126,6 @@ export default function QuestFormModal({ isOpen, onClose, onSubmit, initialData 
               {isUploading ? 'กรุณารอสักครู่...' : 'บันทึกข้อมูลสปอนเซอร์'}
             </button>
           </div>
-
         </form>
       </div>
     </div>

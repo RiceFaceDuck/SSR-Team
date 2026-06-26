@@ -10,7 +10,7 @@ export const synergyAnalyzer = {
   evaluateBestTeamSynergy: (teamCounts) => {
     let bestTeam = null;
     let maxCount = 0;
-    
+
     for (const team in teamCounts) {
       if (teamCounts[team] > maxCount && teamCounts[team] < 3) {
         maxCount = teamCounts[team];
@@ -18,5 +18,5 @@ export const synergyAnalyzer = {
       }
     }
     return bestTeam;
-  }
+  },
 };

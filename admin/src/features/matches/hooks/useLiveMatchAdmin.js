@@ -32,8 +32,8 @@ export function useLiveMatchAdmin() {
     try {
       await liveMatchAdminService.updateLiveMatchSettings(configData);
     } catch (err) {
-      console.error("Failed to update match settings:", err);
-      setError("ไม่สามารถอัปเดตข้อมูลการแข่งขันได้: " + err.message);
+      console.error('Failed to update match settings:', err);
+      setError('ไม่สามารถอัปเดตข้อมูลการแข่งขันได้: ' + err.message);
       throw err;
     } finally {
       setIsUpdating(false);
@@ -48,11 +48,11 @@ export function useLiveMatchAdmin() {
         ...eventData,
         homeScore: eventData.homeScore ?? match?.homeScore ?? 0,
         awayScore: eventData.awayScore ?? match?.awayScore ?? 0,
-        minute: eventData.minute ?? match?.minute ?? '0'
+        minute: eventData.minute ?? match?.minute ?? '0',
       });
     } catch (err) {
-      console.error("Failed to publish event:", err);
-      setError("ไม่สามารถส่งเหตุการณ์ได้: " + err.message);
+      console.error('Failed to publish event:', err);
+      setError('ไม่สามารถส่งเหตุการณ์ได้: ' + err.message);
       throw err;
     } finally {
       setIsUpdating(false);
@@ -63,11 +63,11 @@ export function useLiveMatchAdmin() {
     if (!match) return;
     const newHomeScore = team === 'home' ? Math.max(0, match.homeScore + amount) : match.homeScore;
     const newAwayScore = team === 'away' ? Math.max(0, match.awayScore + amount) : match.awayScore;
-    
+
     await updateMatchConfig({
       ...match,
       homeScore: newHomeScore,
-      awayScore: newAwayScore
+      awayScore: newAwayScore,
     });
   };
 
@@ -79,6 +79,6 @@ export function useLiveMatchAdmin() {
     error,
     updateMatchConfig,
     publishEvent,
-    incrementScore
+    incrementScore,
   };
 }

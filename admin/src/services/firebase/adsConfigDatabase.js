@@ -9,8 +9,8 @@ const DEFAULT_CONFIG = {
   googleAdsense: {
     clientId: '',
     slotId: '',
-    isActive: false
-  }
+    isActive: false,
+  },
 };
 
 export const adsConfigDatabase = {
@@ -26,7 +26,7 @@ export const adsConfigDatabase = {
         return DEFAULT_CONFIG;
       }
     } catch (error) {
-      console.error("Error fetching Ads Config:", error);
+      console.error('Error fetching Ads Config:', error);
       throw error;
     }
   },
@@ -39,8 +39,8 @@ export const adsConfigDatabase = {
       await setDoc(ADS_CONFIG_DOC_REF, configData, { merge: true });
       return { success: true };
     } catch (error) {
-      console.error("Error updating Ads Config:", error);
+      console.error('Error updating Ads Config:', error);
       return { success: false, message: error.message };
     }
-  }
+  },
 };

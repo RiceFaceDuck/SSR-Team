@@ -1,7 +1,15 @@
 import React from 'react';
 import { CheckCircle, Shield, Coins, LayoutGrid, Lock } from 'lucide-react';
 
-const ManagerCard = ({ m, isSelected, activeTab, balls, isProcessing, handleSelect, handleBuy }) => {
+const ManagerCard = ({
+  m,
+  isSelected,
+  activeTab,
+  balls,
+  isProcessing,
+  handleSelect,
+  handleBuy,
+}) => {
   const getIcon = (type) => {
     if (type?.includes('DEF')) return <Shield className="text-[#3b82f6]" size={16} />;
     if (type?.includes('BUDGET')) return <Coins className="text-[#fbbf24]" size={16} />;
@@ -10,10 +18,10 @@ const ManagerCard = ({ m, isSelected, activeTab, balls, isProcessing, handleSele
   };
 
   return (
-    <div 
+    <div
       className={`relative flex flex-col rounded-xl border-2 transition-all duration-300 ${
-        isSelected 
-          ? 'border-[#3b82f6] bg-[#3b82f6]/10 shadow-[0_0_20px_rgba(59,130,246,0.2)]' 
+        isSelected
+          ? 'border-[#3b82f6] bg-[#3b82f6]/10 shadow-[0_0_20px_rgba(59,130,246,0.2)]'
           : 'border-[#1e3a8a] bg-[#0f284e]'
       }`}
     >
@@ -37,10 +45,13 @@ const ManagerCard = ({ m, isSelected, activeTab, balls, isProcessing, handleSele
         <div className="flex-1">
           <h3 className="text-base font-bold text-white mb-1">{m.name}</h3>
           <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">{m.description}</p>
-          
+
           <div className="mt-2 flex items-center gap-1.5 bg-[#040f1d] rounded-md p-1.5 border border-white/5">
             {getIcon(m.effectLogic?.type)}
-            <span className="text-[10px] text-gray-300 font-medium truncate" title={m.effectLogic?.type}>
+            <span
+              className="text-[10px] text-gray-300 font-medium truncate"
+              title={m.effectLogic?.type}
+            >
               {m.effectLogic?.type || 'UNKNOWN EFFECT'}
             </span>
           </div>
@@ -50,19 +61,19 @@ const ManagerCard = ({ m, isSelected, activeTab, balls, isProcessing, handleSele
       {/* Actions */}
       <div className="px-4 pb-4 mt-auto">
         {activeTab === 'INVENTORY' ? (
-          <button 
+          <button
             onClick={() => handleSelect(m)}
             disabled={isSelected}
             className={`w-full py-2 rounded-lg font-bold text-sm transition-all ${
-              isSelected 
-                ? 'bg-[#3b82f6]/20 text-[#3b82f6] cursor-not-allowed' 
+              isSelected
+                ? 'bg-[#3b82f6]/20 text-[#3b82f6] cursor-not-allowed'
                 : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg'
             }`}
           >
             {isSelected ? 'ใช้งานอยู่' : 'เลือกใช้งาน'}
           </button>
         ) : (
-          <button 
+          <button
             onClick={() => handleBuy(m)}
             disabled={isProcessing || balls < (m.price || 0)}
             className={`w-full py-2 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 ${
@@ -74,9 +85,16 @@ const ManagerCard = ({ m, isSelected, activeTab, balls, isProcessing, handleSele
             {isProcessing ? (
               <span className="animate-pulse">กำลังซื้อ...</span>
             ) : balls >= (m.price || 0) ? (
-              <><span>ซื้อ</span> <span className="bg-black/20 px-2 py-0.5 rounded text-xs">🪙 {m.price || 0} Balls</span></>
+              <>
+                <span>ซื้อ</span>{' '}
+                <span className="bg-black/20 px-2 py-0.5 rounded text-xs">
+                  🪙 {m.price || 0} Balls
+                </span>
+              </>
             ) : (
-              <><Lock size={14}/> <span>Balls ไม่พอ ({m.price || 0})</span></>
+              <>
+                <Lock size={14} /> <span>Balls ไม่พอ ({m.price || 0})</span>
+              </>
             )}
           </button>
         )}

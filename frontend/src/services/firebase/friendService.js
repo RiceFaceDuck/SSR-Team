@@ -30,7 +30,7 @@ export const fetchFriends = async (userId) => {
     const q = query(getFriendsRef(userId), limit(500)); // Safety limit
     const friendsSnap = await getDocs(q);
     const friends = [];
-    friendsSnap.forEach(doc => {
+    friendsSnap.forEach((doc) => {
       friends.push({ id: doc.id, ...doc.data() });
     });
     return friends;

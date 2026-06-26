@@ -5,12 +5,14 @@ import LiveMatchContainer from './components/LiveMatchContainer';
 import LiveChatContainer from './components/LiveChatContainer';
 
 export default function LiveScoreScreen() {
-  const themeConfig = useGameStore(state => state.themeConfig);
+  const themeConfig = useGameStore((state) => state.themeConfig);
 
   return (
-    <div 
+    <div
       className="p-2 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full min-h-0 bg-cover bg-center relative flex flex-col"
-      style={{ backgroundImage: `url(${themeConfig?.marketBackgroundUrl || 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000'})` }}
+      style={{
+        backgroundImage: `url(${themeConfig?.marketBackgroundUrl || 'https://images.unsplash.com/photo-1518605368461-1ee7c5320673?auto=format&fit=crop&q=80&w=1000'})`,
+      }}
     >
       {/* Blurred overlay */}
       <div className="absolute inset-0 bg-slate-50/80 backdrop-blur-md pointer-events-none"></div>

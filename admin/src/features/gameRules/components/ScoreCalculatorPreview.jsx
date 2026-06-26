@@ -22,13 +22,17 @@ export default function ScoreCalculatorPreview({ rules }) {
     const fwdScore = playPoints + safeVal(rules.goal, 'FWD');
     const midScore = playPoints + safeVal(rules.assist) + safeVal(rules.cleanSheet, 'MID');
     const defScore = playPoints + safeVal(rules.cleanSheet, 'DEF');
-    const genScore = (fwdScore * 2) + midScore + defScore; // Captain x2
+    const genScore = fwdScore * 2 + midScore + defScore; // Captain x2
 
     // 3. ระดับ Pro: กัปตันเหมา 2 ประตู, MID 1 ประตู 1 จ่าย, DEF 1 คลีนชีต 1 เซฟจุดโทษ + ได้ MVP Bonus (500)
-    const proFwd = playPoints + (safeVal(rules.goal, 'FWD') * 2);
-    const proMid = playPoints + safeVal(rules.goal, 'MID') + safeVal(rules.assist) + safeVal(rules.cleanSheet, 'MID');
+    const proFwd = playPoints + safeVal(rules.goal, 'FWD') * 2;
+    const proMid =
+      playPoints +
+      safeVal(rules.goal, 'MID') +
+      safeVal(rules.assist) +
+      safeVal(rules.cleanSheet, 'MID');
     const proDef = playPoints + safeVal(rules.cleanSheet, 'DEF') + safeVal(rules.penaltySaved);
-    const proScore = (proFwd * 2) + proMid + proDef + 500; // MVP Bonus
+    const proScore = proFwd * 2 + proMid + proDef + 500; // MVP Bonus
 
     return { newbieScore, genScore, proScore };
   }, [rules]);
@@ -40,11 +44,16 @@ export default function ScoreCalculatorPreview({ rules }) {
           <BookOpen size={24} />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-slate-800">ตำราการตั้งค่าคะแนน (The 10k Scale Guide)</h2>
+          <h2 className="text-lg font-bold text-slate-800">
+            ตำราการตั้งค่าคะแนน (The 10k Scale Guide)
+          </h2>
           <p className="text-slate-600 text-sm mt-1 leading-relaxed">
-            ระบบเกมได้รับการออกแบบมาเพื่อให้คะแนนรวมตอนจบสัปดาห์จบที่ <strong>~2,000 ไปจนถึงทะลุ 10,000 คะแนน</strong> 
-            เพื่อความสนุกและเร้าใจ การตั้งค่าคะแนนพื้นฐาน (เช่น ประตู, ลงสนาม) ควรอยู่ในหลัก <strong>ร้อยถึงพัน</strong> <br/>
-            ระบบจะนำคะแนนเหล่านี้ไปคูณกับ กัปตันทีม (x2), บัฟผู้จัดการทีม, และโบนัส Synergy ท้ายสัปดาห์
+            ระบบเกมได้รับการออกแบบมาเพื่อให้คะแนนรวมตอนจบสัปดาห์จบที่{' '}
+            <strong>~2,000 ไปจนถึงทะลุ 10,000 คะแนน</strong>
+            เพื่อความสนุกและเร้าใจ การตั้งค่าคะแนนพื้นฐาน (เช่น ประตู, ลงสนาม) ควรอยู่ในหลัก{' '}
+            <strong>ร้อยถึงพัน</strong> <br />
+            ระบบจะนำคะแนนเหล่านี้ไปคูณกับ กัปตันทีม (x2), บัฟผู้จัดการทีม, และโบนัส Synergy
+            ท้ายสัปดาห์
           </p>
         </div>
       </div>
@@ -59,7 +68,9 @@ export default function ScoreCalculatorPreview({ rules }) {
             <p className="text-xs text-slate-400 mb-2">ลงสนาม 3 คน (ไม่มีผลงานเด่น)</p>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-700">{calculateExpected.newbieScore.toLocaleString()}</span>
+            <span className="text-2xl font-black text-slate-700">
+              {calculateExpected.newbieScore.toLocaleString()}
+            </span>
             <span className="text-xs font-bold text-slate-400">PTS</span>
           </div>
         </div>
@@ -74,7 +85,9 @@ export default function ScoreCalculatorPreview({ rules }) {
             <p className="text-xs text-slate-500 mb-2">กัปตันยิง 1, กลางจ่าย 1, หลังคลีนชีต</p>
           </div>
           <div className="flex items-baseline gap-2 relative z-10">
-            <span className="text-3xl font-black text-indigo-600">{calculateExpected.genScore.toLocaleString()}</span>
+            <span className="text-3xl font-black text-indigo-600">
+              {calculateExpected.genScore.toLocaleString()}
+            </span>
             <span className="text-xs font-bold text-indigo-400">PTS</span>
           </div>
         </div>
@@ -88,7 +101,9 @@ export default function ScoreCalculatorPreview({ rules }) {
             <p className="text-xs text-amber-100 mb-2">กัปตันเหมา 2, แผงหลังโหด + MVP</p>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white">{calculateExpected.proScore.toLocaleString()}</span>
+            <span className="text-3xl font-black text-white">
+              {calculateExpected.proScore.toLocaleString()}
+            </span>
             <span className="text-xs font-bold text-amber-200">PTS</span>
           </div>
         </div>

@@ -4,7 +4,14 @@ import { useUserStore } from '../../store/useUserStore';
 import PositionBadge from './PositionBadge';
 import BottomSheetHighlights from './BottomSheetHighlights';
 import PlayerStatsDetailModal from './PlayerStatsDetailModal';
-import { formatPlayerName, formatTeamShortName } from '../../utils/formatters';
+import {
+  formatPlayerName,
+  formatTeamShortName,
+  getOptimizedImageUrl,
+} from '../../utils/formatters';
+
+const defaultSilhouette =
+  'https://cdn.discordapp.com/attachments/1182283993883832360/1218206584284577832/player-silhouette.png?ex=65e1dd91&is=65cf6891&hm=4a70b20cb374a24c2ed55c2f37e174eb';
 
 const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -39,7 +46,7 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
       }
       return;
     }
-    
+
     if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
       window.navigator.vibrate(30);
     }
@@ -47,19 +54,16 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
   };
 
   return (
-    <div 
+    <div
       className={`fixed inset-0 z-[100] flex flex-col justify-end transition-opacity duration-300 ${
         isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`}
     >
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Bottom Sheet Container */}
-      <div 
+      <div
         className={`relative bg-slate-900 border-t border-slate-700/50 rounded-t-[32px] w-full max-w-md mx-auto shadow-2xl transition-transform duration-300 ease-out ${
           isVisible ? 'translate-y-0' : 'translate-y-full'
         }`}
@@ -70,7 +74,7 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
         </div>
 
         {/* Close Button */}
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 active:scale-95 transition-all"
         >
@@ -82,18 +86,20 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
           <div className="flex items-center gap-4 mb-6">
             <div className="relative">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-800 border-2 border-slate-600 overflow-hidden shadow-lg flex items-center justify-center">
-                <img 
-                  src={player.image || '/assets/default-avatar.png'} 
+                <img
+                  src={getOptimizedImageUrl(player.imageUrl || player.image) || defaultSilhouette}
                   alt={formatPlayerName(player.name)}
                   className="w-full h-full object-cover"
-                  onError={(e) => { e.target.src = '/assets/default-avatar.png' }}
+                  onError={(e) => {
+                    e.target.src = defaultSilhouette;
+                  }}
                 />
               </div>
               <div className="absolute -bottom-2 -right-2">
                 <PositionBadge position={player.position} />
               </div>
             </div>
-            
+
             <div className="flex-1">
               <h3 className="text-xl font-bold text-white leading-tight mb-1 truncate">
                 {formatPlayerName(player.name)}
@@ -115,18 +121,22 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
               <Wallet size={18} className="text-emerald-400" />
               <span>ข้อมูลการเซ็นสัญญา</span>
             </div>
-            
+
             <div className="flex items-center justify-between text-sm mb-2">
               <span className="text-slate-400">งบประมาณสโมสร</span>
               <span className="text-white font-mono">{budgetLeft.toFixed(1)} M</span>
             </div>
             <div className="flex items-center justify-between text-sm mb-2 pb-2 border-b border-slate-700 border-dashed">
               <span className="text-slate-400">ค่าเหนื่อย / ค่าตัว</span>
-              <span className="text-rose-400 font-mono font-medium">-{playerPrice.toFixed(1)} M</span>
+              <span className="text-rose-400 font-mono font-medium">
+                -{playerPrice.toFixed(1)} M
+              </span>
             </div>
             <div className="flex items-center justify-between mt-2">
               <span className="text-slate-300 font-medium">งบประมาณคงเหลือหลังเซ็นสัญญา</span>
-              <span className={`text-lg font-bold font-mono ${isAffordable ? 'text-emerald-400' : 'text-rose-500'}`}>
+              <span
+                className={`text-lg font-bold font-mono ${isAffordable ? 'text-emerald-400' : 'text-rose-500'}`}
+              >
                 {projectedBudget.toFixed(1)} M
               </span>
             </div>
@@ -145,7 +155,7 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
 
           {/* Action Buttons */}
           <div className="grid grid-cols-2 gap-3">
-            <button 
+            <button
               onClick={() => {
                 if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
                   window.navigator.vibrate(20);
@@ -157,13 +167,13 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
               <BarChart2 size={20} />
               STATS
             </button>
-            
-            <button 
+
+            <button
               onClick={handlePlaceClick}
               disabled={!isAffordable}
               className={`flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold transition-all active:scale-[0.98] ${
-                isAffordable 
-                  ? 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white shadow-lg shadow-emerald-500/20 border border-emerald-400/50' 
+                isAffordable
+                  ? 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white shadow-lg shadow-emerald-500/20 border border-emerald-400/50'
                   : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
               }`}
             >
@@ -174,7 +184,7 @@ const PlayerBottomSheet = ({ isOpen, onClose, player, onPlace }) => {
         </div>
       </div>
 
-      <PlayerStatsDetailModal 
+      <PlayerStatsDetailModal
         isOpen={isStatsModalOpen}
         onClose={() => setIsStatsModalOpen(false)}
         player={player}

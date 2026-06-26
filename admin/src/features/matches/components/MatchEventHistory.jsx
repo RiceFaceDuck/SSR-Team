@@ -2,12 +2,15 @@ import React from 'react';
 import { History, Clock } from 'lucide-react';
 
 export default function MatchEventHistory({ events }) {
-  
   const formatTime = (timestamp) => {
     if (!timestamp) return '';
     // Handle Firestore Timestamp
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return date.toLocaleTimeString('th-TH', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
   };
 
   return (
@@ -30,14 +33,19 @@ export default function MatchEventHistory({ events }) {
         ) : (
           <div className="divide-y divide-slate-100">
             {events.map((ev, idx) => (
-              <div key={ev.id || idx} className="p-4 hover:bg-slate-50 transition-colors flex items-start gap-4">
+              <div
+                key={ev.id || idx}
+                className="p-4 hover:bg-slate-50 transition-colors flex items-start gap-4"
+              >
                 <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 flex flex-col items-center justify-center shrink-0">
                   <span className="text-xs font-bold text-blue-600">{ev.minute}'</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between gap-2 mb-1">
                     <h4 className="font-bold text-slate-800 truncate">{ev.primaryDetail}</h4>
-                    <span className="text-[10px] text-slate-400 shrink-0 tabular-nums">{formatTime(ev.timestamp)}</span>
+                    <span className="text-[10px] text-slate-400 shrink-0 tabular-nums">
+                      {formatTime(ev.timestamp)}
+                    </span>
                   </div>
                   {ev.secondaryDetail && (
                     <p className="text-xs text-slate-500 truncate">{ev.secondaryDetail}</p>

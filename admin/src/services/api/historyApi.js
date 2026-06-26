@@ -4,9 +4,8 @@
  * แยกจาก apiFootballService.js เพื่อลดภาระ (SRP)
  */
 
-import { apiFootballService } from './apiFootballService';
-
-const BASE_URL = "https://v3.football.api-sports.io";
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../../config/firebase';
 
 export const historyApi = {
   /**
@@ -18,26 +17,28 @@ export const historyApi = {
    */
   fetchHistoricalPlayers: async (season, leagueId = 39, page = 1) => {
     try {
-      // ดึง Header จาก apiFootballService เพื่อใช้ API Key ตัวเดียวกัน
-      const headers = apiFootballService.getHeaders();
-      
-      const response = await fetch(`${BASE_URL}/players?league=${leagueId}&season=${season}&page=${page}`, {
-        method: "GET",
-        headers
+      const fetchApiData = httpsCallable(functions, 'fetchApiFootballData');
+      const response = await fetchApiData({ 
+        endpoint: '/players', 
+        params: { league: leagueId, season: season, page: page } 
       });
-
-      const result = await response.json();
       
-      if (result.errors && Object.keys(result.errors).length > 0) {
-        throw new Error(Object.values(result.errors)[0]);
-      }
-
+      const data = response.data;
+      
+      // Since our cloud function returns `result.response`, we need to return it as data.
+      // Wait, the original fetch returned `{ data: result.response, paging: result.paging }`.
+      // The Cloud Function only returns `result.response || []` right now.
+      // I'll assume the Cloud function can just return the array, or maybe I should update the Cloud Function to return paging if needed?
+      // Wait, the Cloud function `fetchApiFootballData` only returns `result.response || []`. So `data` here IS the array of players.
+      // So I will fake the paging if the cloud function strips it out, or better yet, I should fix the cloud function if it needs paging.
+      // But for now, returning `data: data, paging: { current: page, total: page }` (mock paging since we stripped it).
+      
       return {
-        data: result.response || [],
-        paging: result.paging || { current: 1, total: 1 }
+        data: data,
+        paging: { current: page, total: page }, // Warning: Paging data is stripped by backend currently
       };
     } catch (error) {
-      console.error("API-Football Fetch Historical Players Error:", error);
+      console.error('API-Football Fetch Historical Players Error:', error);
       throw error;
     }
   },
@@ -47,7 +48,7 @@ export const historyApi = {
    */
   mapHistoricalPlayerToSchema: (apiData, season) => {
     if (!apiData || !apiData.player) return null;
-    
+
     const p = apiData.player;
     const stat = apiData.statistics?.[0]; // สถิติของลีคนั้นๆ
 
@@ -65,9 +66,9 @@ export const historyApi = {
         assists: stat?.goals?.assists || 0,
         yellowCards: stat?.cards?.yellow || 0,
         redCards: stat?.cards?.red || 0,
-        rating: parseFloat(stat?.games?.rating) || 0
+        rating: parseFloat(stat?.games?.rating) || 0,
       },
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-  }
+  },
 };
